@@ -179,8 +179,8 @@ These are the forces pulling in different directions. The SDLC cycle needs to na
 ### Simplicity vs Multi-tenancy
 Single container says "minimal config." Multi-tenancy says "isolation, RBAC, workspace boundaries." A DB abstraction layer helps bridge this - embedded DB for simple deployments, external DB when scale demands it. But the multi-tenancy model itself (workspace isolation, cross-workspace rules) adds application complexity regardless of DB choice.
 
-### Security vs Developer Experience
-RAGTS requires a proper identity provider - there is no built-in basic auth. The platform is designed natively around OIDC (Authelia, Authentik, Keycloak, Microsoft Entra ID, etc.). This means operators need an IdP running, which adds deployment complexity. But it also means auth is always done right - no "development mode" that accidentally leaks into production.
+### Built-in Auth vs External IdP
+The platform has built-in authentication and role management - it works out of the box with native login. For teams that want to connect their existing identity infrastructure, OIDC/SSO integration (Authelia, Authentik, Keycloak, Microsoft Entra ID, etc.) is available as an option. The tension is in making both paths feel first-class without doubling the auth surface area.
 
 ### MVP Scope
 What's the smallest thing that delivers real value? Starting with retrieval (MCP/API) delivers value to agents but skips the human curation UX. Starting with the web UI serves humans but doesn't validate the retrieval domain. Starting with ingestion + browsing proves the core UX but defers the memory loop. The MVP definition is a key SDLC decision.
@@ -209,8 +209,10 @@ Grouped by dependency order (foundation decisions unlock everything else):
 - How are .cast files stored? (DB BLOBs, chunked, content-addressed, ?)
 
 ### Security
-- Which OIDC integration patterns first? (Proxy headers? Direct OIDC? SAML? Multiple?)
-- First-run / bootstrap experience with external IdP?
+- Built-in auth: how does native registration/login work? (Email+password? Magic links? Invite-only?)
+- OIDC integration: which patterns? (Proxy headers? Direct OIDC? SAML? Multiple?)
+- How do built-in accounts and external IdP accounts coexist?
+- First-run / bootstrap experience?
 - Concrete internal role model?
 - Workspace creation and management?
 
