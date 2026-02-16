@@ -1,4 +1,4 @@
-## RAGTS Learning Platform - Human reinforcement
+# RAGTS - Reinforced Human Learning Platform
 
 > Reinforce the human part in the agentic loop. 
 
