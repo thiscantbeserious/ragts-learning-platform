@@ -1,6 +1,6 @@
 # RAGTS Learning Platform
 
-**Real Agentic Terminal Sessions** - Browse, explore, and learn from AI agent sessions.
+**Real Agentic Terminal Sessions** - Just like RAG, but more useful for humans and agents to learn from the unfolded mess when the refactoring deleted half your codebase again and the subagents thought it would be smart to skip the tests.
 
 A self-hostable, white-label web platform that transforms terminal session recordings into browsable, searchable learning artifacts for both humans and agents.
 
