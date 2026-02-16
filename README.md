@@ -23,11 +23,13 @@ RAGTS makes them **browsable, foldable, and retrievable**:
 4. **Ingest** - Agents query past sessions as long-term memory
 
 ```
- Record          Upload          Serve
-┌───────┐      ┌────────┐      ┌──────────────────┐
-│  AGR  │─────▶│ RAGTS  │─────▶│  Humans: Browse  │
-│       │      │Platform│      │  Agents: Retrieve │
-└───────┘      └────────┘      └──────────────────┘
+ Record         Upload              Serve
+┌───────┐      ┌────────┐      ┌────────────────┐
+│  AGR  │─────>│ RAGTS  │─────>│ Humans: Browse │
+└───────┘      │Platform│      └────────────────┘
+               └───┬────┘      ┌──────────────────┐
+                   └──────────>│ Agents: Retrieve │
+                               └──────────────────┘
 ```
 
 ## Powered by AGR
