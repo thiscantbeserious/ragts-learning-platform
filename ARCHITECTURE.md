@@ -37,17 +37,22 @@ Sessions contain rich context: what was attempted, what worked, what failed, and
 
 ### Authentication: Delegate, Don't Reinvent
 
-RAGTS does **not** implement its own authentication. Authentication is delegated to industry-standard identity providers via reverse proxy or OIDC integration:
+RAGTS should not implement its own authentication. Authentication should be delegated to external identity providers, keeping the platform simple and letting operators use whatever auth stack they already run.
 
-- **Authelia** - Lightweight, self-hosted
-- **Authentik** - Full-featured, self-hosted
-- **Keycloak** - Enterprise-grade, self-hosted
+**Possible providers:**
+- **Self-hosted:** Authelia, Authentik, Keycloak
+- **Cloud/Enterprise:** Microsoft Entra ID (Azure AD), Google Workspace, Okta
+- **Standards-based:** Any OIDC/OAuth2/SAML compliant provider
 
-The platform trusts the authenticated identity from the upstream provider (via headers like `Remote-User`, `X-Forwarded-User`, or OIDC tokens). This keeps RAGTS simple and lets operators use whatever auth stack they already run.
+**Possible integration patterns:**
+- Reverse proxy headers (`Remote-User`, `X-Forwarded-User`) from Authelia/Authentik/Traefik
+- OIDC/OAuth2 token verification directly in the application
+- SAML for enterprise environments
+- Combination of the above for different deployment scenarios
 
 ### Internal Access Levels
 
-Once authenticated, RAGTS manages **authorization** internally with simple, flat roles:
+Once authenticated, the platform needs internal authorization. A simple, flat role model could work:
 
 | Role | Permissions |
 |------|------------|
@@ -55,28 +60,32 @@ Once authenticated, RAGTS manages **authorization** internally with simple, flat
 | **Curator** | Viewer + curate/annotate sessions, manage markers, control what gets indexed for agent retrieval |
 | **Admin** | Curator + manage users/roles, configure platform, manage AGR service, access all sessions |
 
-**Scope:** Access levels apply per-workspace. A workspace is an isolated boundary (team, project, organization) that owns a set of sessions.
+Roles could be scoped per-workspace, where a workspace is an isolated boundary (team, project, organization) that owns a set of sessions. The exact model depends on whether RAGTS targets single-user, multi-user, or multi-tenant deployments.
 
 ### Agent Access
 
-Agents authenticate via **API tokens** scoped to a workspace. Tokens are:
-- Created and revoked by Admins or Curators
-- Scoped to read-only retrieval by default (agents consume, humans curate)
+Agents need a way to authenticate for retrieval. Options include:
+- API tokens scoped to a workspace (simple, stateless)
+- OAuth2 client credentials (standards-based, fits enterprise)
+- MCP-level authentication (if retrieval is exposed via MCP)
+
+Regardless of mechanism, agent access should be:
+- Read-only by default (agents consume, humans curate)
 - Rate-limited to prevent abuse
-- Logged for audit
+- Auditable
 
 ### Session Sensitivity
 
-Terminal sessions can contain anything - credentials, API keys, internal URLs, production data. The platform must:
-- Never expose sessions to unauthenticated users
-- Respect workspace boundaries (no cross-workspace leakage)
-- Support session-level visibility (private, workspace, public)
-- Sanitize or flag potentially sensitive content during ingestion (stretch goal)
+Terminal sessions can contain anything - credentials, API keys, internal URLs, production data. Key considerations:
+- Sessions should never be exposed to unauthenticated users
+- Workspace boundaries must prevent cross-tenant leakage
+- Session-level visibility (private, workspace, public) may be needed
+- Sensitive content detection/flagging during ingestion is a stretch goal
 
 ### Data at Rest & In Transit
 
-- **In transit:** TLS everywhere. No exceptions. Handled by the reverse proxy / ingress layer.
-- **At rest:** Session files and index data should support encryption. For v1, defer to filesystem-level encryption (LUKS, encrypted volumes). Application-level encryption is a future consideration.
+- **In transit:** TLS everywhere. Typically handled by the reverse proxy / ingress layer.
+- **At rest:** Session files and index data should support encryption. Filesystem-level encryption (LUKS, encrypted volumes) is the simplest starting point. Application-level encryption is a future consideration.
 
 ## System Components
 
