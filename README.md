@@ -2,9 +2,9 @@
 
 **Real Agentic Terminal Sessions** - Just like RAG, but more useful for humans and agents to learn from the unfolded mess when the refactoring deleted half your codebase again and the subagents thought it would be smart to skip the tests.
 
-**Read sessions like documents.** Generate optimized RAG retrieval on-the-fly - context you can understand, curate, and feed back to your agents.
-
-A self-hostable, white-label web platform that transforms agent terminal session recordings into browsable, searchable learning artifacts.
+- **Read sessions like documents.** Generate optimized RAG retrieval on-the-fly.
+- **Context you control.** Understand, curate, and feed back to your agents.
+- **Self-hostable & white-label.** Your sessions, your infrastructure.
 
 ## Features
 
