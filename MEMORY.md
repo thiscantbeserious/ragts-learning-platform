@@ -40,9 +40,21 @@ The pipeline: Record (AGR) → Upload (RAGTS) → Humans: Curate + Agents: Retri
 - Sessions contain: commands, reasoning, output, errors, timing, markers
 
 ### Architecture
-See `ARCHITECTURE.md` for the brainstorming baseline. Nothing is decided yet - the document captures domain boundaries (Identity, Session, Retrieval, Transform) and open questions across auth, storage, frontend, retrieval, AGR integration, and infrastructure.
+See `ARCHITECTURE.md` for the full architectural baseline. It covers:
+- **6 bounded contexts** - Identity, Session, Retrieval, Index, Transform, Cache
+- **Quality attributes** ranked by priority (security > self-hostability > multi-tenancy > extensibility > performance > operability)
+- **Domain model** with core entities and deep open questions (workspace hierarchy, session lifecycle, curation workflow, etc.)
+- **4 architectural views** - Logical, Data (DB abstraction + cache layer), Integration, Deployment
+- **Deployment topology** - Single container (default) → Docker Compose (team) → Orchestrated (org). Same codebase at every scale.
+- **Cache layer** - Redis or similar for hot sessions, search results, job queues, auth tokens, rate limiting
+- **Architectural tensions** - The real trade-offs that need navigating
+- **Open decisions** layered by dependency
 
-Key framing: this is a **multi-user platform** for teams and organizations. Multi-tenancy, workspaces, and access control are first-class concerns. Security-first perspective throughout.
+Key framing:
+- **Multi-user platform** for teams and organizations from day one
+- **Security-first** perspective throughout
+- **DB abstraction layer** from day one (swap SQLite ↔ PostgreSQL without rewriting)
+- **MVP-driven** - first SDLC cycle defines the minimum viable product scope
 
 ### Tech Stack
 Not yet decided. The "TS" in RAGTS does NOT stand for TypeScript - it stands for "Terminal Sessions". All tech stack choices are open for the first SDLC cycle.
@@ -59,21 +71,22 @@ Not yet decided. The "TS" in RAGTS does NOT stand for TypeScript - it stands for
 | Human curation | Core differentiator | Humans control what gets curated into agent memory |
 | Skills infrastructure | Not copied from AGR | Bare minimum for now, add when needed |
 | Agent instructions | AGENTS.md with symlinks | CLAUDE.md and GEMINI.md symlink to AGENTS.md |
+| MVP-driven | First SDLC defines MVP scope | Smallest vertical slice that delivers real value |
 
 ## Decisions NOT Yet Made
 
-See `ARCHITECTURE.md` "Open Questions" for the full list. Everything is open - auth, storage, frontend, retrieval, AGR integration, deployment, and more.
+See `ARCHITECTURE.md` "Open Decisions" for the full list. Everything is open - MVP scope, auth, storage, frontend, retrieval, AGR integration, deployment, and more.
 
 ## Project State
 
 As of 2026-02-16, the project is bootstrapped with:
 - `README.md` - Project vision, problem/solution, features, how it works
-- `ARCHITECTURE.md` - Brainstorming baseline with domain boundaries and open questions
+- `ARCHITECTURE.md` - Full architectural baseline with domain model, views, tensions, and open decisions
 - `AGENTS.md` - Agent instructions (symlinked as CLAUDE.md, GEMINI.md)
 - `MEMORY.md` - This file
 - `LICENSE` - AGPL-3.0
 
-No code exists yet. Next step is to start a full SDLC cycle to make architectural decisions and begin implementation.
+No code exists yet. Next step: start a full SDLC cycle to define the MVP, make architectural decisions, and begin implementation.
 
 ## Voice and Tone
 

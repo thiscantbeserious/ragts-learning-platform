@@ -19,8 +19,8 @@ A multi-user, self-hostable web platform where teams browse agent terminal sessi
 - **Identity providers** (Authelia, Authentik, Keycloak, Microsoft Entra ID, Okta, etc.) handle authentication. RAGTS delegates, never reinvents.
 - **Agent ecosystems** (MCP, REST APIs, custom integrations) consume curated context from RAGTS.
 
-### Starting Point: MCP First
-The most immediate value RAGTS can deliver is an **MCP server** that exposes curated session context to agents. Before the full web platform exists, an MCP interface gives agents access to session memory. This should be the first thing we build - it validates the retrieval domain, forces us to think about data modeling, and delivers value immediately. The web UI and curation features build on top of this foundation.
+### Starting Point: MVP
+The first SDLC cycle should define a **minimum viable product** - the smallest slice that delivers real value end-to-end. What that MVP looks like is an open question for the Product Owner and Architect to decide. It could be a vertical slice through ingestion + browsing + basic curation, or it could start with the retrieval/MCP layer, or something else entirely. The ARCHITECTURE.md captures the full landscape - the MVP carves out the first deliverable from it.
 
 ## 2. Quality Attributes
 
@@ -39,35 +39,38 @@ These are the non-functional requirements that drive architectural decisions. Wh
 
 ### Bounded Contexts
 
-The platform decomposes into five bounded contexts. Each represents a distinct area of responsibility with its own data, rules, and interfaces.
+The platform decomposes into six bounded contexts. Each represents a distinct area of responsibility with its own data, rules, and interfaces.
 
 ```
 +-------------+     +-------------+     +--------------+
 |  Identity   |     |   Session   |     |  Retrieval   |
 |             |     |             |     |              |
-| Auth        |     | Ingestion   |     | Search       |
-| Roles       |     | Storage     |     | Indexing     |
-| Workspaces  |     | Browsing    |     | Agent API    |
-| Tokens      |     | Curation    |     | MCP Server   |
+| Auth        |     | Ingestion   |     | Agent API    |
+| Roles       |     | Storage     |     | MCP Server   |
+| Workspaces  |     | Browsing    |     | Query engine |
+| Tokens      |     | Curation    |     |              |
 +------+------+     +------+------+     +------+-------+
        |                   |                   |
        +-------------------+-------------------+
                            |
-                    +------+------+     +-------------+
-                    |  Transform  |     |    Cache     |
-                    |             |     |              |
-                    | AGR Service |     | Sessions     |
-                    | Optimization|     | Search state |
-                    +-------------+     | Job queues   |
-                                        +-------------+
+              +------------+------------+
+              |            |            |
+       +------+------+  +-+----------+ +-------------+
+       |  Transform  |  |   Index    | |    Cache     |
+       |             |  |            | |              |
+       | AGR Service |  | Full-text  | | Sessions     |
+       | Optimization|  | Semantic   | | Search state |
+       +-------------+  | Embeddings | | Job queues   |
+                         +------------+ +-------------+
 ```
 
 ### Context Relationships
 
 - **Identity <-> Session** - Every session operation requires an authenticated, authorized user. Sessions belong to workspaces. Workspaces have members with roles.
 - **Identity <-> Retrieval** - Agent API tokens and MCP credentials are scoped to workspaces. Retrieval respects tenant boundaries.
-- **Session <-> Retrieval** - Curated session segments feed the retrieval index. Retrieval queries reference sessions by workspace scope.
-- **Session <-> Transform** - Raw sessions are submitted for background transformation. Transformed sessions replace or augment originals.
+- **Session <-> Index** - When sessions are ingested or curated, the index is updated. The index is derived data - always rebuildable from the session store.
+- **Index <-> Retrieval** - Retrieval queries go through the index. The index is the engine that makes sessions searchable - full-text, semantic, or both.
+- **Session <-> Transform** - Raw sessions are submitted for background transformation. Transformed sessions replace or augment originals, triggering re-indexing.
 - **Cache <-> All** - Hot session data, search results, job state, and auth tokens are cached for performance. The cache is ephemeral - the database is the source of truth.
 
 ### Core Entities
@@ -93,12 +96,15 @@ The domain model above is a starting point. The SDLC cycle needs to dig deeper:
 - **Versioning** - When a session is transformed (silence removed, optimized), is the original preserved? Can you compare versions?
 - **Cross-workspace sharing** - Can a session or segment be shared across workspaces? What are the security implications?
 - **Retention and lifecycle** - How long are sessions kept? Auto-archival? Storage quotas per workspace?
+- **Index strategy** - What gets indexed? Raw session content, curated segments, metadata, all of the above? Full-text, semantic embeddings, or hybrid? When does indexing happen (on ingestion, on curation, on demand)?
+- **Index rebuild** - The index must always be rebuildable from source data. How long does a full rebuild take? Can it be done incrementally? What happens during a rebuild - is search degraded?
+- **Embedding ownership** - If we use semantic search, who generates embeddings? Which model? Self-hosted or API? How does this affect self-hosting simplicity?
 
 ## 4. Architectural Views
 
 ### Logical View - How domains interact
 
-The five bounded contexts communicate through well-defined interfaces. Whether they're deployed as separate services or modules in a monolith is a deployment decision - the logical boundaries stay the same.
+The six bounded contexts communicate through well-defined interfaces. Whether they're deployed as separate services or modules in a monolith is a deployment decision - the logical boundaries stay the same.
 
 Key interaction patterns:
 - **Synchronous** - Auth checks, session CRUD, search queries, MCP tool calls
@@ -115,7 +121,8 @@ Everything goes through a database abstraction layer. No raw filesystem assumpti
 | Sessions (.cast files) | Large, immutable after ingestion, read-heavy | Stored in DB. Cached for frequent access. |
 | Session metadata | Small, structured, queried frequently | Relational. ACID. |
 | Auth data (users, roles, tokens, workspaces) | Small, critical, write-sensitive | Relational. ACID mandatory. |
-| Search index | Derived from sessions + curated segments | Rebuildable from source. Eventual consistency acceptable. |
+| Search index (full-text) | Derived from sessions + curated segments | Rebuildable from source. Eventual consistency acceptable. |
+| Semantic index (embeddings) | Vector representations of session content | Rebuildable. Depends on embedding model choice. Potentially large. |
 | Curated segments | Human-created annotations + tags | Relational, linked to sessions and workspaces. |
 | Transform state | Job status, progress, history | Ephemeral. Cache-backed with DB persistence. |
 
@@ -136,7 +143,7 @@ The cache is always ephemeral - the database remains the single source of truth.
 |-------------------|-----------|-------------------|
 | Authentication | Inbound | Reverse proxy headers, OIDC/OAuth2, SAML |
 | Session ingestion | Inbound | File upload API, AGR direct push, bulk import |
-| Agent retrieval | Outbound (served) | **MCP server (first priority)**, REST API, GraphQL |
+| Agent retrieval | Outbound (served) | MCP server, REST API, GraphQL |
 | AGR transforms | Internal | Sidecar binary, REST wrapper, message queue |
 | Notifications | Outbound | Webhooks, email (stretch) |
 
@@ -175,8 +182,8 @@ Single container says "minimal config." Multi-tenancy says "isolation, RBAC, wor
 ### Security vs Developer Experience
 Delegating auth to external providers is secure but adds deployment complexity. Operators need Authelia/Keycloak/etc. running. A built-in basic auth mode for development/small teams might be practical as a stepping stone, even if production deployments should use proper IdP integration.
 
-### MCP First vs Web First
-Starting with MCP delivers value to agents immediately but skips the human curation UX. Starting with the web UI serves humans but doesn't validate the retrieval domain. The MCP-first approach is recommended because it forces the data model and retrieval interfaces to be solid before layering UX on top.
+### MVP Scope
+What's the smallest thing that delivers real value? Starting with retrieval (MCP/API) delivers value to agents but skips the human curation UX. Starting with the web UI serves humans but doesn't validate the retrieval domain. Starting with ingestion + browsing proves the core UX but defers the memory loop. The MVP definition is a key SDLC decision.
 
 ### AGR Integration Depth
 AGR is Rust. The platform's language is TBD. Tight integration (FFI) gives performance but couples technologies. Loose integration (CLI sidecar) is flexible but adds latency and error surface. This cascades into deployment and operational complexity.
@@ -208,10 +215,10 @@ Grouped by dependency order (foundation decisions unlock everything else):
 - Concrete internal role model?
 - Workspace creation and management?
 
-### Retrieval (MCP First)
-- MCP server implementation - what tools does it expose?
+### Retrieval
+- What retrieval interface? (MCP server, REST API, GraphQL, multiple?)
 - What can agents query? (Sessions, segments, markers, metadata?)
-- Search model for retrieval? (Full-text, semantic, hybrid?)
+- Search model? (Full-text, semantic, hybrid?)
 - Index technology? (Built-in, Meilisearch, vector DB, ?)
 - How does curated vs raw content affect retrieval?
 
@@ -237,7 +244,7 @@ Directional, not prescriptive:
 
 **Curation:** `Curator --> Annotate/tag --> DB --> Invalidate cache --> Re-index`
 
-**Agent retrieval (MCP):** `Agent --> MCP --> Auth + scope --> Cache/Index --> Curated segments`
+**Agent retrieval:** `Agent --> API/MCP --> Auth + scope --> Cache/Index --> Curated segments`
 
 **Transformation:** `Session --> Queue --> AGR worker --> DB --> Invalidate cache --> Re-index`
 
@@ -248,7 +255,6 @@ This document is the architectural baseline for the first SDLC cycle.
 **Recommended approach:**
 1. Read `MEMORY.md` for project context and decisions made so far
 2. Use this document as input for the Product Owner and Architect roles
-3. Start with the **MCP server** as the first deliverable - it validates the data model, retrieval domain, and forces early decisions on foundation and security
-4. Build the web UI and curation features on top of the foundation the MCP work establishes
-
-The MCP-first approach means agents get value immediately, and the architectural decisions it forces (data model, auth, retrieval) are the same ones the web platform needs.
+3. Define the **MVP scope** - the smallest vertical slice that delivers real value end-to-end
+4. Make foundation layer decisions first (language, DB, cache) since everything else depends on them
+5. Build iteratively from the MVP outward
