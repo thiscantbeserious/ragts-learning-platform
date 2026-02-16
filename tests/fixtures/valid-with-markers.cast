@@ -1,0 +1,12 @@
+{"version":3,"width":80,"height":24,"timestamp":1708112345}
+[0.5,"o","Starting task...\n"]
+[0.1,"m","Task 1: Setup"]
+[0.2,"o","Setting up environment\n"]
+[0.3,"o","Done with setup\n"]
+[0.1,"m","Task 2: Build"]
+[0.5,"o","Building project...\n"]
+[1.0,"o","Build complete\n"]
+[0.1,"m","Task 3: Test"]
+[0.2,"o","Running tests...\n"]
+[0.8,"o","All tests passed\n"]
+[0.1,"x",0]

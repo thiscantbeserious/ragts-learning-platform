@@ -40,7 +40,41 @@ Powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/a
 
 ## Getting Started
 
-> TODO
+### Prerequisites
+
+- Node.js 20+
+- npm
+
+### Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev servers (Vite frontend + Hono backend)
+npm run dev
+```
+
+Open http://localhost:5173 to use the app. Upload `.cast` files (asciicast v3 format) via drag & drop or file picker.
+
+### Production Build
+
+```bash
+npm run build
+npm start
+```
+
+### Testing
+
+```bash
+npm test              # Run tests in watch mode
+npx vitest run        # Single run
+npx vitest run --coverage  # With coverage report
+```
+
+### Sample Data
+
+A sample `.cast` file is included at `fixtures/sample.cast` for testing and demo purposes.
 
 ## License
 
