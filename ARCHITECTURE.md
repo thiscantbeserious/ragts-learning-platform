@@ -1,95 +1,31 @@
 # Architecture
 
-System design for the RAGTS platform. Living document - refine as decisions are made.
+Brainstorming baseline for the RAGTS platform. This document captures the thinking so far - questions, options, and directions to explore in the first SDLC cycle. Nothing here is decided.
 
-## Design Principles
+## Guiding Principles
 
-### Security First
-Security is not a feature - it's the foundation. Every component assumes hostile input, every endpoint requires authentication, every action is authorized. Sessions may contain sensitive terminal output (credentials, API keys, internal infrastructure). Treat all session data as potentially sensitive by default.
+These are the lenses we want to evaluate every decision through:
 
-### Human First
-Every technical decision should reinforce human control. The human curates, the human decides what agents learn. Automation serves the human, not the other way around.
-
-### Self-Hosting Simplicity
-Every added dependency makes self-hosting harder. Prefer fewer moving parts. A single binary + SQLite is better than a distributed system for v1.
-
-### AGR is the Engine
-Don't reimplement what AGR already does. The platform focuses on serving, browsing, and curation. AGR handles recording and transformation.
-
-### Sessions are Experiences
-Not logs, not videos, not documents - experiences. Design the UX around exploring what happened, not just reading output.
+- **Security first** - Sessions contain sensitive terminal output. Every design choice should assume hostile input, require authentication, and enforce authorization. Security is the foundation, not a bolt-on.
+- **Human first** - The human curates, the human controls what agents learn. Automation serves the human.
+- **Multi-user by default** - This is a platform for teams and organizations, not a single-user tool. Multi-tenancy, workspaces, and access control are first-class concerns from day one.
+- **Self-hosting simplicity** - Every dependency makes self-hosting harder. Minimize moving parts without sacrificing the multi-user experience.
+- **AGR is the engine** - Don't reimplement what AGR already does. The platform serves, browses, and curates. AGR records and transforms.
+- **Sessions are experiences** - Not logs, not videos. Rich context artifacts that capture what happened, what worked, and what failed.
 
 ## Core Concepts
 
-### Sessions
-Terminal session recordings in asciicast v3 format. Each session captures the full terminal output of an AI agent interaction - commands, responses, errors, and timing.
+**Sessions** - Terminal session recordings in asciicast v3 format. Commands, responses, errors, timing.
 
-### Markers as Structure
-Asciicast v3 markers were designed for annotation. RAGTS elevates them to **fold anchors** - structural boundaries that define collapsible sections. This is the key UX primitive: markers become the hierarchy of a session.
+**Markers as fold anchors** - Asciicast v3 markers become structural boundaries. Collapsible sections for quick navigation. This is the key UX primitive.
 
-### Vertical Browsing
-Sessions render as scrollable documents, not timelines. Terminal output is laid out vertically with fold/unfold at marker boundaries. Quick peeks, progressive disclosure, noise reduction.
+**Vertical browsing** - Sessions render as scrollable documents with fold/unfold at marker boundaries. Progressive disclosure, noise reduction.
 
-### Curated Agent Memory
-Sessions contain rich context: what was attempted, what worked, what failed, and why. Traditional RAG retrieves from documents. RAGTS retrieves from **experiences** - and the human curates what gets indexed. This is the reinforcement loop.
-
-## Security & Authentication
-
-### Authentication: Delegate, Don't Reinvent
-
-RAGTS should not implement its own authentication. Authentication should be delegated to external identity providers, keeping the platform simple and letting operators use whatever auth stack they already run.
-
-**Possible providers:**
-- **Self-hosted:** Authelia, Authentik, Keycloak
-- **Cloud/Enterprise:** Microsoft Entra ID (Azure AD), Google Workspace, Okta
-- **Standards-based:** Any OIDC/OAuth2/SAML compliant provider
-
-**Possible integration patterns:**
-- Reverse proxy headers (`Remote-User`, `X-Forwarded-User`) from Authelia/Authentik/Traefik
-- OIDC/OAuth2 token verification directly in the application
-- SAML for enterprise environments
-- Combination of the above for different deployment scenarios
-
-### Internal Access Levels
-
-Once authenticated, the platform needs internal authorization. A simple, flat role model could work:
-
-| Role | Permissions |
-|------|------------|
-| **Viewer** | Browse and read sessions, use folds, search |
-| **Curator** | Viewer + curate/annotate sessions, manage markers, control what gets indexed for agent retrieval |
-| **Admin** | Curator + manage users/roles, configure platform, manage AGR service, access all sessions |
-
-Roles could be scoped per-workspace, where a workspace is an isolated boundary (team, project, organization) that owns a set of sessions. The exact model depends on whether RAGTS targets single-user, multi-user, or multi-tenant deployments.
-
-### Agent Access
-
-Agents need a way to authenticate for retrieval. Options include:
-- API tokens scoped to a workspace (simple, stateless)
-- OAuth2 client credentials (standards-based, fits enterprise)
-- MCP-level authentication (if retrieval is exposed via MCP)
-
-Regardless of mechanism, agent access should be:
-- Read-only by default (agents consume, humans curate)
-- Rate-limited to prevent abuse
-- Auditable
-
-### Session Sensitivity
-
-Terminal sessions can contain anything - credentials, API keys, internal URLs, production data. Key considerations:
-- Sessions should never be exposed to unauthenticated users
-- Workspace boundaries must prevent cross-tenant leakage
-- Session-level visibility (private, workspace, public) may be needed
-- Sensitive content detection/flagging during ingestion is a stretch goal
-
-### Data at Rest & In Transit
-
-- **In transit:** TLS everywhere. Typically handled by the reverse proxy / ingress layer.
-- **At rest:** Session files and index data should support encryption. Filesystem-level encryption (LUKS, encrypted volumes) is the simplest starting point. Application-level encryption is a future consideration.
+**Curated agent memory** - Humans curate what gets indexed. Agents retrieve from experiences, not just documents. This is the reinforcement loop.
 
 ## Domain Boundaries
 
-The platform decomposes into bounded contexts. Whether these become microservices, modules within a monolith, or something in between is an open decision. This is the baseline - the domains should drive the architecture, not the other way around.
+The platform decomposes into bounded contexts. Whether these become microservices, modules, or something in between is an open question. The domains should drive the architecture, not the other way around.
 
 ```
 +-------------+     +-------------+     +--------------+
@@ -111,129 +47,105 @@ The platform decomposes into bounded contexts. Whether these become microservice
 
 **Identity** - Who you are, what you can do. Delegates authentication externally, manages authorization internally.
 
-**Session** - The core domain. Ingesting, storing, browsing, and curating terminal sessions. This is where the vertical browsing and fold/unfold UX lives.
+**Session** - The core domain. Ingesting, storing, browsing, and curating terminal sessions. Vertical browsing and fold/unfold UX.
 
-**Retrieval** - How agents (and humans) find relevant context. Search, indexing, and the retrieval API/MCP layer.
+**Retrieval** - How agents and humans find relevant context. Search, indexing, retrieval API/MCP.
 
 **Transform** - Background processing powered by AGR. Silence removal, memory optimization, re-indexing.
 
-## Data Flow
+## Open Questions
 
-### Ingestion
-```
-.cast file --> Auth check --> Validation --> Storage --> Index --> Available
-```
+Everything below needs to be explored and decided in the first SDLC cycle. Grouped by theme, not priority.
 
-### Browsing & Curation
-```
-User request --> Auth + role check --> API (session + markers)
-                                          |
-                                          v
-                                   Web UI (vertical render + folds)
-                                          |
-                                          v
-                                   Human curates sections (Curator+)
-                                          |
-                                          v
-                                   Curated context --> Index
-```
+### Authentication & Identity
 
-### Agent Retrieval
-```
-Agent query + API token --> Auth + scope check --> Retrieval layer
-                                                      |
-                                                      v
-                                               Curated segments --> Agent
-```
+How do users authenticate? The platform shouldn't reinvent auth - it should delegate to what operators already run.
 
-### Transformation
-```
-Raw session --> AGR service (optimize) --> Transformed session --> Re-index
-```
+- **Self-hosted providers:** Authelia, Authentik, Keycloak
+- **Cloud/Enterprise:** Microsoft Entra ID, Google Workspace, Okta
+- **Standards:** OIDC, OAuth2, SAML - which do we support and how?
+- **Integration pattern:** Reverse proxy headers? Direct OIDC? SAML? All of the above?
+- **First-run experience:** How does the first admin get created? Seed user? Setup wizard?
+- **Identity mapping:** How do external identities map to internal users, roles, and workspaces?
 
-## Open Architecture Decisions
+### Authorization & Access Control
 
-### ADR-001: Frontend Framework
-**Status:** Open
+Once authenticated, what can users do? This is a multi-user platform - access control is not optional.
 
-**Context:** The platform needs a web UI for vertical session browsing, fold/unfold interaction, search, and white-label theming.
+- **Role model:** Flat roles (viewer/curator/admin) or something more granular? RBAC? ABAC?
+- **Scope:** Per-workspace? Per-session? Per-organization? Hierarchical?
+- **Workspaces:** What is a workspace exactly? A team? A project? An org? How do they relate?
+- **Session visibility:** Private, workspace-scoped, public? Who decides?
+- **Cross-workspace access:** Can users belong to multiple workspaces? How does that work?
 
-**Options to evaluate:**
-- Next.js (React, SSR, large ecosystem)
-- SvelteKit (lightweight, fast, good DX)
-- Astro (content-focused, island architecture)
-- Vite + React (simple SPA, no SSR overhead)
+### Agent Access & Retrieval
 
-**Considerations:**
-- Terminal rendering performance (potentially large sessions)
-- White-label theming support
-- Self-hosting simplicity
-- Community and ecosystem
+How do agents authenticate and retrieve curated context?
 
-### ADR-002: Retrieval Mechanism
-**Status:** Open
+- **Agent authentication:** API tokens? OAuth2 client credentials? MCP-level auth?
+- **Retrieval interface:** REST API? MCP server? GraphQL? Multiple?
+- **Search model:** Full-text? Semantic/vector? Hybrid? What do agents actually need?
+- **Indexing:** What gets indexed? Raw sessions? Curated segments? Both?
+- **Embedding generation:** Who generates embeddings? When? What model?
+- **Rate limiting and audit:** How do we prevent abuse and track agent access?
 
-**Context:** Agents need to query past sessions as long-term memory. Humans curate what gets indexed. Need a retrieval layer that serves both structured queries and semantic search.
+### Storage & Data
 
-**Options to evaluate:**
-- REST API with full-text search (simple, proven)
-- MCP server (native agent integration)
-- Vector DB (semantic search, embeddings)
-- Graph DB (relationship-aware retrieval)
-- Hybrid (API + vector search)
+Where do sessions, metadata, indexes, and auth data live?
 
-**Considerations:**
-- How do agents connect? (API key, MCP, direct DB?)
-- Semantic vs keyword search vs both
-- Embedding generation (who, when, how)
-- Self-hosting complexity (lightweight vs heavy infrastructure)
+- **Session storage:** Filesystem? Object storage? Database BLOBs?
+- **Metadata & auth:** SQLite? PostgreSQL? What needs ACID guarantees?
+- **Search index:** Built-in full-text? Dedicated search engine (Meilisearch, Elasticsearch)? Vector DB?
+- **Encryption at rest:** Filesystem-level? Application-level? Both?
+- **Backup & portability:** How easy is it to export/import everything?
+- **Scale:** What's the expected load? Hundreds of sessions? Millions?
 
-### ADR-003: AGR Integration Model
-**Status:** Open
+### Frontend & UX
 
-**Context:** AGR (Rust binary) needs to run as a service within the platform for background transformations. How does the web platform invoke AGR?
+How do users interact with the platform?
 
-**Options to evaluate:**
-- Sidecar binary (spawn AGR process, communicate via CLI/stdout)
-- REST wrapper around AGR (thin API layer over the binary)
-- FFI bindings (call AGR directly from the platform backend)
-- Message queue (async job processing with AGR as worker)
+- **Framework:** Next.js, SvelteKit, Astro, Vite+React, or something else?
+- **Terminal rendering:** How do we render potentially massive session output performantly?
+- **Fold/unfold UX:** How do markers translate to collapsible sections in the browser?
+- **Curation UX:** How do curators annotate, tag, and control what gets indexed?
+- **White-label theming:** How deep does customization go? CSS variables? Full theme engine?
+- **Real-time vs static:** Are sessions rendered once or streamed/updated live?
 
-**Considerations:**
-- AGR is Rust, platform backend TBD
-- Transforms can be long-running (large sessions)
-- Error handling and progress reporting
-- Deployment simplicity for self-hosting
+### AGR Integration
 
-### ADR-004: Storage Backend
-**Status:** Open
+How does the platform invoke AGR for background transformations?
 
-**Context:** Need to store .cast files, search index, metadata, curated retrieval context, and authorization data (roles, tokens, workspaces).
+- **Integration model:** Sidecar binary? REST wrapper? FFI? Message queue?
+- **Long-running transforms:** How do we handle progress, cancellation, failure?
+- **AGR is Rust, platform is TBD:** What's the cleanest bridge?
+- **Deployment:** How does this work in a containerized setup? Docker compose? Kubernetes?
 
-**Options to evaluate:**
-- Filesystem + SQLite (simple, self-contained, single file backup)
-- Filesystem + PostgreSQL (relational, full-text search built-in, proven at scale)
-- Object storage + dedicated search (S3 + Elasticsearch/Meilisearch)
+### Platform & Infrastructure
 
-**Considerations:**
-- Self-hosting ease (fewer dependencies = better)
-- Scale expectations (single user? team? organization?)
-- Full-text search requirements
-- Backup and portability
-- Authorization data needs ACID guarantees (roles, tokens, workspace membership)
+How does the whole thing run?
 
-### ADR-005: Auth Integration Model
-**Status:** Open
+- **Deployment model:** Single container? Docker compose? Helm chart? All of the above?
+- **Configuration:** Environment variables? Config file? Admin UI? Mix?
+- **Monitoring & observability:** Logging, metrics, health checks?
+- **Update strategy:** How do self-hosters upgrade without data loss?
 
-**Context:** RAGTS delegates authentication to external providers. Need to decide the integration pattern.
+## Data Flow (Rough)
 
-**Options to evaluate:**
-- Reverse proxy headers only (simplest - trust `Remote-User` from Authelia/Authentik/Traefik)
-- OIDC integration (platform verifies tokens directly, more portable)
-- Both (headers for simple setups, OIDC for enterprise)
+These flows will evolve as decisions are made. Current thinking:
 
-**Considerations:**
-- Reverse proxy headers are simple but require trusted network between proxy and app
-- OIDC is more robust but adds complexity to self-hosting
-- Need to map external identity to internal roles/workspaces
-- First-run experience (how does the first admin get created?)
+**Ingestion:** `.cast file --> Auth --> Validation --> Storage --> Index`
+
+**Browsing:** `User --> Auth --> Session API --> Vertical render + folds`
+
+**Curation:** `Curator --> Annotate/tag --> Curated context --> Re-index`
+
+**Agent retrieval:** `Agent + token --> Auth --> Retrieval layer --> Curated segments`
+
+**Transformation:** `Session --> AGR service --> Optimized session --> Re-index`
+
+## Next Steps
+
+This document is the starting point for the first SDLC cycle. A fresh session should:
+1. Read `MEMORY.md` for full project context
+2. Read this document for the architectural baseline
+3. Start a full SDLC cycle to make the first real decisions and begin implementation

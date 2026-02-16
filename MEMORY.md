@@ -39,18 +39,13 @@ The pipeline: Record (AGR) → Upload (RAGTS) → Humans: Curate + Agents: Retri
 - Markers in asciicast v3 serve as fold anchors (structural, not just annotation)
 - Sessions contain: commands, reasoning, output, errors, timing, markers
 
-### Architecture (rough baseline)
-See `ARCHITECTURE.md` for the full diagram. Key components:
-- **Web UI** - Vertical session browser with fold/unfold, search, theming (white-label)
-- **API Server** - Session CRUD, search, transform triggers
-- **Storage** - .cast files, search index, metadata
-- **Transform Pipeline** - AGR service for background processing (silence removal, memory optimization, indexing)
+### Architecture
+See `ARCHITECTURE.md` for the brainstorming baseline. Nothing is decided yet - the document captures domain boundaries (Identity, Session, Retrieval, Transform) and open questions across auth, storage, frontend, retrieval, AGR integration, and infrastructure.
 
-### Ingestion/Retrieval
-The platform needs some form of API/MCP or Graph/VectorDB for agent retrieval - this is not yet decided. Keep it open for now. The gist: agents need to be able to query past sessions as retrievable long-term memory.
+Key framing: this is a **multi-user platform** for teams and organizations. Multi-tenancy, workspaces, and access control are first-class concerns. Security-first perspective throughout.
 
 ### Tech Stack
-Not yet decided. The "TS" in RAGTS does NOT stand for TypeScript - it stands for "Terminal Sessions". Tech stack choices are open for future SDLC cycles.
+Not yet decided. The "TS" in RAGTS does NOT stand for TypeScript - it stands for "Terminal Sessions". All tech stack choices are open for the first SDLC cycle.
 
 ## Decisions Made
 
@@ -67,24 +62,18 @@ Not yet decided. The "TS" in RAGTS does NOT stand for TypeScript - it stands for
 
 ## Decisions NOT Yet Made
 
-- Frontend framework (Next.js, SvelteKit, Astro, etc.)
-- Backend language/framework
-- Storage backend for sessions and index
-- Retrieval mechanism (API, MCP, Graph/VectorDB)
-- Authentication/multi-tenancy model
-- White-label theming approach
-- How exactly AGR integrates as a service (sidecar binary, FFI, API wrapper)
+See `ARCHITECTURE.md` "Open Questions" for the full list. Everything is open - auth, storage, frontend, retrieval, AGR integration, deployment, and more.
 
 ## Project State
 
 As of 2026-02-16, the project is bootstrapped with:
 - `README.md` - Project vision, problem/solution, features, how it works
-- `ARCHITECTURE.md` - Rough system design baseline (living document)
+- `ARCHITECTURE.md` - Brainstorming baseline with domain boundaries and open questions
 - `AGENTS.md` - Agent instructions (symlinked as CLAUDE.md, GEMINI.md)
 - `MEMORY.md` - This file
 - `LICENSE` - AGPL-3.0
 
-No code exists yet. Next step is to start an SDLC cycle for the first implementation phase.
+No code exists yet. Next step is to start a full SDLC cycle to make architectural decisions and begin implementation.
 
 ## Voice and Tone
 
