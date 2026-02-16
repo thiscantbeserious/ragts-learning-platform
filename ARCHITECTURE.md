@@ -87,47 +87,35 @@ Terminal sessions can contain anything - credentials, API keys, internal URLs, p
 - **In transit:** TLS everywhere. Typically handled by the reverse proxy / ingress layer.
 - **At rest:** Session files and index data should support encryption. Filesystem-level encryption (LUKS, encrypted volumes) is the simplest starting point. Application-level encryption is a future consideration.
 
-## System Components
+## Domain Boundaries
+
+The platform decomposes into bounded contexts. Whether these become microservices, modules within a monolith, or something in between is an open decision. This is the baseline - the domains should drive the architecture, not the other way around.
 
 ```
-RAGTS Platform
-==============
-
-  +-------------------+
-  | Reverse Proxy     |  <-- TLS termination, auth (Authelia/Authentik/Keycloak)
-  | (nginx/traefik)   |
-  +---------+---------+
-            |
-            | Authenticated request + identity headers
-            |
-+-----------+------------------------------------------+
-|                   RAGTS Application                   |
-|                                                       |
-|  +--------------+  +--------------+  +------------+  |
-|  | Web UI       |  | API Server   |  | Storage    |  |
-|  |              |  |              |  |            |  |
-|  | - Vertical   |  | - Session    |  | - .cast    |  |
-|  |   browser    |  |   CRUD       |  |   files    |  |
-|  | - Fold/      |  | - Search     |  | - Index    |  |
-|  |   unfold     |  | - Retrieval  |  | - Metadata |  |
-|  | - Curation   |  |   API / MCP  |  | - Roles    |  |
-|  | - Theming    |  | - Auth check |  |            |  |
-|  +------+-------+  +------+-------+  +-----+------+  |
-|         |                 |                |          |
-|         +-----------------+-----------------+         |
-|                           |                           |
-|                  +--------+--------+                  |
-|                  | AGR Service     |                  |
-|                  |                 |                  |
-|                  | - Transforms    |                  |
-|                  | - Silence       |                  |
-|                  |   removal       |                  |
-|                  | - Memory        |                  |
-|                  |   optimization  |                  |
-|                  | - Indexing      |                  |
-|                  +-----------------+                  |
-+-------------------------------------------------------+
++-------------+     +-------------+     +--------------+
+|   Identity  |     |   Session   |     |  Retrieval   |
+|             |     |             |     |              |
+| Auth        |     | Ingestion   |     | Search       |
+| Roles       |     | Storage     |     | Indexing     |
+| Workspaces  |     | Browsing    |     | Agent API    |
+| Tokens      |     | Curation    |     | MCP          |
++-------------+     +------+------+     +--------------+
+                           |
+                    +------+------+
+                    | Transform   |
+                    |             |
+                    | AGR Service |
+                    | Optimization|
+                    +-------------+
 ```
+
+**Identity** - Who you are, what you can do. Delegates authentication externally, manages authorization internally.
+
+**Session** - The core domain. Ingesting, storing, browsing, and curating terminal sessions. This is where the vertical browsing and fold/unfold UX lives.
+
+**Retrieval** - How agents (and humans) find relevant context. Search, indexing, and the retrieval API/MCP layer.
+
+**Transform** - Background processing powered by AGR. Silence removal, memory optimization, re-indexing.
 
 ## Data Flow
 
