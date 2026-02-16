@@ -1,10 +1,22 @@
 # RAGTS Learning Platform
 
+> Reinforce the human in the loop. 
+
 **Real Agentic Terminal Sessions** - Just like RAG, but more useful for humans and agents to learn from the unfolded mess when the refactoring deleted half your codebase again and the subagents thought it would be smart to skip the tests.
+
+
 
 - **Read sessions like documents.** Generate optimized RAG retrieval on-the-fly.
 - **Context you control.** Understand, curate, and feed back to your agents.
-- **Self-hostable & white-label.** Your sessions, your infrastructure.
+- **Self-hostable & white-label.** Your sessions, your infrastructure, fully white-label for your needs.
+
+## Problem
+
+Agent sessions are fire-and-forget. Thousands of lines of terminal output - commands, reasoning, errors, recoveries - generated and never looked at again. When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
+
+## Solution
+
+RAGTS puts you back in the loop. Every session becomes a browsable document you can fold, search, and understand. Curate what matters into retrievable context that your agents learn from next time - so the same mistake doesn't happen twice.
 
 ## Features
 
