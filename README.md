@@ -13,7 +13,7 @@
 
 ## Problem
 
-**Agent sessions are fire-and-forget. Thousands of lines of terminal output** - commands, reasoning, errors, recoveries - generated and never looked at again. When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
+**Agent sessions are fire-and-forget. Thousands of lines of terminal output** - commands, reasoning, errors, recoveries - generated and never looked at again (or if autonomous, never). When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
 
 ## Solution
 
