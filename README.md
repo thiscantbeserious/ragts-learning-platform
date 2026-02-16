@@ -21,14 +21,14 @@ Up until now it was always about reinforcing the agents. But what about the huma
 
 **RAGTS puts you back in the loop. Every session becomes a browsable document you can fold, search, and understand**. Curate what matters into retrievable context for the next sessions so that your agents learn from next time - so the same mistake doesn't happen twice. 
 
-Didn't work out? Adjust and repeat! Reinforce to the max. Your knowdlege, your power, your control.
+Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your power, your control.
 
 ## How It Works
 
 ```
  Record         Upload              Serve
 ┌───────┐      ┌────────┐      ┌────────────────┐
-│  AGR  │─────>│ RAGTS  │─────>│ Humans: Browse │
+│  AGR  │─────>│ RAGTS  │─────>│ Humans: Curate │
 └───────┘      │Platform│      └────────────────┘
                └───┬────┘      ┌──────────────────┐
                    └──────────>│ Agents: Retrieve │
