@@ -19,33 +19,32 @@ Sessions contain rich context: what was attempted, what worked, what failed, and
 ## System Components
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   RAGTS Platform                     │
-│                                                      │
-│  ┌─────────────┐  ┌──────────────┐  ┌────────────┐ │
-│  │  Web UI      │  │  API Server  │  │  Storage   │ │
-│  │             │  │              │  │            │ │
-│  │ - Vertical  │  │ - Session    │  │ - .cast    │ │
-│  │   browser   │  │   CRUD       │  │   files    │ │
-│  │ - Fold/     │  │ - Search     │  │ - Index    │ │
-│  │   unfold    │  │ - Retrieval  │  │ - Metadata │ │
-│  │ - Curation  │  │   API / MCP  │  │            │ │
-│  │ - Theming   │  │              │  │            │ │
-│  └──────┬──────┘  └──────┬───────┘  └─────┬──────┘ │
-│         │                │                │        │
-│         └────────────────┼────────────────┘        │
-│                          │                          │
-│                  ┌───────┴────────┐                  │
-│                  │ AGR Service    │                  │
-│                  │                │                  │
-│                  │ - Transforms   │                  │
-│                  │ - Silence      │                  │
-│                  │   removal      │                  │
-│                  │ - Memory       │                  │
-│                  │   optimization │                  │
-│                  │ - Indexing     │                  │
-│                  └────────────────┘                  │
-└─────────────────────────────────────────────────────┘
+RAGTS Platform
+==============
+
++--------------+  +--------------+  +------------+
+| Web UI       |  | API Server   |  | Storage    |
+|              |  |              |  |            |
+| - Vertical   |  | - Session    |  | - .cast    |
+|   browser    |  |   CRUD       |  |   files    |
+| - Fold/      |  | - Search     |  | - Index    |
+|   unfold     |  | - Retrieval  |  | - Metadata |
+| - Curation   |  |   API / MCP  |  |            |
+| - Theming    |  |              |  |            |
++------+-------+  +------+-------+  +-----+------+
+       |                 |                |
+       +-----------------+-----------------+
+                         |
+                +--------+--------+
+                | AGR Service     |
+                |                 |
+                | - Transforms    |
+                | - Silence       |
+                |   removal       |
+                | - Memory        |
+                |   optimization  |
+                | - Indexing      |
+                +-----------------+
 ```
 
 ## Data Flow
