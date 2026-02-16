@@ -35,6 +35,7 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
                                └──────────────────┘
 ```
 
+## Service
 Powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/agent-session-recorder) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval.
 
 ## Getting Started
