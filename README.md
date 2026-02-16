@@ -13,11 +13,13 @@
 
 ## Problem
 
-Agent sessions are fire-and-forget. Thousands of lines of terminal output - commands, reasoning, errors, recoveries - generated and never looked at again. When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
+**Agent sessions are fire-and-forget. Thousands of lines of terminal output** - commands, reasoning, errors, recoveries - generated and never looked at again. When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
 
 ## Solution
 
-RAGTS puts you back in the loop. Every session becomes a browsable document you can fold, search, and understand. Curate what matters into retrievable context that your agents learn from next time - so the same mistake doesn't happen twice.
+**RAGTS puts you back in the loop. Every session becomes a browsable document you can fold, search, and understand**. Curate what matters into retrievable context for the next sessions so that your agents learn from next time - so the same mistake doesn't happen twice. 
+
+Didn't work out? Adjust and repeat! Reinforce to the max!
 
 ## How It Works
 
