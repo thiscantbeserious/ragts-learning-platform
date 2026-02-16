@@ -8,7 +8,8 @@
 
 - **Read sessions like documents.** Generate optimized RAG retrieval on-the-fly.
 - **Context you control.** Understand, curate, and feed back to your agents.
-- **Self-hostable & white-label.** Your sessions, your infrastructure, fully white-label for your needs.
+- **Fold/unfold with markers.** Collapse noise, expand what matters - powered by asciicast v3.
+- **Self-hostable & white-label.** Your sessions, your infrastructure.
 
 ## Problem
 
@@ -17,15 +18,6 @@ Agent sessions are fire-and-forget. Thousands of lines of terminal output - comm
 ## Solution
 
 RAGTS puts you back in the loop. Every session becomes a browsable document you can fold, search, and understand. Curate what matters into retrievable context that your agents learn from next time - so the same mistake doesn't happen twice.
-
-## Features
-
-- **Vertical browsing** - Read sessions like documents, scroll to what matters
-- **Marker-based folding** - Collapse and expand sections for quick navigation
-- **On-the-fly RAG generation** - Transform sessions into curated, optimized retrieval context
-- **Human + agent readable** - Humans browse and curate, agents retrieve and learn
-- **Self-hostable & white-label** - Your infrastructure, your branding
-- **asciicast v3 native** - Built on the asciicast v3 format with native marker support
 
 ## How It Works
 
