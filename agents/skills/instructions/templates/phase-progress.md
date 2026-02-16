@@ -1,0 +1,25 @@
+# Phase [N] Progress: [PHASE_NAME]
+
+## Goal
+[What this phase aims to achieve]
+
+## Tasks
+
+- [ ] Task 1 - [description]
+- [ ] Task 2 - [description]
+- [ ] Task 3 - [description]
+
+## Definition of Done
+- [ ] All tasks checked above
+- [ ] All verification checks pass (see `verification.md`)
+- [ ] PR reviewed and merged
+- [ ] Branch state docs and PR metadata updated
+
+## Notes
+[Any relevant notes for this phase]
+
+## Blockers
+[List any blockers encountered]
+
+## Test Results
+[Summary of test results]
