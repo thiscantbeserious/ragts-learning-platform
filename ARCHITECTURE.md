@@ -1,35 +1,42 @@
 # Architecture
 
-Brainstorming baseline for the RAGTS platform. This document captures the thinking so far - questions, options, and directions to explore in the first SDLC cycle. Nothing here is decided.
+Architectural baseline for the RAGTS platform. This document frames the problem space, identifies the forces at play, and surfaces the decisions that will shape the system. Nothing is decided - this is the starting point for the first SDLC cycle.
 
-## Guiding Principles
+## 1. Context
 
-These are the lenses we want to evaluate every decision through:
+### What We're Building
+A multi-user, self-hostable web platform where teams browse agent terminal sessions vertically, curate meaningful segments, and generate retrieval context that agents can learn from. The human stays in control.
 
-- **Security first** - Sessions contain sensitive terminal output. Every design choice should assume hostile input, require authentication, and enforce authorization. Security is the foundation, not a bolt-on.
-- **Human first** - The human curates, the human controls what agents learn. Automation serves the human.
-- **Multi-user by default** - This is a platform for teams and organizations, not a single-user tool. Multi-tenancy, workspaces, and access control are first-class concerns from day one.
-- **Self-hosting simplicity** - Every dependency makes self-hosting harder. Minimize moving parts without sacrificing the multi-user experience.
-- **AGR is the engine** - Don't reimplement what AGR already does. The platform serves, browses, and curates. AGR records and transforms.
-- **Sessions are experiences** - Not logs, not videos. Rich context artifacts that capture what happened, what worked, and what failed.
+### Who It's For
+- **Teams and organizations** running AI agents at scale
+- **Platform operators** who self-host and need to integrate with existing infrastructure
+- **Agents** that consume curated session context as long-term memory
 
-## Core Concepts
+### Key Relationships
+- **AGR (Agent Session Recorder)** is the upstream recording and transformation engine. RAGTS does not record - it serves, browses, and curates what AGR captures.
+- **Identity providers** (Authelia, Authentik, Keycloak, Microsoft Entra ID, Okta, etc.) handle authentication. RAGTS delegates, never reinvents.
+- **Agent ecosystems** (MCP, REST APIs, custom integrations) consume curated context from RAGTS.
 
-**Sessions** - Terminal session recordings in asciicast v3 format. Commands, responses, errors, timing.
+## 2. Quality Attributes
 
-**Markers as fold anchors** - Asciicast v3 markers become structural boundaries. Collapsible sections for quick navigation. This is the key UX primitive.
+These are the non-functional requirements that drive architectural decisions. When trade-offs arise, this is the priority order:
 
-**Vertical browsing** - Sessions render as scrollable documents with fold/unfold at marker boundaries. Progressive disclosure, noise reduction.
+| Priority | Attribute | What It Means for RAGTS |
+|----------|-----------|------------------------|
+| 1 | **Security** | Sessions contain sensitive terminal output. Auth, authorization, tenant isolation, and data protection are non-negotiable. |
+| 2 | **Self-hostability** | Operators must be able to run this on their own infrastructure with minimal dependencies. Complex setups kill adoption. |
+| 3 | **Multi-tenancy** | Multiple users, teams, and workspaces from day one. Not bolted on later. |
+| 4 | **Extensibility** | Integration with diverse auth providers, retrieval mechanisms, and agent ecosystems. The platform can't assume a single stack. |
+| 5 | **Performance** | Sessions can be massive. Rendering, search, and retrieval must handle scale without degrading UX. |
+| 6 | **Operability** | Upgrades, backups, monitoring, and configuration must be straightforward for self-hosters. |
 
-**Curated agent memory** - Humans curate what gets indexed. Agents retrieve from experiences, not just documents. This is the reinforcement loop.
+## 3. Domain Model
 
-## Domain Boundaries
-
-The platform decomposes into bounded contexts. Whether these become microservices, modules, or something in between is an open question. The domains should drive the architecture, not the other way around.
+### Bounded Contexts
 
 ```
 +-------------+     +-------------+     +--------------+
-|   Identity  |     |   Session   |     |  Retrieval   |
+|  Identity   |     |   Session   |     |  Retrieval   |
 |             |     |             |     |              |
 | Auth        |     | Ingestion   |     | Search       |
 | Roles       |     | Storage     |     | Indexing     |
@@ -38,114 +45,148 @@ The platform decomposes into bounded contexts. Whether these become microservice
 +-------------+     +------+------+     +--------------+
                            |
                     +------+------+
-                    | Transform   |
+                    |  Transform  |
                     |             |
                     | AGR Service |
                     | Optimization|
                     +-------------+
 ```
 
-**Identity** - Who you are, what you can do. Delegates authentication externally, manages authorization internally.
+### Context Relationships
 
-**Session** - The core domain. Ingesting, storing, browsing, and curating terminal sessions. Vertical browsing and fold/unfold UX.
+- **Identity <-> Session** - Every session operation requires an authenticated, authorized user. Sessions belong to workspaces. Workspaces have members with roles.
+- **Session <-> Retrieval** - Curated session segments feed the retrieval index. Retrieval queries reference sessions by workspace scope.
+- **Session <-> Transform** - Raw sessions are submitted for background transformation (optimization, silence removal). Transformed sessions replace or augment originals.
+- **Identity <-> Retrieval** - Agent API tokens are scoped to workspaces. Retrieval respects tenant boundaries.
 
-**Retrieval** - How agents and humans find relevant context. Search, indexing, retrieval API/MCP.
+### Core Entities (Initial Thinking)
 
-**Transform** - Background processing powered by AGR. Silence removal, memory optimization, re-indexing.
+- **Workspace** - Tenant boundary. Owns sessions, members, and agent tokens.
+- **User** - External identity mapped to internal roles per workspace.
+- **Session** - An asciicast v3 recording with metadata, markers, and curation state.
+- **Marker** - Structural fold anchor within a session. Can be original (from recording) or curated (added by humans).
+- **Curated Segment** - A human-annotated slice of a session, tagged and indexed for retrieval.
+- **Agent Token** - Scoped credential for agent retrieval access.
 
-## Open Questions
+## 4. Architectural Views
 
-Everything below needs to be explored and decided in the first SDLC cycle. Grouped by theme, not priority.
+### Logical View - How domains interact
 
-### Authentication & Identity
+The four bounded contexts communicate through well-defined interfaces. Whether they're deployed as separate services, modules in a monolith, or something hybrid is a deployment decision - the logical boundaries stay the same.
 
-How do users authenticate? The platform shouldn't reinvent auth - it should delegate to what operators already run.
+Key interaction patterns:
+- **Synchronous** - Auth checks, session CRUD, search queries
+- **Asynchronous** - Transform jobs, re-indexing after curation, bulk operations
+- **Event-driven** - Session ingested, curation completed, transform finished (potential future pattern)
 
-- **Self-hosted providers:** Authelia, Authentik, Keycloak
-- **Cloud/Enterprise:** Microsoft Entra ID, Google Workspace, Okta
-- **Standards:** OIDC, OAuth2, SAML - which do we support and how?
-- **Integration pattern:** Reverse proxy headers? Direct OIDC? SAML? All of the above?
-- **First-run experience:** How does the first admin get created? Seed user? Setup wizard?
-- **Identity mapping:** How do external identities map to internal users, roles, and workspaces?
+### Data View - What lives where
 
-### Authorization & Access Control
+Everything goes through a database abstraction layer. The platform targets a single-container deployment - no filesystem assumptions, no external storage dependencies.
 
-Once authenticated, what can users do? This is a multi-user platform - access control is not optional.
+| Data | Characteristics | Notes |
+|------|----------------|-------|
+| Sessions (.cast files) | Large, immutable after ingestion, read-heavy | Stored in DB (as BLOBs or via DB-managed storage). Not raw filesystem. |
+| Session metadata | Small, structured, queried frequently | Relational. ACID. |
+| Auth data (users, roles, tokens, workspaces) | Small, critical, write-sensitive | Relational. ACID mandatory. |
+| Search index | Derived from sessions + curated segments | Rebuildable from source. Eventual consistency acceptable. |
+| Curated segments | Human-created annotations + tags | Relational, linked to sessions and workspaces. |
+| Transform state | Job status, progress, history | Relational or key-value. Ephemeral. |
 
-- **Role model:** Flat roles (viewer/curator/admin) or something more granular? RBAC? ABAC?
-- **Scope:** Per-workspace? Per-session? Per-organization? Hierarchical?
-- **Workspaces:** What is a workspace exactly? A team? A project? An org? How do they relate?
-- **Session visibility:** Private, workspace-scoped, public? Who decides?
-- **Cross-workspace access:** Can users belong to multiple workspaces? How does that work?
+A database abstraction layer is needed early so the concrete DB choice (SQLite, PostgreSQL, etc.) can be swapped without rewriting application logic.
 
-### Agent Access & Retrieval
+### Integration View - How RAGTS connects to the outside
 
-How do agents authenticate and retrieve curated context?
+| Integration Point | Direction | Options to Explore |
+|-------------------|-----------|-------------------|
+| Authentication | Inbound | Reverse proxy headers, OIDC/OAuth2, SAML |
+| Session ingestion | Inbound | File upload API, AGR direct push, bulk import |
+| Agent retrieval | Outbound (served) | REST API, MCP server, GraphQL |
+| AGR transforms | Internal | Sidecar binary, REST wrapper, message queue |
+| Notifications | Outbound | Webhooks, email (stretch) |
 
-- **Agent authentication:** API tokens? OAuth2 client credentials? MCP-level auth?
-- **Retrieval interface:** REST API? MCP server? GraphQL? Multiple?
-- **Search model:** Full-text? Semantic/vector? Hybrid? What do agents actually need?
-- **Indexing:** What gets indexed? Raw sessions? Curated segments? Both?
-- **Embedding generation:** Who generates embeddings? When? What model?
-- **Rate limiting and audit:** How do we prevent abuse and track agent access?
+### Deployment View - How it runs
 
-### Storage & Data
+The primary deployment target is a **single Docker container** - everything in one image, minimal configuration, works behind an existing reverse proxy. This is the baseline that must always work.
 
-Where do sessions, metadata, indexes, and auth data live?
+Scaling beyond that is a future concern:
 
-- **Session storage:** Filesystem? Object storage? Database BLOBs?
-- **Metadata & auth:** SQLite? PostgreSQL? What needs ACID guarantees?
-- **Search index:** Built-in full-text? Dedicated search engine (Meilisearch, Elasticsearch)? Vector DB?
-- **Encryption at rest:** Filesystem-level? Application-level? Both?
-- **Backup & portability:** How easy is it to export/import everything?
-- **Scale:** What's the expected load? Hundreds of sessions? Millions?
+| Scenario | Expectation |
+|----------|-------------|
+| Default | Single container, embedded DB, works behind reverse proxy |
+| Scaled | External database, horizontal scaling, container orchestration |
 
-### Frontend & UX
+The architecture should not prevent scaling, but the single-container experience comes first.
 
-How do users interact with the platform?
+## 5. Architectural Tensions
 
-- **Framework:** Next.js, SvelteKit, Astro, Vite+React, or something else?
-- **Terminal rendering:** How do we render potentially massive session output performantly?
-- **Fold/unfold UX:** How do markers translate to collapsible sections in the browser?
-- **Curation UX:** How do curators annotate, tag, and control what gets indexed?
-- **White-label theming:** How deep does customization go? CSS variables? Full theme engine?
-- **Real-time vs static:** Are sessions rendered once or streamed/updated live?
+These are the forces pulling in different directions. The first SDLC cycle needs to navigate them.
 
-### AGR Integration
+### Simplicity vs Multi-tenancy
+Self-hosting simplicity says "single container, minimal config." Multi-tenancy says "isolation, RBAC, workspace boundaries." These are in tension. A DB abstraction layer helps - start with embedded SQLite for simple deployments, swap to PostgreSQL when scale demands it.
 
-How does the platform invoke AGR for background transformations?
+### Security vs Developer Experience
+Delegating auth to external providers is secure but adds deployment complexity (operators need Authelia/Keycloak/etc. running). A built-in basic auth would be simpler for getting started but violates "don't reinvent auth."
 
-- **Integration model:** Sidecar binary? REST wrapper? FFI? Message queue?
-- **Long-running transforms:** How do we handle progress, cancellation, failure?
-- **AGR is Rust, platform is TBD:** What's the cleanest bridge?
-- **Deployment:** How does this work in a containerized setup? Docker compose? Kubernetes?
+### AGR Integration Depth
+AGR is Rust. The platform's language is TBD. Tight integration (FFI) gives performance but couples technologies. Loose integration (CLI sidecar) is flexible but adds latency and error surface. This decision cascades into deployment and operational complexity.
 
-### Platform & Infrastructure
+### Monolith vs Services
+Domain boundaries are clear, but starting with microservices adds enormous operational overhead for self-hosters. A modular monolith that can be split later respects both domain boundaries and deployment simplicity.
 
-How does the whole thing run?
+### Session Scale
+A session can be megabytes of terminal output. Rendering, searching, and indexing at scale requires different strategies than small-document platforms. Lazy loading, streaming, and pagination are likely necessary but add frontend and API complexity.
 
-- **Deployment model:** Single container? Docker compose? Helm chart? All of the above?
-- **Configuration:** Environment variables? Config file? Admin UI? Mix?
-- **Monitoring & observability:** Logging, metrics, health checks?
-- **Update strategy:** How do self-hosters upgrade without data loss?
+## 6. Open Decisions
 
-## Data Flow (Rough)
+Grouped by the order they likely need to be made (dependencies flow downward):
 
-These flows will evolve as decisions are made. Current thinking:
+### Foundation Layer
+- What language/framework for the backend?
+- Modular monolith in a single container as the starting point?
+- What database for the central data layer? (SQLite embedded vs PostgreSQL external vs ?)
+- What does the DB abstraction layer look like? (ORM? Query builder? Repository pattern?)
+- How are .cast files stored in the database? (BLOBs? Chunked? Referenced?)
+
+### Security Layer
+- Which auth integration patterns do we support first? (OIDC? Proxy headers? Both?)
+- How does the first-run / bootstrap experience work?
+- What does the internal role model look like concretely?
+- How are workspaces created and managed?
+
+### Application Layer
+- What frontend framework?
+- How do we render large sessions performantly in the browser?
+- What does the curation UX look like concretely?
+- How does fold/unfold translate from markers to browser interaction?
+
+### Retrieval Layer
+- What retrieval interface do agents use? (REST? MCP? Both?)
+- Full-text search, semantic search, or hybrid?
+- What search/index technology? (Built-in, Meilisearch, vector DB, ?)
+- How does embedding generation work if we go semantic?
+
+### Integration Layer
+- How does AGR integrate? (Sidecar, REST wrapper, FFI, message queue?)
+- How do sessions get ingested? (Upload API, AGR push, bulk import?)
+- What does the deployment artifact look like? (Container, binary, compose, helm?)
+
+## 7. Data Flow (Rough)
+
+These are directional, not prescriptive:
 
 **Ingestion:** `.cast file --> Auth --> Validation --> Storage --> Index`
 
 **Browsing:** `User --> Auth --> Session API --> Vertical render + folds`
 
-**Curation:** `Curator --> Annotate/tag --> Curated context --> Re-index`
+**Curation:** `Curator --> Annotate/tag segments --> Store --> Re-index`
 
-**Agent retrieval:** `Agent + token --> Auth --> Retrieval layer --> Curated segments`
+**Agent retrieval:** `Agent + token --> Auth + scope --> Retrieval --> Curated segments`
 
 **Transformation:** `Session --> AGR service --> Optimized session --> Re-index`
 
-## Next Steps
+## 8. Next Steps
 
-This document is the starting point for the first SDLC cycle. A fresh session should:
-1. Read `MEMORY.md` for full project context
-2. Read this document for the architectural baseline
-3. Start a full SDLC cycle to make the first real decisions and begin implementation
+This document is the brainstorming baseline. A fresh SDLC session should:
+1. Read `MEMORY.md` for full project context and decisions made so far
+2. Read this document to understand the architectural landscape
+3. Start a full SDLC cycle - beginning with the foundation layer decisions, as everything else depends on them
