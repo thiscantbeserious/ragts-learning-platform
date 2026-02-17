@@ -17,7 +17,7 @@ export function handleListSessions(
 ): Response {
   try {
     const sessions = repository.findAll();
-    return c.json(sessions);
+    return c.json(sessions.map(({ filepath, ...rest }) => rest));
   } catch (err) {
     console.error('List sessions error:', err);
     return c.json(
@@ -51,9 +51,10 @@ export function handleGetSession(
     const content = readSession(session.filepath);
     const parsed = parseAsciicast(content);
 
-    // Return metadata + parsed content
+    // Return metadata + parsed content (strip filepath from response)
+    const { filepath: _fp, ...sessionData } = session;
     return c.json({
-      ...session,
+      ...sessionData,
       content: parsed,
     });
   } catch (err) {

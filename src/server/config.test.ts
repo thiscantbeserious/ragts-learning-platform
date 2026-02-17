@@ -76,11 +76,15 @@ describe('loadConfig', () => {
     expect(config.maxFileSizeMB).toBe(200);
   });
 
-  it('should handle invalid numeric values by using NaN', () => {
+  it('should throw on invalid PORT', () => {
     process.env.PORT = 'not-a-number';
 
-    const config = loadConfig();
+    expect(() => loadConfig()).toThrow('Invalid PORT');
+  });
 
-    expect(config.port).toBeNaN();
+  it('should throw on invalid MAX_FILE_SIZE_MB', () => {
+    process.env.MAX_FILE_SIZE_MB = 'abc';
+
+    expect(() => loadConfig()).toThrow('Invalid MAX_FILE_SIZE_MB');
   });
 });

@@ -5,6 +5,7 @@
  */
 
 import type { Context } from 'hono';
+import { nanoid } from 'nanoid';
 import { parseAsciicast, validateAsciicast } from '../../shared/asciicast.js';
 import { saveSession, deleteSession } from '../storage.js';
 import type { SessionRepository } from '../db/session-repository.js';
@@ -59,7 +60,6 @@ export async function handleUpload(
     const markerCount = parsed.markers.length;
 
     // Generate nanoid upfront for consistent ID across file and DB
-    const { nanoid } = await import('nanoid');
     const id = nanoid();
 
     // Save file (fail fast if filesystem issues)
@@ -86,7 +86,8 @@ export async function handleUpload(
         uploaded_at: new Date().toISOString(),
       });
 
-      return c.json(session, 201);
+      const { filepath: _fp, ...sessionData } = session;
+      return c.json(sessionData, 201);
     } catch (err) {
       // DB insert failed - clean up file
       deleteSession(filepath);
