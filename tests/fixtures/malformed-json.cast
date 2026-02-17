@@ -1,0 +1,4 @@
+{"version":3,"width":80,"height":24}
+[0.5,"o","Valid line\n"]
+{this is not valid json}
+[0.3,"o","Another line\n"]
