@@ -73,10 +73,16 @@ export async function processSessionPipeline(
     const detector = new SectionDetector(events);
     const boundaries = detector.detectWithMarkers(markers);
 
-    // Step 3: Generate snapshots by replaying events through VT
+    // Step 3: Generate delta snapshots by replaying events through VT
+    // Each section stores only the NEW lines produced during that section,
+    // not the full accumulated scrollback. This prevents content repetition.
+    //
+    // Approach: capture full snapshots at each boundary, then compute deltas.
+    // Section[i] gets the lines produced between boundary[i] and boundary[i+1]
+    // (or end of events for the last section).
     const boundarySet = new Set(boundaries.map((b) => b.eventIndex));
-    const snapshotMap = new Map<number, TerminalSnapshot>();
-    const vt = createVt(header.width, header.height);
+    const fullSnapshotMap = new Map<number, TerminalSnapshot>();
+    const vt = createVt(header.width, header.height, 10000);
 
     for (let i = 0; i < events.length; i++) {
       const [, eventType, data] = events[i];
@@ -84,21 +90,36 @@ export async function processSessionPipeline(
         vt.feed(String(data));
       }
       if (boundarySet.has(i)) {
-        snapshotMap.set(i, vt.getView());
+        fullSnapshotMap.set(i, vt.getAllLines());
       }
     }
+
+    // Capture final snapshot after all events (for the last section's delta)
+    const finalSnapshot = vt.getAllLines();
 
     // Step 4: Delete existing sections for this session (replace all)
     sectionRepo.deleteBySessionId(sessionId);
 
     for (let i = 0; i < boundaries.length; i++) {
       const boundary = boundaries[i];
-      const snapshot = snapshotMap.get(boundary.eventIndex);
 
       // Calculate end_event: next boundary's start or total event count
       const endEvent = i < boundaries.length - 1
         ? boundaries[i + 1].eventIndex
         : eventCount;
+
+      // Compute delta: lines produced during this section
+      // = lines at next boundary (or end) minus lines at this boundary
+      const currentSnapshot = fullSnapshotMap.get(boundary.eventIndex);
+      const nextSnapshot = i < boundaries.length - 1
+        ? fullSnapshotMap.get(boundaries[i + 1].eventIndex)
+        : finalSnapshot;
+
+      let snapshot: TerminalSnapshot | null = null;
+      if (currentSnapshot && nextSnapshot) {
+        const deltaLines = nextSnapshot.lines.slice(currentSnapshot.lines.length);
+        snapshot = { ...currentSnapshot, lines: deltaLines };
+      }
 
       // Determine section type: marker if it came from a marker, detected otherwise
       const isMarker = boundary.signals.includes('marker');

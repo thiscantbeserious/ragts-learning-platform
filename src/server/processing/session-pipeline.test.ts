@@ -320,6 +320,74 @@ describe('processSessionPipeline', () => {
     expect(lastSection.end_event).toBe(updatedSession?.event_count);
   });
 
+  it('produces delta snapshots — each section contains only its own lines', async () => {
+    // Create .cast file with 3 markers, each followed by distinct content
+    const castContent = createCastFileWithDistinctSections();
+    const filePath = join(tmpDir, 'session-delta.cast');
+    writeFileSync(filePath, castContent);
+
+    const markers = [
+      { time: 1.0, label: 'Setup', index: 3 },
+      { time: 2.0, label: 'Build', index: 28 },
+      { time: 3.0, label: 'Test', index: 53 },
+    ];
+
+    const session = sessionRepo.create({
+      filename: 'session-delta.cast',
+      filepath: filePath,
+      size_bytes: castContent.length,
+      marker_count: 3,
+      uploaded_at: new Date().toISOString(),
+    });
+
+    await processSessionPipeline(
+      filePath,
+      session.id,
+      markers,
+      sectionRepo,
+      sessionRepo
+    );
+
+    const sections = sectionRepo.findBySessionId(session.id);
+    const markerSections = sections
+      .filter((s) => s.type === 'marker')
+      .sort((a, b) => a.start_event - b.start_event);
+
+    expect(markerSections.length).toBe(3);
+
+    // Parse snapshots and extract text content
+    const sectionTexts = markerSections.map((s) => {
+      const snapshot = JSON.parse(s.snapshot!);
+      return snapshot.lines
+        .map((line: { spans: { text: string }[] }) =>
+          line.spans.map((span: { text: string }) => span.text).join('')
+        )
+        .join('\n');
+    });
+
+    // Section "Setup" should contain setup content, NOT build or test content
+    expect(sectionTexts[0]).toContain('Installing dependencies');
+    expect(sectionTexts[0]).not.toContain('Compiling');
+    expect(sectionTexts[0]).not.toContain('PASS');
+
+    // Section "Build" should contain build content, NOT setup or test content
+    expect(sectionTexts[1]).toContain('Compiling');
+    expect(sectionTexts[1]).not.toContain('Installing dependencies');
+    expect(sectionTexts[1]).not.toContain('PASS');
+
+    // Section "Test" should contain test content, NOT setup or build content
+    expect(sectionTexts[2]).toContain('PASS');
+    expect(sectionTexts[2]).not.toContain('Installing dependencies');
+    expect(sectionTexts[2]).not.toContain('Compiling');
+
+    // Each section should have a reasonable number of lines (not accumulated)
+    for (const s of markerSections) {
+      const snapshot = JSON.parse(s.snapshot!);
+      expect(snapshot.lines.length).toBeGreaterThan(0);
+      expect(snapshot.lines.length).toBeLessThan(30);
+    }
+  });
+
   describe('Edge Cases', () => {
     it('handles empty session (header only)', async () => {
       // Create .cast file with only header, no events
@@ -489,6 +557,47 @@ function createCastFileWithMarkers(): string {
     } else {
       events.push(JSON.stringify([0.1, 'o', `Line ${i}\r\n`]));
     }
+  }
+
+  return [header, ...events].join('\n');
+}
+
+function createCastFileWithDistinctSections(): string {
+  const header = JSON.stringify({
+    version: 3,
+    width: 120,
+    height: 40,
+  });
+
+  const events: string[] = [];
+
+  // Pre-marker output (events 0-2)
+  events.push(JSON.stringify([0.1, 'o', '$ ci-run\r\n']));
+  events.push(JSON.stringify([0.2, 'o', 'Starting CI pipeline...\r\n']));
+  events.push(JSON.stringify([0.3, 'o', '\r\n']));
+
+  // Marker "Setup" at index 3
+  events.push(JSON.stringify([1.0, 'm', 'Setup']));
+
+  // Setup content (events 4-27): 24 events with distinct "setup" text
+  for (let i = 0; i < 24; i++) {
+    events.push(JSON.stringify([1.0 + i * 0.01, 'o', `Installing dependencies (${i + 1}/24)...\r\n`]));
+  }
+
+  // Marker "Build" at index 28
+  events.push(JSON.stringify([2.0, 'm', 'Build']));
+
+  // Build content (events 29-52): 24 events with distinct "build" text
+  for (let i = 0; i < 24; i++) {
+    events.push(JSON.stringify([2.0 + i * 0.01, 'o', `Compiling module ${i + 1} of 24...\r\n`]));
+  }
+
+  // Marker "Test" at index 53
+  events.push(JSON.stringify([3.0, 'm', 'Test']));
+
+  // Test content (events 54-77): 24 events with distinct "test" text
+  for (let i = 0; i < 24; i++) {
+    events.push(JSON.stringify([3.0 + i * 0.01, 'o', `  PASS  test-suite-${i + 1}.ts (${i + 2}ms)\r\n`]));
   }
 
   return [header, ...events].join('\n');

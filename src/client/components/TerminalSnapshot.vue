@@ -88,7 +88,7 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
 </script>
 
 <template>
-  <div class="terminal-snapshot" :style="{ '--cols': snapshot.cols, '--rows': snapshot.rows }">
+  <div class="terminal-snapshot">
     <div
       v-for="(line, lineIndex) in snapshot.lines"
       :key="lineIndex"
@@ -113,7 +113,8 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
   line-height: 1.4;
   padding: 1rem;
   border-radius: 8px;
-  overflow-x: auto;
+  overflow: auto;
+  max-height: 600px;
   white-space: pre-wrap;
   word-break: break-all;
 }

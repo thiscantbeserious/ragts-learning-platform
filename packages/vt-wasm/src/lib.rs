@@ -35,9 +35,16 @@ impl Vt {
         }
     }
 
-    /// Get the current terminal view as a structured snapshot
+    /// Get the current terminal view as a structured snapshot (viewport only)
     pub fn get_view(&self) -> JsValue {
         let snapshot = create_snapshot(&self.inner);
+        serde_wasm_bindgen::to_value(&snapshot).unwrap_or(JsValue::NULL)
+    }
+
+    /// Get all lines (scrollback + viewport), trimmed of trailing empty lines.
+    /// Use this for full terminal history capture.
+    pub fn get_all_lines(&self) -> JsValue {
+        let snapshot = create_full_snapshot(&self.inner);
         serde_wasm_bindgen::to_value(&snapshot).unwrap_or(JsValue::NULL)
     }
 
@@ -120,6 +127,30 @@ fn create_snapshot(vt: &AvtVt) -> TerminalSnapshot {
     for line in vt.view() {
         let spans = merge_cells_to_spans(line);
         lines.push(SnapshotLine { spans });
+    }
+
+    TerminalSnapshot { cols, rows, lines }
+}
+
+/// Create a terminal snapshot from all lines (scrollback + viewport), trimmed of trailing empties.
+fn create_full_snapshot(vt: &AvtVt) -> TerminalSnapshot {
+    let (cols, rows) = vt.size();
+    let mut lines: Vec<SnapshotLine> = Vec::new();
+
+    for line in vt.lines() {
+        let spans = merge_cells_to_spans(line);
+        lines.push(SnapshotLine { spans });
+    }
+
+    // Trim trailing empty lines (lines where all spans are whitespace-only)
+    while let Some(last) = lines.last() {
+        let is_empty = last.spans.is_empty()
+            || last.spans.iter().all(|s| s.text.trim().is_empty());
+        if is_empty {
+            lines.pop();
+        } else {
+            break;
+        }
     }
 
     TerminalSnapshot { cols, rows, lines }

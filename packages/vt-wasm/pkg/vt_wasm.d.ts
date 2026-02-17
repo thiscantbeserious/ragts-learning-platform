@@ -14,6 +14,11 @@ export class Vt {
      */
     feed(s: string): any;
     /**
+     * Get all lines (scrollback + viewport), trimmed of trailing empty lines.
+     * Use this for full terminal history capture.
+     */
+    get_all_lines(): any;
+    /**
      * Get cursor position as [col, row] or null if cursor is hidden
      */
     get_cursor(): any;
@@ -22,7 +27,7 @@ export class Vt {
      */
     get_size(): any;
     /**
-     * Get the current terminal view as a structured snapshot
+     * Get the current terminal view as a structured snapshot (viewport only)
      */
     get_view(): any;
 }

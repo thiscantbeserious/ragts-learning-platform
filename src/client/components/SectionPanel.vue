@@ -35,6 +35,9 @@ function getSectionTypeBadge(type: 'marker' | 'detected'): string {
       <span v-if="section.snapshot" class="section-panel__meta">
         {{ section.snapshot.lines.length }} line{{ section.snapshot.lines.length !== 1 ? 's' : '' }}
       </span>
+      <span v-if="section.endEvent - section.startEvent > 0" class="section-panel__meta">
+        {{ section.endEvent - section.startEvent }} events
+      </span>
     </button>
     <div v-if="!collapsed" class="section-panel__content">
       <TerminalSnapshot v-if="section.snapshot" :snapshot="section.snapshot" />

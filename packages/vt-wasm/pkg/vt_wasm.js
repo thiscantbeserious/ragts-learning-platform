@@ -34,6 +34,15 @@ class Vt {
         return takeObject(ret);
     }
     /**
+     * Get all lines (scrollback + viewport), trimmed of trailing empty lines.
+     * Use this for full terminal history capture.
+     * @returns {any}
+     */
+    get_all_lines() {
+        const ret = wasm.vt_get_all_lines(this.__wbg_ptr);
+        return takeObject(ret);
+    }
+    /**
      * Get cursor position as [col, row] or null if cursor is hidden
      * @returns {any}
      */
@@ -50,7 +59,7 @@ class Vt {
         return takeObject(ret);
     }
     /**
-     * Get the current terminal view as a structured snapshot
+     * Get the current terminal view as a structured snapshot (viewport only)
      * @returns {any}
      */
     get_view() {

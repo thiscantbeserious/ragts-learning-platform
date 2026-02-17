@@ -20,6 +20,7 @@ interface VtWasmModule {
 interface WasmVtInstance {
   feed(data: string): number[];
   get_view(): TerminalSnapshot;
+  get_all_lines(): TerminalSnapshot;
   get_cursor(): [number, number] | null; // WASM returns [col, row] array
   get_size(): [number, number]; // WASM returns [cols, rows] array
   free(): void;
@@ -68,6 +69,12 @@ export interface VtInstance {
   getView(): TerminalSnapshot;
 
   /**
+   * Get all lines (scrollback + viewport), trimmed of trailing empty lines.
+   * Use this for capturing the full terminal history at a point in time.
+   */
+  getAllLines(): TerminalSnapshot;
+
+  /**
    * Get the current cursor position, or null if cursor is hidden.
    */
   getCursor(): CursorPosition | null;
@@ -112,6 +119,10 @@ export function createVt(
 
     getView(): TerminalSnapshot {
       return wasmInstance.get_view();
+    },
+
+    getAllLines(): TerminalSnapshot {
+      return wasmInstance.get_all_lines();
     },
 
     getCursor(): CursorPosition | null {

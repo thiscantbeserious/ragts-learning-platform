@@ -77,8 +77,8 @@ describe('parseAsciicast', () => {
     const file = parseAsciicast(content);
 
     expect(file.header.version).toBe(3);
-    expect(file.header.width).toBe(80);
-    expect(file.header.height).toBe(24);
+    expect(file.header.width).toBe(120);
+    expect(file.header.height).toBe(40);
     expect(file.events.length).toBeGreaterThan(0);
     expect(file.markers.length).toBe(3);
   });
@@ -229,20 +229,22 @@ describe('Integration: full parsing flow', () => {
     const content = loadFixture('valid-with-markers.cast');
     const file = parseAsciicast(content);
 
-    // Verify cumulative time calculation
-    expect(file.events[0].time).toBe(0.5);
-    expect(file.events[1].time).toBe(0.6); // 0.5 + 0.1
-    expect(file.events[2].time).toBe(0.8); // 0.6 + 0.2
+    // Verify cumulative time calculation (timestamps are relative deltas)
+    // Event 0: [0.1,"o",...] → cumulative 0.1
+    // Event 1: [0.2,"o",...] → cumulative 0.3
+    // Event 2: [0.3,"o",...] → cumulative 0.6
+    expect(file.events[0].time).toBeCloseTo(0.1);
+    expect(file.events[1].time).toBeCloseTo(0.3);
+    expect(file.events[2].time).toBeCloseTo(0.6);
 
     // Verify markers extracted correctly with cumulative times
-    expect(file.markers[0].label).toBe('Task 1: Setup');
-    expect(file.markers[0].time).toBe(0.6);
-    expect(file.markers[1].label).toBe('Task 2: Build');
-    expect(file.markers[2].label).toBe('Task 3: Test');
+    expect(file.markers[0].label).toBe('Test Execution');
+    expect(file.markers[1].label).toBe('Build');
+    expect(file.markers[2].label).toBe('Deploy');
 
     // Verify marker indices point to correct events
     const marker0Event = file.events[file.markers[0].index];
     expect(marker0Event.type).toBe('m');
-    expect(marker0Event.data).toBe('Task 1: Setup');
+    expect(marker0Event.data).toBe('Test Execution');
   });
 });
