@@ -319,6 +319,139 @@ describe('processSessionPipeline', () => {
     const updatedSession = sessionRepo.findById(session.id);
     expect(lastSection.end_event).toBe(updatedSession?.event_count);
   });
+
+  describe('Edge Cases', () => {
+    it('handles empty session (header only)', async () => {
+      // Create .cast file with only header, no events
+      const castContent = JSON.stringify({
+        version: 3,
+        width: 80,
+        height: 24,
+      });
+      const filePath = join(tmpDir, 'empty-session.cast');
+      writeFileSync(filePath, castContent);
+
+      const session = sessionRepo.create({
+        filename: 'empty-session.cast',
+        filepath: filePath,
+        size_bytes: castContent.length,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      await processSessionPipeline(
+        filePath,
+        session.id,
+        [],
+        sectionRepo,
+        sessionRepo
+      );
+
+      // Should complete without error
+      const updatedSession = sessionRepo.findById(session.id);
+      expect(updatedSession?.detection_status).toBe('completed');
+      expect(updatedSession?.event_count).toBe(0);
+
+      // Should have no sections (below minimum threshold)
+      const sections = sectionRepo.findBySessionId(session.id);
+      expect(sections.length).toBe(0);
+    });
+
+    it('handles session with single event', async () => {
+      // Create .cast file with header + 1 event
+      const header = JSON.stringify({
+        version: 3,
+        width: 80,
+        height: 24,
+      });
+      const event = JSON.stringify([0.1, 'o', 'Single line\r\n']);
+      const castContent = [header, event].join('\n');
+      const filePath = join(tmpDir, 'single-event.cast');
+      writeFileSync(filePath, castContent);
+
+      const session = sessionRepo.create({
+        filename: 'single-event.cast',
+        filepath: filePath,
+        size_bytes: castContent.length,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      await processSessionPipeline(
+        filePath,
+        session.id,
+        [],
+        sectionRepo,
+        sessionRepo
+      );
+
+      // Should complete without error
+      const updatedSession = sessionRepo.findById(session.id);
+      expect(updatedSession?.detection_status).toBe('completed');
+      expect(updatedSession?.event_count).toBe(1);
+
+      // Should have no sections (below minimum threshold)
+      const sections = sectionRepo.findBySessionId(session.id);
+      expect(sections.length).toBe(0);
+    });
+
+    it('handles Unicode content (CJK characters and emoji)', async () => {
+      // Create .cast file with Unicode content
+      const header = JSON.stringify({
+        version: 3,
+        width: 80,
+        height: 24,
+      });
+
+      const events = [];
+      // Add various Unicode content
+      events.push(JSON.stringify([0.1, 'o', '你好世界\r\n'])); // Chinese
+      events.push(JSON.stringify([0.2, 'o', 'こんにちは\r\n'])); // Japanese
+      events.push(JSON.stringify([0.3, 'o', '안녕하세요\r\n'])); // Korean
+      events.push(JSON.stringify([0.4, 'o', '🎉 🚀 ✨\r\n'])); // Emoji
+      events.push(JSON.stringify([0.5, 'o', 'Ñoño çédille\r\n'])); // Latin extended
+
+      // Add enough events to meet minimum threshold
+      for (let i = 0; i < 195; i++) {
+        events.push(JSON.stringify([0.1 + i * 0.01, 'o', `Line ${i}\r\n`]));
+      }
+
+      const castContent = [header, ...events].join('\n');
+      const filePath = join(tmpDir, 'unicode-session.cast');
+      writeFileSync(filePath, castContent);
+
+      const session = sessionRepo.create({
+        filename: 'unicode-session.cast',
+        filepath: filePath,
+        size_bytes: castContent.length,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      await processSessionPipeline(
+        filePath,
+        session.id,
+        [],
+        sectionRepo,
+        sessionRepo
+      );
+
+      // Should complete without error
+      const updatedSession = sessionRepo.findById(session.id);
+      expect(updatedSession?.detection_status).toBe('completed');
+      expect(updatedSession?.event_count).toBe(200);
+
+      // If sections were created, verify snapshots don't error
+      const sections = sectionRepo.findBySessionId(session.id);
+      sections.forEach((section) => {
+        if (section.snapshot) {
+          // Should parse without error
+          const snapshot = JSON.parse(section.snapshot);
+          expect(snapshot.lines).toBeDefined();
+        }
+      });
+    });
+  });
 });
 
 // Helper functions to generate test .cast files

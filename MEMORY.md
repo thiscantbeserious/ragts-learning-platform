@@ -79,14 +79,71 @@ See `ARCHITECTURE.md` "Open Decisions" for the full list. Everything is open - M
 
 ## Project State
 
-As of 2026-02-16, the project is bootstrapped with:
-- `README.md` - Project vision, problem/solution, features, how it works
-- `ARCHITECTURE.md` - Full architectural baseline with domain model, views, tensions, and open decisions
-- `AGENTS.md` - Agent instructions (symlinked as CLAUDE.md, GEMINI.md)
-- `MEMORY.md` - This file
-- `LICENSE` - AGPL-3.0
+As of 2026-02-17, the project has completed **MVP v2** implementation:
 
-No code exists yet. Next step: start a full SDLC cycle to define the MVP, make architectural decisions, and begin implementation.
+### Completed Features
+- **Session ingestion pipeline** - Upload .cast files via API, store in SQLite with metadata
+- **Section detection** - Multi-signal boundary detection (timing gaps, screen clears, alt screen, volume bursts)
+- **Terminal rendering** - avt WASM bridge for VT100 processing (replaces anser)
+- **Hybrid rendering model** - Viewport-only snapshots stored as JSON in SQLite (not full terminal state)
+- **Async processing** - Upload returns immediately, section detection runs via setImmediate
+- **Migration CLI** - Migrate existing v1 sessions to v2 with sections (`npm run migrate:v2`)
+- **REST API** - Session CRUD, section listing, re-detection endpoint
+- **Frontend** - Vue-based session browser with sections navigation
+- **Testing** - Comprehensive test coverage including edge cases (empty sessions, Unicode content)
+
+### Tech Stack Decisions
+- **Backend:** Hono (Node.js)
+- **Frontend:** Vue 3 + Vite
+- **Database:** SQLite with better-sqlite3 (abstraction layer ready for PostgreSQL)
+- **Terminal processing:** avt WASM (Rust → WASM via wasm-pack)
+- **Testing:** Vitest
+
+### Key Architectural Decisions Made During MVP v2
+
+| Decision | Choice | Rationale |
+|----------|--------|-----------|
+| Terminal rendering | avt WASM bridge | Native VT100 parsing in Rust, better performance than JS libraries |
+| Section detection | Multi-signal heuristics | Timing gaps + screen clears + alt screen + volume bursts for robust boundaries |
+| Snapshot storage | Viewport JSON in SQLite | Hybrid approach: metadata in SQL, viewport content as JSON blob |
+| File processing | Single-pass streaming | NdjsonStream reads .cast once, feeds VT + detector simultaneously |
+| Async processing | setImmediate after upload | Upload responds fast, processing happens in background |
+| DB abstraction | Repository pattern | SqliteSessionRepository/SqliteSectionRepository, swappable for PostgreSQL |
+| Migration path | CLI script | `npm run migrate:v2` for existing sessions, idempotent |
+
+### Codebase Structure
+```
+src/
+  client/              # Vue frontend
+    components/        # TerminalSnapshot, SessionView, etc.
+  server/
+    db/                # Database layer (repositories, migrations)
+    processing/        # Session pipeline (detector, VT bridge, NDJSON stream)
+    routes/            # Hono routes (sessions, upload, sections)
+    scripts/           # CLI tools (migrate-v2)
+  shared/              # Shared types (asciicast, session, section)
+packages/
+  vt-wasm/             # Rust WASM module for VT100 processing
+tests/                 # Integration tests
+```
+
+### What's NOT Yet Implemented
+From ARCHITECTURE.md's vision, these are deferred post-MVP:
+- **Identity/Auth** - No authentication yet (built-in or OIDC)
+- **Multi-tenancy** - No workspaces/teams/RBAC
+- **Curation** - No human annotation/tagging of segments
+- **Retrieval** - No MCP server or agent API
+- **Indexing** - No full-text or semantic search
+- **AGR integration** - No transforms/optimization service
+- **Cache layer** - No Redis (in-memory only)
+- **White-label theming** - No customization yet
+
+### Next Steps
+The foundation is in place. Next SDLC cycle should focus on:
+1. **Authentication** - Built-in auth + OIDC integration (see ARCHITECTURE.md section 5)
+2. **Curation UX** - Human annotation workflow for segments
+3. **Retrieval API** - MCP server for agent memory
+4. Or pivot to operational concerns: deployment artifacts, monitoring, backups
 
 ## Voice and Tone
 

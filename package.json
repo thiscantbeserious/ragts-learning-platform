@@ -9,6 +9,7 @@
     "dev:server": "tsx watch src/server/start.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
+    "build:wasm": "cd packages/vt-wasm && ./build.sh",
     "start": "NODE_ENV=production node dist/server/start.js",
     "test": "vitest",
     "migrate:v2": "tsx src/server/scripts/migrate-v2.ts"
