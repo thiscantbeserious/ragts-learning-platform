@@ -17,6 +17,7 @@ export class SqliteSessionRepository implements SessionRepository {
   private findAllStmt: Database.Statement;
   private findByIdStmt: Database.Statement;
   private deleteByIdStmt: Database.Statement;
+  private updateDetectionStatusStmt: Database.Statement;
 
   constructor(private db: Database.Database) {
     // Prepare statements once at construction
@@ -37,6 +38,14 @@ export class SqliteSessionRepository implements SessionRepository {
 
     this.deleteByIdStmt = db.prepare(`
       DELETE FROM sessions
+      WHERE id = ?
+    `);
+
+    this.updateDetectionStatusStmt = db.prepare(`
+      UPDATE sessions
+      SET detection_status = ?,
+          event_count = COALESCE(?, event_count),
+          detected_sections_count = COALESCE(?, detected_sections_count)
       WHERE id = ?
     `);
   }
@@ -73,5 +82,23 @@ export class SqliteSessionRepository implements SessionRepository {
   deleteById(id: string): boolean {
     const result = this.deleteByIdStmt.run(id);
     return result.changes > 0;
+  }
+
+  /**
+   * Update session detection status and metadata.
+   * Used after processing a session for section detection.
+   */
+  updateDetectionStatus(
+    id: string,
+    status: 'pending' | 'completed' | 'failed',
+    eventCount?: number,
+    detectedSectionsCount?: number
+  ): void {
+    this.updateDetectionStatusStmt.run(
+      status,
+      eventCount ?? null,
+      detectedSectionsCount ?? null,
+      id
+    );
   }
 }
