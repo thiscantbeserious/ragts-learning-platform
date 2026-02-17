@@ -23,6 +23,7 @@ import { normalizeHeader } from '../../shared/asciicast.js';
 import { NdjsonStream } from './ndjson-stream.js';
 import { SectionDetector } from './section-detector.js';
 import { createVt, initVt, type TerminalSnapshot } from '../../../packages/vt-wasm/index.js';
+import { buildCleanDocument, type EpochBoundary } from './scrollback-dedup.js';
 
 /**
  * Process a session: detect sections, capture snapshots, store in DB.
@@ -131,6 +132,10 @@ export async function processSessionPipeline(
     // When getAllLines().length stops growing (scrollback full), we detect overflow
     // and fall back to capturing viewport snapshots instead of empty line ranges.
     let highWaterLineCount = 0;
+    // Track epoch boundaries for scrollback deduplication.
+    // TUI apps (Claude Code, Gemini CLI) clear the screen and redraw, pushing
+    // duplicate content into scrollback. Epoch boundaries mark clear-screen events.
+    const epochBoundaries: EpochBoundary[] = [];
     const sectionData: Array<{
       lineCount: number | null;    // null = TUI or overflow section
       snapshot: TerminalSnapshot | null;  // non-null = TUI or overflow fallback section
@@ -138,12 +143,32 @@ export async function processSessionPipeline(
 
     for (let j = 0; j < eventCount; j++) {
       const [, eventType, data] = events[j];
-      if (eventType === 'o') {
+      if (eventType === 'r') {
+        // Resize event: asciicast v3 format is [timestamp, "r", "COLSxROWS"]
+        const sizeStr = String(data);
+        const match = sizeStr.match(/^(\d+)x(\d+)$/);
+        if (match) {
+          vt.resize(parseInt(match[1], 10), parseInt(match[2], 10));
+        }
+      } else if (eventType === 'o') {
         const str = String(data);
-        vt.feed(str);
+        // Strip \x1b[3J (erase scrollback) before feeding to VT so scrollback
+        // accumulates fully for epoch-based deduplication. \x1b[3J only affects
+        // scrollback (not viewport), so getView() results are unchanged.
+        vt.feed(str.replaceAll('\x1b[3J', ''));
         // Track alt-screen transitions
         if (str.includes('\x1b[?1049h')) inAltScreen = true;
         if (str.includes('\x1b[?1049l')) inAltScreen = false;
+        // Track clear-screen events for epoch-based scrollback dedup.
+        // Detect ESC[2J (erase display) and ESC[3J (erase scrollback) — both
+        // used by TUI apps on the primary buffer (Claude Code, Gemini CLI, Codex).
+        if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
+          const lineCount = vt.getAllLines().lines.length;
+          // Avoid duplicate boundaries at the same line count (e.g., 2J+3J in same event)
+          if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+            epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
+          }
+        }
       }
 
       const boundaryIdx = sectionEndEvents.get(j + 1);
@@ -170,14 +195,20 @@ export async function processSessionPipeline(
     }
 
     // Full session document (getAllLines at end of replay)
-    const fullSnapshot = vt.getAllLines();
+    const rawSnapshot = vt.getAllLines();
 
-    // Store full snapshot on session (always, even with zero boundaries)
-    sessionRepo.updateSnapshot(sessionId, JSON.stringify(fullSnapshot));
+    // Deduplicate scrollback if clear-screen epochs were detected.
+    // For CLI sessions (zero clears): identity transform, no change.
+    // For TUI sessions: removes re-rendered content, keeps only unique lines.
+    const { cleanSnapshot, rawLineCountToClean } = buildCleanDocument(rawSnapshot, epochBoundaries);
+
+    // Store deduplicated snapshot on session (always, even with zero boundaries)
+    sessionRepo.updateSnapshot(sessionId, JSON.stringify(cleanSnapshot));
 
     // Compute line ranges and store sections.
-    // previousLineCount tracks the end of the last CLI section for contiguous ranges.
-    let previousLineCount = 0;
+    // previousCleanLineCount tracks the end of the last CLI section for contiguous ranges.
+    // Line counts are remapped through the dedup mapping so ranges index into the clean snapshot.
+    let previousCleanLineCount = 0;
     for (let i = 0; i < boundaries.length; i++) {
       const boundary = boundaries[i];
       const endEvent = i < boundaries.length - 1
@@ -196,10 +227,12 @@ export async function processSessionPipeline(
           startLine: null, endLine: null,
         });
       } else {
-        // CLI section: store line range, no snapshot
-        const endLine = sd.lineCount ?? fullSnapshot.lines.length;
-        const startLine = Math.min(previousLineCount, endLine);
-        previousLineCount = endLine;
+        // CLI section: store line range into the clean (deduplicated) snapshot.
+        // Remap raw line counts through the dedup mapping.
+        const rawEndLine = sd.lineCount ?? rawSnapshot.lines.length;
+        const endLine = rawLineCountToClean(rawEndLine);
+        const startLine = Math.min(previousCleanLineCount, endLine);
+        previousCleanLineCount = endLine;
 
         sectionRepo.create({
           sessionId, type: isMarker ? 'marker' : 'detected',
