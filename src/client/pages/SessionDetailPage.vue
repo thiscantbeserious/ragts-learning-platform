@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import SessionContent from '../components/SessionContent.vue';
 import { useSession } from '../composables/useSession';
 
-const router = useRouter();
-
 const route = useRoute();
 const sessionId = computed(() => route.params.id as string);
-const { sections, loading, error, filename } = useSession(sessionId.value);
+const { sections, loading, error, filename } = useSession(sessionId);
 </script>
 
 <template>

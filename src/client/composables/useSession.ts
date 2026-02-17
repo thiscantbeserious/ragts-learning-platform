@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, isRef, toValue, type Ref, type MaybeRef } from 'vue';
 import type { AsciicastFile, ParsedEvent, Marker } from '../../shared/asciicast-types';
 
 export interface Section {
@@ -85,7 +85,7 @@ function extractOutputLines(events: ParsedEvent[], start: number, end: number): 
   return lines;
 }
 
-export function useSession(sessionId: string) {
+export function useSession(sessionId: MaybeRef<string>) {
   const session = ref<SessionResponse | null>(null);
   const sections = ref<Section[]>([]);
   const loading = ref(true);
@@ -93,11 +93,11 @@ export function useSession(sessionId: string) {
 
   const filename = computed(() => session.value?.filename ?? '');
 
-  async function fetchSession(): Promise<void> {
+  async function fetchSession(id: string): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
-      const res = await fetch(`/api/sessions/${sessionId}`);
+      const res = await fetch(`/api/sessions/${id}`);
       if (res.status === 404) {
         error.value = 'Session not found';
         return;
@@ -115,7 +115,9 @@ export function useSession(sessionId: string) {
     }
   }
 
-  onMounted(fetchSession);
+  watch(() => toValue(sessionId), (id) => {
+    if (id) fetchSession(id);
+  }, { immediate: true });
 
   return {
     session,

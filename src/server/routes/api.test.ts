@@ -8,6 +8,7 @@ import { mkdtempSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Hono } from 'hono';
+import type Database from 'better-sqlite3';
 import { initDatabase } from '../db/database.js';
 import { SqliteSessionRepository } from '../db/sqlite-session-repository.js';
 import { handleUpload } from './upload.js';
@@ -20,6 +21,7 @@ import {
 describe('API Routes', () => {
   let testDir: string;
   let app: Hono;
+  let db: ReturnType<typeof initDatabase>;
   let repository: SqliteSessionRepository;
 
   const validFixture = readFileSync(
@@ -38,7 +40,7 @@ describe('API Routes', () => {
 
     // Initialize database and repository
     const dbPath = join(testDir, 'test.db');
-    const db = initDatabase(dbPath);
+    db = initDatabase(dbPath);
     repository = new SqliteSessionRepository(db);
 
     // Setup Hono app with routes
@@ -52,6 +54,8 @@ describe('API Routes', () => {
   });
 
   afterEach(() => {
+    // Close database before removing files
+    db.close();
     // Clean up temporary directory
     rmSync(testDir, { recursive: true, force: true });
   });
