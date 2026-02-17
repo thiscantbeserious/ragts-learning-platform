@@ -4,6 +4,7 @@
  * This module provides streaming-based processing of .cast files:
  * - NdjsonStream: Low-level streaming NDJSON parser
  * - SessionProcessor: High-level pipeline with VT integration and snapshot capture
+ * - SectionDetector: Section boundary detection for sessions
  *
  * Usage:
  * ```typescript
@@ -16,3 +17,4 @@
 
 export { NdjsonStream, type NdjsonItem } from './ndjson-stream.js';
 export { processSession, type ProcessingResult } from './session-processor.js';
+export { SectionDetector, type SectionBoundary } from './section-detector.js';
