@@ -15,6 +15,10 @@ export interface Session {
   marker_count: number;
   uploaded_at: string;
   created_at: string;
+  agent_type?: string | null;
+  event_count?: number | null;
+  detected_sections_count?: number | null;
+  detection_status?: 'pending' | 'processing' | 'completed' | 'failed';
 }
 
 /**

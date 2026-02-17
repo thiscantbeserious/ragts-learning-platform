@@ -18,3 +18,4 @@
 export { NdjsonStream, type NdjsonItem } from './ndjson-stream.js';
 export { processSession, type ProcessingResult } from './session-processor.js';
 export { SectionDetector, type SectionBoundary } from './section-detector.js';
+export { processSessionPipeline } from './session-pipeline.js';
