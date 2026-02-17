@@ -1,11 +1,15 @@
 /**
  * Session Processing Pipeline - Orchestrates detection + snapshot generation + DB storage.
  *
+ * Single-pass file read: reads the .cast file once, collecting both the header
+ * and events. Then runs detection on the in-memory events, generates snapshots
+ * using the VT engine, and stores everything in the DB.
+ *
  * High-level flow:
  * 1. Set detection_status to 'processing'
- * 2. Read events from .cast file using NdjsonStream
+ * 2. Read header + events from .cast file (single pass)
  * 3. Run SectionDetector to get boundaries
- * 4. Run processSession to get snapshots at boundary event indices
+ * 4. Generate snapshots by replaying events through VT at boundary indices
  * 5. Delete existing sections for this session
  * 6. Create sections in DB (markers + detected) with snapshots
  * 7. Update session metadata (detection_status, event_count, detected_sections_count)
@@ -14,11 +18,10 @@
 
 import type { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
 import type { SessionRepository } from '../db/session-repository.js';
-import type { Marker, AsciicastEvent } from '../../shared/asciicast-types.js';
+import type { Marker, AsciicastEvent, AsciicastHeader } from '../../shared/asciicast-types.js';
 import { NdjsonStream } from './ndjson-stream.js';
 import { SectionDetector } from './section-detector.js';
-import { processSession } from './session-processor.js';
-import { initVt } from '../../../packages/vt-wasm/index.js';
+import { createVt, initVt, type TerminalSnapshot } from '../../../packages/vt-wasm/index.js';
 
 /**
  * Process a session: detect sections, capture snapshots, store in DB.
@@ -46,15 +49,22 @@ export async function processSessionPipeline(
     // Set status to processing
     sessionRepo.updateDetectionStatus(sessionId, 'processing');
 
-    // Step 1: Read events from .cast file
+    // Step 1: Read header + events from .cast file (single pass)
+    let header: AsciicastHeader | null = null;
     const events: AsciicastEvent[] = [];
     const stream = new NdjsonStream(filePath);
 
     for await (const item of stream) {
+      if (item.header) {
+        header = item.header as AsciicastHeader;
+      }
       if (item.event) {
-        // Cast to AsciicastEvent type
         events.push(item.event as AsciicastEvent);
       }
+    }
+
+    if (!header) {
+      throw new Error('No header found in .cast file');
     }
 
     const eventCount = events.length;
@@ -63,18 +73,23 @@ export async function processSessionPipeline(
     const detector = new SectionDetector(events);
     const boundaries = detector.detectWithMarkers(markers);
 
-    // Step 3: Run processSession to get snapshots at boundary event indices
-    const boundaryIndices = boundaries.map((b) => b.eventIndex);
-    const processingResult = await processSession(filePath, boundaryIndices);
+    // Step 3: Generate snapshots by replaying events through VT
+    const boundarySet = new Set(boundaries.map((b) => b.eventIndex));
+    const snapshotMap = new Map<number, TerminalSnapshot>();
+    const vt = createVt(header.width, header.height);
+
+    for (let i = 0; i < events.length; i++) {
+      const [, eventType, data] = events[i];
+      if (eventType === 'o') {
+        vt.feed(String(data));
+      }
+      if (boundarySet.has(i)) {
+        snapshotMap.set(i, vt.getView());
+      }
+    }
 
     // Step 4: Delete existing sections for this session (replace all)
     sectionRepo.deleteBySessionId(sessionId);
-
-    // Step 5: Create sections in DB
-    // Build a map of eventIndex -> snapshot for quick lookup
-    const snapshotMap = new Map(
-      processingResult.snapshots.map((s) => [s.boundaryEvent, s.snapshot])
-    );
 
     for (let i = 0; i < boundaries.length; i++) {
       const boundary = boundaries[i];
