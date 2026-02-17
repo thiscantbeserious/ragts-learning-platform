@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import TerminalOutput from './TerminalOutput.vue';
-import MarkerSection from './MarkerSection.vue';
+import SectionPanel from './SectionPanel.vue';
 import type { Section } from '../composables/useSession';
 
 defineProps<{
@@ -10,20 +9,12 @@ defineProps<{
 
 <template>
   <div class="session-content">
-    <template v-for="(section, index) in sections" :key="index">
-      <!-- Preamble: always expanded, no fold UI -->
-      <div v-if="section.type === 'preamble'" class="session-content__preamble">
-        <TerminalOutput :lines="section.lines" />
-      </div>
-
-      <!-- Marker section: collapsible, default collapsed -->
-      <MarkerSection
-        v-else
-        :label="section.label ?? 'Unnamed section'"
-        :lines="section.lines"
-        :default-collapsed="true"
-      />
-    </template>
+    <SectionPanel
+      v-for="section in sections"
+      :key="section.id"
+      :section="section"
+      :default-collapsed="true"
+    />
   </div>
 </template>
 

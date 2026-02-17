@@ -1,88 +1,71 @@
 import { ref, computed, watch, isRef, toValue, type Ref, type MaybeRef } from 'vue';
-import type { AsciicastFile, ParsedEvent, Marker } from '../../shared/asciicast-types';
+import type { AsciicastFile } from '../../shared/asciicast-types';
+import type { TerminalSnapshot } from '../../../packages/vt-wasm/types';
 
+/**
+ * Client-side section interface.
+ * Maps from the API section response shape.
+ */
 export interface Section {
-  type: 'preamble' | 'marker';
-  label?: string;
-  time?: number;
-  lines: string[];
+  id: string;
+  type: 'marker' | 'detected';
+  label: string;
+  startEvent: number;
+  endEvent: number;
+  snapshot: TerminalSnapshot | null;
+}
+
+/**
+ * API section row structure.
+ */
+interface ApiSection {
+  id: string;
+  session_id: string;
+  type: 'marker' | 'detected';
+  start_event: number;
+  end_event: number;
+  label: string;
+  snapshot: string; // JSON string of TerminalSnapshot
+  created_at: string;
 }
 
 interface SessionResponse {
   id: string;
   filename: string;
-  size_bytes: number;
-  marker_count: number;
-  uploaded_at: string;
   content: AsciicastFile;
+  sections: ApiSection[];
+  detection_status: 'pending' | 'processing' | 'completed' | 'failed';
 }
 
 /**
- * Build sections from parsed events and markers.
- * Content before first marker is preamble (always expanded).
- * Each marker starts a new collapsible section.
+ * Parse snapshot JSON string into TerminalSnapshot object.
+ * Returns null if parsing fails or snapshot is empty.
  */
-function buildSections(events: ParsedEvent[], markers: Marker[]): Section[] {
-  const sections: Section[] = [];
-
-  if (markers.length === 0) {
-    // No markers: single section with all output
-    const lines = extractOutputLines(events, 0, events.length);
-    if (lines.length > 0) {
-      sections.push({ type: 'preamble', lines });
+function parseSnapshot(snapshotJson: string): TerminalSnapshot | null {
+  try {
+    if (!snapshotJson || snapshotJson.trim() === '') {
+      return null;
     }
-    return sections;
+    const parsed = JSON.parse(snapshotJson) as TerminalSnapshot;
+    return parsed;
+  } catch (err) {
+    console.error('Failed to parse snapshot JSON:', err);
+    return null;
   }
-
-  // Preamble: events before first marker
-  const firstMarkerIndex = markers[0].index;
-  if (firstMarkerIndex > 0) {
-    const lines = extractOutputLines(events, 0, firstMarkerIndex);
-    if (lines.length > 0) {
-      sections.push({ type: 'preamble', lines });
-    }
-  }
-
-  // Marker sections
-  for (let i = 0; i < markers.length; i++) {
-    const marker = markers[i];
-    const startIdx = marker.index + 1; // Events after marker
-    const endIdx = i + 1 < markers.length ? markers[i + 1].index : events.length;
-    const lines = extractOutputLines(events, startIdx, endIdx);
-
-    sections.push({
-      type: 'marker',
-      label: marker.label,
-      time: marker.time,
-      lines,
-    });
-  }
-
-  return sections;
 }
 
 /**
- * Extract output lines from a range of events.
- * Concatenates output event data and splits on newlines.
+ * Map API sections to client-side sections.
  */
-function extractOutputLines(events: ParsedEvent[], start: number, end: number): string[] {
-  let buffer = '';
-  for (let i = start; i < end; i++) {
-    const event = events[i];
-    if (event && event.type === 'o' && typeof event.data === 'string') {
-      buffer += event.data;
-    }
-  }
-
-  if (buffer.length === 0) return [];
-
-  // Split on newlines, keep trailing empty line only if there's content
-  const lines = buffer.split('\n');
-  // Remove trailing empty string from final newline
-  if (lines.length > 1 && lines[lines.length - 1] === '') {
-    lines.pop();
-  }
-  return lines;
+function mapSections(apiSections: ApiSection[]): Section[] {
+  return apiSections.map((apiSection) => ({
+    id: apiSection.id,
+    type: apiSection.type,
+    label: apiSection.label,
+    startEvent: apiSection.start_event,
+    endEvent: apiSection.end_event,
+    snapshot: parseSnapshot(apiSection.snapshot),
+  }));
 }
 
 export function useSession(sessionId: MaybeRef<string>) {
@@ -90,6 +73,7 @@ export function useSession(sessionId: MaybeRef<string>) {
   const sections = ref<Section[]>([]);
   const loading = ref(true);
   const error = ref<string | null>(null);
+  const detectionStatus = ref<'pending' | 'processing' | 'completed' | 'failed'>('completed');
 
   const filename = computed(() => session.value?.filename ?? '');
 
@@ -107,7 +91,8 @@ export function useSession(sessionId: MaybeRef<string>) {
       }
       const data = await res.json() as SessionResponse;
       session.value = data;
-      sections.value = buildSections(data.content.events, data.content.markers);
+      detectionStatus.value = data.detection_status;
+      sections.value = mapSections(data.sections);
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load session';
     } finally {
@@ -125,5 +110,6 @@ export function useSession(sessionId: MaybeRef<string>) {
     loading,
     error,
     filename,
+    detectionStatus,
   };
 }
