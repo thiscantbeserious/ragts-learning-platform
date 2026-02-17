@@ -203,9 +203,11 @@ describe('API Routes', () => {
       expect(data.id).toBe(uploadData.id);
       expect(data.filename).toBe('test.cast');
       expect(data.content).toHaveProperty('header');
-      expect(data.content).toHaveProperty('events');
+      expect(data.content).not.toHaveProperty('events'); // events are excluded per Stage 3
       expect(data.content).toHaveProperty('markers');
       expect(data.content.markers).toHaveLength(3);
+      // Snapshot field should exist (may be null if not yet processed)
+      expect(data).toHaveProperty('snapshot');
     });
 
     it('should return 404 for non-existent session', async () => {

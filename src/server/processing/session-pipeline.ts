@@ -19,6 +19,7 @@
 import type { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
 import type { SessionRepository } from '../db/session-repository.js';
 import type { Marker, AsciicastEvent, AsciicastHeader } from '../../shared/asciicast-types.js';
+import { normalizeHeader } from '../../shared/asciicast.js';
 import { NdjsonStream } from './ndjson-stream.js';
 import { SectionDetector } from './section-detector.js';
 import { createVt, initVt, type TerminalSnapshot } from '../../../packages/vt-wasm/index.js';
@@ -67,72 +68,144 @@ export async function processSessionPipeline(
       throw new Error('No header found in .cast file');
     }
 
+    // Normalize header (v3 term.cols/rows → width/height)
+    header = normalizeHeader(header as Record<string, any>);
+
     const eventCount = events.length;
 
     // Step 2: Run SectionDetector to get boundaries
     const detector = new SectionDetector(events);
     const boundaries = detector.detectWithMarkers(markers);
 
-    // Step 3: Generate delta snapshots by replaying events through VT
-    // Each section stores only the NEW lines produced during that section,
-    // not the full accumulated scrollback. This prevents content repetition.
-    //
-    // Approach: capture full snapshots at each boundary, then compute deltas.
-    // Section[i] gets the lines produced between boundary[i] and boundary[i+1]
-    // (or end of events for the last section).
-    const boundarySet = new Set(boundaries.map((b) => b.eventIndex));
-    const fullSnapshotMap = new Map<number, TerminalSnapshot>();
-    const vt = createVt(header.width, header.height, 10000);
-
-    for (let i = 0; i < events.length; i++) {
-      const [, eventType, data] = events[i];
-      if (eventType === 'o') {
-        vt.feed(String(data));
-      }
-      if (boundarySet.has(i)) {
-        fullSnapshotMap.set(i, vt.getAllLines());
+    // Synthesize preamble boundary when markers exist and first marker isn't at event 0.
+    // Only for marker-based sessions — for pure auto-detected sections, the detector
+    // already determines where content starts; adding a preamble would just dump
+    // the entire scrollback buffer into one massive section.
+    const hasMarkerBoundary = boundaries.some(b => b.signals.includes('marker'));
+    if (hasMarkerBoundary && boundaries.length > 0 && boundaries[0].eventIndex > 0) {
+      const hasPreContent = events.slice(0, boundaries[0].eventIndex).some(e => e[1] === 'o');
+      if (hasPreContent) {
+        boundaries.unshift({
+          eventIndex: 0,
+          score: Infinity,
+          signals: ['preamble'],
+          label: 'Preamble',
+        });
       }
     }
 
-    // Capture final snapshot after all events (for the last section's delta)
-    const finalSnapshot = vt.getAllLines();
+    // Step 3: Hybrid snapshot capture - CLI sections get line ranges, TUI sections get viewport snapshots.
+    // Track alt-screen state during VT replay:
+    // - At CLI boundaries: record line count from getAllLines() for range calculation
+    // - At TUI boundaries (during alt-screen): capture getView() as section viewport snapshot
+    // - At end: capture getAllLines() as full session document
+    //
+    // Previous approaches that failed:
+    // - Delta (nextSnapshot.lines.slice(currentSnapshot.lines.length)): breaks
+    //   when scrollback hits the limit — both snapshots have same line count.
+    // - Fresh VT per section: loses terminal state, TUI sections all look identical.
+    // - All sections as viewport snapshots: produces duplicate content for CLI sessions.
 
     // Step 4: Delete existing sections for this session (replace all)
     sectionRepo.deleteBySessionId(sessionId);
 
-    for (let i = 0; i < boundaries.length; i++) {
-      const boundary = boundaries[i];
+    // Always replay events through VT to capture the full session document.
+    // Even with zero boundaries, the session needs its full snapshot for rendering.
+    const vt = createVt(header.width, header.height, 10000);
 
-      // Calculate end_event: next boundary's start or total event count
+    // Build a map of section end events → boundary index for O(1) lookup during replay
+    const sectionEndEvents: Map<number, number> = new Map();
+    for (let i = 0; i < boundaries.length; i++) {
       const endEvent = i < boundaries.length - 1
         ? boundaries[i + 1].eventIndex
         : eventCount;
+      sectionEndEvents.set(endEvent, i);
+    }
 
-      // Compute delta: lines produced during this section
-      // = lines at next boundary (or end) minus lines at this boundary
-      const currentSnapshot = fullSnapshotMap.get(boundary.eventIndex);
-      const nextSnapshot = i < boundaries.length - 1
-        ? fullSnapshotMap.get(boundaries[i + 1].eventIndex)
-        : finalSnapshot;
+    // Track alt-screen state during replay
+    let inAltScreen = false;
+    // highWaterLineCount tracks the max line count seen across boundaries during replay.
+    // When getAllLines().length stops growing (scrollback full), we detect overflow
+    // and fall back to capturing viewport snapshots instead of empty line ranges.
+    let highWaterLineCount = 0;
+    const sectionData: Array<{
+      lineCount: number | null;    // null = TUI or overflow section
+      snapshot: TerminalSnapshot | null;  // non-null = TUI or overflow fallback section
+    }> = new Array(boundaries.length).fill(null).map(() => ({ lineCount: null, snapshot: null }));
 
-      let snapshot: TerminalSnapshot | null = null;
-      if (currentSnapshot && nextSnapshot) {
-        const deltaLines = nextSnapshot.lines.slice(currentSnapshot.lines.length);
-        snapshot = { ...currentSnapshot, lines: deltaLines };
+    for (let j = 0; j < eventCount; j++) {
+      const [, eventType, data] = events[j];
+      if (eventType === 'o') {
+        const str = String(data);
+        vt.feed(str);
+        // Track alt-screen transitions
+        if (str.includes('\x1b[?1049h')) inAltScreen = true;
+        if (str.includes('\x1b[?1049l')) inAltScreen = false;
       }
 
-      // Determine section type: marker if it came from a marker, detected otherwise
-      const isMarker = boundary.signals.includes('marker');
-      const type = isMarker ? 'marker' : 'detected';
+      const boundaryIdx = sectionEndEvents.get(j + 1);
+      if (boundaryIdx !== undefined) {
+        if (inAltScreen) {
+          // TUI section: capture viewport snapshot
+          sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
+        } else {
+          // CLI section: record line count AND capture viewport as fallback.
+          // When scrollback is full, getAllLines() plateaus and line ranges become empty.
+          // The viewport fallback ensures we always have something to show.
+          const lines = vt.getAllLines();
+          const currentLineCount = lines.lines.length;
 
-      sectionRepo.create({
-        sessionId,
-        type,
-        startEvent: boundary.eventIndex,
-        endEvent,
-        label: boundary.label,
-        snapshot: snapshot ? JSON.stringify(snapshot) : null,
-      });
+          if (currentLineCount <= highWaterLineCount) {
+            // Scrollback overflow: line count didn't grow since last boundary → capture viewport
+            sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
+          } else {
+            sectionData[boundaryIdx] = { lineCount: currentLineCount, snapshot: null };
+            highWaterLineCount = currentLineCount;
+          }
+        }
+      }
+    }
+
+    // Full session document (getAllLines at end of replay)
+    const fullSnapshot = vt.getAllLines();
+
+    // Store full snapshot on session (always, even with zero boundaries)
+    sessionRepo.updateSnapshot(sessionId, JSON.stringify(fullSnapshot));
+
+    // Compute line ranges and store sections.
+    // previousLineCount tracks the end of the last CLI section for contiguous ranges.
+    let previousLineCount = 0;
+    for (let i = 0; i < boundaries.length; i++) {
+      const boundary = boundaries[i];
+      const endEvent = i < boundaries.length - 1
+        ? boundaries[i + 1].eventIndex
+        : eventCount;
+      const sd = sectionData[i];
+      const isMarker = boundary.signals.includes('marker');
+
+      if (sd.snapshot) {
+        // TUI section or scrollback overflow: store viewport snapshot, no line range
+        sectionRepo.create({
+          sessionId, type: isMarker ? 'marker' : 'detected',
+          startEvent: boundary.eventIndex, endEvent,
+          label: boundary.label,
+          snapshot: JSON.stringify(sd.snapshot),
+          startLine: null, endLine: null,
+        });
+      } else {
+        // CLI section: store line range, no snapshot
+        const endLine = sd.lineCount ?? fullSnapshot.lines.length;
+        const startLine = Math.min(previousLineCount, endLine);
+        previousLineCount = endLine;
+
+        sectionRepo.create({
+          sessionId, type: isMarker ? 'marker' : 'detected',
+          startEvent: boundary.eventIndex, endEvent,
+          label: boundary.label,
+          snapshot: null,
+          startLine, endLine,
+        });
+      }
     }
 
     // Step 6: Count detected sections (exclude markers)

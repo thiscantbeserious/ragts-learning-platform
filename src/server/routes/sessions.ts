@@ -57,12 +57,47 @@ export function handleGetSession(
     // Get sections if repository provided
     const sections = sectionRepository ? sectionRepository.findBySessionId(id) : [];
 
-    // Return metadata + parsed content + sections (strip filepath from response)
-    const { filepath: _fp, ...sessionData } = session;
+    // Parse session snapshot from JSON (if available)
+    let snapshot = null;
+    if (session.snapshot) {
+      try {
+        snapshot = JSON.parse(session.snapshot);
+      } catch (err) {
+        console.warn('Failed to parse session snapshot JSON:', err);
+        // Continue without snapshot rather than failing the entire request
+      }
+    }
+
+    // Transform sections to include parsed snapshot (if present)
+    const transformedSections = sections.map(section => ({
+      id: section.id,
+      type: section.type,
+      label: section.label,
+      startEvent: section.start_event,
+      endEvent: section.end_event,
+      startLine: section.start_line,
+      endLine: section.end_line,
+      snapshot: section.snapshot ? (() => {
+        try {
+          return JSON.parse(section.snapshot);
+        } catch (err) {
+          console.warn(`Failed to parse snapshot for section ${section.id}:`, err);
+          return null;
+        }
+      })() : null,
+    }));
+
+    // Return metadata + parsed content (header + markers only) + sections + snapshot
+    // Strip filepath and database snapshot field from response
+    const { filepath: _fp, snapshot: _snap, ...sessionData } = session;
     return c.json({
       ...sessionData,
-      content: parsed,
-      sections,
+      snapshot,
+      content: {
+        header: parsed.header,
+        markers: parsed.markers,
+      },
+      sections: transformedSections,
     });
   } catch (err) {
     console.error('Get session error:', err);

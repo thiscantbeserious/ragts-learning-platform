@@ -7,14 +7,28 @@
 
 /**
  * asciicast v3 header. First line of .cast file.
+ *
+ * Official v3 uses `term.cols`/`term.rows` (nested). For backward compat,
+ * `width`/`height` are normalized from `term.cols`/`term.rows` at parse time
+ * so all downstream consumers can use `header.width`/`header.height`.
  */
 export interface AsciicastHeader {
   version: number;
-  width: number;
-  height: number;
+  width: number;   // normalized from term.cols if v3 format
+  height: number;  // normalized from term.rows if v3 format
+  term?: {
+    cols: number;
+    rows: number;
+    type?: string;
+    version?: string;
+    theme?: { fg?: string; bg?: string; palette?: string };
+  };
   timestamp?: number;
+  idle_time_limit?: number;
+  command?: string;
   env?: Record<string, string>;
   title?: string;
+  tags?: string[];
   [key: string]: unknown;
 }
 
@@ -28,7 +42,7 @@ export type AsciicastEvent =
   | [number, "o", string]  // output
   | [number, "i", string]  // input
   | [number, "m", string]  // marker
-  | [number, "r", [number, number]]  // resize [width, height]
+  | [number, "r", string]  // resize "COLSxROWS"
   | [number, "x", number]; // exit code
 
 /**
@@ -38,7 +52,7 @@ export interface ParsedEvent {
   time: number;           // cumulative timestamp (seconds from start)
   relativeTime: number;   // original delta
   type: string;
-  data: string | [number, number] | number;
+  data: string | number;
 }
 
 /**

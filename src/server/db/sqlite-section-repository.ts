@@ -19,6 +19,8 @@ export interface SectionRow {
   end_event: number | null;
   label: string | null;
   snapshot: string | null;
+  start_line: number | null;
+  end_line: number | null;
   created_at: string;
 }
 
@@ -33,6 +35,8 @@ export interface CreateSectionInput {
   endEvent: number | null;
   label: string | null;
   snapshot: string | null;
+  startLine: number | null;
+  endLine: number | null;
 }
 
 /**
@@ -49,8 +53,8 @@ export class SqliteSectionRepository {
   constructor(private db: Database.Database) {
     // Prepare statements once at construction
     this.insertStmt = db.prepare(`
-      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     this.findBySessionIdStmt = db.prepare(`
@@ -90,7 +94,9 @@ export class SqliteSectionRepository {
       input.startEvent,
       input.endEvent,
       input.label,
-      input.snapshot
+      input.snapshot,
+      input.startLine,
+      input.endLine
     );
 
     // Retrieve the created section to get generated created_at

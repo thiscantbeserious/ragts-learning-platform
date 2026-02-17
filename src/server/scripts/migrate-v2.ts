@@ -102,6 +102,49 @@ export async function migrateV2(db: Database.Database): Promise<MigrationResult>
     }
   }
 
+  // After existing migration, reprocess sessions missing unified snapshot
+  console.log('');
+  console.log('Checking for sessions without unified snapshot...');
+  const allSessionsAfterMigration = sessionRepo.findAll();
+  let reprocessed = 0;
+
+  for (let i = 0; i < allSessionsAfterMigration.length; i++) {
+    const sessionSummary = allSessionsAfterMigration[i];
+    const fullSession = sessionRepo.findById(sessionSummary.id);
+
+    if (!fullSession) {
+      console.log(`Session ${sessionSummary.id} not found, skipping`);
+      continue;
+    }
+
+    // Check if session lacks snapshot
+    if (!fullSession.snapshot) {
+      const progress = `[${i + 1}/${allSessionsAfterMigration.length}]`;
+      console.log(`${progress} Reprocessing session ${fullSession.id} (${fullSession.filename}) for unified snapshot...`);
+
+      try {
+        // Read .cast file to extract markers
+        const markers = await extractMarkersFromFile(fullSession.filepath);
+
+        // Re-run pipeline to generate the new hybrid data
+        await processSessionPipeline(
+          fullSession.filepath,
+          fullSession.id,
+          markers,
+          sectionRepo,
+          sessionRepo
+        );
+
+        reprocessed++;
+        console.log(`${progress} Reprocessed: ${fullSession.filename}`);
+      } catch (error) {
+        console.error(
+          `${progress} Reprocess failed: ${fullSession.filename} - ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+
   const result: MigrationResult = {
     processed,
     skipped: allSessions.length - sessionsToProcess.length,
@@ -110,9 +153,10 @@ export async function migrateV2(db: Database.Database): Promise<MigrationResult>
 
   console.log('');
   console.log('Migration v2 complete:');
-  console.log(`  Processed: ${result.processed}`);
-  console.log(`  Skipped:   ${result.skipped}`);
-  console.log(`  Failed:    ${result.failed}`);
+  console.log(`  Processed:    ${result.processed}`);
+  console.log(`  Skipped:      ${result.skipped}`);
+  console.log(`  Failed:       ${result.failed}`);
+  console.log(`  Reprocessed:  ${reprocessed}`);
 
   return result;
 }

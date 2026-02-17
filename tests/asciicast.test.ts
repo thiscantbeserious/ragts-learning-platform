@@ -6,6 +6,7 @@ import {
   validateAsciicast,
   extractMarkers,
   computeCumulativeTimes,
+  normalizeHeader,
 } from '../src/shared/asciicast';
 import type { AsciicastEvent, ParsedEvent } from '../src/shared/asciicast-types';
 
@@ -69,6 +70,19 @@ describe('validateAsciicast', () => {
     expect(result.valid).toBe(false);
     expect(result.error).toContain('version');
   });
+
+  it('validates AGR-format header with term.cols/term.rows', () => {
+    const content = '{"version":3,"term":{"cols":80,"rows":24,"type":"xterm-256color"},"command":"claude"}\n[0.1,"o","hello\\n"]';
+    const result = validateAsciicast(content);
+    expect(result.valid).toBe(true);
+  });
+
+  it('rejects header missing both width/height and term.cols/term.rows', () => {
+    const content = '{"version":3}\n[0.1,"o","hello\\n"]';
+    const result = validateAsciicast(content);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('term.cols/term.rows');
+  });
 });
 
 describe('parseAsciicast', () => {
@@ -79,7 +93,9 @@ describe('parseAsciicast', () => {
     expect(file.header.version).toBe(3);
     expect(file.header.width).toBe(120);
     expect(file.header.height).toBe(40);
-    expect(file.events.length).toBeGreaterThan(0);
+    expect(file.header.term?.cols).toBe(120);
+    expect(file.header.term?.rows).toBe(40);
+    expect(file.events.length).toBe(32);
     expect(file.markers.length).toBe(3);
   });
 
@@ -144,7 +160,7 @@ describe('computeCumulativeTimes', () => {
     const events: AsciicastEvent[] = [
       [0.5, 'o', 'output text'],
       [0.1, 'm', 'marker label'],
-      [0.2, 'r', [120, 40]],
+      [0.2, 'r', '120x40'],
       [0.3, 'x', 0],
     ];
 
@@ -154,7 +170,7 @@ describe('computeCumulativeTimes', () => {
     expect(parsed[0].type).toBe('o');
     expect(parsed[1].data).toBe('marker label');
     expect(parsed[1].type).toBe('m');
-    expect(parsed[2].data).toEqual([120, 40]);
+    expect(parsed[2].data).toBe('120x40');
     expect(parsed[2].type).toBe('r');
     expect(parsed[3].data).toBe(0);
     expect(parsed[3].type).toBe('x');
@@ -246,5 +262,23 @@ describe('Integration: full parsing flow', () => {
     const marker0Event = file.events[file.markers[0].index];
     expect(marker0Event.type).toBe('m');
     expect(marker0Event.data).toBe('Test Execution');
+  });
+
+  it('normalizes AGR-format header to width/height', () => {
+    const content = '{"version":3,"term":{"cols":100,"rows":50,"type":"xterm-256color"},"command":"claude"}\n[0.1,"o","hello\\n"]';
+    const file = parseAsciicast(content);
+
+    expect(file.header.width).toBe(100);
+    expect(file.header.height).toBe(50);
+    expect(file.header.term?.cols).toBe(100);
+    expect(file.header.term?.rows).toBe(50);
+  });
+
+  it('preserves v2-compat headers with top-level width/height', () => {
+    const content = '{"version":3,"width":80,"height":24}\n[0.1,"o","hello\\n"]';
+    const file = parseAsciicast(content);
+
+    expect(file.header.width).toBe(80);
+    expect(file.header.height).toBe(24);
   });
 });

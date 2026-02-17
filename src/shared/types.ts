@@ -19,6 +19,7 @@ export interface Session {
   event_count?: number | null;
   detected_sections_count?: number | null;
   detection_status?: 'pending' | 'processing' | 'completed' | 'failed';
+  snapshot?: string | null;  // Full getAllLines() JSON from VT terminal
 }
 
 /**

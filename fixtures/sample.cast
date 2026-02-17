@@ -1,4 +1,4 @@
-{"version":3,"width":120,"height":40,"title":"Sample RAGTS Session","env":{"SHELL":"/bin/zsh","TERM":"xterm-256color"}}
+{"version":3,"term":{"cols":120,"rows":40,"type":"xterm-256color"},"title":"Sample RAGTS Session","env":{"SHELL":"/bin/zsh","TERM":"xterm-256color"}}
 [0.5,"o","$ \u001b[1;32mnpm\u001b[0m test\r\n"]
 [0.1,"m","Test Execution"]
 [0.3,"o","\u001b[32m✓\u001b[0m \u001b[2mshould parse asciicast v3 format\u001b[0m \u001b[90m(5ms)\u001b[0m\r\n"]

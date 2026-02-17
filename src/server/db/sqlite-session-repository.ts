@@ -18,6 +18,7 @@ export class SqliteSessionRepository implements SessionRepository {
   private findByIdStmt: Database.Statement;
   private deleteByIdStmt: Database.Statement;
   private updateDetectionStatusStmt: Database.Statement;
+  private updateSnapshotStmt: Database.Statement;
 
   constructor(private db: Database.Database) {
     // Prepare statements once at construction
@@ -26,11 +27,16 @@ export class SqliteSessionRepository implements SessionRepository {
       VALUES (?, ?, ?, ?, ?, ?)
     `);
 
+    // Exclude snapshot column from list view (too large)
     this.findAllStmt = db.prepare(`
-      SELECT * FROM sessions
+      SELECT id, filename, filepath, size_bytes, marker_count, uploaded_at,
+             created_at, agent_type, event_count, detected_sections_count,
+             detection_status
+      FROM sessions
       ORDER BY uploaded_at DESC
     `);
 
+    // Include snapshot column for detail view
     this.findByIdStmt = db.prepare(`
       SELECT * FROM sessions
       WHERE id = ?
@@ -46,6 +52,12 @@ export class SqliteSessionRepository implements SessionRepository {
       SET detection_status = ?,
           event_count = COALESCE(?, event_count),
           detected_sections_count = COALESCE(?, detected_sections_count)
+      WHERE id = ?
+    `);
+
+    this.updateSnapshotStmt = db.prepare(`
+      UPDATE sessions
+      SET snapshot = ?
       WHERE id = ?
     `);
   }
@@ -90,7 +102,7 @@ export class SqliteSessionRepository implements SessionRepository {
    */
   updateDetectionStatus(
     id: string,
-    status: 'pending' | 'completed' | 'failed',
+    status: 'pending' | 'processing' | 'completed' | 'failed',
     eventCount?: number,
     detectedSectionsCount?: number
   ): void {
@@ -100,5 +112,13 @@ export class SqliteSessionRepository implements SessionRepository {
       detectedSectionsCount ?? null,
       id
     );
+  }
+
+  /**
+   * Update the unified snapshot for a session.
+   * Stores the full getAllLines() JSON from the VT terminal.
+   */
+  updateSnapshot(id: string, snapshot: string): void {
+    this.updateSnapshotStmt.run(snapshot, id);
   }
 }

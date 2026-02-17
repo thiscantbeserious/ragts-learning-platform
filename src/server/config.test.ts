@@ -28,7 +28,7 @@ describe('loadConfig', () => {
 
     expect(config.port).toBe(3000);
     expect(config.dataDir).toBe('./data');
-    expect(config.maxFileSizeMB).toBe(50);
+    expect(config.maxFileSizeMB).toBe(250);
     expect(config.nodeEnv).toBe('development');
   });
 

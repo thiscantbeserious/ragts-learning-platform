@@ -39,4 +39,21 @@ export interface SessionRepository {
    * Returns true if deleted, false if not found.
    */
   deleteById(id: string): boolean;
+
+  /**
+   * Update session detection status and metadata.
+   * Used after processing a session for section detection.
+   */
+  updateDetectionStatus(
+    id: string,
+    status: 'pending' | 'processing' | 'completed' | 'failed',
+    eventCount?: number,
+    detectedSectionsCount?: number
+  ): void;
+
+  /**
+   * Update the unified snapshot for a session.
+   * Stores the full getAllLines() JSON from the VT terminal.
+   */
+  updateSnapshot(id: string, snapshot: string): void;
 }

@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import type { TerminalSnapshot } from '../../../packages/vt-wasm/types';
+import type { SnapshotLine } from '../../../packages/vt-wasm/types';
 import './terminal-colors.css';
 
-const props = defineProps<{
-  snapshot: TerminalSnapshot;
-}>();
+const props = withDefaults(defineProps<{
+  lines: SnapshotLine[];
+  startLineNumber?: number;
+}>(), {
+  startLineNumber: 1,
+});
 
 /**
  * Convert a palette color index (0-255) to RGB color string.
@@ -90,42 +93,54 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
 <template>
   <div class="terminal-snapshot">
     <div
-      v-for="(line, lineIndex) in snapshot.lines"
+      v-for="(line, lineIndex) in lines"
       :key="lineIndex"
       class="terminal-line"
     >
-      <span
+      <span class="terminal-line__number">{{ startLineNumber + lineIndex }}</span>
+      <span class="terminal-line__content"><span
         v-for="(span, spanIndex) in line.spans"
         :key="spanIndex"
         :class="getSpanClasses(span)"
         :style="getSpanStyle(span)"
-      >{{ span.text }}</span>
+      >{{ span.text }}</span></span>
     </div>
   </div>
 </template>
 
 <style scoped>
 .terminal-snapshot {
-  background-color: var(--term-default-bg, #0a0a0a);
-  color: var(--term-default-fg, #d4d4d4);
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 0.875rem;
   line-height: 1.4;
-  padding: 1rem;
-  border-radius: 8px;
-  overflow: auto;
-  max-height: 600px;
-  white-space: pre-wrap;
-  word-break: break-all;
+  padding: 0.75rem 0;
+  white-space: pre;
 }
 
 .terminal-line {
-  display: block;
+  display: flex;
   min-height: 1.4em; /* Preserve empty lines */
 }
 
+.terminal-line__number {
+  display: inline-block;
+  width: 5ch;
+  min-width: 5ch;
+  text-align: right;
+  padding-right: 1ch;
+  color: #444;
+  user-select: none;
+  flex-shrink: 0;
+  border-right: 1px solid #222;
+  margin-right: 1ch;
+}
+
+.terminal-line__content {
+  white-space: pre;
+  flex: 1;
+}
+
 .terminal-span {
-  white-space: pre-wrap;
+  white-space: pre;
 }
 
 /* Text attributes */

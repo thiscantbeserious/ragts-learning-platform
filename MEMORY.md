@@ -110,15 +110,55 @@ As of 2026-02-17, the project has completed **MVP v2** implementation:
 | Async processing | setImmediate after upload | Upload responds fast, processing happens in background |
 | DB abstraction | Repository pattern | SqliteSessionRepository/SqliteSectionRepository, swappable for PostgreSQL |
 | Migration path | CLI script | `npm run migrate:v2` for existing sessions, idempotent |
+| Header normalization | normalizeHeader() at parse time | v3 `term.cols`/`term.rows` → `width`/`height` so all downstream code works unchanged |
+| File size limit | 250MB default | Real AGR sessions from Claude Code can be 36MB+; 50MB was too conservative |
+| Unified console | Single terminal-chrome wrapper | Sections render inside one dark background with fold dividers, not separate cards |
+| Preamble sections | Marker-based sessions only | Content before first marker gets a "Preamble" section; not for auto-detected boundaries |
+| Unified document model | Hybrid: CLI line ranges + TUI viewport snapshots | CLI sessions produce scrollback documents; TUI sessions produce ephemeral screen states. One model can't serve both. |
+| Alt-screen tracking | Scan for \x1b[?1049h/l during replay | Distinguishes CLI (getAllLines) from TUI (getView) sections at boundary capture time |
+| Session-level snapshot | Full getAllLines() stored on session | CLI sections reference line ranges into this document; enables one-document rendering |
+| Sticky section headers | CSS position: sticky in one scrollable container | Sections fold/unfold within a single terminal chrome, not separate cards |
+
+### Known Bugs & Lessons Learned
+
+**TUI session rendering — RESOLVED (2026-02-17)**
+
+Previous approaches failed for TUI sessions:
+
+1. **Fresh VT per section**: Each section created its own VT instance and replayed only that section's events. This worked for CLI sessions (linear scrollback) but **failed completely for TUI apps** like Claude Code because terminal state (alt screen mode, cursor position) was lost between sections.
+2. **All sections looked identical**: Claude Code redraws the entire screen on each render cycle. Without prior state context, each section's fresh VT produced similar-looking output because the TUI escape sequences assumed terminal state from prior events.
+3. **Delta approach**: The previous delta approach (`nextSnapshot.lines.slice(currentSnapshot.lines.length)`) broke when scrollback hit the 10,000-line limit — both snapshots had the same line count, delta was empty (0 lines).
+4. **Cumulative getView()**: Replaying through all boundaries and capturing `getView()` at each boundary produced repeated content for CLI sessions — Section 2 showed Section 1's content plus its own.
+
+**The resolution**: Implement a **hybrid document model**:
+- Single VT instance replays all events once
+- Track alt-screen state during replay (scan for `\x1b[?1049h`/`\x1b[?1049l`)
+- At CLI boundaries (not in alt-screen): record line count from `getAllLines()` for range calculation
+- At TUI boundaries (during alt-screen): capture `getView()` as section viewport snapshot
+- At end: capture `getAllLines()` as full session document
+- Store: `session.snapshot` (full document) + sections with line ranges (CLI) OR viewport snapshots (TUI)
+- Client renders ONE scrollable terminal with sticky section headers using CSS `position: sticky`
+
+This hybrid model serves both CLI (scrollback documents) and TUI (ephemeral screen states) correctly within a unified rendering architecture.
+
+**Other lessons from this session:**
+- `word-break: break-all` destroys terminal output; use `white-space: pre` with `overflow-x: auto`
+- asciicast v3 uses `term.cols`/`term.rows` not top-level `width`/`height` — real AGR files were being rejected
+- Resize events in v3 use string format `"COLSxROWS"` not array `[number, number]`
+- Section detector finds only 3 boundaries in 30K-event TUI sessions — may need tuning for large files
 
 ### Codebase Structure
 ```
 src/
   client/              # Vue frontend
-    components/        # TerminalSnapshot, SessionView, etc.
+    components/        # Terminal rendering components
+      SectionHeader.vue         # Sticky fold divider (replaces SectionPanel.vue)
+      SessionContent.vue        # Unified terminal document renderer
+      TerminalSnapshot.vue      # Line-level ANSI renderer
   server/
     db/                # Database layer (repositories, migrations)
     processing/        # Session pipeline (detector, VT bridge, NDJSON stream)
+      session-pipeline.ts       # Hybrid snapshot capture with alt-screen tracking
     routes/            # Hono routes (sessions, upload, sections)
     scripts/           # CLI tools (migrate-v2)
   shared/              # Shared types (asciicast, session, section)
@@ -126,6 +166,12 @@ packages/
   vt-wasm/             # Rust WASM module for VT100 processing
 tests/                 # Integration tests
 ```
+
+**Key architectural components:**
+- **session-pipeline.ts**: Replays events through single VT instance, tracks alt-screen state, stores session-level snapshot + section line ranges/viewport snapshots
+- **SectionHeader.vue**: Sticky fold divider using CSS `position: sticky` within scrollable container
+- **SessionContent.vue**: One terminal chrome with sticky section headers; CLI sections render line ranges from session snapshot, TUI sections render inline viewport snapshots
+- **TerminalSnapshot.vue**: Accepts `lines` prop instead of full snapshot; renders ANSI color spans
 
 ### What's NOT Yet Implemented
 From ARCHITECTURE.md's vision, these are deferred post-MVP:

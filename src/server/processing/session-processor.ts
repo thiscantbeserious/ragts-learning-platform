@@ -7,6 +7,7 @@
 
 import { createVt, type TerminalSnapshot } from '../../../packages/vt-wasm/index.js';
 import type { AsciicastHeader } from '../../shared/asciicast-types.js';
+import { normalizeHeader } from '../../shared/asciicast.js';
 import { NdjsonStream } from './ndjson-stream.js';
 
 export interface ProcessingResult {
@@ -39,8 +40,8 @@ export async function processSession(
 
   for await (const item of stream) {
     if (item.header) {
-      // First item is always the header
-      header = item.header as AsciicastHeader;
+      // First item is always the header — normalize v3 term.cols/rows
+      header = normalizeHeader(item.header as Record<string, any>);
 
       // Create VT instance with dimensions from header
       vt = createVt(header.width, header.height);

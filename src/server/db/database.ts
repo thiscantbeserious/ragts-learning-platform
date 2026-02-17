@@ -9,6 +9,7 @@ import { join, dirname } from 'path';
 import { mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { migrate002Sections } from './migrations/002-sections.js';
+import { migrate003UnifiedSnapshot } from './migrations/003-unified-snapshot.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,6 +41,7 @@ export function initDatabase(dbPath: string): Database.Database {
 
   // Run migrations
   migrate002Sections(db);
+  migrate003UnifiedSnapshot(db);
 
   return db;
 }

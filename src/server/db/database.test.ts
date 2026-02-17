@@ -70,4 +70,38 @@ describe('initDatabase', () => {
 
     db.close();
   });
+
+  it('should apply migration 003 (unified snapshot)', () => {
+    const db = initDatabase(':memory:');
+
+    // Check sessions table has snapshot column
+    const sessionColumns = db.pragma('table_info(sessions)');
+    const sessionColumnNames = sessionColumns.map((col: any) => col.name);
+    expect(sessionColumnNames).toContain('snapshot');
+
+    // Check sections table has start_line and end_line columns
+    const sectionColumns = db.pragma('table_info(sections)');
+    const sectionColumnNames = sectionColumns.map((col: any) => col.name);
+    expect(sectionColumnNames).toContain('start_line');
+    expect(sectionColumnNames).toContain('end_line');
+
+    // Verify snapshot column is nullable (TEXT without NOT NULL)
+    const snapshotCol = sessionColumns.find((col: any) => col.name === 'snapshot');
+    expect(snapshotCol).toBeDefined();
+    expect(snapshotCol.type).toBe('TEXT');
+    expect(snapshotCol.notnull).toBe(0); // 0 means nullable
+
+    // Verify line columns are nullable (INTEGER without NOT NULL)
+    const startLineCol = sectionColumns.find((col: any) => col.name === 'start_line');
+    expect(startLineCol).toBeDefined();
+    expect(startLineCol.type).toBe('INTEGER');
+    expect(startLineCol.notnull).toBe(0);
+
+    const endLineCol = sectionColumns.find((col: any) => col.name === 'end_line');
+    expect(endLineCol).toBeDefined();
+    expect(endLineCol.type).toBe('INTEGER');
+    expect(endLineCol.notnull).toBe(0);
+
+    db.close();
+  });
 });

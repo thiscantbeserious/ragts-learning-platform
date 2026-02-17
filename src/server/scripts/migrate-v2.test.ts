@@ -65,21 +65,30 @@ describe('migrateV2', () => {
     expect(updatedSession?.detection_status).toBe('completed');
     expect(updatedSession?.event_count).toBe(150);
 
-    // Verify marker sections were created
+    // Verify marker sections were created with line ranges (CLI session)
     const sections = sectionRepo.findBySessionId(session.id);
     const markerSections = sections.filter((s) => s.type === 'marker');
 
     expect(markerSections.length).toBe(2);
     expect(markerSections[0].label).toBe('Start');
     expect(markerSections[0].start_event).toBe(50);
-    expect(markerSections[0].snapshot).toBeTruthy();
+    expect(markerSections[0].snapshot).toBe(null);
+    expect(markerSections[0].start_line).toBeTypeOf('number');
+    expect(markerSections[0].end_line).toBeTypeOf('number');
 
     expect(markerSections[1].label).toBe('Middle');
     expect(markerSections[1].start_event).toBe(100);
-    expect(markerSections[1].snapshot).toBeTruthy();
+    expect(markerSections[1].snapshot).toBe(null);
+    expect(markerSections[1].start_line).toBeTypeOf('number');
+    expect(markerSections[1].end_line).toBeTypeOf('number');
+
+    // Verify session has full snapshot
+    expect(updatedSession?.snapshot).toBeTruthy();
+    const fullSnapshot = JSON.parse(updatedSession!.snapshot!);
+    expect(fullSnapshot.lines).toBeDefined();
   });
 
-  it('skips already-completed sessions', async () => {
+  it('skips already-completed sessions with unified snapshot', async () => {
     // Create .cast file
     const castContent = createCastFile(200);
     const filePath = join(tmpDir, 'completed-session.cast');
@@ -94,8 +103,13 @@ describe('migrateV2', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    // Manually set status to completed
+    // Manually set status to completed and add a unified snapshot
     sessionRepo.updateDetectionStatus(session.id, 'completed', 200, 0);
+    sessionRepo.updateSnapshot(session.id, JSON.stringify({
+      cols: 80,
+      rows: 24,
+      lines: [{ spans: [{ text: 'test', fg: null, bg: null, attrs: 0 }] }],
+    }));
 
     // Create a marker section manually to verify no duplicates are created
     sectionRepo.create({
@@ -105,6 +119,8 @@ describe('migrateV2', () => {
       endEvent: 200,
       label: 'Existing Section',
       snapshot: null,
+      startLine: 0,
+      endLine: 1,
     });
 
     // Run migration

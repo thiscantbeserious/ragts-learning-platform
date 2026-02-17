@@ -17,7 +17,7 @@ describe('NdjsonStream', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'parse.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const events = [
         [0.5, 'o', 'Hello\n'],
         [0.1, 'o', 'World\n'],
@@ -48,7 +48,7 @@ describe('NdjsonStream', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'empty-lines.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const content = [
         JSON.stringify(header),
         '',
@@ -78,7 +78,7 @@ describe('NdjsonStream', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'malformed.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const content = [
         JSON.stringify(header),
         JSON.stringify([0.5, 'o', 'Good line\n']),
@@ -109,7 +109,7 @@ describe('NdjsonStream', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'invalid-event.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const content = [
         JSON.stringify(header),
         JSON.stringify([0.5, 'o', 'Good event\n']),

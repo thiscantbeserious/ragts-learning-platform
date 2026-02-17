@@ -5,6 +5,9 @@ import type { TerminalSnapshot } from '../../../packages/vt-wasm/types';
 /**
  * Client-side section interface.
  * Maps from the API section response shape.
+ * Supports hybrid rendering:
+ * - CLI sections: use session snapshot + startLine/endLine ranges
+ * - TUI sections: use per-section viewport snapshot
  */
 export interface Section {
   id: string;
@@ -12,27 +15,36 @@ export interface Section {
   label: string;
   startEvent: number;
   endEvent: number;
-  snapshot: TerminalSnapshot | null;
+  startLine: number | null;   // CLI sections — index into session snapshot
+  endLine: number | null;     // CLI sections — index into session snapshot
+  snapshot: TerminalSnapshot | null;  // TUI sections — per-section viewport
 }
 
 /**
- * API section row structure.
+ * API section response structure (camelCase from the route handler).
+ * Includes both line-range fields (CLI) and snapshot (TUI).
  */
 interface ApiSection {
   id: string;
-  session_id: string;
   type: 'marker' | 'detected';
-  start_event: number;
-  end_event: number;
   label: string;
-  snapshot: string; // JSON string of TerminalSnapshot
-  created_at: string;
+  startEvent: number;
+  endEvent: number;
+  startLine: number | null;  // CLI sections — line range start
+  endLine: number | null;    // CLI sections — line range end
+  snapshot: TerminalSnapshot | null;  // Parsed by route handler (TUI sections)
 }
 
+/**
+ * Session API response structure.
+ * Includes session-level snapshot (unified terminal document)
+ * plus sections with their individual snapshots or line ranges.
+ */
 interface SessionResponse {
   id: string;
   filename: string;
   content: AsciicastFile;
+  snapshot?: string | TerminalSnapshot | null;  // Session-level snapshot (JSON string or parsed)
   sections: ApiSection[];
   detection_status: 'pending' | 'processing' | 'completed' | 'failed';
 }
@@ -56,21 +68,26 @@ function parseSnapshot(snapshotJson: string): TerminalSnapshot | null {
 
 /**
  * Map API sections to client-side sections.
+ * Preserves line ranges (CLI) and snapshots (TUI).
+ * Backward compatible: if start_line/end_line are missing, section still works with snapshot.
  */
 function mapSections(apiSections: ApiSection[]): Section[] {
   return apiSections.map((apiSection) => ({
     id: apiSection.id,
     type: apiSection.type,
     label: apiSection.label,
-    startEvent: apiSection.start_event,
-    endEvent: apiSection.end_event,
-    snapshot: parseSnapshot(apiSection.snapshot),
+    startEvent: apiSection.startEvent,
+    endEvent: apiSection.endEvent,
+    startLine: apiSection.startLine ?? null,
+    endLine: apiSection.endLine ?? null,
+    snapshot: apiSection.snapshot ?? null,
   }));
 }
 
 export function useSession(sessionId: MaybeRef<string>) {
   const session = ref<SessionResponse | null>(null);
   const sections = ref<Section[]>([]);
+  const snapshot = ref<TerminalSnapshot | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
   const detectionStatus = ref<'pending' | 'processing' | 'completed' | 'failed'>('completed');
@@ -93,6 +110,17 @@ export function useSession(sessionId: MaybeRef<string>) {
       session.value = data;
       detectionStatus.value = data.detection_status;
       sections.value = mapSections(data.sections);
+
+      // Parse session-level snapshot (handles both string and parsed object)
+      if (data.snapshot) {
+        if (typeof data.snapshot === 'string') {
+          snapshot.value = parseSnapshot(data.snapshot);
+        } else {
+          snapshot.value = data.snapshot;
+        }
+      } else {
+        snapshot.value = null;
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load session';
     } finally {
@@ -107,6 +135,7 @@ export function useSession(sessionId: MaybeRef<string>) {
   return {
     session,
     sections,
+    snapshot,
     loading,
     error,
     filename,

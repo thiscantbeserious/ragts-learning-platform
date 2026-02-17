@@ -1,40 +1,32 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import TerminalSnapshot from './TerminalSnapshot.vue';
-import type { TerminalSnapshot as SnapshotType } from '../../../packages/vt-wasm/types';
+import type { SnapshotLine } from '../../../packages/vt-wasm/types';
 
 describe('TerminalSnapshot', () => {
   it('renders plain text spans correctly', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Hello World' }] },
-        { spans: [{ text: 'Second line' }] },
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Hello World' }] },
+      { spans: [{ text: 'Second line' }] },
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     expect(wrapper.text()).toContain('Hello World');
     expect(wrapper.text()).toContain('Second line');
-    const lines = wrapper.findAll('.terminal-line');
-    expect(lines).toHaveLength(2);
+    const lineElements = wrapper.findAll('.terminal-line');
+    expect(lineElements).toHaveLength(2);
   });
 
   it('renders foreground color via CSS variable (palette 0-7)', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Red text', fg: 1 }] }, // ANSI red = palette index 1
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Red text', fg: 1 }] }, // ANSI red = palette index 1
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const span = wrapper.find('.terminal-span');
@@ -43,16 +35,12 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders background color', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Blue background', bg: 4 }] }, // ANSI blue = palette index 4
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Blue background', bg: 4 }] }, // ANSI blue = palette index 4
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const span = wrapper.find('.terminal-span');
@@ -61,18 +49,14 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders bold/italic/underline attributes', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Bold', bold: true }] },
-        { spans: [{ text: 'Italic', italic: true }] },
-        { spans: [{ text: 'Underline', underline: true }] },
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Bold', bold: true }] },
+      { spans: [{ text: 'Italic', italic: true }] },
+      { spans: [{ text: 'Underline', underline: true }] },
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const spans = wrapper.findAll('.terminal-span');
@@ -82,16 +66,12 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders 256-color palette span', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Orange', fg: 208 }] }, // 256-color palette orange
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Orange', fg: 208 }] }, // 256-color palette orange
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const span = wrapper.find('.terminal-span');
@@ -101,16 +81,12 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders true color (#RRGGBB) span', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'True color', fg: '#ff5733' }] },
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'True color', fg: '#ff5733' }] },
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const span = wrapper.find('.terminal-span');
@@ -119,14 +95,10 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders empty snapshot (no crash)', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [],
-    };
+    const lines: SnapshotLine[] = [];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     expect(wrapper.find('.terminal-snapshot').exists()).toBe(true);
@@ -134,18 +106,12 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders correct number of lines (e.g., 24 lines for 80x24)', () => {
-    const lines = Array.from({ length: 24 }, (_, i) => ({
+    const lines: SnapshotLine[] = Array.from({ length: 24 }, (_, i) => ({
       spans: [{ text: `Line ${i + 1}` }],
     }));
 
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines,
-    };
-
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const lineElements = wrapper.findAll('.terminal-line');
@@ -153,20 +119,16 @@ describe('TerminalSnapshot', () => {
   });
 
   it('handles multiple attributes on single span', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        {
-          spans: [
-            { text: 'Bold italic underline', bold: true, italic: true, underline: true, fg: 2 },
-          ],
-        },
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      {
+        spans: [
+          { text: 'Bold italic underline', bold: true, italic: true, underline: true, fg: 2 },
+        ],
+      },
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const span = wrapper.find('.terminal-span');
@@ -177,19 +139,15 @@ describe('TerminalSnapshot', () => {
   });
 
   it('handles faint, strikethrough, blink, and inverse attributes', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Faint', faint: true }] },
-        { spans: [{ text: 'Strike', strikethrough: true }] },
-        { spans: [{ text: 'Blink', blink: true }] },
-        { spans: [{ text: 'Inverse', inverse: true }] },
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Faint', faint: true }] },
+      { spans: [{ text: 'Strike', strikethrough: true }] },
+      { spans: [{ text: 'Blink', blink: true }] },
+      { spans: [{ text: 'Inverse', inverse: true }] },
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const spans = wrapper.findAll('.terminal-span');
@@ -200,17 +158,13 @@ describe('TerminalSnapshot', () => {
   });
 
   it('handles bright ANSI colors (8-15)', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Bright red', fg: 9 }] }, // Bright red = palette index 9
-        { spans: [{ text: 'Bright cyan', fg: 14 }] }, // Bright cyan = palette index 14
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Bright red', fg: 9 }] }, // Bright red = palette index 9
+      { spans: [{ text: 'Bright cyan', fg: 14 }] }, // Bright cyan = palette index 14
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const spans = wrapper.findAll('.terminal-span');
@@ -219,16 +173,12 @@ describe('TerminalSnapshot', () => {
   });
 
   it('handles grayscale colors (232-255)', () => {
-    const snapshot: SnapshotType = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'Gray', fg: 240 }] }, // Grayscale ramp
-      ],
-    };
+    const lines: SnapshotLine[] = [
+      { spans: [{ text: 'Gray', fg: 240 }] }, // Grayscale ramp
+    ];
 
     const wrapper = mount(TerminalSnapshot, {
-      props: { snapshot },
+      props: { lines },
     });
 
     const span = wrapper.find('.terminal-span');

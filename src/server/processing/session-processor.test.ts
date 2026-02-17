@@ -32,16 +32,16 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'empty.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       writeFileSync(testFile, JSON.stringify(header) + '\n');
 
       const result = await processSession(testFile, []);
 
-      expect(result).toEqual({
-        header,
-        eventCount: 0,
-        snapshots: [],
-      });
+      expect(result.header.version).toBe(3);
+      expect(result.header.width).toBe(80);
+      expect(result.header.height).toBe(24);
+      expect(result.eventCount).toBe(0);
+      expect(result.snapshots).toEqual([]);
     });
   });
 
@@ -51,7 +51,7 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'simple.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const events = [
         [0.5, 'o', 'Hello\n'],
         [0.1, 'o', 'World\n'],
@@ -67,7 +67,9 @@ describe('SessionProcessor', () => {
 
       const result = await processSession(testFile, []);
 
-      expect(result.header).toEqual(header);
+      expect(result.header.version).toBe(3);
+      expect(result.header.width).toBe(80);
+      expect(result.header.height).toBe(24);
       expect(result.eventCount).toBe(3);
       expect(result.snapshots).toEqual([]);
     });
@@ -79,7 +81,7 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'boundary.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const events = [
         [0.5, 'o', 'Line 1\n'],
         [0.1, 'o', 'Line 2\n'],
@@ -109,7 +111,7 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'multi-boundary.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const events = [
         [0.5, 'o', 'Event 0\n'],
         [0.1, 'o', 'Event 1\n'],
@@ -140,7 +142,7 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'snapshot-structure.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const events = [
         [0.5, 'o', 'Hello World'],
       ];
@@ -183,7 +185,7 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'escape-sequences.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       // ANSI escape sequence for bold red text
       const events = [
         [0.5, 'o', '\x1b[1;31mRed Bold Text\x1b[0m'],
@@ -213,9 +215,9 @@ describe('SessionProcessor', () => {
       // Path to the fixture file
       const fixtureFile = join(__dirname, '../../../tests/fixtures/valid-with-markers.cast');
 
-      // The fixture has markers at event indices 1, 5, 8
+      // The fixture has markers at event indices 3, 14, 24
       // Let's capture snapshots at those boundaries
-      const result = await processSession(fixtureFile, [1, 5, 8]);
+      const result = await processSession(fixtureFile, [3, 14, 24]);
 
       expect(result.header).toBeDefined();
       expect(result.header.version).toBe(3);
@@ -239,7 +241,7 @@ describe('SessionProcessor', () => {
       mkdirSync(tempDir, { recursive: true });
       const testFile = join(tempDir, 'large.cast');
 
-      const header = { version: 3, width: 80, height: 24 };
+      const header = { version: 3, term: { cols: 80, rows: 24 } };
       const lines = [JSON.stringify(header)];
 
       // Generate 1000 events
