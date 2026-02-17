@@ -28,11 +28,33 @@ Stage 6: Integration + Polish     (end-to-end, edge cases)
 **Goal:** Build and test the WASM wrapper around `avt` that can process terminal output and return structured buffer state.
 
 **Scope:**
-- Create `packages/vt-wasm/` directory with a Rust crate wrapping `avt`
-- wasm-bindgen interface: `create(cols, rows)`, `feed(text)`, `get_lines()`, `get_cursor()`
-- `get_lines()` returns structured JSON: array of lines, each line an array of spans `{text, fg, bg, bold, italic, underline, strikethrough, dim, inverse}`
-- Build script that compiles to WASM via wasm-pack
-- TypeScript wrapper that loads the WASM module and provides typed API
+
+### 1a: Containerized Build System
+- Create `packages/vt-wasm/Dockerfile` -- build container based on `rust:1.82-slim` with `wasm-pack`
+- Create `packages/vt-wasm/build.sh` -- runs Podman/Docker to compile WASM, outputs to `pkg/`
+- Supports `CONTAINER_ENGINE` env var (defaults to `podman`, falls back to `docker`)
+- Build produces platform-independent `.wasm` binary + JS glue + TypeScript types
+
+### 1b: Rust WASM Wrapper
+- Create `packages/vt-wasm/Cargo.toml` -- depends on `avt = "0.17.0"`, `wasm-bindgen`, `serde-wasm-bindgen`
+- Create `packages/vt-wasm/src/lib.rs` -- thin wasm-bindgen wrapper:
+  - `create(cols, rows, scrollback_limit)` → `Vt` instance
+  - `vt.feed(text)` → changed row indices
+  - `vt.get_view()` → structured JSON: array of lines, each line an array of spans `{text, fg, bg, bold, italic, underline, strikethrough, dim, inverse, wrapped}`
+  - `vt.get_cursor()` → cursor position or null
+  - `vt.get_size()` → `[cols, rows]`
+- Uses `serde-wasm-bindgen` for JSON serialization (simpler than player's `repr(C)` zero-copy; can optimize later)
+
+### 1c: TypeScript Wrapper + Types
+- Create `packages/vt-wasm/index.ts` -- typed API that imports from `pkg/`
+- Export types: `TerminalSnapshot`, `SnapshotLine`, `SnapshotSpan` (matching ADR Decision 3 data model)
+- Async WASM init: `initVt()` loads the WASM module once
+- Factory: `createVt(cols, rows, scrollbackLimit?)` returns typed instance
+
+### 1d: Build and Commit Binary
+- Run `./build.sh` to produce `pkg/` directory
+- Commit `pkg/` contents to repo -- developers never need Rust/Podman for normal work
+- Add `packages/vt-wasm/pkg/` to git (NOT in `.gitignore`)
 
 **Tests (write first):**
 - `vt-wasm.test.ts` -- Unit tests for the TypeScript wrapper:
@@ -46,20 +68,27 @@ Stage 6: Integration + Polish     (end-to-end, edge cases)
   - Performance: feed 10,000 events in <1 second
 
 **Files to create:**
-- `packages/vt-wasm/Cargo.toml`
-- `packages/vt-wasm/src/lib.rs`
-- `packages/vt-wasm/build.sh` (or integrate into project build)
-- `packages/vt-wasm/index.ts` (TypeScript wrapper)
-- `packages/vt-wasm/vt-wasm.test.ts`
+```
+packages/vt-wasm/
+├── Dockerfile              # rust:1.82-slim + wasm-pack
+├── build.sh                # podman/docker build + run
+├── Cargo.toml              # avt 0.17.0 + wasm-bindgen + serde-wasm-bindgen
+├── src/lib.rs              # WASM-bindgen wrapper
+├── index.ts                # TypeScript typed wrapper
+├── vt-wasm.test.ts         # Tests
+└── pkg/                    # COMMITTED — build output
+    ├── vt_wasm_bg.wasm
+    ├── vt_wasm.js
+    └── vt_wasm.d.ts
+```
 
-**Dependencies added:**
-- `avt` (Rust crate, v0.17.0)
-- `wasm-bindgen` (Rust crate)
-- `wasm-pack` (build tool, dev dependency)
+**Dependencies:**
+- Rust crates (inside container only): `avt 0.17.0`, `wasm-bindgen`, `serde-wasm-bindgen`, `wee_alloc`
+- No new npm dependencies -- the WASM module is loaded directly
 
-**Review checkpoint:** Pair reviewer verifies WASM builds, tests pass, reference session events process without errors.
+**Review checkpoint:** Pair reviewer verifies: (1) `./build.sh` produces WASM with Podman, (2) tests pass against committed binary, (3) reference session events process without errors.
 
-**Exit criteria:** `npm test` passes all vt-wasm tests. WASM module loads in both Node.js (for server) and browser (for future client use).
+**Exit criteria:** `npm test` passes all vt-wasm tests. WASM module loads in Node.js. Binary committed to repo.
 
 ---
 
@@ -321,10 +350,11 @@ Migration tests (`migration-v2.test.ts`):
 - Memory: browser stays under 200MB for any session (snapshots, not raw events)
 
 ### 6d: Build and CI
-- Ensure WASM builds work in CI (GitHub Actions)
-- Pre-built WASM binary checked into repo (or CI step) so developers without Rust can still build the JS/TS parts
+- WASM binary is committed to repo — no CI build step needed for WASM
+- Verify `npm install && npm run dev` works without Rust/Podman (uses committed binary)
+- Add `npm run build:wasm` script that runs `packages/vt-wasm/build.sh` (for maintainers updating avt)
 - Update `package.json` scripts for new build steps
-- Update `.gitignore` for WASM build artifacts
+- Ensure `.gitignore` does NOT exclude `packages/vt-wasm/pkg/` (it must be committed)
 
 ### 6e: Documentation
 - Update MEMORY.md with decisions made
@@ -369,7 +399,7 @@ Stages 4 and 5 can proceed in parallel once Stage 3 is complete. Stage 6 require
 
 | Risk | Mitigation | Stage |
 |------|-----------|-------|
-| Rust/wasm-pack build complexity | Pre-build WASM binary, commit to repo; only rebuild when Rust code changes | 1 |
+| Rust/wasm-pack build complexity | Containerized build (Podman/Docker); WASM binary committed to repo; developers never install Rust | 1 |
 | avt missing escape sequences for our data | Test against all 5 reference sessions in Stage 1; file upstream issues if needed | 1 |
 | 200MB session crashes server | Streaming NDJSON parser, bounded memory; test explicitly in Stage 2 | 2 |
 | Detection produces bad boundaries | Algorithm is tunable (thresholds, weights); re-detection endpoint allows iteration | 3 |
