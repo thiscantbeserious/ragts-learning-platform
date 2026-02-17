@@ -1,7 +1,7 @@
 # ADR: RAGTS MVP v1 - Technical Architecture
 
 ## Status
-Accepted
+Implemented
 
 ## Context
 
