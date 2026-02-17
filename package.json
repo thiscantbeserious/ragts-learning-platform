@@ -10,7 +10,8 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
     "start": "NODE_ENV=production node dist/server/start.js",
-    "test": "vitest"
+    "test": "vitest",
+    "migrate:v2": "tsx src/server/scripts/migrate-v2.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
