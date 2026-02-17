@@ -116,7 +116,10 @@ pub enum Color {
 }
 ```
 
-**Parser (1,275 lines):** Implements Paul Williams' DEC ANSI parser state diagram with 11 states (Ground, Escape, EscapeIntermediate, CsiEntry, CsiParam, CsiIntermediate, CsiIgnore, DcsEntry, DcsParam, DcsIntermediate, DcsPassthrough, OscString, SosPmApcString). Emits 45+ CSI/escape functions.
+> **WARNING: avt Pen.attrs vs player TextAttrs layout mismatch.**
+> avt's `Pen.attrs` bitfield does NOT include Bold or Faint -- those are in the separate `intensity` field. The layout is: italic=bit0, underline=bit1, strikethrough=bit2, blink=bit3, inverse=bit4. The asciinema-player's `TextAttrs` bitmask (see Appendix A4) uses a DIFFERENT layout that packs Bold at bit0, Faint at bit1, shifting all other attributes up by 2. Our WASM wrapper works with avt's `Pen` directly and must use avt's layout, mapping `intensity` to Bold/Faint separately. Do NOT assume the player's TextAttrs bit positions match avt's Pen.attrs.
+
+**Parser (1,275 lines):** Implements Paul Williams' DEC ANSI parser state diagram with 13 states (Ground, Escape, EscapeIntermediate, CsiEntry, CsiParam, CsiIntermediate, CsiIgnore, DcsEntry, DcsParam, DcsIntermediate, DcsPassthrough, OscString, SosPmApcString). Emits 45+ CSI/escape functions.
 
 **Terminal state machine (1,690 lines):** Manages:
 - Primary and alternate screen buffers (`VecDeque<Line>`)
@@ -193,9 +196,9 @@ function renderRowBg(rowIndex, spans, theme) {
 3. **HTML `<pre>`** -- regular text with CSS for colors/attributes
 
 **Symbol classification:** Characters are classified at render time:
-- Raster symbols → drawn on Canvas2D at 8x24 pixel resolution per character
-- Vector symbols → SVG `<use>` elements referencing path definitions
-- Regular text → `<span>` elements with CSS classes for color/attrs
+- Raster symbols -> drawn on Canvas2D at 8x24 pixel resolution per character
+- Vector symbols -> SVG `<use>` elements referencing path definitions
+- Regular text -> `<span>` elements with CSS classes for color/attrs
 
 **Color handling:** Tag-based (4 bytes): `None | "fg" | "bg" | paletteIndex(0-255) | "#RRGGBB"`
 
@@ -205,7 +208,6 @@ function renderRowBg(rowIndex, spans, theme) {
 avt = "0.16.0"
 wasm-bindgen = "0.2.106"
 serde-wasm-bindgen = "0.6.5"
-wee_alloc = "0.4"
 
 [profile.release]
 opt-level = "z"    # optimize for size
@@ -260,36 +262,38 @@ Rationale:
 1. avt is purpose-built for our exact use case: processing recorded terminal output and maintaining a virtual screen buffer
 2. 6,466 lines of battle-tested Rust with property-based fuzz testing -- we get correctness for free
 3. The full VT parser handles all escape codes found in our production sessions (45+ CSI functions, alternate screen, scroll regions, all color modes)
-4. The API model (`feed_str()` → iterate `view()` → read cells) maps directly to our architecture
-5. Works server-side (WASM in Node.js) and client-side (WASM in browser)
+4. The API model (`feed_str()` -> iterate `view()` -> read cells) maps directly to our architecture
+5. Works server-side (WASM in Node.js); can be rebuilt with `--target web` for browser use in the future
 6. Minimal dependencies (2 crates: `rgb`, `unicode-width`)
 7. Apache-2.0 license compatible with RAGTS's AGPL-3.0
 8. The asciinema-player's WASM bridge provides a proven reference implementation we can adapt
 
+**Note on PoC:** The deep source code analysis of avt and the asciinema-player (6,466 lines of Rust + the full WASM bridge) substitutes for a traditional proof-of-concept. Stage 1 of the implementation plan serves as the de facto PoC -- it tests avt against real reference sessions and validates that the rendering engine produces correct output before any other work proceeds.
+
 **Implementation approach:**
 - Create `packages/vt-wasm/` with a simplified WASM bridge wrapping avt
 - Use avt's Rust API directly: `Vt::builder().size(cols, rows).scrollback_limit(limit).build()`
-- For server-side processing: `feed_str()` → iterate `view()` → serialize cells to JSON spans
+- For server-side processing: `feed_str()` -> iterate `view()` -> serialize cells to JSON spans
 - Simplify the player's `repr(C)` memory layout to JSON serialization via `serde-wasm-bindgen` (performance is adequate for one-time server processing; we can optimize to zero-copy later if needed)
 - **Don't** replicate the player's 3-layer Canvas/SVG/HTML rendering -- we only need the text/span layer
 
 **Build approach: Containerized WASM compilation, committed binary.**
 
-WASM is platform-independent — one `.wasm` binary runs identically on macOS, Linux, and Windows (it executes inside Node.js/browser, not natively on the OS). No per-architecture builds needed.
+WASM is platform-independent -- one `.wasm` binary runs identically on macOS, Linux, and Windows (it executes inside Node.js/browser, not natively on the OS). No per-architecture builds needed.
 
-The Rust toolchain is isolated inside a Podman/Docker container. Docker/Podman is already an expected project dependency per ARCHITECTURE.md Section 4 (Deployment View: single container → docker-compose → orchestrated). The WASM build container is just another use of infrastructure developers already have.
+The Rust toolchain is isolated inside a Podman/Docker container. Docker/Podman is already an expected project dependency per ARCHITECTURE.md Section 4 (Deployment View: single container -> docker-compose -> orchestrated). The WASM build container is just another use of infrastructure developers already have.
 
 ```
 packages/vt-wasm/
-├── Dockerfile              # Build container: rust:1.82 + wasm-pack
-├── build.sh                # podman/docker build + run → outputs pkg/
-├── Cargo.toml              # avt + wasm-bindgen dependencies
-├── src/lib.rs              # Thin wasm-bindgen wrapper around avt
-├── pkg/                    # COMMITTED TO REPO — build output
-│   ├── vt_wasm_bg.wasm     # The WASM binary (platform-independent)
-│   ├── vt_wasm.js          # JS glue (generated by wasm-pack)
-│   └── vt_wasm.d.ts        # TypeScript types (generated)
-└── index.ts                # Our typed wrapper that imports from pkg/
++-- Dockerfile              # Build container: rust:1.82 + wasm-pack
++-- build.sh                # podman/docker build + run -> outputs pkg/
++-- Cargo.toml              # avt + wasm-bindgen dependencies
++-- src/lib.rs              # Thin wasm-bindgen wrapper around avt
++-- pkg/                    # COMMITTED TO REPO -- build output
+|   +-- vt_wasm_bg.wasm     # The WASM binary (platform-independent)
+|   +-- vt_wasm.js          # JS glue (generated by wasm-pack)
+|   +-- vt_wasm.d.ts        # TypeScript types (generated)
++-- index.ts                # Our typed wrapper that imports from pkg/
 ```
 
 Build workflow:
@@ -306,9 +310,9 @@ The `Dockerfile`:
 FROM rust:1.82-slim
 RUN cargo install wasm-pack
 WORKDIR /build
-COPY Cargo.toml Cargo.lock src/ ./
-RUN wasm-pack build --target nodejs --release
-# Output: /build/pkg/
+COPY Cargo.toml ./
+COPY src/ src/
+CMD ["wasm-pack", "build", "--target", "nodejs", "--release", "--out-dir", "/output/pkg"]
 ```
 
 The `build.sh`:
@@ -317,16 +321,17 @@ The `build.sh`:
 set -euo pipefail
 CONTAINER_ENGINE="${CONTAINER_ENGINE:-podman}"
 $CONTAINER_ENGINE build -t ragts-vt-build .
-$CONTAINER_ENGINE run --rm -v "$(pwd)/pkg:/build/pkg" ragts-vt-build
-echo "WASM build complete → pkg/"
+$CONTAINER_ENGINE run --rm -v "$(pwd)/pkg:/output/pkg" ragts-vt-build
+echo "WASM build complete -> pkg/"
 ```
 
 **Why this approach:**
-- No Rust on developer machines — uses the same Docker/Podman already needed for deployment
-- WASM output is platform-independent — build once on any OS, runs everywhere
-- Binary committed to repo — `npm install` + `npm run dev` just works, no container needed for day-to-day dev
-- Reproducible builds — pinned Rust version in Dockerfile
-- Update path: bump avt version in Cargo.toml → `./build.sh` → commit pkg/
+- No Rust on developer machines -- uses the same Docker/Podman already needed for deployment
+- WASM output is platform-independent -- build once on any OS, runs everywhere
+- Binary committed to repo -- `npm install` + `npm run dev` just works, no container needed for day-to-day dev
+- Reproducible builds -- pinned Rust version in Dockerfile
+- Update path: bump avt version in Cargo.toml -> `./build.sh` -> commit pkg/
+- wasm-pack runs at container runtime (CMD), not build time (RUN), so the output is written to the host-mounted volume
 
 ### Consequences
 
@@ -374,21 +379,23 @@ echo "WASM build complete → pkg/"
 
 No single signal reliably identifies section boundaries across all agent types. The algorithm combines multiple signals with weighted scoring:
 
-#### Signal 1: Timing Gaps (Primary Signal)
+#### Signal 1: Timing Gaps (Co-Primary Signal)
 
 Large timing gaps between consecutive events indicate natural pauses -- user thinking, agent processing, or session phase transitions.
 
 - **Threshold**: Adaptive, based on session statistics. Compute the median inter-event gap and the 95th percentile. A "significant gap" is one that exceeds `max(5 seconds, 95th_percentile * 3)`.
-- **Weight**: High. This is the most reliable signal across all agent types.
-- **Limitation**: AGR-processed sessions may have compressed timestamps. If max_gap < 1s across the entire session, timing is unreliable and this signal is disabled.
+- **Weight**: High when timing data is reliable. This is the dominant signal for raw (non-AGR-processed) recordings where natural timing is preserved.
+- **Limitation**: AGR-processed sessions have compressed timestamps. If max_gap < 1s across the entire session, timing is unreliable and this signal is disabled.
 
-#### Signal 2: Screen Clear Sequences (Secondary Signal)
+#### Signal 2: Screen Clear Sequences (Co-Primary Signal)
 
 `\x1b[2J` (clear entire screen) and `\x1b[3J` (clear screen + scrollback) indicate TUI phase transitions. In Claude Code sessions, these correlate with tool execution boundaries.
 
 - **Detection**: Scan output event data for `\x1b[2J` or `\x1b[3J`
-- **Weight**: Medium-high. Very reliable when present, but not all sessions use screen clears.
+- **Weight**: High. This is the dominant signal for AGR-processed sessions where timing has been compressed but screen clears are preserved.
 - **Debounce**: Multiple clears within 10 events of each other are treated as a single boundary (TUI redraw noise). Use the last clear in a cluster.
+
+**Note on signal primacy:** Timing gaps and screen clears are both primary signals, but their dominance depends on session type. For raw recordings with natural timing, timing gaps are the dominant signal. For AGR-processed sessions (timestamps compressed), screen clears are the dominant signal. Most sessions in the reference corpus are AGR-processed, making screen clears the dominant signal in practice. Neither signal is universally primary across all session types.
 
 #### Signal 3: Alternate Screen Buffer Transitions (Secondary Signal)
 
@@ -398,13 +405,13 @@ Large timing gaps between consecutive events indicate natural pauses -- user thi
 - **Weight**: Medium. Rare but very precise when present.
 - **Boundary placement**: At the `?1049l` (exit) event. The alternate screen content itself could be a collapsed sub-section.
 
-#### Signal 4: Output Volume Bursts (Tertiary Signal)
+#### Signal 4: Output Volume Bursts (Tertiary Signal / Tiebreaker)
 
 Periods of high output volume (many events in rapid succession) followed by silence indicate agent processing phases. The transition from burst to quiet is a potential boundary.
 
 - **Detection**: Compute a rolling window of output bytes per time unit. Boundaries at transitions from high-volume to low-volume.
 - **Weight**: Low. Used as a tiebreaker, not a primary signal.
-- **Only applicable**: When timing data is available (non-compressed sessions).
+- **Only applicable**: When timing data is available (non-compressed sessions). This signal is only active alongside Signal 1 (both require timing data) and serves as a tiebreaker when timing gaps are marginal -- e.g., a gap of 4.8s that falls just below the 5s threshold can be promoted to a boundary if it also coincides with a volume burst transition.
 
 #### Boundary Scoring and Merging
 
@@ -434,7 +441,7 @@ When a session has both markers and auto-detected sections:
 
 **Implement multi-signal heuristic detection with adaptive thresholds, run server-side during ingestion.**
 
-The algorithm prioritizes timing gaps (when available) and screen clear sequences (always available in TUI sessions). It degrades gracefully: if timestamps are compressed, it falls back to structural signals only. If no signals are found, the session renders as a single block.
+The algorithm uses timing gaps and screen clear sequences as co-primary signals, with their relative dominance depending on session type. It degrades gracefully: if timestamps are compressed, it falls back to structural signals (screen clears, alt screen transitions). If no signals are found, the session renders as a single block.
 
 ### Consequences
 
@@ -491,7 +498,6 @@ Server processes events through avt to extract **structured terminal state** (no
 2. At each section boundary, the server snapshots the terminal buffer state as structured JSON: an array of lines, each line an array of spans with `{text, fg, bg, bold, italic, ...}`
 3. These snapshots are stored in the database alongside section metadata
 4. The client receives section snapshots and renders them to DOM spans with CSS classes
-5. For the "between sections" content, the server also stores the intermediate output so clients can expand sections and see full content
 
 **Snapshot data model (derived from avt's Cell/Pen types):**
 ```typescript
@@ -520,7 +526,14 @@ interface SnapshotSpan {
 }
 ```
 
-This maps directly to avt's `Cell(char, width, Pen)` → consecutive cells with identical pens are merged into spans.
+This maps directly to avt's `Cell(char, width, Pen)` -> consecutive cells with identical pens are merged into spans.
+
+> **Viewport-only snapshots -- trade-off acknowledgment.**
+> `vt.view()` returns only the visible viewport (e.g., the 80x24 or 120x40 character grid). It does NOT include scrollback history.
+> - For TUI applications (Claude Code, Codex, Gemini CLI), this IS the full content. TUI apps manage the entire screen buffer -- they redraw the viewport in-place using cursor positioning. The viewport snapshot captures the complete rendered state.
+> - For non-TUI CLI output (e.g., a long `ls` or `cat` that scrolls past the viewport), content that has scrolled off the top of the viewport is lost in the snapshot. Only the last N rows (viewport height) are captured.
+> - The `scrollback_limit` parameter on `Vt::builder()` controls how much scrollback history avt retains internally. Setting this allows future retrieval via `vt.lines()`.
+> - **Future improvement:** For non-TUI sessions, capture scrollback via `vt.lines()` (which returns all lines including scrollback) to preserve output that has scrolled past the viewport. This is not needed for MVP v2 because all reference sessions are TUI applications.
 
 **Pros:**
 - Rendering work done once on the server, amortized across all clients
@@ -534,6 +547,16 @@ This maps directly to avt's `Cell(char, width, Pen)` → consecutive cells with 
 - More complex server pipeline than pure pass-through
 - Storage overhead for snapshots (mitigated by their compact size)
 - Server needs WASM runtime (Node.js can load WASM modules natively via `WebAssembly.instantiate`)
+
+### Schema Extensions
+
+The `sections` table defined in REQUIREMENTS.md Section 6 does not include a column for the terminal snapshot. The following column is added to the `sections` table schema:
+
+```sql
+ALTER TABLE sections ADD COLUMN snapshot TEXT;  -- JSON blob: TerminalSnapshot (nullable)
+```
+
+This extends the REQUIREMENTS schema. The `snapshot` column stores the serialized `TerminalSnapshot` JSON for the terminal state at the section boundary. It is nullable because marker sections imported during migration may not have snapshots generated yet (they are populated during the snapshot generation pass).
 
 ### Decision
 
@@ -575,7 +598,7 @@ Load session detail
 - The server ingestion pipeline becomes the critical path. It must handle 200MB sessions without crashing.
 - Streaming NDJSON parsing is required -- we cannot load entire sessions into memory.
 - avt WASM runs in Node.js (supported natively via `WebAssembly.instantiate`).
-- The `sections` table gains a `snapshot` column (JSON blob) for rendered terminal state.
+- The `sections` table gains a `snapshot` column (JSON blob) for rendered terminal state (see Schema Extensions above).
 - The client `AnsiLine.vue` is replaced by a `TerminalSnapshot.vue` that renders structured span data.
 
 ---
@@ -638,6 +661,77 @@ Steps 2-4 can be combined into a single streaming pass over the `.cast` file.
 
 ---
 
+## Decision 5: Section Content Model
+
+### Context
+
+When a user expands a section, what do they see? The answer depends on what terminal state we capture at each section boundary and how we present it.
+
+### Options
+
+#### Option A: Show only the terminal viewport snapshot at the section END (Recommended)
+
+At each section boundary, call `vt.view()` and capture the visible viewport (e.g., 80x24 grid). When the user expands a section, they see a static image of what the terminal looked like at the end of that section.
+
+**Pros:**
+- Simplest implementation -- one snapshot per section, already captured during ingestion
+- Correct for TUI applications (Claude Code, Codex, Gemini CLI) which manage the full screen -- the viewport IS the complete rendered state at that point
+- Small storage footprint (one viewport per section)
+- Fast to render (just styled spans for one screen)
+
+**Cons:**
+- For non-TUI CLI output that scrolls past the viewport, intermediate output is lost
+- Only shows the final state, not the progression within the section
+
+#### Option B: Show the terminal viewport snapshot PLUS accumulated scrollback during the section
+
+Capture both `vt.view()` (viewport) and the scrollback lines that were evicted during the section's event range. Present the scrollback above the viewport.
+
+**Pros:**
+- Preserves non-TUI output that scrolls past the viewport
+- More complete picture of what happened
+
+**Cons:**
+- Significantly more complex -- must track scrollback deltas per section
+- Storage overhead for scrollback content
+- TUI apps rarely produce meaningful scrollback (they redraw in-place)
+- Scrollback presentation UX is unclear (scrollable region above the viewport?)
+
+#### Option C: Show a series of snapshots at regular intervals within the section
+
+Capture viewport snapshots at multiple points within each section (e.g., every 500 events). Present as a gallery or timeline.
+
+**Pros:**
+- Shows progression within a section
+- Could allow scrubbing through section content
+
+**Cons:**
+- Multiplies storage by the number of intermediate snapshots
+- Complex UI for presenting multiple snapshots
+- Approaches playback territory (which is explicitly not our design)
+
+### Decision
+
+**Option A: Show only the terminal viewport snapshot at the section END.**
+
+For MVP v2, this is the simplest correct approach. TUI applications -- which constitute all sessions in the reference corpus -- manage the full screen, so the viewport snapshot IS the complete rendered content. The snapshot shows exactly what the terminal looked like when the section ended.
+
+**Trade-off acknowledged:** Non-TUI CLI output that scrolls past the viewport is lost in the snapshot. A long `ls` or `cat` output will only show the last N rows. This is acceptable for MVP v2 because:
+1. All reference sessions are TUI applications
+2. AGR-processed sessions are the primary use case, and AGR records TUI agents
+3. Scrollback capture (Option B) can be added in a future iteration for non-TUI session support
+
+**Alternate screen buffer content:** If a section boundary falls during alternate screen mode, the snapshot captures the alternate screen content. When the session exits alternate screen, the primary buffer is restored and the next section's snapshot captures the primary buffer. This is handled naturally by avt -- `vt.view()` returns whichever buffer is currently active.
+
+### Consequences
+
+- Each section has exactly one `TerminalSnapshot` (nullable, populated during ingestion)
+- The client renders one viewport-sized grid per expanded section
+- No scrollback capture or multi-snapshot complexity in MVP v2
+- Future work: add scrollback capture via `vt.lines()` for non-TUI sessions
+
+---
+
 ## Appendix: asciinema-player Source Code Reference
 
 This appendix documents the concrete findings from analyzing the asciinema-player (`github.com/asciinema/asciinema-player`) and avt (`github.com/asciinema/avt`) source code repositories, cloned and read in full.
@@ -646,21 +740,21 @@ This appendix documents the concrete findings from analyzing the asciinema-playe
 
 ```
 Recording File (.cast)
-    ↓ src/parser/asciicast.js (supports v1/v2/v3 formats)
-Parser → { cols, rows, events: [[time, type, data], ...] }
-    ↓ src/driver/recording.js (playback state machine)
-Recording Driver → play/pause/seek/step
-    ↓ src/buffer.js (adaptive buffering with EMA smoothing)
-Buffer → timed event delivery
-    ↓ src/vt/ (Rust WASM via avt)
-Virtual Terminal → screen buffer state
-    ↓ src/components/Terminal.js (SolidJS component)
+    | src/parser/asciicast.js (supports v1/v2/v3 formats)
+Parser -> { cols, rows, events: [[time, type, data], ...] }
+    | src/driver/recording.js (playback state machine)
+Recording Driver -> play/pause/seek/step
+    | src/buffer.js (adaptive buffering with EMA smoothing)
+Buffer -> timed event delivery
+    | src/vt/ (Rust WASM via avt)
+Virtual Terminal -> screen buffer state
+    | src/components/Terminal.js (SolidJS component)
 3-Layer Renderer: Canvas (blocks) + SVG (vectors) + HTML (text)
 ```
 
 ### A2: avt Internal Architecture
 
-**Parser states (11):** Ground, Escape, EscapeIntermediate, CsiEntry, CsiParam, CsiIntermediate, CsiIgnore, DcsEntry, DcsParam, DcsIntermediate, DcsPassthrough, OscString, SosPmApcString.
+**Parser states (13):** Ground, Escape, EscapeIntermediate, CsiEntry, CsiParam, CsiIntermediate, CsiIgnore, DcsEntry, DcsParam, DcsIntermediate, DcsPassthrough, OscString, SosPmApcString.
 
 **Emitted functions (45+):** Cup, Cuu, Cud, Cuf, Cub, Cha, Vpa, Cnl, Cpl, Ich, Dch, Il, Dl, Ech, El, Ed, Cht, Cbt, Hts, Tbc, Su, Sd, Sgr, Sm, Rm, Decset, Decrst, and more.
 
@@ -671,34 +765,47 @@ Virtual Terminal → screen buffer state
 ### A3: Player Color Pipeline
 
 ```
-avt Color enum → vt-js Color repr(C) → JavaScript getColor() → CSS string
+avt Color enum -> vt-js Color repr(C) -> JavaScript getColor() -> CSS string
 
 Rust side:
-  Indexed(n) → tag=3, value=n
-  RGB(r,g,b) → tag=4, r, g, b
+  Indexed(n) -> tag=3, value=n
+  RGB(r,g,b) -> tag=4, r, g, b
 
 JS side:
-  tag 0 → null (no color)
-  tag 1 → theme.fg (default foreground)
-  tag 2 → theme.bg (default background)
-  tag 3 → theme.palette[n] (0-255, includes 16 ANSI + 240 extended)
-  tag 4 → `rgb(${r},${g},${b})`
+  tag 0 -> null (no color)
+  tag 1 -> theme.fg (default foreground)
+  tag 2 -> theme.bg (default background)
+  tag 3 -> theme.palette[n] (0-255, includes 16 ANSI + 240 extended)
+  tag 4 -> `rgb(${r},${g},${b})`
 ```
 
 ### A4: Player Text Attribute Mapping
 
+> **WARNING: The player's TextAttrs bitmask uses a DIFFERENT layout from avt's Pen.attrs.**
+> avt's `Pen.attrs` does not include Bold/Faint (those are in the separate `Pen.intensity` field). The player's `TextAttrs` re-packs Bold and Faint into the bitmask at bits 0-1, shifting all other attributes up by 2. Our WASM wrapper uses avt's `Pen` directly and must map `intensity` to Bold/Faint separately from the `attrs` bitfield. See the warning in Decision 1 for details.
+
 ```rust
-// Rust TextAttrs bitmask:
-const BOLD: u8 = 1;
-const FAINT: u8 = 1 << 1;
-const ITALIC: u8 = 1 << 2;
-const UNDERLINE: u8 = 1 << 3;
-const STRIKETHROUGH: u8 = 1 << 4;
-const BLINK: u8 = 1 << 5;
+// Player's TextAttrs bitmask (used in the player's vt-js bridge, NOT avt's Pen.attrs):
+const BOLD: u8 = 1;           // bit 0
+const FAINT: u8 = 1 << 1;     // bit 1
+const ITALIC: u8 = 1 << 2;    // bit 2
+const UNDERLINE: u8 = 1 << 3; // bit 3
+const STRIKETHROUGH: u8 = 1 << 4; // bit 4
+const BLINK: u8 = 1 << 5;     // bit 5
+```
+
+```rust
+// avt's Pen.attrs bitfield (what our WASM wrapper uses):
+// Bold and Faint are NOT here -- they are in Pen.intensity
+// italic = bit 0
+// underline = bit 1
+// strikethrough = bit 2
+// blink = bit 3
+// inverse = bit 4
 ```
 
 ```javascript
-// JS CSS class mapping:
+// Player's JS CSS class mapping (maps player's TextAttrs, not avt's Pen.attrs):
 if (attrs & 1) cls += "ap-bold ";
 if (attrs & 4) cls += "ap-italic ";
 if (attrs & 8) cls += "ap-underline ";
@@ -726,6 +833,7 @@ if (attrs & 16) cls += "ap-strike ";
 | # | Decision | Choice | Key Rationale |
 |---|----------|--------|---------------|
 | 1 | Rendering Engine | asciinema `avt` v0.17.0 via WASM | Purpose-built for asciicast, 6.5K lines tested Rust, full VT parser. Source code analyzed in depth. |
-| 2 | Section Detection | Multi-signal heuristic (timing gaps + screen clears + alt screen) | Adapts to real TUI data, degrades gracefully |
-| 3 | Rendering Architecture | Hybrid: server-side avt processing, client-side DOM rendering | Render once, serve to all; scales to 200MB sessions |
+| 2 | Section Detection | Multi-signal heuristic (timing gaps + screen clears as co-primary, alt screen, volume bursts) | Adapts to real TUI data, degrades gracefully, signal dominance varies by session type |
+| 3 | Rendering Architecture | Hybrid: server-side avt processing, client-side DOM rendering | Render once, serve to all; scales to 200MB sessions; viewport-only snapshots |
 | 4 | Migration Strategy | Single-pass streaming migration | Efficient, idempotent, additive-only |
+| 5 | Section Content Model | Viewport snapshot at section END only | Simplest correct approach for TUI apps; scrollback capture deferred |
