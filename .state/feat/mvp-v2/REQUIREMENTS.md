@@ -49,58 +49,62 @@ MVP v1 shipped with:
 
 ## 3. Functional Requirements
 
-### FR-1: Auto-Detect Command Boundaries
+### FR-1: Auto-Detect Section Boundaries
 
-**User Story:** As a user viewing a markerless session, I can collapse and expand sections based on detected command boundaries so I can navigate structure even without explicit markers.
+**User Story:** As a user viewing a markerless session, I can collapse and expand sections based on detected structural boundaries so I can navigate the session even without explicit markers.
+
+**Critical Context — Real Session Data:**
+Analysis of 81 production sessions reveals that the vast majority are **TUI application recordings** (Claude Code, OpenAI Codex, Gemini CLI), NOT traditional shell sessions. The terminal output is heavily escape-coded with box-drawing characters, cursor movements, screen redraws, and interactive UI elements. **Shell prompt regex detection (e.g., matching `$ `) will not work** for this data and must NOT be the detection approach.
+
+**Reference sessions for Architect analysis** (located at `~/recorded_agent_sessions/`):
+- `claude/agnt-ses-rec_260203_171636.cast` — 6.6MB, 34K lines, markerless Claude Code TUI session
+- `codex/codex-pattern-analysis.cast` — 4.3MB, 10K lines, markerless Codex TUI session
+- `gemini/aggressive-terminal-noise-reduction.cast` — 207MB, 199K lines, markerless Gemini CLI session (largest)
+- `claude/fix-grid-field-type-batch-update.cast` — 13MB, 30K lines, 4 markers (hybrid example)
+- `claude/extraction-pipeline-config-migration-overhaul.cast` — 47MB, 175K lines, 12 markers (large hybrid)
+
+The Architect MUST analyze these reference sessions to design a detection algorithm that works with real TUI output, not hypothetical shell prompts.
 
 **Acceptance Criteria:**
-- System detects shell prompts in terminal output as section boundaries
-- Each command + its output becomes a collapsible section
-- Detection works for common shell prompts:
-  - Bash/Zsh: `$ `, `user@host:~$ `, `[user@host ~]$ `
-  - Custom prompts with `$ ` or `# ` suffix
-  - Git branch indicators: `(main) $ `, `[feature-branch]$ `
+- System detects structural boundaries in terminal output as section fold points
+- Detection algorithm designed by Architect based on analysis of real production sessions (see reference files above)
 - Auto-detected sections behave identically to marker-based sections (collapse/expand, visual indicator)
 - **Default state: auto-detected sections collapsed** (same as markers)
-- Sessions WITH markers: markers take precedence over auto-detection within unmarked regions
+- Sessions WITH markers: markers take precedence; auto-detection fills unmarked regions
 - Hybrid sessions (some markers, mostly unmarked): both systems coexist
-  - Marked regions: use markers as fold points
-  - Unmarked regions: apply auto-detection
 - Detection happens server-side during session ingestion (stored in DB)
 - Re-detection can be triggered manually if detection logic improves
 
 **Edge Cases:**
-- Session with no detectable prompts: falls back to rendering entire session as single expanded block
-- False positive prompts in output: acceptable for MVP (user can expand to see full output)
-- Nested prompts (subshells): detect all levels, nest fold structure if possible
-- Very long output between prompts (>10k lines): still treat as single section
+- Session with no detectable boundaries: falls back to rendering entire session as single expanded block
+- Very long output between boundaries (>10k events): still treat as single section
+- Very short sessions (<100 events): skip detection, render as single block
 
 **Performance:**
-- Detection must complete in <5 seconds for sessions up to 100k lines
+- Detection must complete in <10 seconds for sessions up to 200K events
 - Detection runs asynchronously during upload, does not block upload completion
 
-**Detection Algorithm (Guidance for Implementer):**
-Parse NDJSON session line-by-line:
-1. Look for output lines matching shell prompt patterns (regex-based)
-2. When prompt detected, mark as section boundary
-3. Store section boundaries in DB as structured data (similar to markers)
-4. Frontend renders sections identically to marker-based folds
+**Detection Algorithm:**
+- **NOT prescribed here** — the Architect must analyze the reference session files and design an appropriate algorithm
+- The PO explicitly rejects regex-based shell prompt detection as the primary approach
+- Possible directions the Architect should explore (not exhaustive): timing gaps between events, ANSI screen clear sequences, TUI redraw patterns, output volume patterns — but the real data must drive the decision
+- Algorithm design is an **open question for the Architect** (see Section 13)
 
 ### FR-2: Server-Side Pagination for Large Sessions
 
-**User Story:** As a user viewing a massive session (>50k lines), the system serves content in chunks so that rendering remains responsive and does not crash the browser.
+**User Story:** As a user viewing a massive session (>50K events), the system serves content in chunks so that rendering remains responsive and does not crash the browser.
 
 **Acceptance Criteria:**
 - Session detail endpoint supports pagination: `GET /api/sessions/:id?offset=0&limit=1000`
-- Default chunk size: 1000 lines (configurable via env var)
+- Default chunk size: 1000 events (configurable via env var)
 - Response includes:
-  - Chunk content (lines 0-999, or requested range)
-  - Total line count
+  - Chunk content (events 0-999, or requested range)
+  - Total event count
   - Current offset
   - Has more data (boolean)
 - Frontend lazy-loads chunks as user scrolls (infinite scroll pattern)
 - Fold/unfold state preserved across chunk boundaries
-- Chunks align with section boundaries where possible (do not split a command+output mid-section)
+- **Chunks are fixed-size event ranges** (e.g., events 0-999, 1000-1999). Chunks do NOT attempt to align with section boundaries — this avoids combinatorial complexity. Sections and chunks are independent coordinate systems that the frontend overlays.
 - First chunk loads immediately (<500ms)
 - Subsequent chunks load on-demand as user approaches end of current chunk
 
@@ -108,7 +112,7 @@ Parse NDJSON session line-by-line:
 - User scrolls very fast: load multiple chunks in parallel (max 3 simultaneous requests)
 - User jumps to bottom: load final chunk directly
 - Session smaller than chunk size: serve entire session in single response (no pagination overhead)
-- Section spans multiple chunks: load all chunks for that section when expanded
+- Section spans multiple chunks: frontend loads additional chunks as needed when user expands a section that crosses chunk boundaries
 
 **Performance:**
 - First paint (initial chunk) must happen in <1 second for any session size
@@ -117,10 +121,10 @@ Parse NDJSON session line-by-line:
 
 ### FR-3: Virtual Scrolling Integration
 
-**User Story:** As a user viewing a large session with many sections, only the visible viewport is rendered so that the browser remains responsive even with 100k+ lines loaded.
+**User Story:** As a user viewing a large session with many sections, only the visible viewport is rendered so that the browser remains responsive even with 100K+ events loaded.
 
 **Acceptance Criteria:**
-- Use `@tanstack/vue-virtual` (already decided in MVP v1 ADR)
+- Use `@tanstack/vue-virtual` (decided in MVP v1 ADR but not yet installed — must be added as dependency in MVP v2)
 - Virtual scrolling applies to the session detail view
 - Only visible rows rendered in DOM (viewport + buffer zone)
 - Scroll position preserved when expanding/collapsing sections
@@ -128,12 +132,12 @@ Parse NDJSON session line-by-line:
 - Works correctly with variable-height rows (sections vary in size)
 
 **Edge Cases:**
-- User expands section with 10k lines: virtual scrolling keeps rendering smooth
+- User expands section with 10K events: virtual scrolling keeps rendering smooth
 - User collapses large section: scroll position adjusts to prevent jump
-- Search/jump to line: virtual scroller scrolls to target position
+- Search/jump to event: virtual scroller scrolls to target position
 
 **Performance:**
-- Rendering 100k lines session: smooth 60fps scrolling
+- Rendering 100K events session: smooth 60fps scrolling
 - Expand/collapse: completes in <200ms (same as MVP v1 NFR)
 
 ### FR-4: Agent Type Metadata
@@ -182,15 +186,15 @@ Parse NDJSON session line-by-line:
 **User Story:** As a user with large sessions (>50MB), I can upload files up to 250MB so that all my real recorded sessions can be imported.
 
 **Acceptance Criteria:**
-- Upload limit increased to 250MB (from 50MB in MVP v1)
+- Per-file upload limit increased to 250MB (from 50MB in MVP v1)
 - Configurable via env var: `MAX_FILE_SIZE_MB=250`
-- Upload progress indicator for large files (shows percentage)
+- **Client-side** upload progress indicator for large files (using `XMLHttpRequest.upload.onprogress` or fetch upload stream — Hono's server-side `parseBody()` does not expose progress events)
 - Large file uploads do not timeout (adjust server request timeout)
 - Validation error message if file exceeds limit: "File too large. Maximum size: 250MB. Consider processing with AGR to reduce size."
 
 **Performance:**
 - 100MB file upload completes in <30 seconds on typical connection
-- Upload progress updates every 5% increment
+- Upload progress updates visually during upload (client-side, not server-side)
 
 ### FR-7: Edit Session Metadata
 
@@ -231,7 +235,7 @@ Parse NDJSON session line-by-line:
 
 **Requirements:**
 - Command boundary detection stored durably in DB
-- Pagination chunk boundaries never split a line (align on NDJSON boundaries)
+- Pagination chunk boundaries align on event boundaries (one event = one NDJSON line)
 - Metadata edits are atomic (no partial updates)
 
 **Acceptance Criteria:**
@@ -249,7 +253,7 @@ Parse NDJSON session line-by-line:
 **Acceptance Criteria:**
 - Migration script updates schema without data loss
 - Old sessions display correctly in new UI
-- No breaking changes to existing API endpoints (only additions/extensions)
+- API breaking changes are acceptable where required (e.g., `GET /api/sessions` response shape changes from array to paginated object). There are no external consumers — only the RAGTS frontend.
 
 ### NFR-4: Scalability
 
@@ -261,7 +265,24 @@ Parse NDJSON session line-by-line:
 - DB queries use indexes (no full table scans)
 - Session list query returns in <500ms even with 1000 sessions
 
-## 5. Data Model Changes
+## 5. Coordinate System Definition
+
+**CRITICAL: "Event index" is the canonical coordinate system throughout MVP v2.**
+
+A `.cast` file is NDJSON: line 1 is the header, lines 2+ are events. Each event has a type (`"o"` for output, `"m"` for marker, etc.). The coordinate system:
+
+- **Event index** — 0-indexed position in the events array (excluding the header). Event 0 is the first event after the header. This is used for:
+  - Section boundaries (`start_event`, `end_event`)
+  - Pagination offsets and limits
+  - Marker positions (already stored as event indices in MVP v1)
+
+- **NOT rendered output lines** — Concatenating output events and splitting on `\n` produces "rendered lines," but these are NOT used as coordinates. Rendered lines are a frontend concern only.
+
+- `event_count` — Total number of events in the session (NDJSON lines minus 1 for the header). Used for pagination math and progress display.
+
+This definition means: `GET /api/sessions/:id?offset=0&limit=1000` returns events 0-999, not "rendered lines 0-999."
+
+## 6. Data Model Changes
 
 ### Updated SQLite Schema
 
@@ -278,8 +299,8 @@ CREATE TABLE sessions (
 
   -- NEW FIELDS for MVP v2
   agent_type TEXT,                  -- Agent type: claude, gemini, codex, echo, other (nullable)
-  line_count INTEGER,               -- Total line count (for pagination)
-  detected_sections_count INTEGER DEFAULT 0,  -- Count of auto-detected command boundaries
+  event_count INTEGER,              -- Total event count (NDJSON lines minus header)
+  detected_sections_count INTEGER DEFAULT 0,  -- Count of auto-detected boundaries
   detection_status TEXT DEFAULT 'pending'     -- pending, completed, failed
 );
 ```
@@ -290,9 +311,9 @@ CREATE TABLE sections (
   id TEXT PRIMARY KEY,              -- nanoid
   session_id TEXT NOT NULL,         -- Foreign key to sessions.id
   type TEXT NOT NULL,               -- 'marker' or 'detected'
-  start_line INTEGER NOT NULL,      -- 0-indexed line number where section starts
-  end_line INTEGER,                 -- Line number where section ends (null = EOF)
-  label TEXT,                       -- Marker text (if type=marker) or detected command (if type=detected)
+  start_event INTEGER NOT NULL,     -- 0-indexed event where section starts
+  end_event INTEGER,                -- Event where section ends (null = EOF)
+  label TEXT,                       -- Marker text or detected label
   created_at TEXT DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
@@ -305,14 +326,15 @@ CREATE INDEX idx_sessions_agent_type ON sessions(agent_type);
 CREATE INDEX idx_sessions_filename ON sessions(filename);  -- For search
 CREATE INDEX idx_sessions_uploaded_at ON sessions(uploaded_at DESC);  -- Already exists from v1
 CREATE INDEX idx_sections_session_id ON sections(session_id);
-CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- For chunk boundary alignment
+CREATE INDEX idx_sections_start_event ON sections(session_id, start_event);  -- For chunk boundary alignment
 ```
 
 **Migration Notes:**
 - Existing sessions: `agent_type` defaults to NULL
-- Existing sessions: `line_count` calculated during migration (read .cast file, count lines)
+- Existing sessions: `event_count` calculated during migration (count NDJSON lines minus 1 — fast, no parsing needed, just count newlines)
 - Existing sessions: `detection_status` defaults to 'pending', background job re-processes
-- `sections` table populated from existing markers, then detection runs
+- Existing markers extracted to `sections` table during migration (markers already use event indices in MVP v1, so mapping is direct)
+- **Marker extraction from MVP v1**: Current code parses markers on-the-fly from .cast files. Migration must read each existing session's .cast file, extract markers using existing `extractMarkers()`, and insert them into the `sections` table with `type='marker'`. This is a one-time migration, after which markers are served from DB, not re-parsed.
 
 ## 6. API Changes
 
@@ -329,7 +351,7 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
   "id": "abc123",
   "filename": "my-session.cast",
   "size_bytes": 123456,
-  "line_count": 5420,
+  "event_count": 5420,
   "marker_count": 5,
   "detected_sections_count": 0,  // Pending detection
   "agent_type": "claude",
@@ -340,7 +362,7 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
 
 **Changes from v1:**
 - Added `agent_type` field in request
-- Added `line_count`, `detected_sections_count`, `agent_type`, `detection_status` in response
+- Added `event_count`, `detected_sections_count`, `agent_type`, `detection_status` in response
 
 #### GET /api/sessions
 **Request:**
@@ -358,7 +380,7 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
       "id": "abc123",
       "filename": "my-session.cast",
       "size_bytes": 123456,
-      "line_count": 5420,
+      "event_count": 5420,
       "marker_count": 5,
       "detected_sections_count": 34,
       "agent_type": "claude",
@@ -374,14 +396,14 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
 
 **Changes from v1:**
 - Added search and filter query params
-- Added `line_count`, `detected_sections_count`, `agent_type`, `detection_status` to response objects
+- Added `event_count`, `detected_sections_count`, `agent_type`, `detection_status` to response objects
 - Added `total`, `offset`, `limit` for pagination support
 
 #### GET /api/sessions/:id
 **Request:**
 - Query params:
-  - `offset` (optional, default 0): line number to start from
-  - `limit` (optional, default 1000): number of lines to return
+  - `offset` (optional, default 0): event index to start from
+  - `limit` (optional, default 1000): number of events to return
 
 **Response (200):**
 ```json
@@ -389,7 +411,7 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
   "id": "abc123",
   "filename": "my-session.cast",
   "size_bytes": 123456,
-  "line_count": 5420,
+  "event_count": 5420,
   "marker_count": 5,
   "detected_sections_count": 34,
   "agent_type": "claude",
@@ -405,22 +427,22 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
     {
       "id": "sec1",
       "type": "marker",
-      "start_line": 0,
-      "end_line": 120,
+      "start_event": 0,
+      "end_event": 120,
       "label": "Setup environment"
     },
     {
       "id": "sec2",
       "type": "detected",
-      "start_line": 121,
-      "end_line": 340,
+      "start_event": 121,
+      "end_event": 340,
       "label": "$ npm install"
     }
   ],
   "pagination": {
     "offset": 0,
     "limit": 1000,
-    "total_lines": 5420,
+    "total_events": 5420,
     "has_more": true,
     "next_offset": 1000
   }
@@ -429,10 +451,10 @@ CREATE INDEX idx_sections_start_line ON sections(session_id, start_line);  -- Fo
 
 **Changes from v1:**
 - Added `offset` and `limit` query params
-- Added `line_count`, `detected_sections_count`, `agent_type`, `detection_status` fields
+- Added `event_count`, `detected_sections_count`, `agent_type`, `detection_status` fields
 - Added `sections` array (replaces inline marker detection in v1)
 - Added `pagination` object
-- `content.events` only includes lines in requested range (not entire file)
+- `content.events` only includes events in requested range (not entire file)
 
 #### PUT /api/sessions/:id
 **NEW endpoint**
@@ -498,10 +520,10 @@ None. MVP v2 is additive.
 |  Sessions (47 results)                                 |
 |  +---------------------------------------------------+ |
 |  | [Claude] 2026-02-17 10:30 | my-session.cast       | |
-|  | 123 KB | 5 markers | 34 detected | 5420 lines [>]| |
+|  | 123 KB | 5 markers | 34 detected | 5420 events[>]| |
 |  +---------------------------------------------------+ |
 |  | [Gemini] 2026-02-16 14:22 | debug-run.cast        | |
-|  | 456 KB | 12 markers | 0 detected | 12k lines  [>]| |
+|  | 456 KB | 12 markers | 0 detected | 12K events [>]| |
 |  +---------------------------------------------------+ |
 +--------------------------------------------------------+
 ```
@@ -510,7 +532,7 @@ None. MVP v2 is additive.
 - Agent type dropdown in upload form
 - Search box and filter controls added
 - Agent type badge on each session ([Claude], [Gemini], etc.)
-- Session list shows `detected_sections_count` and `line_count`
+- Session list shows `detected_sections_count` and `event_count`
 - Result count displayed
 
 ### Updated Session Detail View Layout
@@ -518,7 +540,7 @@ None. MVP v2 is additive.
 ```
 +--------------------------------------------------------+
 |  [< Back] my-session.cast            [Claude] [Edit]   |
-|  123 KB | 5420 lines | 5 markers | 34 auto-detected   |
+|  123 KB | 5420 events | 5 markers | 34 auto-detected  |
 +--------------------------------------------------------+
 |  > Section: Setup environment          [marker]        | <- collapsed
 |  v Section: $ npm install              [detected]      | <- expanded
@@ -583,7 +605,7 @@ MAX_FILE_SIZE_MB=250               # Upload limit (was 50MB)
 NODE_ENV=production                # development | production (unchanged)
 
 # NEW for MVP v2
-CHUNK_SIZE=1000                    # Pagination chunk size (lines)
+CHUNK_SIZE=1000                    # Pagination chunk size (events)
 DETECTION_TIMEOUT_MS=5000          # Max time for command detection per session
 VIRTUAL_SCROLL_BUFFER=10           # Number of rows to buffer above/below viewport
 ```
@@ -661,7 +683,7 @@ VIRTUAL_SCROLL_BUFFER=10           # Number of rows to buffer above/below viewpo
    - Add new columns to `sessions` table
    - Create `sections` table
    - Create indexes
-   - Populate `line_count` for existing sessions (scan .cast files)
+   - Populate `event_count` for existing sessions (scan .cast files)
    - Set `agent_type` to NULL for existing sessions
    - Set `detection_status` to 'pending'
 
@@ -670,11 +692,12 @@ VIRTUAL_SCROLL_BUFFER=10           # Number of rows to buffer above/below viewpo
    - Run asynchronously, do not block startup
    - Log progress and failures
 
-3. **Frontend compatibility:**
-   - Detect old API responses (no `sections` array) → fallback to MVP v1 inline marker parsing
-   - Detect new API responses (with `sections`) → use new rendering logic
+3. **Frontend migration:**
+   - MVP v2 frontend fully replaces MVP v1 section rendering
+   - No backward-compatible fallback needed — migration converts all existing data
+   - Frontend always uses the `sections` array from API (never parses markers inline)
 
-**Migration script:** `src/server/migrations/002-mvp-v2-schema.ts`
+**Migration script design is an Architect responsibility** — the exact approach for extracting inline markers to the sections table, handling large files during event_count calculation, and running async detection on existing sessions should be specified in the ADR/PLAN.
 
 ## 12. Success Criteria
 
@@ -690,15 +713,16 @@ The MVP v2 is considered successful if:
 8. Browser memory stays under 500MB even with 200MB session open
 9. All existing MVP v1 functionality (markers, ANSI colors, fold/unfold) continues to work
 
-## 13. Open Questions (for Architect/Implementer)
+## 13. Open Questions (for Architect)
 
-- **Detection algorithm specifics:** Regex patterns for shell prompts, how to handle false positives?
-- **Chunk alignment strategy:** Always align on section boundaries, or allow mid-section chunks if sections are very large?
+- **CRITICAL — Detection algorithm design:** Real sessions are TUI application recordings (Claude Code, Codex, Gemini CLI) with heavy escape codes, box-drawing, cursor movements, and screen redraws. Shell prompt regex will NOT work. The Architect must analyze the reference session files listed in FR-1 and design an algorithm that works with real TUI output. This is the hardest problem in MVP v2.
+- **Migration strategy:** How to extract inline markers from existing .cast files into the new sections table. How to calculate event_count efficiently for large files (200MB+). Design of the async detection trigger for existing sessions.
 - **Detection queue:** In-process async or separate worker process? (Recommend in-process for MVP v2, defer worker to future)
-- **Virtual scrolling with sections:** How to calculate row heights for collapsed vs expanded sections?
+- **Virtual scrolling with sections:** How to calculate row heights for collapsed vs expanded sections? How does virtual scrolling interact with chunk loading?
 - **Search index:** Add full-text search (SQLite FTS5) or stick with substring LIKE queries? (Recommend LIKE for MVP v2)
 - **Polling vs SSE for detection status:** Frontend polls every 2 seconds, or use Server-Sent Events? (Recommend polling for simplicity)
 - **Section nesting:** If detected sections overlap with marker sections, which takes precedence? (Decision: markers always win)
+- **PUT /api/sessions/:id error handling:** 404 for non-existent session? Partial updates allowed (change only one field)?
 
 ## 14. Out of Scope (Explicitly Deferred)
 
@@ -730,7 +754,7 @@ Before declaring MVP v2 complete, verify:
 - [ ] User can select agent type during upload
 - [ ] Large file upload shows progress indicator
 - [ ] Command boundary detection runs asynchronously after upload
-- [ ] Detection completes in <5 seconds for 100k line session
+- [ ] Detection completes in <10 seconds for 200K event session
 - [ ] Sessions with markers + detected sections render both correctly
 
 **Search & Filter:**
@@ -781,8 +805,8 @@ Before declaring MVP v2 complete, verify:
 ## 16. Dependencies and Risks
 
 **Dependencies:**
-- `@tanstack/vue-virtual` (already used in MVP v1)
-- No new external dependencies required (detection is custom logic)
+- `@tanstack/vue-virtual` — NEW dependency (decided in MVP v1 ADR but never installed; must be added)
+- No other new external dependencies required (detection is custom logic)
 
 **Technical Risks:**
 
@@ -815,10 +839,10 @@ Before declaring MVP v2 complete, verify:
 ## 17. Next Steps
 
 Hand off to **Architect** for:
-- Command boundary detection algorithm design (regex patterns, edge case handling)
-- Pagination chunking strategy (alignment with sections, streaming .cast file reads)
-- Virtual scrolling integration with dynamic sections
-- Migration script design (schema changes, existing session re-processing)
+- **Detection algorithm design** — MUST analyze reference session files from `~/recorded_agent_sessions/` (see FR-1 for specific files). Real data is TUI output, not shell sessions. This is the hardest open problem.
+- **Migration strategy** — Inline marker extraction, event_count calculation, async detection for existing sessions
+- **Pagination + virtual scrolling architecture** — How chunks, sections, and virtual scrolling interact
+- **Streaming .cast file reads** — Server-side approach for reading 200MB files without loading into memory
 
 Then hand off to **Implementer** for execution.
 
