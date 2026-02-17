@@ -44,13 +44,13 @@ describe('buildCleanDocument', () => {
   });
 
   describe('3 epochs with progressive re-renders', () => {
-    it('deduplicates when consecutive epochs have high match rate', () => {
+    it('deduplicates when epochs re-render previous content as prefix', () => {
       // Epoch 0: A, B, C (lines 0-2)
       // Epoch 1: A, B, C, D, E (lines 3-7, re-renders A,B,C then adds D,E)
-      // Epoch 2: A, B, C, D, E, F, G (lines 8-14, re-renders A,B,C,D,E then adds F,G)
+      // Epoch 2: A, B, C, D, E, F, G (lines 8-14, re-renders all then adds F,G)
       //
-      // Epoch 1 vs Epoch 0: 3/3 match (100%) → DEDUP, keep D,E as new
-      // Epoch 2 vs Epoch 1: 5/5 match (100%) → DEDUP, keep F,G as new
+      // Epoch 1: A,B,C match clean 0-2 (block of 3) → dedup. D,E new.
+      // Epoch 2: A,B,C,D,E match clean 0-4 (block of 5) → dedup. F,G new.
       // Expected clean: A, B, C, D, E, F, G (7 lines)
       const raw = makeSnapshot([
         'A', 'B', 'C',           // Epoch 0
@@ -120,16 +120,63 @@ describe('buildCleanDocument', () => {
     });
   });
 
-  describe('partial overlap between consecutive epochs', () => {
-    it('deduplicates when epoch re-renders part of previous content', () => {
+  describe('interior block matching', () => {
+    it('deduplicates re-rendered content in the middle of an epoch', () => {
       // Epoch 0: A, B, C, D, E (5 lines)
-      // Epoch 1: A, B, C, F, G (first 3 match = 60% of min(5,5))
-      // 60% > 50% threshold → DEDUP
-      // Overlap = min(5, 5) = 5 lines compared, overlap declared
-      // But only first 3 match. Algorithm maps ALL 5 to prev positions, then no new lines.
-      // Actually: compareLen=5, matchCount=3, matchRate=60% → overlap=5
-      // All 5 epoch1 lines map to epoch0's clean positions.
-      // Result: same as epoch0 = [A, B, C, D, E]
+      // Epoch 1: F, G, B, C, D, H, I (re-renders B,C,D in the middle)
+      //
+      // B,C,D match clean 1-3 (block of 3 in the interior) → dedup
+      // F,G are new (before the match), H,I are new (after the match)
+      // Expected clean: A, B, C, D, E, F, G, H, I (9 lines)
+      const raw = makeSnapshot([
+        'A', 'B', 'C', 'D', 'E',
+        'F', 'G', 'B', 'C', 'D', 'H', 'I',
+      ]);
+
+      const epochs = [
+        { eventIndex: 10, rawLineCount: 5 },
+      ];
+
+      const result = buildCleanDocument(raw, epochs);
+
+      expect(result.cleanSnapshot.lines.length).toBe(9);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+      ]);
+    });
+
+    it('matches against earlier epochs, not just the previous one', () => {
+      // Epoch 0: A, B, C
+      // Epoch 1: D, E, F (completely different)
+      // Epoch 2: A, B, C, G, H (re-renders epoch 0 content, then new)
+      //
+      // Epoch 2: A,B,C match clean 0-2 (from epoch 0), G,H new
+      // Expected clean: A, B, C, D, E, F, G, H (8 lines)
+      const raw = makeSnapshot([
+        'A', 'B', 'C',
+        'D', 'E', 'F',
+        'A', 'B', 'C', 'G', 'H',
+      ]);
+
+      const epochs = [
+        { eventIndex: 10, rawLineCount: 3 },
+        { eventIndex: 20, rawLineCount: 6 },
+      ];
+
+      const result = buildCleanDocument(raw, epochs);
+
+      expect(result.cleanSnapshot.lines.length).toBe(8);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+      ]);
+    });
+  });
+
+  describe('partial overlap between consecutive epochs', () => {
+    it('keeps non-matching lines as new content alongside deduped blocks', () => {
+      // Epoch 0: A, B, C, D, E (5 lines)
+      // Epoch 1: A, B, C, F, G (A,B,C match as block of 3, F,G are new)
+      // Expected clean: A, B, C, D, E, F, G (7 lines)
       const raw = makeSnapshot([
         'A', 'B', 'C', 'D', 'E',
         'A', 'B', 'C', 'F', 'G',
@@ -141,11 +188,9 @@ describe('buildCleanDocument', () => {
 
       const result = buildCleanDocument(raw, epochs);
 
-      // Overlap detected (60%), all 5 lines mapped to epoch 0 positions
-      // Clean doc keeps epoch 0's version: [A, B, C, D, E]
-      expect(result.cleanSnapshot.lines.length).toBe(5);
+      expect(result.cleanSnapshot.lines.length).toBe(7);
       expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
-        'A', 'B', 'C', 'D', 'E',
+        'A', 'B', 'C', 'D', 'E', 'F', 'G',
       ]);
     });
   });
@@ -176,7 +221,7 @@ describe('buildCleanDocument', () => {
   describe('overlap shorter than minimum threshold', () => {
     it('does not dedup when only 2 of 2 lines match (below MIN_MATCH)', () => {
       // Epoch 0: A, B
-      // Epoch 1: A, B, C, D (match 2/2 = 100% but only 2 matching lines, below MIN_MATCH=3)
+      // Epoch 1: A, B, C, D (match 2 consecutive = below MIN_MATCH=3)
       const raw = makeSnapshot([
         'A', 'B',
         'A', 'B', 'C', 'D',
@@ -237,10 +282,10 @@ describe('buildCleanDocument', () => {
     });
   });
 
-  describe('below match rate threshold', () => {
-    it('does not dedup when match rate is below 50%', () => {
+  describe('below match rate — contiguous block too short', () => {
+    it('does not dedup when no contiguous block reaches MIN_MATCH', () => {
       // Epoch 0: A, B, C, D, E, F (6 lines)
-      // Epoch 1: A, X, Y, Z, W, V (only 1/6 match = 17%)
+      // Epoch 1: A, X, Y, Z, W, V (only A matches — block of 1, < MIN_MATCH)
       const raw = makeSnapshot([
         'A', 'B', 'C', 'D', 'E', 'F',
         'A', 'X', 'Y', 'Z', 'W', 'V',
@@ -252,16 +297,16 @@ describe('buildCleanDocument', () => {
 
       const result = buildCleanDocument(raw, epochs);
 
-      // 17% match rate < 50% → no dedup
+      // No block >= 3 → no dedup
       expect(result.cleanSnapshot.lines.length).toBe(12);
     });
 
-    it('deduplicates when match rate is exactly 50%', () => {
+    it('deduplicates a 3-line contiguous block even when other lines differ', () => {
       // Epoch 0: A, B, C, D (4 lines)
-      // Epoch 1: A, X, C, D, E (compare first 4: 3/4 match = 75%)
+      // Epoch 1: X, A, B, C, Y (A,B,C match clean 0-2 as block of 3; X,Y are new)
       const raw = makeSnapshot([
         'A', 'B', 'C', 'D',
-        'A', 'X', 'C', 'D', 'E',
+        'X', 'A', 'B', 'C', 'Y',
       ]);
 
       const epochs = [
@@ -270,9 +315,11 @@ describe('buildCleanDocument', () => {
 
       const result = buildCleanDocument(raw, epochs);
 
-      // 75% match → overlap, only E is new
-      expect(result.cleanSnapshot.lines.length).toBe(5);
-      expect(result.cleanSnapshot.lines[4].spans[0].text).toBe('E');
+      // X is new, A,B,C deduped, Y is new
+      expect(result.cleanSnapshot.lines.length).toBe(6);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+        'A', 'B', 'C', 'D', 'X', 'Y',
+      ]);
     });
   });
 
@@ -319,6 +366,74 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(3);
+    });
+
+    it('removes stutters (partial render followed by full render)', () => {
+      // Simulates TUI startup: partial header, blank, full header + details
+      // The partial header (line 0) + blank (line 1) should be removed
+      const raw = makeSnapshot([
+        'HEADER',     // partial render
+        '',           // blank separator
+        'HEADER',     // full render starts here
+        'SUBTITLE',
+        'INFO',
+      ]);
+
+      const epochs = [
+        { eventIndex: 10, rawLineCount: 5 },
+      ];
+
+      const result = buildCleanDocument(raw, epochs);
+
+      // Stutter removed: first HEADER + blank gone, only full render kept
+      expect(result.cleanSnapshot.lines.length).toBe(3);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+        'HEADER', 'SUBTITLE', 'INFO',
+      ]);
+    });
+
+    it('does not remove non-stutter repeated lines', () => {
+      // Lines with non-trivial content between repetitions should NOT be stutters
+      const raw = makeSnapshot([
+        'HEADER',
+        'DIFFERENT_CONTENT',  // non-trivial line between
+        'HEADER',
+        'SUBTITLE',
+      ]);
+
+      const epochs = [
+        { eventIndex: 10, rawLineCount: 4 },
+      ];
+
+      const result = buildCleanDocument(raw, epochs);
+
+      // No stutter removal — all 4 lines kept
+      expect(result.cleanSnapshot.lines.length).toBe(4);
+    });
+
+    it('handles multiple blocks within a single epoch', () => {
+      // Epoch 0: A, B, C, D, E, F, G, H (8 lines)
+      // Epoch 1: A, B, C, X, Y, F, G, H, Z
+      //   Block 1: A,B,C match clean 0-2 (3 lines)
+      //   X,Y are new (2 lines, no match)
+      //   Block 2: F,G,H match clean 5-7 (3 lines)
+      //   Z is new
+      // Expected clean: A,B,C,D,E,F,G,H,X,Y,Z (11 lines)
+      const raw = makeSnapshot([
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+        'A', 'B', 'C', 'X', 'Y', 'F', 'G', 'H', 'Z',
+      ]);
+
+      const epochs = [
+        { eventIndex: 10, rawLineCount: 8 },
+      ];
+
+      const result = buildCleanDocument(raw, epochs);
+
+      expect(result.cleanSnapshot.lines.length).toBe(11);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'X', 'Y', 'Z',
+      ]);
     });
   });
 });
