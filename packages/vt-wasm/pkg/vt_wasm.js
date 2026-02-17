@@ -66,6 +66,14 @@ class Vt {
         const ret = wasm.vt_get_view(this.__wbg_ptr);
         return takeObject(ret);
     }
+    /**
+     * Resize the terminal to new dimensions
+     * @param {number} cols
+     * @param {number} rows
+     */
+    resize(cols, rows) {
+        wasm.vt_resize(this.__wbg_ptr, cols, rows);
+    }
 }
 if (Symbol.dispose) Vt.prototype[Symbol.dispose] = Vt.prototype.free;
 exports.Vt = Vt;

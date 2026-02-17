@@ -59,6 +59,11 @@ impl Vt {
         }
     }
 
+    /// Resize the terminal to new dimensions
+    pub fn resize(&mut self, cols: usize, rows: usize) {
+        self.inner.resize(cols, rows);
+    }
+
     /// Get terminal size as [cols, rows]
     pub fn get_size(&self) -> JsValue {
         let (cols, rows) = self.inner.size();

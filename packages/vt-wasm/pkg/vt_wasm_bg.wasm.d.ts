@@ -8,5 +8,6 @@ export const vt_get_all_lines: (a: number) => number;
 export const vt_get_cursor: (a: number) => number;
 export const vt_get_size: (a: number) => number;
 export const vt_get_view: (a: number) => number;
+export const vt_resize: (a: number, b: number, c: number) => void;
 export const __wbindgen_export: (a: number, b: number) => number;
 export const __wbindgen_export2: (a: number, b: number, c: number, d: number) => number;

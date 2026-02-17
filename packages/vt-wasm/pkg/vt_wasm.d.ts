@@ -30,6 +30,10 @@ export class Vt {
      * Get the current terminal view as a structured snapshot (viewport only)
      */
     get_view(): any;
+    /**
+     * Resize the terminal to new dimensions
+     */
+    resize(cols: number, rows: number): void;
 }
 
 /**

@@ -23,6 +23,7 @@ interface WasmVtInstance {
   get_all_lines(): TerminalSnapshot;
   get_cursor(): [number, number] | null; // WASM returns [col, row] array
   get_size(): [number, number]; // WASM returns [cols, rows] array
+  resize(cols: number, rows: number): void;
   free(): void;
 }
 
@@ -83,6 +84,11 @@ export interface VtInstance {
    * Get the terminal size in columns and rows.
    */
   getSize(): TerminalSize;
+
+  /**
+   * Resize the terminal to new dimensions.
+   */
+  resize(cols: number, rows: number): void;
 }
 
 /**
@@ -134,6 +140,10 @@ export function createVt(
     getSize(): TerminalSize {
       const result = wasmInstance.get_size();
       return { cols: result[0], rows: result[1] };
+    },
+
+    resize(cols: number, rows: number): void {
+      wasmInstance.resize(cols, rows);
     },
   };
 }
