@@ -111,7 +111,10 @@ export async function processSessionPipeline(
 
     // Always replay events through VT to capture the full session document.
     // Even with zero boundaries, the session needs its full snapshot for rendering.
-    const vt = createVt(header.width, header.height, 10000);
+    // Large scrollback ensures getAllLines() captures the full session document.
+    // Without this, line counts plateau and sections beyond the limit get degraded
+    // to viewport-only snapshots (terminal height lines instead of full content).
+    const vt = createVt(header.width, header.height, 200000);
 
     // Build a map of section end events → boundary index for O(1) lookup during replay
     const sectionEndEvents: Map<number, number> = new Map();
