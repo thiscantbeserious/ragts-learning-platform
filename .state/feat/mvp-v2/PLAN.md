@@ -10,7 +10,7 @@ Depends on: ADR.md decisions (avt WASM, multi-signal detection with co-primary s
 
 ## Overview
 
-Six stages, each independently testable and reviewable. TDD throughout -- tests are written before or alongside implementation, never after.
+Six stages, each independently testable and reviewable. Strict TDD red/green/refactor throughout.
 
 ```
 Stage 1: avt WASM Bridge          (foundation -- rendering engine, de facto PoC)
@@ -20,6 +20,224 @@ Stage 4: Client Rendering         (Vue components)
 Stage 5: Migration                (existing sessions)
 Stage 6: Integration + Polish     (end-to-end, edge cases)
 ```
+
+---
+
+## TDD Methodology: Red/Green/Refactor
+
+Every stage follows the same discipline. No production code is written without a failing test first.
+
+### The Cycle
+
+```
+RED    → Write a failing test that defines the expected behavior
+GREEN  → Write the minimum code to make it pass (no more)
+REFACTOR → Clean up while keeping all tests green
+```
+
+### Rules
+
+1. **RED first, always.** Before writing any implementation code, write a test that fails. The test defines what "done" looks like for the next small increment. If you can't write a test, you don't understand the requirement yet.
+
+2. **GREEN means minimal.** The goal is to make the failing test pass with the simplest possible code. Hardcode return values if that's all it takes. Don't optimize, don't generalize, don't handle edge cases — just make the test green.
+
+3. **REFACTOR only when green.** Once all tests pass, clean up: extract functions, rename variables, remove duplication, improve structure. Run tests after every change. If a test goes red during refactor, undo and try a smaller change.
+
+4. **Small increments.** Each red/green/refactor cycle should take 5-15 minutes. If you're writing a test that requires 100+ lines of implementation to go green, the test is too big — break it down.
+
+5. **Tests are the specification.** The test suite IS the requirements document for the implementer. Each test name reads like a requirement: "should detect boundary at screen clear event", "should skip malformed NDJSON lines gracefully".
+
+6. **No test-after.** If code is written without a failing test first, delete it and start over with the test. Test-after produces tests that verify the implementation instead of defining the behavior.
+
+### Stage-Specific TDD Patterns
+
+#### Stage 1 (avt WASM Bridge) — Interface-first TDD
+
+The WASM module is a black box once built. TDD drives the TypeScript wrapper's interface design.
+
+```
+Cycle 1 (RED):   test("createVt returns instance with getView method")
+         (GREEN): stub createVt() returning object with getView()
+         (REFACTOR): extract interface types
+
+Cycle 2 (RED):   test("feed plain text appears in view")
+         (GREEN): wire up actual WASM feed() + getView()
+         (REFACTOR): type the return value properly
+
+Cycle 3 (RED):   test("feed SGR color codes produce colored spans")
+         (GREEN): ensure color mapping works in lib.rs serialization
+         (REFACTOR): extract span merging logic
+
+Cycle 4 (RED):   test("feed cursor movement places chars correctly")
+         (GREEN): already works (avt handles this) — test passes immediately
+                  → this confirms avt correctness, move on
+
+Cycle 5 (RED):   test("Bold mapped from Pen.intensity, not Pen.attrs bit 0")
+         (GREEN): ensure lib.rs reads intensity field separately
+         (REFACTOR): add assertion comment explaining the layout difference
+
+Cycle 6 (RED):   test("feed real Claude session first 50 events without crash")
+         (GREEN): load fixture, feed events, assert no throw
+         (REFACTOR): extract fixture loading helper
+```
+
+The Rust `lib.rs` wrapper is developed alongside — when a TypeScript test needs behavior from WASM, the Rust code is updated, the container rebuilds, and the test goes green.
+
+#### Stage 2 (Server Processing) — Outside-in TDD
+
+Start from the outermost API (SessionProcessor) and drive inward.
+
+```
+Cycle 1 (RED):   test("SessionProcessor processes empty session")
+         (GREEN): SessionProcessor class, processSession() returns empty array
+         (REFACTOR): define ProcessingResult type
+
+Cycle 2 (RED):   test("processSession counts events correctly")
+         (GREEN): add NDJSON line counting
+         (REFACTOR): extract NdjsonStream class
+
+Cycle 3 (RED):   test("NdjsonStream yields parsed events from fixture")
+         (GREEN): implement readline-based streaming parser
+         (REFACTOR): handle header line separately
+
+Cycle 4 (RED):   test("processSession produces snapshot at boundary event 500")
+         (GREEN): feed events to avt, snapshot view() at boundary
+         (REFACTOR): extract snapshotView() helper
+
+Cycle 5 (RED):   test("snapshot merges consecutive cells with identical pens")
+         (GREEN): implement span merging in snapshot serialization
+         (REFACTOR): optimize merge loop
+
+Cycle 6 (RED):   test("malformed NDJSON line is skipped gracefully")
+         (GREEN): try/catch around JSON.parse, continue
+         (REFACTOR): add warning logger
+
+Cycle 7 (RED):   test("10MB session stays under 50MB memory")
+         (GREEN): verify streaming doesn't accumulate — should already work
+         (REFACTOR): add memory assertion helper
+```
+
+#### Stage 3 (Section Detection) — Algorithm TDD with synthetic data
+
+Build the algorithm incrementally from simplest signal to full heuristic.
+
+```
+Cycle 1 (RED):   test("session with < 100 events returns no boundaries")
+         (GREEN): SectionDetector returns [] for short sessions
+         (REFACTOR): define SectionBoundary type
+
+Cycle 2 (RED):   test("detects boundary at 10s timing gap")
+         (GREEN): implement Signal 1 (timing gaps) with fixed threshold
+         (REFACTOR): make threshold configurable
+
+Cycle 3 (RED):   test("compressed timestamps disable timing signal")
+         (GREEN): check max_gap < 1s, skip timing if so
+         (REFACTOR): extract isTimingReliable() predicate
+
+Cycle 4 (RED):   test("detects boundary at screen clear event")
+         (GREEN): implement Signal 2 (screen clears)
+         (REFACTOR): extract scanForPattern() helper
+
+Cycle 5 (RED):   test("debounces multiple clears within 10 events")
+         (GREEN): cluster nearby clears, use last in cluster
+         (REFACTOR): extract debounce logic
+
+Cycle 6 (RED):   test("detects boundary at alternate screen exit")
+         (GREEN): implement Signal 3
+         (REFACTOR): combine with signal scanning
+
+Cycle 7 (RED):   test("merges candidates within 50 events")
+         (GREEN): implement boundary merging
+         (REFACTOR): extract mergeBoundaries()
+
+Cycle 8 (RED):   test("drops sections smaller than 100 events")
+         (GREEN): post-filter boundaries by section size
+         (REFACTOR): combine with merge pass
+
+Cycle 9 (RED):   test("markers take precedence over detected boundaries")
+         (GREEN): implement marker precedence in detectWithMarkers()
+         (REFACTOR): clean up the precedence logic
+
+Cycle 10 (RED):  test("Codex reference session produces 5-15 sections")
+         (GREEN): tune thresholds against real data
+         (REFACTOR): extract adaptive threshold calculation
+```
+
+DB tests follow the same pattern — start with "create section, retrieve it", build up to cascading deletes and migration.
+
+#### Stage 4 (Client Rendering) — Component TDD
+
+Vue component tests using `@vue/test-utils` or Vitest's browser mode.
+
+```
+Cycle 1 (RED):   test("TerminalSnapshot renders plain text lines")
+         (GREEN): v-for over lines, v-for over spans, render text
+         (REFACTOR): extract TerminalLine sub-component if needed
+
+Cycle 2 (RED):   test("colored span gets correct CSS class")
+         (GREEN): map fg/bg values to CSS classes/variables
+         (REFACTOR): extract colorToClass() utility
+
+Cycle 3 (RED):   test("bold span gets ap-bold class")
+         (GREEN): map boolean attrs to CSS classes
+         (REFACTOR): extract attrsToClasses() utility
+
+Cycle 4 (RED):   test("80x24 snapshot renders 24 lines")
+         (GREEN): already works from cycle 1
+         (REFACTOR): add grid container styles
+
+Cycle 5 (RED):   test("SessionContent loads sections from API")
+         (GREEN): update useSession composable to fetch new API shape
+         (REFACTOR): define Section API type
+
+Cycle 6 (RED):   test("expanding section shows viewport snapshot")
+         (GREEN): toggle collapsed state, render TerminalSnapshot
+         (REFACTOR): add transition animation
+```
+
+#### Stage 5 (Migration) — Integration TDD
+
+Migration tests use a test database with known fixture data.
+
+```
+Cycle 1 (RED):   test("migration creates sections table")
+         (GREEN): run schema migration, verify table exists
+         (REFACTOR): extract migration runner
+
+Cycle 2 (RED):   test("simple session gets event_count populated")
+         (GREEN): count NDJSON lines, update session row
+         (REFACTOR): reuse NdjsonStream from Stage 2
+
+Cycle 3 (RED):   test("session with markers gets marker sections")
+         (GREEN): extract markers, insert into sections table
+         (REFACTOR): reuse marker extraction logic
+
+Cycle 4 (RED):   test("large session gets detected sections with snapshots")
+         (GREEN): run full pipeline (detect + process + store)
+         (REFACTOR): combine into single streaming pass
+
+Cycle 5 (RED):   test("migration is idempotent — no duplicates on re-run")
+         (GREEN): check detection_status before processing
+         (REFACTOR): add skip logging
+```
+
+### What "Tests First" Looks Like in Practice
+
+For each stage, the implementer:
+
+1. **Reads the test list** in the PLAN (the "Tests (write first)" section)
+2. **Creates the test file** with all test names as empty `it()` blocks (the "test skeleton")
+3. **Implements one test at a time** — writes the assertion, runs it (RED), writes the code (GREEN), cleans up (REFACTOR)
+4. **Does NOT skip ahead** — resist the urge to write the full implementation and test it afterward
+5. **Commits at each green** — every passing test is a commit point (can be squashed later)
+
+### Anti-patterns to Avoid
+
+- **Test-after**: Writing implementation first, then tests to confirm it works. This tests the implementation, not the behavior.
+- **Big bang**: Writing all tests at once, then all implementation at once. This defeats the incremental feedback loop.
+- **Gold plating during GREEN**: Adding error handling, edge cases, or optimizations before the current test needs them. Wait for a RED test that demands it.
+- **Skipping REFACTOR**: Accumulating technical debt because "the tests pass." Refactor is not optional — it's where design emerges.
+- **Testing implementation details**: Tests should assert observable behavior (inputs → outputs), not internal state. If refactoring breaks tests, the tests are too coupled.
 
 ---
 
