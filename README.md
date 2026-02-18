@@ -29,7 +29,7 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
 %%{ init: { 'flowchart': { 'curve': 'stepAfter', 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
 graph TD
     AD>Record everything<br/>agents do] -.- A
-    A[AGR · Record] --> R[RAGTS · Platform]
+    A[AGR · Record] --> R[RAGTS · Platform<br/>Process · Store · Serve]
 
     R <--> H[Humans]
     R --> AG[Agents]
