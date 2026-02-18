@@ -25,14 +25,27 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
 
 ## How It Works
 
-```
- Record         Upload              Serve
-┌───────┐      ┌────────┐      ┌────────────────┐
-│  AGR  │─────>│ RAGTS  │─────>│ Humans: Curate │
-└───────┘      │Platform│      └────────────────┘
-               └───┬────┘      ┌──────────────────┐
-                   └──────────>│ Agents: Retrieve │
-                               └──────────────────┘
+```mermaid
+graph TD
+    A[AGR · Record] --> R[RAGTS · Platform]
+
+    R --> H[Humans]
+    R --> AG[Agents]
+
+    subgraph " "
+        direction LR
+        H --> Browse
+        H --> Curate
+        H --> Share
+    end
+
+    subgraph "  "
+        direction LR
+        AG --> Retrieve
+    end
+
+    Curate -.->|context| AG
+    AG -.->|sessions| A
 ```
 
 ## Service
