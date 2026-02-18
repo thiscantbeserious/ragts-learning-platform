@@ -26,10 +26,12 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
 ## How It Works
 
 ```mermaid
+%%{ init: { 'flowchart': { 'curve': 'stepAfter', 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
 graph TD
+    AD>Full capture of<br/>working sessions] -.- A
     A[AGR · Record] --> R[RAGTS · Platform]
 
-    R --> H[Humans]
+    R <--> H[Humans]
     R --> AG[Agents]
 
     subgraph " "
@@ -40,12 +42,9 @@ graph TD
     end
 
     subgraph "  "
-        direction LR
         AG --> Retrieve
+        Retrieve -.- RD>Human-vetted context<br/>for smarter agents]
     end
-
-    Curate -.->|context| AG
-    AG -.->|sessions| A
 ```
 
 ## Service
