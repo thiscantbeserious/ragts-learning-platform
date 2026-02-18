@@ -28,7 +28,7 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
 ```mermaid
 %%{ init: { 'flowchart': { 'curve': 'stepAfter', 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
 graph TD
-    AD>Full capture of<br/>working sessions] -.- A
+    AD>Record everything<br/>agents do] -.- A
     A[AGR · Record] --> R[RAGTS · Platform]
 
     R <--> H[Humans]
@@ -43,7 +43,7 @@ graph TD
 
     subgraph "  "
         AG --> Retrieve
-        Retrieve -.- RD>Human-vetted context<br/>for smarter agents]
+        Retrieve -.- RD>Curated context<br/>for smarter agents]
     end
 ```
 
