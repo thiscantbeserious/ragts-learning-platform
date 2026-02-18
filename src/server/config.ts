@@ -16,7 +16,7 @@ export interface Config {
  */
 export function loadConfig(): Config {
   const port = parseInt(process.env.PORT || '3000', 10);
-  const maxFileSizeMB = parseInt(process.env.MAX_FILE_SIZE_MB || '50', 10);
+  const maxFileSizeMB = parseInt(process.env.MAX_FILE_SIZE_MB || '250', 10);
 
   if (isNaN(port) || port <= 0 || port > 65535) {
     throw new Error(`Invalid PORT: "${process.env.PORT}". Must be a number between 1 and 65535.`);

@@ -9,12 +9,13 @@
     "dev:server": "tsx watch src/server/start.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
+    "build:wasm": "cd packages/vt-wasm && ./build.sh",
     "start": "NODE_ENV=production node dist/server/start.js",
-    "test": "vitest"
+    "test": "vitest",
+    "migrate:v2": "tsx src/server/scripts/migrate-v2.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
-    "anser": "^2.3.5",
     "better-sqlite3": "^12.6.2",
     "hono": "^4.11.9",
     "nanoid": "^5.1.6",

@@ -11,18 +11,22 @@ import { Hono } from 'hono';
 import type Database from 'better-sqlite3';
 import { initDatabase } from '../db/database.js';
 import { SqliteSessionRepository } from '../db/sqlite-session-repository.js';
+import { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
 import { handleUpload } from './upload.js';
 import {
   handleListSessions,
   handleGetSession,
   handleDeleteSession,
+  handleRedetect,
 } from './sessions.js';
+import { initVt } from '../../../packages/vt-wasm/index.js';
 
 describe('API Routes', () => {
   let testDir: string;
   let app: Hono;
   let db: ReturnType<typeof initDatabase>;
-  let repository: SqliteSessionRepository;
+  let sessionRepository: SqliteSessionRepository;
+  let sectionRepository: SqliteSectionRepository;
 
   const validFixture = readFileSync(
     join(__dirname, '../../..', 'tests', 'fixtures', 'valid-with-markers.cast'),
@@ -34,23 +38,28 @@ describe('API Routes', () => {
     'utf-8'
   );
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Initialize WASM module once before tests
+    await initVt();
+
     // Create temporary directory for each test
     testDir = mkdtempSync(join(tmpdir(), 'ragts-api-test-'));
 
-    // Initialize database and repository
+    // Initialize database and repositories
     const dbPath = join(testDir, 'test.db');
     db = initDatabase(dbPath);
-    repository = new SqliteSessionRepository(db);
+    sessionRepository = new SqliteSessionRepository(db);
+    sectionRepository = new SqliteSectionRepository(db);
 
     // Setup Hono app with routes
     app = new Hono();
     app.post('/api/upload', (c) =>
-      handleUpload(c, repository, testDir, 50)
+      handleUpload(c, sessionRepository, sectionRepository, testDir, 50)
     );
-    app.get('/api/sessions', (c) => handleListSessions(c, repository));
-    app.get('/api/sessions/:id', (c) => handleGetSession(c, repository));
-    app.delete('/api/sessions/:id', (c) => handleDeleteSession(c, repository));
+    app.get('/api/sessions', (c) => handleListSessions(c, sessionRepository));
+    app.get('/api/sessions/:id', (c) => handleGetSession(c, sessionRepository, sectionRepository));
+    app.delete('/api/sessions/:id', (c) => handleDeleteSession(c, sessionRepository));
+    app.post('/api/sessions/:id/redetect', (c) => handleRedetect(c, sessionRepository, sectionRepository));
   });
 
   afterEach(() => {
@@ -194,9 +203,11 @@ describe('API Routes', () => {
       expect(data.id).toBe(uploadData.id);
       expect(data.filename).toBe('test.cast');
       expect(data.content).toHaveProperty('header');
-      expect(data.content).toHaveProperty('events');
+      expect(data.content).not.toHaveProperty('events'); // events are excluded per Stage 3
       expect(data.content).toHaveProperty('markers');
       expect(data.content.markers).toHaveLength(3);
+      // Snapshot field should exist (may be null if not yet processed)
+      expect(data).toHaveProperty('snapshot');
     });
 
     it('should return 404 for non-existent session', async () => {
@@ -308,6 +319,110 @@ describe('API Routes', () => {
       const sessionsAfterDelete = await listAfterDelete.json();
 
       expect(sessionsAfterDelete).toHaveLength(0);
+    });
+  });
+
+  describe('POST /api/sessions/:id/redetect', () => {
+    it('should return 202 and trigger async re-detection', async () => {
+      // Upload a session first
+      const formData = new FormData();
+      const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
+      formData.append('file', file);
+
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+      );
+      const uploadData = await uploadRes.json();
+
+      // Wait a bit for initial processing to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Trigger re-detection
+      const req = new Request(
+        `http://localhost/api/sessions/${uploadData.id}/redetect`,
+        { method: 'POST' }
+      );
+      const res = await app.fetch(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(202);
+      expect(data.message).toContain('Re-detection started');
+      expect(data.sessionId).toBe(uploadData.id);
+    });
+
+    it('should return 404 for non-existent session', async () => {
+      const req = new Request(
+        'http://localhost/api/sessions/nonexistent/redetect',
+        { method: 'POST' }
+      );
+      const res = await app.fetch(req);
+      const data = await res.json();
+
+      expect(res.status).toBe(404);
+      expect(data.error).toContain('not found');
+    });
+  });
+
+  describe('Upload with async processing', () => {
+    it('should include sections in session response after processing', async () => {
+      // Upload a session
+      const formData = new FormData();
+      const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
+      formData.append('file', file);
+
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+      );
+      const uploadData = await uploadRes.json();
+
+      // Wait for async processing to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Get session - should include sections
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      const sessionData = await getRes.json();
+
+      expect(sessionData.sections).toBeDefined();
+      expect(Array.isArray(sessionData.sections)).toBe(true);
+
+      // Should have marker sections (validFixture has 3 markers)
+      const markerSections = sessionData.sections.filter((s: any) => s.type === 'marker');
+      expect(markerSections.length).toBeGreaterThan(0);
+    });
+
+    it('should update detection_status after processing', async () => {
+      // Upload a session
+      const formData = new FormData();
+      const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
+      formData.append('file', file);
+
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+      );
+      const uploadData = await uploadRes.json();
+
+      // Wait for async processing to complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Get session - check status
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      const sessionData = await getRes.json();
+
+      expect(sessionData.detection_status).toBe('completed');
+      expect(sessionData.event_count).toBeGreaterThan(0);
     });
   });
 });

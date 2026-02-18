@@ -9,6 +9,8 @@ import { nanoid } from 'nanoid';
 import { parseAsciicast, validateAsciicast } from '../../shared/asciicast.js';
 import { saveSession, deleteSession } from '../storage.js';
 import type { SessionRepository } from '../db/session-repository.js';
+import type { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
+import { processSessionPipeline } from '../processing/index.js';
 
 /**
  * Handle POST /api/upload
@@ -17,6 +19,7 @@ import type { SessionRepository } from '../db/session-repository.js';
 export async function handleUpload(
   c: Context,
   repository: SessionRepository,
+  sectionRepository: SqliteSectionRepository,
   dataDir: string,
   maxFileSizeMB: number
 ): Promise<Response> {
@@ -84,6 +87,12 @@ export async function handleUpload(
         size_bytes: file.size,
         marker_count: markerCount,
         uploaded_at: new Date().toISOString(),
+      });
+
+      // Trigger async processing (fire and forget)
+      setImmediate(() => {
+        processSessionPipeline(filepath, id, parsed.markers, sectionRepository, repository)
+          .catch(err => console.error('Session processing failed:', err));
       });
 
       const { filepath: _fp, ...sessionData } = session;

@@ -6,7 +6,7 @@ import { useSession } from '../composables/useSession';
 
 const route = useRoute();
 const sessionId = computed(() => route.params.id as string);
-const { sections, loading, error, filename } = useSession(sessionId);
+const { sections, snapshot, loading, error, filename } = useSession(sessionId);
 </script>
 
 <template>
@@ -18,10 +18,10 @@ const { sections, loading, error, filename } = useSession(sessionId);
 
     <div v-if="loading" class="session-detail-page__loading">Loading session...</div>
     <div v-else-if="error" class="session-detail-page__error">{{ error }}</div>
-    <div v-else-if="sections.length === 0" class="session-detail-page__empty">
+    <div v-else-if="sections.length === 0 && !snapshot" class="session-detail-page__empty">
       This session has no content.
     </div>
-    <SessionContent v-else :sections="sections" />
+    <SessionContent v-else :snapshot="snapshot" :sections="sections" :default-collapsed="false" />
   </div>
 </template>
 

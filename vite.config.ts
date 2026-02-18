@@ -29,6 +29,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'tests/**/*.{test,spec}.{js,ts}'],
+    include: [
+      'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
+      'tests/**/*.{test,spec}.{js,ts}',
+      'packages/**/*.{test,spec}.{js,ts}',
+    ],
+    environmentMatchGlobs: [
+      ['packages/**', 'node'],
+      ['src/server/**', 'node'],
+    ],
   },
 });

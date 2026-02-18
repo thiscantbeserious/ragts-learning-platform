@@ -17,6 +17,20 @@ import type {
 } from './asciicast-types';
 
 /**
+ * Normalize an asciicast header: copy term.cols/term.rows to width/height
+ * if the top-level fields are missing. This allows downstream code to always
+ * use header.width / header.height regardless of v2 vs v3 format.
+ */
+export function normalizeHeader(raw: Record<string, any>): AsciicastHeader {
+  const h = { ...raw } as AsciicastHeader;
+  if (h.term && typeof h.term === 'object') {
+    if (typeof h.width !== 'number' && typeof h.term.cols === 'number') h.width = h.term.cols;
+    if (typeof h.height !== 'number' && typeof h.term.rows === 'number') h.height = h.term.rows;
+  }
+  return h;
+}
+
+/**
  * Validates asciicast v3 content without full parsing.
  * Checks version, JSON validity, and basic structure.
  */
@@ -42,19 +56,19 @@ export function validateAsciicast(content: string): ValidationResult {
   // Validate header (first line)
   let header: AsciicastHeader;
   try {
-    header = JSON.parse(lines[0]);
+    const raw = JSON.parse(lines[0]);
+    if (!raw || typeof raw !== 'object') {
+      return {
+        valid: false,
+        error: 'Header must be a JSON object',
+        line: 1,
+      };
+    }
+    header = normalizeHeader(raw);
   } catch (err) {
     return {
       valid: false,
       error: 'Invalid JSON in header',
-      line: 1,
-    };
-  }
-
-  if (!header || typeof header !== 'object') {
-    return {
-      valid: false,
-      error: 'Header must be a JSON object',
       line: 1,
     };
   }
@@ -70,7 +84,7 @@ export function validateAsciicast(content: string): ValidationResult {
   if (typeof header.width !== 'number' || typeof header.height !== 'number') {
     return {
       valid: false,
-      error: 'Header must include width and height',
+      error: 'Header must include term.cols/term.rows (v3) or width/height (v2-compat)',
       line: 1,
     };
   }
@@ -124,7 +138,7 @@ export function parseAsciicast(content: string): AsciicastFile {
 
   const lines = content.split('\n').filter(line => line.trim().length > 0);
 
-  const header: AsciicastHeader = JSON.parse(lines[0]);
+  const header: AsciicastHeader = normalizeHeader(JSON.parse(lines[0]));
   const rawEvents: AsciicastEvent[] = lines.slice(1).map(line => JSON.parse(line));
 
   const events = computeCumulativeTimes(rawEvents);

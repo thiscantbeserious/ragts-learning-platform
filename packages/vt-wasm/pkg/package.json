@@ -1,0 +1,11 @@
+{
+  "name": "vt-wasm",
+  "version": "0.1.0",
+  "files": [
+    "vt_wasm_bg.wasm",
+    "vt_wasm.js",
+    "vt_wasm.d.ts"
+  ],
+  "main": "vt_wasm.js",
+  "types": "vt_wasm.d.ts"
+}

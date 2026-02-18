@@ -8,6 +8,8 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { mkdirSync } from 'fs';
 import { fileURLToPath } from 'url';
+import { migrate002Sections } from './migrations/002-sections.js';
+import { migrate003UnifiedSnapshot } from './migrations/003-unified-snapshot.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,10 +34,14 @@ export function initDatabase(dbPath: string): Database.Database {
   // Enable foreign key constraints
   db.pragma('foreign_keys = ON');
 
-  // Apply schema from schema.sql
+  // Apply base schema from schema.sql
   const schemaPath = join(__dirname, 'schema.sql');
   const schema = readFileSync(schemaPath, 'utf-8');
   db.exec(schema);
+
+  // Run migrations
+  migrate002Sections(db);
+  migrate003UnifiedSnapshot(db);
 
   return db;
 }
