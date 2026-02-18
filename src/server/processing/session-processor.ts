@@ -53,7 +53,7 @@ export async function processSession(
       const [_timestamp, eventType, data] = item.event;
 
       // Only process output events through VT
-      if (eventType === 'o' && vt) {
+      if (eventType === 'o' && vt && data !== undefined) {
         vt.feed(String(data));
       }
 
@@ -72,6 +72,9 @@ export async function processSession(
   if (!header) {
     throw new Error('No header found in .cast file');
   }
+
+  // Free WASM resources
+  vt?.free();
 
   return {
     header,

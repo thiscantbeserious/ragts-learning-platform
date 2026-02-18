@@ -69,7 +69,7 @@ function parseSnapshot(snapshotJson: string): TerminalSnapshot | null {
 /**
  * Map API sections to client-side sections.
  * Preserves line ranges (CLI) and snapshots (TUI).
- * Backward compatible: if start_line/end_line are missing, section still works with snapshot.
+ * Backward compatible: if startLine/endLine are missing, section still works with snapshot.
  */
 function mapSections(apiSections: ApiSection[]): Section[] {
   return apiSections.map((apiSection) => ({
@@ -97,6 +97,10 @@ export function useSession(sessionId: MaybeRef<string>) {
   async function fetchSession(id: string): Promise<void> {
     loading.value = true;
     error.value = null;
+    session.value = null;
+    sections.value = [];
+    snapshot.value = null;
+    detectionStatus.value = 'pending';
     try {
       const res = await fetch(`/api/sessions/${id}`);
       if (res.status === 404) {

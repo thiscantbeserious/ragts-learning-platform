@@ -6,7 +6,6 @@ import {
   validateAsciicast,
   extractMarkers,
   computeCumulativeTimes,
-  normalizeHeader,
 } from '../src/shared/asciicast';
 import type { AsciicastEvent, ParsedEvent } from '../src/shared/asciicast-types';
 

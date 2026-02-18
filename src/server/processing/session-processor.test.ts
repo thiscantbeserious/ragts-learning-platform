@@ -166,18 +166,13 @@ describe('SessionProcessor', () => {
       expect(Array.isArray(snapshot.lines)).toBe(true);
 
       // Each line should have spans
-      if (snapshot.lines.length > 0) {
-        const firstLine = snapshot.lines[0];
-        expect(firstLine.spans).toBeDefined();
-        expect(Array.isArray(firstLine.spans)).toBe(true);
-
-        // If there are spans, they should have text
-        if (firstLine.spans.length > 0) {
-          const firstSpan = firstLine.spans[0];
-          expect(firstSpan.text).toBeDefined();
-          expect(typeof firstSpan.text).toBe('string');
-        }
-      }
+      expect(snapshot.lines.length).toBeGreaterThan(0);
+      const firstLine = snapshot.lines[0];
+      expect(firstLine.spans).toBeDefined();
+      expect(firstLine.spans.length).toBeGreaterThan(0);
+      const firstSpan = firstLine.spans[0];
+      expect(firstSpan.text).toBeDefined();
+      expect(typeof firstSpan.text).toBe('string');
     });
 
     it('processes terminal escape sequences correctly', async () => {

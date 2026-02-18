@@ -197,6 +197,9 @@ export async function processSessionPipeline(
     // Full session document (getAllLines at end of replay)
     const rawSnapshot = vt.getAllLines();
 
+    // Free WASM resources now that we have the final snapshot
+    vt.free();
+
     // Deduplicate scrollback if clear-screen epochs were detected.
     // For CLI sessions (zero clears): identity transform, no change.
     // For TUI sessions: removes re-rendered content, keeps only unique lines.

@@ -36,7 +36,7 @@ export interface AsciicastHeader {
  * asciicast v3 event. Array format: [time, "type", "data"]
  * - time: relative to previous event (seconds, float)
  * - type: "o" (output), "i" (input), "m" (marker), "r" (resize), "x" (exit)
- * - data: string for o/i/m, array for r [width, height], number for x (exit code)
+ * - data: string for o/i/m/r (resize is "COLSxROWS"), number for x (exit code)
  */
 export type AsciicastEvent =
   | [number, "o", string]  // output

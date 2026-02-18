@@ -153,7 +153,7 @@ TUI redraws start at the END of one epoch (header line) and continue at the STAR
 - Section detector finds ~50 boundaries per session with current tuning
 
 ### Codebase Structure
-```
+```text
 src/
   client/              # Vue frontend
     components/        # Terminal rendering components

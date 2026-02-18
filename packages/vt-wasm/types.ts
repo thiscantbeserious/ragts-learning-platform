@@ -4,8 +4,8 @@
  */
 
 /**
- * A complete terminal buffer snapshot (viewport only).
- * Represents the visible terminal grid at a point in time.
+ * A complete terminal buffer snapshot.
+ * May represent the visible viewport (from getView) or the full scrollback + viewport (from getAllLines).
  */
 export interface TerminalSnapshot {
   cols: number;

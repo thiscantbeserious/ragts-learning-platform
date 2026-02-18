@@ -89,6 +89,11 @@ export interface VtInstance {
    * Resize the terminal to new dimensions.
    */
   resize(cols: number, rows: number): void;
+
+  /**
+   * Free the underlying WASM resources. Call when done with this instance.
+   */
+  free(): void;
 }
 
 /**
@@ -144,6 +149,10 @@ export function createVt(
 
     resize(cols: number, rows: number): void {
       wasmInstance.resize(cols, rows);
+    },
+
+    free(): void {
+      wasmInstance.free();
     },
   };
 }
