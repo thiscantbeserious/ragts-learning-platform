@@ -8,6 +8,7 @@
 
 > <figure>
 >   <img src="screenshot.png" alt="RAGTS browsing a Claude Code agent session" width="70%" border="1" />
+>
 >   <figcaption><strong>Screenshot of early MVP v2</strong>. Browsing a recorded Claude Code session<br/> — terminal output with section detection and fold/unfold.</figcaption>
 > </figure>
 
