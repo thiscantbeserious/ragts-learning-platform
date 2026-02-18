@@ -6,6 +6,12 @@
 
 ```Currently in MVP state - Heavy refactorings incomming!```
 
+> <figure>
+>   <img src="screenshot.png" alt="RAGTS browsing a Claude Code agent session" width="70%" border="1" />
+>   <figcaption><strong>Screenshot of early MVP v2</strong>. Browsing a recorded Claude Code session<br/> — terminal output with section detection and fold/unfold.</figcaption>
+</figure>
+
+
 ## Problem
 
 **Agent sessions are fire-and-forget. Thousands of lines of terminal output** - commands, reasoning, errors, recoveries - generated and never looked at again (or if autonomous, never). When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
