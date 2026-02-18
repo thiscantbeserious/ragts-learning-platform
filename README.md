@@ -8,7 +8,7 @@
 
 > <img src="screenshot.png" alt="RAGTS browsing a Claude Code agent session" width="100%" border="1" />
 >
-> _**Screenshot of early MVP v2**. Browsing a recorded Claude Code session — terminal output with section detection and fold/unfold._
+> _**Screenshot of early MVP v2**. Browsing a recorded Claude Code session — terminal output of a 2 hour session in 2500 lines with split sections and fold/unfold. Later on you can use that with Markers and use these for RAG-Feeding with additional Context (adding Comments, Voting Results for example)_
 
 
 ## Problem
