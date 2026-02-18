@@ -26,22 +26,13 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
 ## How It Works
 
 ```mermaid
+%%{ init: { 'flowchart': { 'curve': 'basis', 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
 graph TD
     AD>Record everything<br/>agents do] -.- A
-    A["agentic-session-recorder (AGR)"] --> RAGTS
+    A[AGR · Record] --> R[RAGTS · Platform<br/>Process · Store · Serve]
 
-    subgraph RAGTS["RAGTS Platform"]
-        Process --- Store
-        Store --- Serve
-        Process --- AGR
-        Process --- VT
-        Serve --- Index
-        Serve --- Search
-        
-    end
-
-    RAGTS <--> H[Humans]
-    RAGTS --> AG[Agents]
+    R <--> H[Humans]
+    R --> AG[Agents]
 
     subgraph " "
         direction LR
