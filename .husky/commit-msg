@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#
+# Blocks snapshot file changes unless the commit message contains [snapshot-update].
+# Prevents accidental/mindless snapshot updates.
+#
+# To intentionally update snapshots:
+#   git commit -m "update dedup baselines after algorithm change [snapshot-update]"
+
+COMMIT_MSG=$(cat "$1")
+
+# Check if any .snap files or __screenshots__ files are staged
+SNAP_FILES=$(git diff --cached --name-only --diff-filter=ACDMR | grep -E '\.(snap|png)$' | grep -E '(__snapshots__|__screenshots__)' || true)
+
+if [ -z "$SNAP_FILES" ]; then
+  exit 0
+fi
+
+if echo "$COMMIT_MSG" | grep -qF '[snapshot-update]'; then
+  exit 0
+fi
+
+echo ""
+echo "ERROR: Snapshot files changed but commit message is missing [snapshot-update] tag."
+echo ""
+echo "Changed snapshot files:"
+echo "$SNAP_FILES" | sed 's/^/  /'
+echo ""
+echo "If this is intentional, add [snapshot-update] to your commit message."
+echo "If not, unstage these files or investigate why they changed."
+echo ""
+exit 1
