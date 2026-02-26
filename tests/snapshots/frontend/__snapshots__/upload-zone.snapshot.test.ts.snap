@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`UploadZone component snapshots > default state 1`] = `
+"<div data-v-8bb889dd="" class="upload-zone">
+  <div data-v-8bb889dd="" class="upload-zone__content">
+    <div data-v-8bb889dd="" class="upload-zone__icon">↑</div>
+    <p data-v-8bb889dd="" class="upload-zone__text"> Drag &amp; drop a <code data-v-8bb889dd="">.cast</code> file here </p>
+    <p data-v-8bb889dd="" class="upload-zone__subtext">or</p><label data-v-8bb889dd="" class="upload-zone__button"> Browse files <input data-v-8bb889dd="" type="file" accept=".cast" class="upload-zone__input"></label>
+  </div>
+  <!--v-if-->
+</div>"
+`;
+
+exports[`UploadZone component snapshots > dragging state 1`] = `
+"<div data-v-8bb889dd="" class="upload-zone upload-zone--dragging">
+  <div data-v-8bb889dd="" class="upload-zone__content">
+    <div data-v-8bb889dd="" class="upload-zone__icon">↑</div>
+    <p data-v-8bb889dd="" class="upload-zone__text"> Drag &amp; drop a <code data-v-8bb889dd="">.cast</code> file here </p>
+    <p data-v-8bb889dd="" class="upload-zone__subtext">or</p><label data-v-8bb889dd="" class="upload-zone__button"> Browse files <input data-v-8bb889dd="" type="file" accept=".cast" class="upload-zone__input"></label>
+  </div>
+  <!--v-if-->
+</div>"
+`;
+
+exports[`UploadZone component snapshots > error state 1`] = `
+"<div data-v-8bb889dd="" class="upload-zone">
+  <div data-v-8bb889dd="" class="upload-zone__content">
+    <div data-v-8bb889dd="" class="upload-zone__icon">↑</div>
+    <p data-v-8bb889dd="" class="upload-zone__text"> Drag &amp; drop a <code data-v-8bb889dd="">.cast</code> file here </p>
+    <p data-v-8bb889dd="" class="upload-zone__subtext">or</p><label data-v-8bb889dd="" class="upload-zone__button"> Browse files <input data-v-8bb889dd="" type="file" accept=".cast" class="upload-zone__input"></label>
+  </div>
+  <div data-v-8bb889dd="" class="upload-zone__error"><span data-v-8bb889dd="">Only .cast files are supported</span><button data-v-8bb889dd="" class="upload-zone__error-dismiss">×</button></div>
+</div>"
+`;
+
+exports[`UploadZone component snapshots > uploading state 1`] = `
+"<div data-v-8bb889dd="" class="upload-zone upload-zone--uploading">
+  <div data-v-8bb889dd="" class="upload-zone__content">
+    <div data-v-8bb889dd="" class="upload-zone__spinner">Uploading...</div>
+  </div>
+  <!--v-if-->
+</div>"
+`;

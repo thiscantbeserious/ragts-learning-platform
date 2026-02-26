@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SectionHeader component snapshots > TUI viewport section (no line range) 1`] = `"<button data-v-a902c83d="" class="section-header"><span data-v-a902c83d="" class="section-header__chevron">▾</span><span data-v-a902c83d="" class="section-header__label">Test Section</span><span data-v-a902c83d="" class="section-header__badge">Marker</span><span data-v-a902c83d="" class="section-header__meta">24 lines (viewport)</span></button>"`;
+
+exports[`SectionHeader component snapshots > collapsed marker section 1`] = `"<button data-v-a902c83d="" class="section-header section-header--collapsed"><span data-v-a902c83d="" class="section-header__chevron">▸</span><span data-v-a902c83d="" class="section-header__label">Deploy</span><span data-v-a902c83d="" class="section-header__badge">Marker</span><span data-v-a902c83d="" class="section-header__meta"> L101–L200 (100 lines) </span></button>"`;
+
+exports[`SectionHeader component snapshots > detected section with auto-label 1`] = `"<button data-v-a902c83d="" class="section-header"><span data-v-a902c83d="" class="section-header__chevron">▾</span><span data-v-a902c83d="" class="section-header__label">Section 1</span><span data-v-a902c83d="" class="section-header__badge">Detected</span><span data-v-a902c83d="" class="section-header__meta"> L1–L150 (150 lines) </span></button>"`;
+
+exports[`SectionHeader component snapshots > expanded marker section with CLI line range 1`] = `"<button data-v-a902c83d="" class="section-header"><span data-v-a902c83d="" class="section-header__chevron">▾</span><span data-v-a902c83d="" class="section-header__label">Build Step</span><span data-v-a902c83d="" class="section-header__badge">Marker</span><span data-v-a902c83d="" class="section-header__meta"> L11–L60 (50 lines) </span></button>"`;
+
+exports[`SectionHeader component snapshots > large line count display 1`] = `"<button data-v-a902c83d="" class="section-header"><span data-v-a902c83d="" class="section-header__chevron">▾</span><span data-v-a902c83d="" class="section-header__label">Test Section</span><span data-v-a902c83d="" class="section-header__badge">Marker</span><span data-v-a902c83d="" class="section-header__meta"> L1–L5000 (5000 lines) </span></button>"`;

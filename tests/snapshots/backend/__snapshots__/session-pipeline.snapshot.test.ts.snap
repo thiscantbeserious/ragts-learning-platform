@@ -1,0 +1,65 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`session-pipeline snapshots > CLI session with markers — section structure 1`] = `
+[
+  {
+    "endEvent": 3,
+    "endLine": 2,
+    "hasSnapshot": false,
+    "label": "Preamble",
+    "startEvent": 0,
+    "startLine": 0,
+    "type": "detected",
+  },
+  {
+    "endEvent": 14,
+    "endLine": 13,
+    "hasSnapshot": false,
+    "label": "Test Execution",
+    "startEvent": 3,
+    "startLine": 2,
+    "type": "marker",
+  },
+  {
+    "endEvent": 24,
+    "endLine": 22,
+    "hasSnapshot": false,
+    "label": "Build",
+    "startEvent": 14,
+    "startLine": 13,
+    "type": "marker",
+  },
+  {
+    "endEvent": 32,
+    "endLine": 29,
+    "hasSnapshot": false,
+    "label": "Deploy",
+    "startEvent": 24,
+    "startLine": 22,
+    "type": "marker",
+  },
+]
+`;
+
+exports[`session-pipeline snapshots > CLI session with markers — section structure 2`] = `32`;
+
+exports[`session-pipeline snapshots > empty cast file (header only) — pipeline handles gracefully 1`] = `
+{
+  "eventCount": 0,
+  "sectionsCount": 0,
+  "status": "completed",
+}
+`;
+
+exports[`session-pipeline snapshots > synthetic TUI session with epochs — exercises dedup 1`] = `10`;
+
+exports[`session-pipeline snapshots > valid-with-markers.cast — full pipeline snapshot excluding dynamic fields 1`] = `
+{
+  "eventCount": 32,
+  "sectionsCount": 1,
+  "snapshotCols": 120,
+  "snapshotLineCount": 29,
+  "snapshotRows": 40,
+  "status": "completed",
+}
+`;

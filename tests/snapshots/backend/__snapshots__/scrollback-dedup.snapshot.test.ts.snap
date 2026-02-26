@@ -1,0 +1,129 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`scrollback-dedup snapshots > 3-epoch progressive re-renders — clean texts 1`] = `
+[
+  "Welcome to Claude Code",
+  "Type your request below",
+  "---",
+  "> How do I fix this bug?",
+  "Let me look at the code...",
+  "I found the issue in line 42.",
+  "Here is the fix:",
+  "\`\`\`diff",
+  "- const x = null;",
+  "+ const x = getDefault();",
+  "\`\`\`",
+]
+`;
+
+exports[`scrollback-dedup snapshots > 3-epoch progressive re-renders — rawToClean mapping array 1`] = `
+[
+  0,
+  1,
+  2,
+  0,
+  1,
+  2,
+  3,
+  0,
+  1,
+  2,
+  3,
+  4,
+]
+`;
+
+exports[`scrollback-dedup snapshots > below MIN_MATCH threshold — no dedup 1`] = `
+[
+  "Short A",
+  "Short B",
+  "Short A",
+  "Short B",
+  "New content",
+]
+`;
+
+exports[`scrollback-dedup snapshots > empty epoch — no crash 1`] = `
+[
+  "A",
+  "B",
+  "C",
+]
+`;
+
+exports[`scrollback-dedup snapshots > epoch boundary spanning — known limitation 1`] = `
+[
+  "Header",
+  "Content A",
+  "Content B",
+  "New stuff",
+]
+`;
+
+exports[`scrollback-dedup snapshots > interior block matching — multiple blocks in single epoch 1`] = `
+[
+  "Block A line 1",
+  "Block A line 2",
+  "Block A line 3",
+  "Unique separator",
+  "Block B line 1",
+  "Block B line 2",
+  "Block B line 3",
+  "New middle content",
+  "Appended content",
+]
+`;
+
+exports[`scrollback-dedup snapshots > rawLineCountToClean — boundary values 1`] = `
+{
+  "at0": 0,
+  "at3": 3,
+  "at7": 4,
+  "beyondEnd": 4,
+  "negative": 0,
+}
+`;
+
+exports[`scrollback-dedup snapshots > rawToClean for stuttered line index — probe-forward fallback 1`] = `
+{
+  "mappedReal": 0,
+  "mappedStutter": 0,
+}
+`;
+
+exports[`scrollback-dedup snapshots > stutter removal — clean output 1`] = `
+[
+  "Important header text here",
+  "Next content line",
+]
+`;
+
+exports[`scrollback-dedup snapshots > styled lines — match on text only 1`] = `
+[
+  "Same text",
+  "New content",
+]
+`;
+
+exports[`scrollback-dedup snapshots > synthetic TUI fixture through VT + dedup integration 1`] = `
+[
+  "Claude Code v1.0",
+  "Ready for input",
+  "---",
+  "> What is 2+2?",
+  "The answer is 4.",
+  "> Explain more",
+  "2+2=4 because of basic arithmetic.",
+  "> One more thing",
+  "Sure! Addition is commutative: 2+2 = 2+2.",
+  "Done.",
+]
+`;
+
+exports[`scrollback-dedup snapshots > zero epochs — identity transform 1`] = `
+[
+  "Line one",
+  "Line two",
+  "Line three",
+]
+`;

@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ToastContainer component snapshots > error toast 1`] = `
+"<div data-v-dd40d1fc="" class="toast-container">
+  <div data-v-dd40d1fc="" class="toast toast--error"><span data-v-dd40d1fc="" class="toast__message">Upload failed: invalid file type</span><button data-v-dd40d1fc="" class="toast__dismiss">×</button></div>
+</div>"
+`;
+
+exports[`ToastContainer component snapshots > info toast 1`] = `
+"<div data-v-dd40d1fc="" class="toast-container">
+  <div data-v-dd40d1fc="" class="toast toast--info"><span data-v-dd40d1fc="" class="toast__message">Processing session...</span><button data-v-dd40d1fc="" class="toast__dismiss">×</button></div>
+</div>"
+`;
+
+exports[`ToastContainer component snapshots > multiple toasts stacked 1`] = `
+"<div data-v-dd40d1fc="" class="toast-container">
+  <div data-v-dd40d1fc="" class="toast toast--success"><span data-v-dd40d1fc="" class="toast__message">Upload complete</span><button data-v-dd40d1fc="" class="toast__dismiss">×</button></div>
+  <div data-v-dd40d1fc="" class="toast toast--error"><span data-v-dd40d1fc="" class="toast__message">Another warning</span><button data-v-dd40d1fc="" class="toast__dismiss">×</button></div>
+  <div data-v-dd40d1fc="" class="toast toast--info"><span data-v-dd40d1fc="" class="toast__message">FYI</span><button data-v-dd40d1fc="" class="toast__dismiss">×</button></div>
+</div>"
+`;
+
+exports[`ToastContainer component snapshots > success toast 1`] = `
+"<div data-v-dd40d1fc="" class="toast-container">
+  <div data-v-dd40d1fc="" class="toast toast--success"><span data-v-dd40d1fc="" class="toast__message">Session uploaded successfully</span><button data-v-dd40d1fc="" class="toast__dismiss">×</button></div>
+</div>"
+`;

@@ -7,3 +7,6 @@ data/
 *.db-wal
 .DS_Store
 agents/settings.local.json
+test-results/
+playwright-report/
+tests/.test-data/

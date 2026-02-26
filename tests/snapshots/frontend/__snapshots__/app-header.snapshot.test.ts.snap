@@ -1,0 +1,5 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AppHeader component snapshots > brand link points to root 1`] = `"<header data-v-49fcc50c="" class="app-header"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__brand">RAGTS</a></header>"`;
+
+exports[`AppHeader component snapshots > default render 1`] = `"<header data-v-49fcc50c="" class="app-header"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__brand">RAGTS</a></header>"`;

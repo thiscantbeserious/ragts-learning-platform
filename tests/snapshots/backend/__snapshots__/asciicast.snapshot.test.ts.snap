@@ -1,0 +1,147 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`asciicast snapshots > computeCumulativeTimes — event sequence 1`] = `
+[
+  {
+    "data": "first",
+    "relativeTime": 0.5,
+    "time": 0.5,
+    "type": "o",
+  },
+  {
+    "data": "same-time",
+    "relativeTime": 0,
+    "time": 0.5,
+    "type": "o",
+  },
+  {
+    "data": "later",
+    "relativeTime": 0.2,
+    "time": 0.7,
+    "type": "o",
+  },
+  {
+    "data": "marker",
+    "relativeTime": 1,
+    "time": 1.7,
+    "type": "m",
+  },
+  {
+    "data": "120x40",
+    "relativeTime": 0.3,
+    "time": 2,
+    "type": "r",
+  },
+]
+`;
+
+exports[`asciicast snapshots > normalizeHeader — v3 term.cols/rows to width/height 1`] = `
+{
+  "height": 40,
+  "termCols": 120,
+  "termRows": 40,
+  "version": 3,
+  "width": 120,
+}
+`;
+
+exports[`asciicast snapshots > normalizeHeader — v3 term.cols/rows to width/height 2`] = `
+{
+  "height": 24,
+  "version": 3,
+  "width": 80,
+}
+`;
+
+exports[`asciicast snapshots > valid-with-markers.cast — cumulative times first 10 events 1`] = `
+[
+  {
+    "relativeTime": 0.1,
+    "time": 0.1,
+    "type": "o",
+  },
+  {
+    "relativeTime": 0.2,
+    "time": 0.3,
+    "type": "o",
+  },
+  {
+    "relativeTime": 0.3,
+    "time": 0.6,
+    "type": "o",
+  },
+  {
+    "relativeTime": 0.5,
+    "time": 1.1,
+    "type": "m",
+  },
+  {
+    "relativeTime": 0.6,
+    "time": 1.7,
+    "type": "o",
+  },
+  {
+    "relativeTime": 0.7,
+    "time": 2.4,
+    "type": "o",
+  },
+  {
+    "relativeTime": 0.8,
+    "time": 3.2,
+    "type": "o",
+  },
+  {
+    "relativeTime": 0.9,
+    "time": 4.1,
+    "type": "o",
+  },
+  {
+    "relativeTime": 1,
+    "time": 5.1,
+    "type": "o",
+  },
+  {
+    "relativeTime": 1.1,
+    "time": 6.2,
+    "type": "o",
+  },
+]
+`;
+
+exports[`asciicast snapshots > valid-with-markers.cast — marker extraction 1`] = `
+[
+  {
+    "index": 3,
+    "label": "Test Execution",
+    "time": 1.1,
+  },
+  {
+    "index": 14,
+    "label": "Build",
+    "time": 13.6,
+  },
+  {
+    "index": 24,
+    "label": "Deploy",
+    "time": 39.6,
+  },
+]
+`;
+
+exports[`asciicast snapshots > valid-with-markers.cast — parsed header 1`] = `
+{
+  "env": {
+    "SHELL": "/bin/bash",
+    "TERM": "xterm-256color",
+  },
+  "height": 40,
+  "term": {
+    "cols": 120,
+    "rows": 40,
+    "type": "xterm-256color",
+  },
+  "title": "CI Pipeline Run",
+  "version": 3,
+  "width": 120,
+}
+`;

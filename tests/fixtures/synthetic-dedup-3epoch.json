@@ -1,0 +1,46 @@
+{
+  "description": "Pre-built dedup test fixture: 3 epochs with progressive re-renders",
+  "rawLines": [
+    "Welcome to Claude Code",
+    "Type your request below",
+    "---",
+    "> How do I fix this bug?",
+    "Let me look at the code...",
+    "Welcome to Claude Code",
+    "Type your request below",
+    "---",
+    "> How do I fix this bug?",
+    "Let me look at the code...",
+    "I found the issue in line 42.",
+    "Here is the fix:",
+    "Welcome to Claude Code",
+    "Type your request below",
+    "---",
+    "> How do I fix this bug?",
+    "Let me look at the code...",
+    "I found the issue in line 42.",
+    "Here is the fix:",
+    "```diff",
+    "- const x = null;",
+    "+ const x = getDefault();",
+    "```"
+  ],
+  "epochBoundaries": [
+    { "eventIndex": 10, "rawLineCount": 5 },
+    { "eventIndex": 20, "rawLineCount": 12 }
+  ],
+  "expectedCleanTexts": [
+    "Welcome to Claude Code",
+    "Type your request below",
+    "---",
+    "> How do I fix this bug?",
+    "Let me look at the code...",
+    "I found the issue in line 42.",
+    "Here is the fix:",
+    "```diff",
+    "- const x = null;",
+    "+ const x = getDefault();",
+    "```"
+  ],
+  "expectedCleanCount": 11
+}

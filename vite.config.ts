@@ -34,9 +34,14 @@ export default defineConfig({
       'tests/**/*.{test,spec}.{js,ts}',
       'packages/**/*.{test,spec}.{js,ts}',
     ],
+    exclude: [
+      'tests/visual/**',
+      'node_modules/**',
+    ],
     environmentMatchGlobs: [
       ['packages/**', 'node'],
       ['src/server/**', 'node'],
+      ['tests/snapshots/backend/**', 'node'],
     ],
   },
 });
