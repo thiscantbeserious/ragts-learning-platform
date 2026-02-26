@@ -1,65 +1,61 @@
 /**
  * Visual regression tests for error states.
  * Covers 404, network errors, empty sessions, and invalid uploads.
+ *
+ * Each test is self-contained — no shared state between tests.
  */
 import { test, expect } from '@playwright/test';
 import { deleteAllSessions } from '../helpers/seed-visual-data';
 
-test.describe('Error States', () => {
-  test.describe.configure({ mode: 'serial' });
+test('error: 404 — invalid session ID', async ({ page }) => {
+  await page.goto('/session/invalid-session-id-does-not-exist');
+  await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
 
-  test.beforeAll(async () => {
-    await deleteAllSessions();
+  await expect(page).toHaveScreenshot('error-404-invalid-session.png', {
+    mask: [page.locator('.app-header')],
+  });
+});
+
+test('error: nonexistent route', async ({ page }) => {
+  await page.goto('/nonexistent-route');
+  await page.waitForLoadState('networkidle');
+
+  await expect(page).toHaveScreenshot('error-nonexistent-route.png', {
+    mask: [page.locator('.app-header')],
+  });
+});
+
+test('error: empty session list — prompt to upload', async ({ page }) => {
+  await deleteAllSessions();
+
+  await page.goto('/');
+  await page.waitForSelector('.session-list__empty', { timeout: 10000 });
+
+  const emptyMessage = page.locator('.session-list__empty');
+  await expect(emptyMessage).toBeVisible();
+  await expect(emptyMessage).toHaveScreenshot('error-empty-session-list.png');
+});
+
+test('error: upload of non-.cast file shows error', async ({ page }) => {
+  await page.goto('/');
+  await page.waitForSelector('.upload-zone', { timeout: 10000 });
+
+  const fileInput = page.locator('.upload-zone__input');
+  await fileInput.setInputFiles({
+    name: 'invalid.txt',
+    mimeType: 'text/plain',
+    buffer: Buffer.from('This is not a cast file'),
   });
 
-  test('404 — invalid session ID', async ({ page }) => {
-    await page.goto('/session/invalid-session-id-does-not-exist');
-    await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
+  await page.waitForSelector('.upload-zone__error', { timeout: 10000 });
+  await expect(page.locator('.upload-zone')).toHaveScreenshot('error-invalid-file-upload.png');
+});
 
-    await expect(page).toHaveScreenshot('error-404-invalid-session.png', {
-      mask: [page.locator('.app-header')],
-    });
-  });
+test('error: direct navigation to session detail without data', async ({ page }) => {
+  await page.goto('/session/aaaaaaaaa');
+  await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
 
-  test('nonexistent route', async ({ page }) => {
-    await page.goto('/nonexistent-route');
-    await page.waitForLoadState('networkidle');
-
-    await expect(page).toHaveScreenshot('error-nonexistent-route.png', {
-      mask: [page.locator('.app-header')],
-    });
-  });
-
-  test('empty session list — prompt to upload', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForSelector('.session-list__empty', { timeout: 10000 });
-
-    const emptyMessage = page.locator('.session-list__empty');
-    await expect(emptyMessage).toBeVisible();
-    await expect(emptyMessage).toHaveScreenshot('error-empty-session-list.png');
-  });
-
-  test('upload of non-.cast file shows error', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForSelector('.upload-zone', { timeout: 10000 });
-
-    const fileInput = page.locator('.upload-zone__input');
-    await fileInput.setInputFiles({
-      name: 'invalid.txt',
-      mimeType: 'text/plain',
-      buffer: Buffer.from('This is not a cast file'),
-    });
-
-    await page.waitForSelector('.upload-zone__error', { timeout: 10000 });
-    await expect(page.locator('.upload-zone')).toHaveScreenshot('error-invalid-file-upload.png');
-  });
-
-  test('direct navigation to session detail without data', async ({ page }) => {
-    await page.goto('/session/aaaaaaaaa');
-    await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
-
-    await expect(page).toHaveScreenshot('error-session-not-found.png', {
-      mask: [page.locator('.app-header')],
-    });
+  await expect(page).toHaveScreenshot('error-session-not-found.png', {
+    mask: [page.locator('.app-header')],
   });
 });

@@ -2,23 +2,15 @@
  * Visual regression tests for the session detail page.
  * Covers loading, content display, section fold/unfold, and navigation.
  */
-import { test, expect, type Page } from '@playwright/test';
-import { uploadFixture, waitForProcessing, deleteAllSessions } from '../helpers/seed-visual-data';
-
-/** Navigate to the session detail page and wait for a selector to appear. */
-async function gotoSession(page: Page, id: string, waitFor: string) {
-  await page.goto(`/session/${id}`);
-  await page.waitForSelector(waitFor, { timeout: 15000 });
-}
+import { test, expect } from '@playwright/test';
+import { seedSessionFixture, deleteAllSessions, gotoSession } from '../helpers/seed-visual-data';
 
 test.describe('Session Detail Page', () => {
   test.describe.configure({ mode: 'serial' });
   let sessionId: string;
 
   test.beforeAll(async () => {
-    await deleteAllSessions();
-    sessionId = await uploadFixture('valid-with-markers.cast');
-    await waitForProcessing(sessionId);
+    sessionId = await seedSessionFixture();
   });
 
   test.afterAll(async () => {

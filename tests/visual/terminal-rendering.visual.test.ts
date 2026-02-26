@@ -2,23 +2,15 @@
  * Visual regression tests for terminal rendering.
  * Covers ANSI colors, line numbers, section badges, and terminal chrome.
  */
-import { test, expect, type Page } from '@playwright/test';
-import { uploadFixture, waitForProcessing, deleteAllSessions } from '../helpers/seed-visual-data';
-
-/** Navigate to the session detail page and wait for a selector to appear. */
-async function gotoSession(page: Page, id: string, waitFor: string) {
-  await page.goto(`/session/${id}`);
-  await page.waitForSelector(waitFor, { timeout: 15000 });
-}
+import { test, expect } from '@playwright/test';
+import { seedSessionFixture, deleteAllSessions, gotoSession } from '../helpers/seed-visual-data';
 
 test.describe('Terminal Rendering', () => {
   test.describe.configure({ mode: 'serial' });
   let sessionId: string;
 
   test.beforeAll(async () => {
-    await deleteAllSessions();
-    sessionId = await uploadFixture('valid-with-markers.cast');
-    await waitForProcessing(sessionId);
+    sessionId = await seedSessionFixture();
   });
 
   test.afterAll(async () => {
@@ -69,7 +61,7 @@ test.describe('Terminal Rendering', () => {
 
   test('empty terminal state message', async ({ page }) => {
     await page.goto('/session/nonexistent-id-12345');
-    await page.waitForTimeout(3000);
+    await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
 
     await expect(page).toHaveScreenshot('terminal-error-state.png', {
       mask: [page.locator('.app-header')],

@@ -3,7 +3,7 @@
  * Covers empty state, populated states, upload interactions, and session management.
  */
 import { test, expect } from '@playwright/test';
-import { uploadFixture, waitForProcessing, deleteAllSessions } from '../helpers/seed-visual-data';
+import { uploadFixture, waitForProcessing, deleteAllSessions, seedSessionFixture } from '../helpers/seed-visual-data';
 
 test.describe('Landing Page', () => {
   test.describe.configure({ mode: 'serial' });
@@ -88,9 +88,7 @@ test.describe('Landing Page', () => {
   });
 
   test('after delete — session removed', async ({ page }) => {
-    await deleteAllSessions();
-    const id = await uploadFixture('valid-with-markers.cast');
-    await waitForProcessing(id);
+    await seedSessionFixture();
 
     await page.goto('/');
     await page.waitForSelector('.session-card', { timeout: 10000 });

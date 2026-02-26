@@ -1,5 +1,41 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`vt-wasm snapshots > 'bold' attribute 1`] = `
+[
+  {
+    "bold": true,
+    "text": "Bold Text",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 'italic' attribute 1`] = `
+[
+  {
+    "italic": true,
+    "text": "Italic Text",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 'strikethrough' attribute 1`] = `
+[
+  {
+    "strikethrough": true,
+    "text": "Struck",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 'underline' attribute 1`] = `
+[
+  {
+    "text": "Underlined",
+    "underline": true,
+  },
+]
+`;
+
 exports[`vt-wasm snapshots > 16-color foreground — span fg values 1`] = `
 [
   {
@@ -30,15 +66,6 @@ exports[`vt-wasm snapshots > 256-palette color — span fg values 1`] = `
 ]
 `;
 
-exports[`vt-wasm snapshots > bold attribute 1`] = `
-[
-  {
-    "bold": true,
-    "text": "Bold Text",
-  },
-]
-`;
-
 exports[`vt-wasm snapshots > faint and inverse attributes 1`] = `
 [
   {
@@ -50,15 +77,6 @@ exports[`vt-wasm snapshots > faint and inverse attributes 1`] = `
     "faint": false,
     "inverse": true,
     "text": "Inverse",
-  },
-]
-`;
-
-exports[`vt-wasm snapshots > italic attribute 1`] = `
-[
-  {
-    "italic": true,
-    "text": "Italic Text",
   },
 ]
 `;
@@ -124,15 +142,6 @@ exports[`vt-wasm snapshots > scrollback accumulation — getAllLines 1`] = `
 ]
 `;
 
-exports[`vt-wasm snapshots > strikethrough attribute 1`] = `
-[
-  {
-    "strikethrough": true,
-    "text": "Struck",
-  },
-]
-`;
-
 exports[`vt-wasm snapshots > true color — span fg values 1`] = `
 [
   {
@@ -142,15 +151,6 @@ exports[`vt-wasm snapshots > true color — span fg values 1`] = `
   {
     "fg": "#00C864",
     "text": "TrueGreen",
-  },
-]
-`;
-
-exports[`vt-wasm snapshots > underline attribute 1`] = `
-[
-  {
-    "text": "Underlined",
-    "underline": true,
   },
 ]
 `;

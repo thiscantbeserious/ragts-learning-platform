@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { Page } from '@playwright/test';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -57,6 +58,25 @@ export async function waitForProcessing(sessionId: string, timeoutMs = 30000): P
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
   throw new Error(`Processing timeout for session ${sessionId}`);
+}
+
+/**
+ * Navigate to a session detail page and wait for a selector to appear.
+ */
+export async function gotoSession(page: Page, id: string, waitFor: string): Promise<void> {
+  await page.goto(`/session/${id}`);
+  await page.waitForSelector(waitFor, { timeout: 15000 });
+}
+
+/**
+ * Seed a processed session fixture. Returns the session ID.
+ * Deletes all existing sessions first for a clean state.
+ */
+export async function seedSessionFixture(fixture = 'valid-with-markers.cast'): Promise<string> {
+  await deleteAllSessions();
+  const id = await uploadFixture(fixture);
+  await waitForProcessing(id);
+  return id;
 }
 
 /**

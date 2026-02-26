@@ -74,24 +74,14 @@ describe('vt-wasm snapshots', () => {
     expect(extractColorSpans(snapshot)).toMatchSnapshot();
   });
 
-  it('bold attribute', () => {
-    const { snapshot } = feedAndView('\x1b[1mBold Text\x1b[0m\r\n');
-    expect(extractAttrSpans(snapshot, 'bold')).toMatchSnapshot();
-  });
-
-  it('italic attribute', () => {
-    const { snapshot } = feedAndView('\x1b[3mItalic Text\x1b[0m\r\n');
-    expect(extractAttrSpans(snapshot, 'italic')).toMatchSnapshot();
-  });
-
-  it('underline attribute', () => {
-    const { snapshot } = feedAndView('\x1b[4mUnderlined\x1b[0m\r\n');
-    expect(extractAttrSpans(snapshot, 'underline')).toMatchSnapshot();
-  });
-
-  it('strikethrough attribute', () => {
-    const { snapshot } = feedAndView('\x1b[9mStruck\x1b[0m\r\n');
-    expect(extractAttrSpans(snapshot, 'strikethrough')).toMatchSnapshot();
+  it.each([
+    { attr: 'bold', code: '1', text: 'Bold Text' },
+    { attr: 'italic', code: '3', text: 'Italic Text' },
+    { attr: 'underline', code: '4', text: 'Underlined' },
+    { attr: 'strikethrough', code: '9', text: 'Struck' },
+  ])('$attr attribute', ({ attr, code, text }) => {
+    const { snapshot } = feedAndView(`\x1b[${code}m${text}\x1b[0m\r\n`);
+    expect(extractAttrSpans(snapshot, attr)).toMatchSnapshot();
   });
 
   it('faint and inverse attributes', () => {
