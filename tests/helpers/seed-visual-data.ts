@@ -44,9 +44,15 @@ export async function waitForProcessing(sessionId: string, timeoutMs = 30000): P
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     const response = await fetch(`${API_BASE}/api/sessions/${sessionId}`);
+    if (!response.ok) {
+      throw new Error(`Polling failed: ${response.status} ${await response.text()}`);
+    }
     const data = await response.json() as { detection_status: string };
-    if (data.detection_status === 'completed' || data.detection_status === 'failed') {
+    if (data.detection_status === 'completed') {
       return;
+    }
+    if (data.detection_status === 'failed') {
+      throw new Error(`Processing failed for session ${sessionId}`);
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
@@ -58,8 +64,14 @@ export async function waitForProcessing(sessionId: string, timeoutMs = 30000): P
  */
 export async function deleteAllSessions(): Promise<void> {
   const response = await fetch(`${API_BASE}/api/sessions`);
+  if (!response.ok) {
+    throw new Error(`List sessions failed: ${response.status} ${await response.text()}`);
+  }
   const sessions = await response.json() as Array<{ id: string }>;
   for (const session of sessions) {
-    await fetch(`${API_BASE}/api/sessions/${session.id}`, { method: 'DELETE' });
+    const del = await fetch(`${API_BASE}/api/sessions/${session.id}`, { method: 'DELETE' });
+    if (!del.ok) {
+      throw new Error(`Delete failed for ${session.id}: ${del.status} ${await del.text()}`);
+    }
   }
 }

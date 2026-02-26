@@ -67,17 +67,23 @@ export function createCastContent(
   });
 
   const lines = [header];
+  const events: Array<[number, string, string]> = [];
   let time = 0.1;
 
   for (const output of outputs) {
-    lines.push(JSON.stringify([time, 'o', output]));
+    events.push([time, 'o', output]);
     time += 0.1;
   }
 
   if (options?.markers) {
     for (const marker of options.markers) {
-      lines.push(JSON.stringify([marker.time, 'm', marker.label]));
+      events.push([marker.time, 'm', marker.label]);
     }
+  }
+
+  events.sort((a, b) => a[0] - b[0]);
+  for (const event of events) {
+    lines.push(JSON.stringify(event));
   }
 
   return lines.join('\n') + '\n';

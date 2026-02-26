@@ -173,7 +173,7 @@ After this cycle:
 - Current test state: 217 tests, 15 files, all passing, zero snapshot files, zero screenshots, zero E2E tests
 - Backend tests cover DB, storage, parsing, pipeline, and dedup via assertions only
 - Frontend tests cover TerminalSnapshot only (12 assertion-based tests)
-- Tech stack: Vitest (existing), Vue 3 + Vite (existing), avt WASM (existing), Playwright (new)
+- Tech stack: Vitest (existing), Vue 3 + Vite (existing), VT WASM (existing), Playwright (new)
 - The `valid-with-markers.cast` fixture has zero screen clears (no dedup epochs) — a synthetic TUI fixture with epochs is required for meaningful pipeline dedup testing
 - Adversarial review identified: ESM `.js` import convention, Playwright port race condition, snapshot determinism gaps, and platform-dependent screenshot risks — all resolved in this revision
 

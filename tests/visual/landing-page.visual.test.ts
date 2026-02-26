@@ -32,8 +32,8 @@ test.describe('Landing Page', () => {
   });
 
   test('with 3 sessions — grid layout', async ({ page }) => {
-    // Already have 1 from previous test, add 2 more
-    for (const fixture of ['valid-without-markers.cast', 'valid-with-markers.cast']) {
+    await deleteAllSessions();
+    for (const fixture of ['valid-with-markers.cast', 'valid-without-markers.cast', 'valid-with-markers.cast']) {
       const id = await uploadFixture(fixture);
       await waitForProcessing(id);
     }
@@ -71,11 +71,9 @@ test.describe('Landing Page', () => {
       buffer: Buffer.from('{"version":3,"term":{"cols":80,"rows":24}}\n[0.1,"o","hello\\n"]\n'),
     });
 
-    // Capture uploading state — may or may not catch the spinner
     const spinner = page.locator('.upload-zone__spinner');
-    if (await spinner.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(page.locator('.upload-zone')).toHaveScreenshot('upload-zone-uploading.png');
-    }
+    await expect(spinner).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.upload-zone')).toHaveScreenshot('upload-zone-uploading.png');
   });
 
   test('session card hover', async ({ page }) => {

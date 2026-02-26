@@ -14,7 +14,7 @@ test.describe('Error States', () => {
 
   test('404 — invalid session ID', async ({ page }) => {
     await page.goto('/session/invalid-session-id-does-not-exist');
-    await page.waitForTimeout(3000);
+    await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
 
     await expect(page).toHaveScreenshot('error-404-invalid-session.png', {
       mask: [page.locator('.app-header')],
@@ -23,7 +23,7 @@ test.describe('Error States', () => {
 
   test('nonexistent route', async ({ page }) => {
     await page.goto('/nonexistent-route');
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('networkidle');
 
     await expect(page).toHaveScreenshot('error-nonexistent-route.png', {
       mask: [page.locator('.app-header')],
@@ -50,13 +50,13 @@ test.describe('Error States', () => {
       buffer: Buffer.from('This is not a cast file'),
     });
 
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('.upload-zone__error', { timeout: 10000 });
     await expect(page.locator('.upload-zone')).toHaveScreenshot('error-invalid-file-upload.png');
   });
 
   test('direct navigation to session detail without data', async ({ page }) => {
     await page.goto('/session/aaaaaaaaa');
-    await page.waitForTimeout(3000);
+    await page.waitForSelector('.session-detail-page__error', { timeout: 10000 });
 
     await expect(page).toHaveScreenshot('error-session-not-found.png', {
       mask: [page.locator('.app-header')],

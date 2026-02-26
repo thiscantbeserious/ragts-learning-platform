@@ -23,16 +23,33 @@ function serializeBoundaries(boundaries: SectionBoundary[]) {
   }));
 }
 
+/** Detect boundaries for events with a signal sandwiched between normal events. */
+function detectWithSignal(signal: AsciicastEvent, beforeCount = 150, afterCount = 150): SectionBoundary[] {
+  const events: AsciicastEvent[] = [
+    ...makeEvents(beforeCount, 0.2),
+    signal,
+    ...makeEvents(afterCount, 0.2),
+  ];
+  return new SectionDetector(events).detect();
+}
+
+/** Load a .cast fixture and extract markers from its events. */
+function loadFixtureWithMarkers(fixturePath: string) {
+  const content = readFileSync(fixturePath, 'utf-8');
+  const lines = content.split('\n').filter((l: string) => l.trim());
+  const events: AsciicastEvent[] = lines.slice(1)
+    .map((l: string) => JSON.parse(l))
+    .filter((e: any) => Array.isArray(e));
+  const markers: Marker[] = events
+    .map((e: AsciicastEvent, i: number) => ({ event: e, index: i }))
+    .filter((x: any) => x.event[1] === 'm')
+    .map((x: any) => ({ time: x.event[0], label: String(x.event[2]), index: x.index }));
+  return { events, markers };
+}
+
 describe('section-detector snapshots', () => {
   it('timing gap signal — boundaries from long pauses', () => {
-    const events: AsciicastEvent[] = [
-      ...makeEvents(150, 0.2),       // 150 normal events
-      [10, 'o', 'after gap\r\n'],  // 10s timing gap
-      ...makeEvents(150, 0.2),       // 150 more normal events
-    ];
-
-    const detector = new SectionDetector(events);
-    const boundaries = detector.detect();
+    const boundaries = detectWithSignal([10, 'o', 'after gap\r\n']);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
     expect(boundaries.length).toBeGreaterThanOrEqual(1);
@@ -40,55 +57,27 @@ describe('section-detector snapshots', () => {
   });
 
   it('screen clear signal — boundaries from clear sequences', () => {
-    const events: AsciicastEvent[] = [
-      ...makeEvents(150, 0.2),
-      [0.1, 'o', '\x1b[2J\x1b[H'],  // Screen clear
-      ...makeEvents(150, 0.2),
-    ];
-
-    const detector = new SectionDetector(events);
-    const boundaries = detector.detect();
+    const boundaries = detectWithSignal([0.1, 'o', '\x1b[2J\x1b[H']);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
     expect(boundaries.some(b => b.signals.includes('screen_clear'))).toBe(true);
   });
 
   it('alt-screen exit signal', () => {
-    const events: AsciicastEvent[] = [
-      ...makeEvents(150, 0.2),
-      [0.1, 'o', '\x1b[?1049l'],  // Alt screen exit
-      ...makeEvents(150, 0.2),
-    ];
-
-    const detector = new SectionDetector(events);
-    const boundaries = detector.detect();
+    const boundaries = detectWithSignal([0.1, 'o', '\x1b[?1049l']);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
     expect(boundaries.some(b => b.signals.includes('alt_screen_exit'))).toBe(true);
   });
 
   it('volume burst signal — after quiet period', () => {
-    const events: AsciicastEvent[] = [
-      ...makeEvents(150, 0.2),
-      [2, 'o', 'A'.repeat(5000)],  // Volume burst after 2s gap
-      ...makeEvents(150, 0.2),
-    ];
-
-    const detector = new SectionDetector(events);
-    const boundaries = detector.detect();
+    const boundaries = detectWithSignal([2, 'o', 'A'.repeat(5000)]);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
   });
 
   it('multiple signals merged within window', () => {
-    const events: AsciicastEvent[] = [
-      ...makeEvents(150, 0.2),
-      [8, 'o', '\x1b[2J'],  // Both timing gap (8s) and screen clear
-      ...makeEvents(150, 0.2),
-    ];
-
-    const detector = new SectionDetector(events);
-    const boundaries = detector.detect();
+    const boundaries = detectWithSignal([8, 'o', '\x1b[2J']);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
     // The merged boundary should have both signals
@@ -117,23 +106,8 @@ describe('section-detector snapshots', () => {
   });
 
   it('real fixture boundaries — valid-with-markers.cast', () => {
-    const content = readFileSync(
-      join(__dirname, '../../fixtures/valid-with-markers.cast'),
-      'utf-8'
-    );
-    const lines = content.split('\n').filter((l: string) => l.trim());
-    const events: AsciicastEvent[] = lines.slice(1)
-      .map((l: string) => JSON.parse(l))
-      .filter((e: any) => Array.isArray(e));
-
-    const markers: Marker[] = events
-      .map((e: AsciicastEvent, i: number) => ({ event: e, index: i }))
-      .filter((x: any) => x.event[1] === 'm')
-      .map((x: any) => ({
-        time: x.event[0],
-        label: String(x.event[2]),
-        index: x.index,
-      }));
+    const fixturePath = join(__dirname, '../../fixtures/valid-with-markers.cast');
+    const { events, markers } = loadFixtureWithMarkers(fixturePath);
 
     const detector = new SectionDetector(events);
     const boundaries = detector.detectWithMarkers(markers);

@@ -38,6 +38,13 @@ function extractColorSpans(snapshot: TerminalSnapshot, lineIndex = 0) {
     .map(s => ({ text: s.text, fg: s.fg }));
 }
 
+/** Extract spans with a specific attribute from a snapshot line. */
+function extractAttrSpans(snapshot: TerminalSnapshot, attr: string, lineIndex = 0) {
+  return snapshot.lines[lineIndex].spans
+    .filter(s => (s as any)[attr])
+    .map(s => ({ text: s.text, [attr]: (s as any)[attr] }));
+}
+
 describe('vt-wasm snapshots', () => {
   it('plain text — getView', () => {
     const { text, snapshot } = feedAndView('Hello World\r\nSecond line\r\n');
@@ -69,26 +76,22 @@ describe('vt-wasm snapshots', () => {
 
   it('bold attribute', () => {
     const { snapshot } = feedAndView('\x1b[1mBold Text\x1b[0m\r\n');
-    const boldSpans = snapshot.lines[0].spans.filter(s => s.bold);
-    expect(boldSpans.map(s => ({ text: s.text, bold: s.bold }))).toMatchSnapshot();
+    expect(extractAttrSpans(snapshot, 'bold')).toMatchSnapshot();
   });
 
   it('italic attribute', () => {
     const { snapshot } = feedAndView('\x1b[3mItalic Text\x1b[0m\r\n');
-    const italicSpans = snapshot.lines[0].spans.filter(s => s.italic);
-    expect(italicSpans.map(s => ({ text: s.text, italic: s.italic }))).toMatchSnapshot();
+    expect(extractAttrSpans(snapshot, 'italic')).toMatchSnapshot();
   });
 
   it('underline attribute', () => {
     const { snapshot } = feedAndView('\x1b[4mUnderlined\x1b[0m\r\n');
-    const underlineSpans = snapshot.lines[0].spans.filter(s => s.underline);
-    expect(underlineSpans.map(s => ({ text: s.text, underline: s.underline }))).toMatchSnapshot();
+    expect(extractAttrSpans(snapshot, 'underline')).toMatchSnapshot();
   });
 
   it('strikethrough attribute', () => {
     const { snapshot } = feedAndView('\x1b[9mStruck\x1b[0m\r\n');
-    const strikeSpans = snapshot.lines[0].spans.filter(s => s.strikethrough);
-    expect(strikeSpans.map(s => ({ text: s.text, strikethrough: s.strikethrough }))).toMatchSnapshot();
+    expect(extractAttrSpans(snapshot, 'strikethrough')).toMatchSnapshot();
   });
 
   it('faint and inverse attributes', () => {

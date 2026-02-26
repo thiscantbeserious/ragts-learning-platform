@@ -74,9 +74,8 @@ test.describe('Session Detail Page', () => {
     await gotoSession(page, sessionId, '.terminal-chrome');
 
     const backLink = page.locator('a[href="/"]').first();
-    if (await backLink.isVisible()) {
-      await expect(backLink).toHaveScreenshot('session-detail-back-link.png');
-    }
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveScreenshot('session-detail-back-link.png');
   });
 
   test('terminal content with line numbers', async ({ page }) => {
@@ -103,9 +102,8 @@ test.describe('Session Detail Page', () => {
     await gotoSession(page, sessionId, '.section-header__meta');
 
     const meta = page.locator('.section-header__meta');
-    if (await meta.first().isVisible()) {
-      await expect(meta.first()).toHaveScreenshot('section-meta-lines.png');
-    }
+    await expect(meta.first()).toBeVisible();
+    await expect(meta.first()).toHaveScreenshot('section-meta-lines.png');
   });
 
   test('full page layout at viewport', async ({ page }) => {
