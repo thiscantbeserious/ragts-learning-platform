@@ -2,7 +2,7 @@
  * Snapshot tests for SessionList component.
  * Locks down list rendering for all states: loading, empty, error, populated.
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import SessionList from '@client/components/SessionList.vue';

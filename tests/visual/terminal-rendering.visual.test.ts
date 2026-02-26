@@ -2,8 +2,14 @@
  * Visual regression tests for terminal rendering.
  * Covers ANSI colors, line numbers, section badges, and terminal chrome.
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { uploadFixture, waitForProcessing, deleteAllSessions } from '../helpers/seed-visual-data';
+
+/** Navigate to the session detail page and wait for a selector to appear. */
+async function gotoSession(page: Page, id: string, waitFor: string) {
+  await page.goto(`/session/${id}`);
+  await page.waitForSelector(waitFor, { timeout: 15000 });
+}
 
 test.describe('Terminal Rendering', () => {
   test.describe.configure({ mode: 'serial' });
@@ -20,8 +26,7 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('ANSI color rendering in terminal', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-span', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-span');
 
     const coloredSpans = page.locator('.terminal-span[style*="color"]');
     const count = await coloredSpans.count();
@@ -31,8 +36,7 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('line numbers aligned', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-line__number', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-line__number');
 
     const numbers = page.locator('.terminal-line__number');
     const count = await numbers.count();
@@ -43,8 +47,7 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('section header marker badge', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header__badge', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header__badge');
 
     const markerBadges = page.locator('.section-header__badge');
     const count = await markerBadges.count();
@@ -54,12 +57,11 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('terminal content whitespace preserved', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-line__content', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-line__content');
 
     const content = page.locator('.terminal-line__content').first();
     const style = await content.evaluate((el) => {
-      const cs = window.getComputedStyle(el);
+      const cs = globalThis.getComputedStyle(el);
       return { whiteSpace: cs.whiteSpace };
     });
     expect(style.whiteSpace).toBe('pre');
@@ -75,12 +77,11 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('terminal chrome border and background', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-chrome', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-chrome');
 
     const chrome = page.locator('.terminal-chrome');
     const styles = await chrome.evaluate((el) => {
-      const cs = window.getComputedStyle(el);
+      const cs = globalThis.getComputedStyle(el);
       return {
         background: cs.backgroundColor,
         borderRadius: cs.borderRadius,
@@ -94,8 +95,7 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('section header label and chevron', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header');
 
     const header = page.locator('.section-header').first();
     const chevron = header.locator('.section-header__chevron');
@@ -108,8 +108,7 @@ test.describe('Terminal Rendering', () => {
   });
 
   test('multiple sections with different content', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header');
 
     const headers = page.locator('.section-header');
     const count = await headers.count();

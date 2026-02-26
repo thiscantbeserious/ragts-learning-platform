@@ -3,13 +3,12 @@
  * Locks down parsed/normalized headers, marker extraction, and cumulative times.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   parseAsciicast,
   normalizeHeader,
   computeCumulativeTimes,
-  extractMarkers,
 } from '../../../src/shared/asciicast.js';
 import type { AsciicastEvent } from '../../../src/shared/asciicast-types.js';
 
@@ -74,9 +73,9 @@ describe('asciicast snapshots', () => {
   it('computeCumulativeTimes — event sequence', () => {
     const events: AsciicastEvent[] = [
       [0.5, 'o', 'first'],
-      [0.0, 'o', 'same-time'],
+      [0, 'o', 'same-time'],
       [0.2, 'o', 'later'],
-      [1.0, 'm', 'marker'],
+      [1, 'm', 'marker'],
       [0.3, 'r', '120x40'],
     ];
 

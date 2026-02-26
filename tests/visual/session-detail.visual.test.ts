@@ -2,8 +2,14 @@
  * Visual regression tests for the session detail page.
  * Covers loading, content display, section fold/unfold, and navigation.
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { uploadFixture, waitForProcessing, deleteAllSessions } from '../helpers/seed-visual-data';
+
+/** Navigate to the session detail page and wait for a selector to appear. */
+async function gotoSession(page: Page, id: string, waitFor: string) {
+  await page.goto(`/session/${id}`);
+  await page.waitForSelector(waitFor, { timeout: 15000 });
+}
 
 test.describe('Session Detail Page', () => {
   test.describe.configure({ mode: 'serial' });
@@ -20,8 +26,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('loaded with terminal content and sections', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-chrome', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-chrome');
     await page.waitForSelector('.section-header', { timeout: 5000 });
 
     await expect(page).toHaveScreenshot('session-detail-loaded.png', {
@@ -30,8 +35,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('section headers visible', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header');
 
     const headers = page.locator('.section-header');
     const count = await headers.count();
@@ -41,8 +45,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('section collapsed after click', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header');
 
     const firstHeader = page.locator('.section-header').first();
     await firstHeader.click();
@@ -54,8 +57,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('section expanded after double click (toggle)', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header');
 
     const firstHeader = page.locator('.section-header').first();
     await firstHeader.click();
@@ -69,8 +71,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('back navigation link', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-chrome', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-chrome');
 
     const backLink = page.locator('a[href="/"]').first();
     if (await backLink.isVisible()) {
@@ -79,8 +80,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('terminal content with line numbers', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-line', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-line');
 
     const lineNumbers = page.locator('.terminal-line__number');
     const count = await lineNumbers.count();
@@ -90,8 +90,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('section badge types visible', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header__badge', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header__badge');
 
     const badges = page.locator('.section-header__badge');
     const count = await badges.count();
@@ -101,8 +100,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('section meta line range info', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header__meta', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header__meta');
 
     const meta = page.locator('.section-header__meta');
     if (await meta.first().isVisible()) {
@@ -111,8 +109,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('full page layout at viewport', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.terminal-chrome', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.terminal-chrome');
 
     await expect(page).toHaveScreenshot('session-detail-full-layout.png', {
       fullPage: true,
@@ -121,8 +118,7 @@ test.describe('Session Detail Page', () => {
   });
 
   test('marker section label visible', async ({ page }) => {
-    await page.goto(`/session/${sessionId}`);
-    await page.waitForSelector('.section-header__label', { timeout: 15000 });
+    await gotoSession(page, sessionId, '.section-header__label');
 
     const labels = page.locator('.section-header__label');
     const count = await labels.count();

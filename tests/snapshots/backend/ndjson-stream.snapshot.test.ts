@@ -3,7 +3,7 @@
  * Locks down parsed header/event structure from .cast fixtures.
  */
 import { describe, it, expect } from 'vitest';
-import { join } from 'path';
+import { join } from 'node:path';
 import { NdjsonStream } from '../../../src/server/processing/ndjson-stream.js';
 
 const fixturesDir = join(__dirname, '../../fixtures');

@@ -3,12 +3,12 @@
  * Locks down the dedup output for all major code paths.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { buildCleanDocument, type EpochBoundary } from '../../../src/server/processing/scrollback-dedup.js';
 import { initVt, createVt } from '../../../packages/vt-wasm/index.js';
-import type { TerminalSnapshot, SnapshotLine } from '../../../packages/vt-wasm/types.js';
-import { makeLine, makeSnapshot, makeStyledLine, snapshotToText } from '../../helpers/test-utils.js';
+import type { TerminalSnapshot } from '../../../packages/vt-wasm/types.js';
+import { makeSnapshot, makeStyledLine, snapshotToText } from '../../helpers/test-utils.js';
 
 beforeAll(async () => {
   await initVt();
@@ -302,7 +302,7 @@ describe('scrollback-dedup snapshots', () => {
         vt.feed(str.replaceAll('\x1b[3J', ''));
         if (str.includes('\x1b[2J') || str.includes('\x1b[3J')) {
           const lineCount = vt.getAllLines().lines.length;
-          if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+          if (epochBoundaries.length === 0 || epochBoundaries.at(-1)!.rawLineCount !== lineCount) {
             epochBoundaries.push({ eventIndex: events.indexOf(event), rawLineCount: lineCount });
           }
         }

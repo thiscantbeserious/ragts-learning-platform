@@ -2,9 +2,9 @@
  * Utilities for seeding data in Playwright visual tests.
  * Uses raw fetch (not Playwright request) so they work in beforeAll hooks.
  */
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

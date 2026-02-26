@@ -3,6 +3,8 @@
  * Locks down boundary detection output for all signal types.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { SectionDetector, type SectionBoundary } from '../../../src/server/processing/section-detector.js';
 import type { AsciicastEvent, Marker } from '../../../src/shared/asciicast-types.js';
 
@@ -15,9 +17,9 @@ function makeEvents(count: number, gap = 0.1): AsciicastEvent[] {
 function serializeBoundaries(boundaries: SectionBoundary[]) {
   return boundaries.map(b => ({
     eventIndex: b.eventIndex,
-    signals: [...b.signals].sort(),
+    signals: [...b.signals].sort((a, b) => a.localeCompare(b)),
     label: b.label,
-    score: typeof b.score === 'number' && isFinite(b.score) ? Math.round(b.score * 100) / 100 : 'Infinity',
+    score: typeof b.score === 'number' && Number.isFinite(b.score) ? Math.round(b.score * 100) / 100 : 'Infinity',
   }));
 }
 
@@ -25,7 +27,7 @@ describe('section-detector snapshots', () => {
   it('timing gap signal — boundaries from long pauses', () => {
     const events: AsciicastEvent[] = [
       ...makeEvents(150, 0.2),       // 150 normal events
-      [10.0, 'o', 'after gap\r\n'],  // 10s timing gap
+      [10, 'o', 'after gap\r\n'],  // 10s timing gap
       ...makeEvents(150, 0.2),       // 150 more normal events
     ];
 
@@ -68,7 +70,7 @@ describe('section-detector snapshots', () => {
   it('volume burst signal — after quiet period', () => {
     const events: AsciicastEvent[] = [
       ...makeEvents(150, 0.2),
-      [2.0, 'o', 'A'.repeat(5000)],  // Volume burst after 2s gap
+      [2, 'o', 'A'.repeat(5000)],  // Volume burst after 2s gap
       ...makeEvents(150, 0.2),
     ];
 
@@ -81,7 +83,7 @@ describe('section-detector snapshots', () => {
   it('multiple signals merged within window', () => {
     const events: AsciicastEvent[] = [
       ...makeEvents(150, 0.2),
-      [8.0, 'o', '\x1b[2J'],  // Both timing gap (8s) and screen clear
+      [8, 'o', '\x1b[2J'],  // Both timing gap (8s) and screen clear
       ...makeEvents(150, 0.2),
     ];
 
@@ -104,7 +106,7 @@ describe('section-detector snapshots', () => {
     ];
 
     const markers: Marker[] = [
-      { time: 40.0, label: 'Test Marker', index: 200 },
+      { time: 40, label: 'Test Marker', index: 200 },
     ];
 
     const detector = new SectionDetector(events);
@@ -115,9 +117,6 @@ describe('section-detector snapshots', () => {
   });
 
   it('real fixture boundaries — valid-with-markers.cast', () => {
-    // Load and parse the fixture events
-    const { readFileSync } = require('fs');
-    const { join } = require('path');
     const content = readFileSync(
       join(__dirname, '../../fixtures/valid-with-markers.cast'),
       'utf-8'
@@ -146,8 +145,7 @@ describe('section-detector snapshots', () => {
     // Create a session with many screen clears to trigger > 50 candidates
     const events: AsciicastEvent[] = [];
     for (let i = 0; i < 60; i++) {
-      events.push(...makeEvents(110, 0.2));
-      events.push([0.1, 'o', '\x1b[2J']);
+      events.push(...makeEvents(110, 0.2), [0.1, 'o', '\x1b[2J']);
     }
     events.push(...makeEvents(200, 0.2));
 

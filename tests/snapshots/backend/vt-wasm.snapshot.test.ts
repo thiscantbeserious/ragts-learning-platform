@@ -3,8 +3,8 @@
  * Locks down VT output for escape sequences, colors, attributes, and operations.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { initVt, createVt } from '../../../packages/vt-wasm/index.js';
 import type { TerminalSnapshot } from '../../../packages/vt-wasm/types.js';
 import { snapshotToText } from '../../helpers/test-utils.js';
@@ -31,6 +31,13 @@ function feedAndAllLines(data: string, cols = 80, rows = 24, scrollback = 1000):
   return { text: snapshotToText(snapshot).map(t => t.trimEnd()), snapshot };
 }
 
+/** Extract color spans with fg values from a snapshot line. */
+function extractColorSpans(snapshot: TerminalSnapshot, lineIndex = 0) {
+  return snapshot.lines[lineIndex].spans
+    .filter(s => s.fg !== undefined)
+    .map(s => ({ text: s.text, fg: s.fg }));
+}
+
 describe('vt-wasm snapshots', () => {
   it('plain text — getView', () => {
     const { text, snapshot } = feedAndView('Hello World\r\nSecond line\r\n');
@@ -43,30 +50,21 @@ describe('vt-wasm snapshots', () => {
     const { snapshot } = feedAndView(
       '\x1b[31mRed\x1b[0m \x1b[32mGreen\x1b[0m \x1b[34mBlue\x1b[0m\r\n'
     );
-
-    const colorSpans = snapshot.lines[0].spans.filter(s => s.fg !== undefined);
-    const colors = colorSpans.map(s => ({ text: s.text, fg: s.fg }));
-    expect(colors).toMatchSnapshot();
+    expect(extractColorSpans(snapshot)).toMatchSnapshot();
   });
 
   it('256-palette color — span fg values', () => {
     const { snapshot } = feedAndView(
       '\x1b[38;5;208mOrange\x1b[0m \x1b[38;5;135mPurple\x1b[0m\r\n'
     );
-
-    const colorSpans = snapshot.lines[0].spans.filter(s => s.fg !== undefined);
-    const colors = colorSpans.map(s => ({ text: s.text, fg: s.fg }));
-    expect(colors).toMatchSnapshot();
+    expect(extractColorSpans(snapshot)).toMatchSnapshot();
   });
 
   it('true color — span fg values', () => {
     const { snapshot } = feedAndView(
       '\x1b[38;2;255;128;0mTrueOrange\x1b[0m \x1b[38;2;0;200;100mTrueGreen\x1b[0m\r\n'
     );
-
-    const colorSpans = snapshot.lines[0].spans.filter(s => s.fg !== undefined);
-    const colors = colorSpans.map(s => ({ text: s.text, fg: s.fg }));
-    expect(colors).toMatchSnapshot();
+    expect(extractColorSpans(snapshot)).toMatchSnapshot();
   });
 
   it('bold attribute', () => {

@@ -5,9 +5,8 @@
  * Uses in-memory repository mocks to isolate the pipeline logic.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
-import { writeFileSync, mkdirSync, rmSync } from 'fs';
-import { join } from 'path';
-import { readFileSync } from 'fs';
+import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { processSessionPipeline } from '../../../src/server/processing/session-pipeline.js';
 import { initVt } from '../../../packages/vt-wasm/index.js';
 
@@ -25,15 +24,31 @@ function writeTempCast(content: string, name: string): string {
   return filePath;
 }
 
+/** Load a .cast fixture and extract markers from its events. */
+function loadFixtureWithMarkers(fixturePath: string) {
+  const content = readFileSync(fixturePath, 'utf-8');
+  const lines = content.split('\n').filter(l => l.trim());
+  const events = lines.slice(1).map(l => JSON.parse(l));
+  const markers = events
+    .map((e: any, i: number) => ({ event: e, index: i }))
+    .filter((x: any) => x.event[1] === 'm')
+    .map((x: any) => ({
+      time: x.event[0],
+      label: String(x.event[2]),
+      index: x.index,
+    }));
+  return { events, markers };
+}
+
 /** In-memory mock for SessionRepository. */
 function createMockSessionRepo() {
   const state: Record<string, any> = {};
   return {
     updateDetectionStatus(id: string, status: string, eventCount?: number, sectionsCount?: number) {
-      state[id] = { ...(state[id] ?? {}), status, eventCount, sectionsCount };
+      state[id] = { ...state[id], status, eventCount, sectionsCount };
     },
     updateSnapshot(id: string, snapshot: string) {
-      state[id] = { ...(state[id] ?? {}), snapshot };
+      state[id] = { ...state[id], snapshot };
     },
     getState(id: string) { return state[id]; },
   };
@@ -52,7 +67,7 @@ function createMockSectionRepo() {
 /** Serialize sections for deterministic snapshots. */
 function serializeSections(sections: any[]) {
   return sections
-    .sort((a: any, b: any) => a.startEvent - b.startEvent)
+    .toSorted((a: any, b: any) => a.startEvent - b.startEvent)
     .map((s: any) => ({
       type: s.type,
       label: s.label,
@@ -71,19 +86,7 @@ describe('session-pipeline snapshots', () => {
 
   it('CLI session with markers — section structure', async () => {
     const castPath = join(__dirname, '../../fixtures/valid-with-markers.cast');
-    const content = readFileSync(castPath, 'utf-8');
-    const lines = content.split('\n').filter(l => l.trim());
-    const events = lines.slice(1).map(l => JSON.parse(l));
-
-    // Extract markers
-    const markers = events
-      .map((e: any, i: number) => ({ event: e, index: i }))
-      .filter((x: any) => x.event[1] === 'm')
-      .map((x: any) => ({
-        time: x.event[0],
-        label: String(x.event[2]),
-        index: x.index,
-      }));
+    const { markers } = loadFixtureWithMarkers(castPath);
 
     const sessionRepo = createMockSessionRepo();
     const sectionRepo = createMockSectionRepo();
@@ -129,18 +132,7 @@ describe('session-pipeline snapshots', () => {
 
   it('valid-with-markers.cast — full pipeline snapshot excluding dynamic fields', async () => {
     const castPath = join(__dirname, '../../fixtures/valid-with-markers.cast');
-    const content = readFileSync(castPath, 'utf-8');
-    const lines = content.split('\n').filter(l => l.trim());
-    const events = lines.slice(1).map(l => JSON.parse(l));
-
-    const markers = events
-      .map((e: any, i: number) => ({ event: e, index: i }))
-      .filter((x: any) => x.event[1] === 'm')
-      .map((x: any) => ({
-        time: x.event[0],
-        label: String(x.event[2]),
-        index: x.index,
-      }));
+    const { markers } = loadFixtureWithMarkers(castPath);
 
     const sessionRepo = createMockSessionRepo();
     const sectionRepo = createMockSectionRepo();
