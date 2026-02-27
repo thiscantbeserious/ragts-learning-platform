@@ -49,3 +49,9 @@ docker compose down -v         # Stop and remove volumes
 ```
 
 Penpot UI: http://localhost:9001 | Mail UI: http://localhost:1080
+
+## MCP Servers
+
+```bash
+claude mcp add penpot -t http http://localhost:4401/mcp   # Register Penpot MCP (requires Penpot running)
+```
