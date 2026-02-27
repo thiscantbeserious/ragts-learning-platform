@@ -13,7 +13,7 @@ User Request
      │
      ▼
 ┌─────────────┐
-│ Coordinator │  Coordinates, never implements
+│ Coordinator │  Assesses task, spawns roles dynamically
 └──────┬──────┘
        │
        ▼
@@ -40,51 +40,59 @@ User Request
                        Execution (mutable)      │       │
                             │                   │       │
                             ▼                   │       │
-                  ┌─────────────────┐           │       │
-                  │   Implementer   │  Works ───┘       │
-                  └────────┬────────┘  from PLAN        │
-                           │                            │
-                     ┌─────┴──────┐                     │
-                     │ Per-stage: │                     │
-                     │ Pair Review│ questions/flags     │
-                     └─────┬──────┘                     │
-                           │                            │
-                           ▼                            │
-                     [Draft PR]                         │
-                           │                            │
-                           ▼                            │
-                  ┌─────────────────┐                   │
-                  │ Reviewer        │ Internal:         │
-                  │ (adversarial)   │ full ADR+PLAN     │
-                  └────────┬────────┘ check             │
-                           │                            │
-                      ┌────┴────┐                       │
-                      │  Gate   │ Mark PR ready only    │
-                      └────┬────┘ after internal pass   │
-                           │                            │
-                           ▼                            │
-                    [CodeRabbit]  External review       │
-                           │                            │
-                           ▼                            │
-                  ┌─────────────────┐                   │
-                  │ Reviewer        │ Address CodeRabbit│
-                  │ (coderabbit)    │ findings          │
-                  └────────┬────────┘                   │
-                           │                            │
-                           ▼                            │
-                  ┌─────────────────┐  Validates ───────┘
-                  │  Product Owner  │  against REQUIREMENTS
-                  └────────┬────────┘
-                           │
-                           ▼
-                  ┌─────────────────┐
-                  │   Maintainer    │  Merges, updates ADR Status
-                  └─────────────────┘
+               ┌────────────────────────┐       │       │
+               │ [Frontend Designer]    │       │       │
+               │ (optional, if UI work) │       │       │
+               └───────────┬────────────┘       │       │
+                           │                    │       │
+                           ▼                    │       │
+              ┌──────────────────────┐          │       │
+              │ Frontend Engineer /  │  Works ──┘       │
+              │ Backend Engineer /   │  from PLAN       │
+              │ Implementer          │                  │
+              └──────────┬───────────┘                  │
+                         │                              │
+                   ┌─────┴──────┐                       │
+                   │ Per-stage: │                       │
+                   │ Pair Review│ questions/flags       │
+                   └─────┬──────┘                       │
+                         │                              │
+                         ▼                              │
+                   [Draft PR]                           │
+                         │                              │
+                         ▼                              │
+                ┌─────────────────┐                     │
+                │ Reviewer        │ Internal:           │
+                │ (adversarial)   │ full ADR+PLAN       │
+                └────────┬────────┘ check               │
+                         │                              │
+                    ┌────┴────┐                         │
+                    │  Gate   │ Mark PR ready only      │
+                    └────┬────┘ after internal pass     │
+                         │                              │
+                         ▼                              │
+                  [CodeRabbit]  External review         │
+                         │                              │
+                         ▼                              │
+                ┌─────────────────┐                     │
+                │ Reviewer        │ Address CodeRabbit  │
+                │ (coderabbit)    │ findings            │
+                └────────┬────────┘                     │
+                         │                              │
+                         ▼                              │
+                ┌─────────────────┐  Validates ─────────┘
+                │  Product Owner  │  against REQUIREMENTS
+                └────────┬────────┘
+                         │
+                         ▼
+                ┌─────────────────┐
+                │   Maintainer    │  Merges, updates ADR Status
+                └─────────────────┘
 ```
 
 ## Agent-Based Architecture
 
-Roles are implemented as agent files in `agents/agents/` (physically at `agents/agents/`). Each agent file contains:
+Roles are implemented as agent files in `agents/agents/`. Each agent file contains:
 
 1. **YAML frontmatter** - configuration (model, tools, permissions, skills, maxTurns)
 2. **Markdown body** - role-specific behavioral instructions, workflow, and output format
@@ -124,13 +132,14 @@ Mutable during implementation. Detailed work tracking.
 | Dependencies | What must complete before what |
 | Progress | Status tracking updated by implementer |
 
-Modified by: Implementer (progress), Architect (scope changes via ADR loop)
+Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR loop)
 
 ## Roles
 
 ### Coordinator
 - Coordinates the SDLC flow
 - Never writes code
+- Assesses each task and dynamically selects which roles to spawn
 - Spawns other roles with fresh context
 - Gates transitions between phases
 - Orchestrates cross-consultation between PO and Architect
@@ -150,12 +159,29 @@ Modified by: Implementer (progress), Architect (scope changes via ADR loop)
 - Hands off only after explicit approval
 - Can be consulted during PO phase for feasibility checks
 
-### Implementer
+### Frontend Designer
+- Creates visual mockups and designs using Penpot MCP (primary) or Chrome MCP (fallback)
+- Iterates with user (max 5 iterations per design element)
+- Hands off approved designs with screenshots and notes to Frontend Engineer
+- Does NOT write application code
+
+### Frontend Engineer
+- Specialized implementer scoped to client-side code (`src/client/`, `src/shared/`)
+- Implements UI to match approved designer mockups
 - Works from PLAN.md stages
-- Stays within ADR Decision scope
-- Updates PLAN.md progress
 - Creates PR when done
-- Reports stage completion for pair review
+
+### Backend Engineer
+- Specialized implementer scoped to server-side code (`src/server/`, `packages/`)
+- Handles Hono routes, DB layer, WASM packages
+- Works from PLAN.md stages
+- Creates PR when done
+
+### Implementer
+- General-purpose implementation role (full-stack fallback)
+- Used when scope crosses both frontend and backend, or when the specialized split is unnecessary
+- Works from PLAN.md stages
+- Creates PR when done
 
 ### Reviewer (Three Phases)
 - **Pair (reviewer-pair):** Collaborative incremental review during implementation. Asks questions, makes observations, flags potential issues per PLAN stage.
@@ -177,6 +203,7 @@ Modified by: Implementer (progress), Architect (scope changes via ADR loop)
 5. Explicit approval - no phase transitions without sign-off
 6. Agent files as configuration - each agent has its model, tools, and permissions defined in YAML frontmatter
 7. Skills as shared protocols - cross-cutting concerns (collaboration protocol, verification rules, coding principles) loaded via the skills field
+8. Dynamic role selection - Coordinator picks only the roles needed per task
 
 ## Phases
 

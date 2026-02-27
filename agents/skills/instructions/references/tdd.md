@@ -26,18 +26,41 @@
 
 ## Test Organization
 
-Tests should be separate from source code when feasible. Prefer integration-style tests that exercise real behavior over heavily mocked unit tests.
+Tests are co-located with source code in `src/` and standalone tests live in `tests/` at the project root.
 
 ```
+src/
+  server/processing/
+    scrollback-dedup.test.ts    # Co-located unit tests
+    session-pipeline.test.ts
+  ...
 tests/
-  unit/           # Unit tests by module
-  integration/    # Integration tests
-  e2e/            # End-to-end tests
-  fixtures/       # Test data files
+  fixtures/                     # Test data files (.cast, etc.)
+  ...
 ```
 
-**Naming:** `<module>.test.*` or `<module>_test.*` for files, descriptive behavior names for functions.
+**Naming:** `<module>.test.ts` for test files, descriptive behavior names for test cases.
 
-## Tech Stack Note
+## Vitest Configuration
 
-Specific test frameworks, snapshot testing, and commands will be defined once the tech stack is chosen.
+- **Default environment:** `happy-dom` (client-side tests, Vue components)
+- **Server tests:** Use `// @vitest-environment node` pragma for backend code that needs Node APIs
+- Run with `npx vitest run` (single run) or `npm test` (watch mode)
+
+## Snapshot Testing
+
+Snapshot tests lock expected output to catch regressions. **Never update snapshots without explicit user approval.**
+
+```typescript
+// Inline snapshot
+expect(result).toMatchInlineSnapshot(`...`);
+
+// File snapshot (creates .snap file)
+expect(result).toMatchSnapshot();
+```
+
+If a snapshot test fails:
+1. Investigate why — the failure likely means source code changed behavior
+2. Report the diff (old vs new) to the user
+3. Only run `--update` after user confirms the new output is correct
+4. Commits with snapshot changes require `[snapshot-update]` in the commit message (enforced by git hook)

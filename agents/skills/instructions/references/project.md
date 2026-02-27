@@ -8,13 +8,27 @@
 - Markers as fold/unfold anchors for collapsible sections
 - Sessions serve as curated long-term memory for humans and agents
 
-## Architecture
+## Tech Stack
 
-See `ARCHITECTURE.md` for the full architectural baseline including:
-- 6 bounded contexts: Identity, Session, Retrieval, Index, Transform, Cache
-- Container topology: Single container -> Docker Compose -> Orchestrated
-- Built-in authentication with optional OIDC integration
-- DB abstraction layer (SQLite <-> PostgreSQL)
+- **Backend:** Hono (Node.js) with SQLite via better-sqlite3
+- **Frontend:** Vue 3 + Vite
+- **Terminal processing:** avt WASM (Rust compiled to WASM via wasm-pack)
+- **Testing:** Vitest (unit/integration), Playwright (E2E)
+- **Type checking:** vue-tsc (TypeScript + Vue SFCs)
+
+## Codebase Structure
+
+| Directory | Purpose |
+|-----------|---------|
+| `src/server/` | Hono backend: routes, DB layer (repositories, migrations), processing pipeline |
+| `src/client/` | Vue 3 frontend: components, pages, composables |
+| `src/shared/` | Shared TypeScript types (asciicast, session, section) |
+| `packages/vt-wasm/` | Rust WASM module for VT100 terminal processing |
+| `tests/` | Integration tests and fixtures |
+| `scripts/` | Diagnostic and utility scripts |
+| `.state/` | SDLC state files (requirements, ADR, plans per branch) |
+
+See `ARCHITECTURE.md` for the full architectural baseline.
 
 ## Related Projects
 

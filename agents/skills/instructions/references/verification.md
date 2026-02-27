@@ -7,17 +7,14 @@
 Run all applicable checks before committing:
 
 ```bash
-# TBD - will be defined once tech stack is chosen
-# Expected: format + lint + test
+npx vitest run                # Unit + integration tests
+npx vue-tsc --noEmit          # Type check (TypeScript + Vue SFCs)
+npx playwright test           # E2E tests (if applicable)
 ```
 
 ## Requirements
 
 - All tests must pass
-- No linter warnings
+- No TypeScript type errors (`vue-tsc --noEmit` clean)
 - Code formatted per project standards
 - PR must pass CI before merge
-
-## Tech Stack Note
-
-Verification commands will be defined once the tech stack is decided. This file should be updated as part of the first implementation cycle.

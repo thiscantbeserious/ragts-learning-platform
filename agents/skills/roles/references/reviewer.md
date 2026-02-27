@@ -65,7 +65,7 @@ Patterns or choices you noticed that differ from the codebase norm.
 
 #### Flags
 Potential issues that could cause problems in later stages or conflict with the ADR.
-- "This might conflict with Stage N which modifies the same struct"
+- "This might conflict with Stage N which modifies the same interface/type"
 - "This approach may not scale for the case described in ADR section X"
 - "This doesn't match the ADR decision regarding Y"
 
@@ -83,7 +83,7 @@ Categorize every finding:
 
 | Severity | Criteria | Examples |
 |----------|----------|----------|
-| HIGH | Breaks functionality, loses data, security vulnerability, or will cause production incidents | Panic on valid input, data corruption, path traversal, command injection, race condition causing data loss |
+| HIGH | Breaks functionality, loses data, security vulnerability, or will cause production incidents | Uncaught throw on valid input, data corruption, path traversal, command injection, race condition causing data loss |
 | MEDIUM | Incorrect behavior in edge cases, poor error handling, performance issues, or maintainability problems that will cause future bugs | Off-by-one errors, swallowed errors, O(n^2) where O(n) is trivial, tight coupling |
 | LOW | Code smells, style issues, missing optimizations, or minor improvements | Unnecessary allocations, verbose code, missing documentation on complex logic |
 
@@ -128,9 +128,10 @@ For each changed file, actively search for:
 - Exhaustiveness - are all cases handled?
 
 #### Edge Cases
-- Empty input (empty string, empty vec, zero)
+- Empty input (empty string, empty array, null, undefined, zero)
 - Single element collections
-- Maximum values (usize::MAX, i64::MAX)
+- Maximum values (Number.MAX_SAFE_INTEGER, Infinity, buffer limits)
+- Type coercion edge cases (loose equality, truthy/falsy)
 - Unicode and special characters in strings
 - Whitespace-only input
 - Negative numbers where only positive expected
@@ -221,7 +222,7 @@ Use the template at `agents/skills/roles/templates/REVIEW.md`
 Before approving, answer honestly:
 
 1. "If this code ran in production for a year, what would break?"
-2. "What input would cause this to panic or corrupt data?"
+2. "What input would cause this to crash or corrupt data?"
 3. "If I were attacking this system, where would I probe?"
 4. "Will the next developer understand why this code exists?"
 5. "Are the tests actually testing the right things?"

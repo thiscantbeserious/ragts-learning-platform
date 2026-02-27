@@ -32,11 +32,11 @@ Direct Assist policy:
 
 Quick implementation loop (inside Direct Assist):
 - Only after explicit user confirmation, for small bounded implementation tasks, run a minimal quality loop:
-  1. Spawn Implementer
+  1. Spawn appropriate engineer (Frontend Engineer, Backend Engineer, or Implementer based on scope)
   2. Spawn Reviewer (internal)
   3. Return reviewed result to user
 - Mandatory gates:
-  - Implementer runs tests (full suite + targeted tests)
+  - Engineer/Implementer runs tests (full suite + targeted tests)
   - Reviewer reports findings with severity
   - Blocking findings are fixed before handoff
 - This loop does not bypass coordinator-managed flow; it is a confirmed fast path within Direct Assist.
@@ -74,6 +74,7 @@ Limits:
 - One active cross-role question per role at a time
 - Maximum 2 follow-ups, then escalate to user
 - If unresolved, Coordinator summarizes options and asks user
+
 ## 4. Verification
 
 - Check files exist before claiming to read them
@@ -111,6 +112,7 @@ A phase is a named operational mode of a role, represented by a separate agent f
 A role without phases has a single agent file. A role with phases has one agent file per phase, named `<role>-<phase>.md`.
 
 Current phase definitions:
-- reviewer-pair: collaborative, during implementation (per stage)
-- reviewer-internal: adversarial, after full implementation
-- reviewer-coderabbit: focused, after CodeRabbit review
+- **reviewer-pair:** collaborative, during implementation (per stage)
+- **reviewer-internal:** adversarial, after full implementation
+- **reviewer-coderabbit:** focused, after CodeRabbit review
+- **frontend-designer:** visual design, when Coordinator identifies UI work in PLAN

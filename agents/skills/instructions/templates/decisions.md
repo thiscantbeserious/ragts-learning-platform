@@ -38,7 +38,7 @@ Copy this template for new decisions:
 
 ## Important Paths
 - **Project:** [PROJECT_PATH]
-- **Config:** ~/.config/[app]/config.toml
+- **Config:** `.env` / `src/server/config.ts`
 - **Storage:** [STORAGE_PATH]
 
 ## Build/Test Commands
