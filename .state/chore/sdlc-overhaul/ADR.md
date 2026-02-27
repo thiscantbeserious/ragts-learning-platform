@@ -1,7 +1,7 @@
 # ADR: SDLC Infrastructure Overhaul
 
 ## Status
-Proposed
+Accepted
 
 ## Context
 
