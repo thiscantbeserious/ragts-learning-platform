@@ -28,6 +28,12 @@ Use Penpot MCP tools to create, modify, and read designs programmatically:
 
 **Prerequisites:** The Penpot stack auto-starts on first tool call (via `PreToolUse` hook). One-time setup: register the MCP server with `claude mcp add penpot -t http http://localhost:4401/mcp` and create an access token at http://localhost:9001.
 
+**If Penpot tools fail or the hook doesn't fire:**
+1. Start the stack manually: `docker compose up -d`
+2. Wait for readiness: `curl -sf --max-time 5 http://localhost:4401/mcp`
+3. If MCP not registered: `claude mcp add penpot -t http http://localhost:4401/mcp` (requires session restart)
+4. If Penpot is unreachable after all steps, fall back to Chrome MCP and inform the Coordinator.
+
 ### Fallback: Chrome MCP
 
 When Penpot is unavailable or for quick prototyping:
