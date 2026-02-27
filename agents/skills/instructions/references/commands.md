@@ -43,12 +43,15 @@ npx vue-tsc --noEmit          # TypeScript type check (includes Vue SFCs)
 ## Docker (Design Stack)
 
 ```bash
-docker compose up -d          # Start Penpot design stack
-docker compose down            # Stop Penpot stack
+docker compose up -d          # Start Penpot + MCP server (7 services)
+docker compose up -d --build  # Rebuild MCP server image (after upstream updates)
+docker compose down            # Stop all services
 docker compose down -v         # Stop and remove volumes
 ```
 
-Penpot UI: http://localhost:9001 | Mail UI: http://localhost:1080
+Penpot UI: http://localhost:9001 | MCP: http://localhost:4401/mcp | Plugin: http://localhost:4400/manifest.json | Mail: http://localhost:1080
+
+Note: First `docker compose up -d` builds the MCP server from source (may take a few minutes). Subsequent starts use the cached image.
 
 ## MCP Servers
 

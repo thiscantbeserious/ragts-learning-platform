@@ -148,12 +148,11 @@ What becomes easier:
 
 What becomes harder:
 - Coordinator decision logic is more complex (dynamic role selection table, design iteration trigger conditions, routing)
-- Design sessions require running a 6-service docker-compose stack
+- Design sessions require running a 7-service docker-compose stack (Penpot + MCP server)
 - Three engineer roles (plus designer) means more role files to maintain
 - The Coordinator must maintain full awareness of role capabilities to route blocked requests correctly
 
 Follow-ups for later:
-- Penpot MCP server configuration is a local environment concern (out of scope)
 - The `decisions.md` Rust-style config path was fixed, but deeper decisions template review deferred
 - CI integration for the Penpot stack is not addressed
 
@@ -168,3 +167,5 @@ Follow-ups for later:
 7. Decisions template config path changed from Rust convention to TypeScript convention.
 8. All changes confined to `agents/`, `.claude/`, `.state/`, `AGENTS.md`, and `docker-compose.yml`. Zero `src/` modifications.
 9. Role isolation principle adopted: roles define inputs/outputs and scope boundaries only. Blocked requests describe what is needed, not who answers. Coordinator owns all inter-role routing.
+10. Penpot MCP server added as 7th docker-compose service (custom Dockerfile building from `mcp-prod` branch). PreToolUse hook auto-starts full stack on first `mcp__penpot__*` tool call. MCP registration remains a one-time manual step.
+11. Role isolation scope clarified as operational (routing, blocked requests), not descriptive (prose may name other roles for readability).

@@ -26,13 +26,19 @@ Use Penpot MCP tools to create, modify, and read designs programmatically:
 - `export_shape` — Export frames and shapes as PNG/SVG screenshots
 - `import_image` — Import reference images into designs
 
-**Prerequisites:** The Penpot stack auto-starts on first tool call (via `PreToolUse` hook). One-time setup: register the MCP server with `claude mcp add penpot -t http http://localhost:4401/mcp` and create an access token at http://localhost:9001.
+**Prerequisites:** The full stack (Penpot + MCP server) auto-starts on first tool call (via `PreToolUse` hook). One-time setup: register the MCP with `claude mcp add penpot -t http http://localhost:4401/mcp` and create an access token at http://localhost:9001.
+
+**Browser setup for design sessions:**
+1. Open Penpot at http://localhost:9001 and navigate to a design file
+2. Load the plugin from http://localhost:4400/manifest.json
+3. Click "Connect to MCP server" in the plugin UI
 
 **If Penpot tools fail or the hook doesn't fire:**
-1. Start the stack manually: `docker compose up -d`
-2. Wait for readiness: `curl -sf --max-time 5 http://localhost:4401/mcp`
-3. If MCP not registered: `claude mcp add penpot -t http http://localhost:4401/mcp` (requires session restart)
-4. If Penpot is unreachable after all steps, fall back to Chrome MCP and inform the Coordinator.
+1. Start the stack manually: `docker compose up -d --build`
+2. Wait for Penpot: `curl -sf --max-time 5 http://localhost:9001`
+3. Wait for MCP: `curl -sf --max-time 5 http://localhost:4401/mcp`
+4. If MCP not registered: `claude mcp add penpot -t http http://localhost:4401/mcp` (requires session restart)
+5. If unreachable after all steps, fall back to Chrome MCP and inform the Coordinator.
 
 ### Fallback: Chrome MCP
 

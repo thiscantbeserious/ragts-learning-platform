@@ -7,8 +7,10 @@
 ##   docker compose down            # Stop
 ##   docker compose down -v         # Stop and remove volumes
 ##
-## Penpot UI:   http://localhost:9001
-## Mail UI:     http://localhost:1080
+## Penpot UI:      http://localhost:9001
+## Penpot MCP:     http://localhost:4401/mcp
+## Penpot Plugin:  http://localhost:4400/manifest.json
+## Mail UI:        http://localhost:1080
 
 services:
   penpot-frontend:
@@ -73,6 +75,17 @@ services:
     image: valkey/valkey:8.1
     restart: unless-stopped
     command: valkey-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  penpot-mcp:
+    build:
+      context: ./docker/penpot-mcp
+    restart: unless-stopped
+    ports:
+      - "4400:4400"
+      - "4401:4401"
+      - "4402:4402"
+    depends_on:
+      - penpot-frontend
 
   penpot-mailcatch:
     image: sj26/mailcatcher:latest
