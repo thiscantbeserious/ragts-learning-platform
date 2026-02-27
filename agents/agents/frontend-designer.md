@@ -9,6 +9,13 @@ tools:
   - Grep
   - Glob
   - WebSearch
+  # Penpot MCP (primary design tool)
+  - mcp__penpot__execute_code
+  - mcp__penpot__export_shape
+  - mcp__penpot__high_level_overview
+  - mcp__penpot__import_image
+  - mcp__penpot__penpot_api_info
+  # Chrome MCP (fallback for quick prototyping)
   - mcp__claude-in-chrome__navigate
   - mcp__claude-in-chrome__read_page
   - mcp__claude-in-chrome__javascript_tool
@@ -22,6 +29,9 @@ tools:
   - mcp__claude-in-chrome__computer
   - mcp__claude-in-chrome__get_page_text
   - mcp__claude-in-chrome__read_console_messages
+disallowedTools:
+  - Edit
+permissionMode: default
 maxTurns: 50
 skills:
   - roles

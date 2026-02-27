@@ -301,16 +301,48 @@ The Coordinator operates within strict boundaries. Violations compromise the SDL
 6. **Fresh sessions** - Each role gets fresh context with role definition
 7. **CodeRabbit required** - Wait for actual review, never proceed while "processing"
 
-## Role-to-Role Routing
+## Blocked Request Routing
 
-All cross-role questions are routed by the Coordinator.
+When a role submits a blocked request (describing what it needs), the Coordinator uses this routing map to decide where to route it. This is the **complete** routing table — if a request category is missing, add it here before routing.
 
-Coordinator routing duties:
-1. Enforce the structured request/response format from `roles/SKILL.md`
-2. Allow only one active cross-role question per role
-3. Allow at most 2 follow-ups, then escalate to user
-4. Record outcomes in branch ADR/PLAN or PR discussion
-5. Block phase transitions while blocking role-to-role questions remain unresolved
+| Requesting Role | Need Category | Route To |
+|-----------------|---------------|----------|
+| **Product Owner** | Technical feasibility of a requirement | Architect |
+| | Validation risk / testability of acceptance criteria | Reviewer (internal) |
+| | Existing codebase behavior or patterns | Implementer or relevant Engineer |
+| **Architect** | Requirements clarification or scope interpretation | Product Owner |
+| | Risk, testability, or reviewability of a design choice | Reviewer (internal) |
+| | Current implementation details or constraints | Implementer or relevant Engineer |
+| **Frontend Designer** | Requirements clarification | Product Owner |
+| | Technical feasibility of a design | Architect |
+| | Implementation feasibility of a visual pattern | Frontend Engineer |
+| | Existing codebase UI patterns | Frontend Engineer |
+| **Frontend Engineer** | Design clarification (mockup, layout, spacing) | Frontend Designer |
+| | ADR interpretation or design intent | Architect |
+| | API contract or server-side behavior | Backend Engineer |
+| | Requirements clarification | Product Owner |
+| **Backend Engineer** | ADR interpretation or design intent | Architect |
+| | Client-side expectations or contract shape | Frontend Engineer |
+| | Requirements clarification | Product Owner |
+| **Implementer** | ADR interpretation or design intent | Architect |
+| | Requirements clarification | Product Owner |
+| | Domain-specific implementation detail | Frontend Engineer or Backend Engineer (by file scope) |
+| **Reviewer (any phase)** | Implementation intent behind a code choice | The engineer who wrote it (Frontend/Backend/Implementer) |
+| | ADR interpretation or decision boundary | Architect |
+| | Requirements verification or acceptance criteria | Product Owner |
+| **Maintainer** | Blocking findings resolution status | Reviewer (internal) |
+| | Scope acceptance / release readiness | Product Owner |
+| | CI failure diagnosis | The engineer who last committed |
+
+**Routing rules:**
+- If a need doesn't match any row, ask the user before inventing a route
+- "Relevant Engineer" means check file paths to determine Frontend vs Backend vs Implementer
+- Never expose the routing decision to the requesting role — simply relay the answer back
+- Enforce the structured request/response format from `roles/SKILL.md`
+- Allow only one active blocked request per role at a time
+- Allow at most 2 follow-ups per question, then escalate to user
+- Record outcomes in branch ADR/PLAN or PR discussion
+- Block phase transitions while unresolved blocked requests remain open
 
 ## Parallel Implementation Mode
 

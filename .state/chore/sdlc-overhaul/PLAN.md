@@ -251,7 +251,7 @@ Stage 10 depends on Stages 4, 5, 7 (all role files, coordinator, and README must
 | `.state/chore/sdlc-overhaul/NOTES.md` | Created | (planning) |
 | `.state/chore/sdlc-overhaul/REQUIREMENTS.md` | Created | (planning) |
 
-Total: 25 files changed (8 created, 17 modified). Note: `agents/skills/roles/references/frontend-engineer.md`, `backend-engineer.md`, `frontend-designer.md`, `implementer.md`, `reviewer.md`, `SKILL.md`, and `README.md` were also modified in Stage 10 but are already listed under their creation/modification stages above.
+Total: 26 files changed (9 created, 17 modified). Note: several files modified in Stage 10 are already listed under their creation/modification stages above.
 
 ## Progress
 

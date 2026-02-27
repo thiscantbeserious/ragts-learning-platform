@@ -113,4 +113,3 @@ Current phase definitions:
 - **reviewer-pair:** collaborative, during implementation (per stage)
 - **reviewer-internal:** adversarial, after full implementation
 - **reviewer-coderabbit:** focused, after CodeRabbit review
-- **frontend-designer:** visual design, when Coordinator identifies UI work in PLAN

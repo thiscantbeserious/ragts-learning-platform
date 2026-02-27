@@ -207,7 +207,7 @@ After CodeRabbit completes:
    - If valid: describe the required fix with file path and specific change needed
    - If invalid: document clear rationale for dismissal
 3. Report all findings to the Coordinator with classification (valid/invalid)
-4. The Coordinator will delegate valid fixes to the Implementer
+4. The Coordinator will delegate valid fixes to the appropriate engineer
 
 ---
 
