@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction B Refined: Dev Tool + Terminal Colors - RAGTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   DIRECTION B REFINED: DEV TOOL + TERMINAL COLORS
+
+   Mood: Polished developer tool meets terminal
+   energy. Geist's clean geometry, rounded surfaces,
+   and considered spacing — but with Direction A's
+   green/orange palette that says "I live in the
+   terminal." Familiar layout, unexpected color.
+   ============================================ */
+
+:root {
+  /* Backgrounds — near-black, slightly warmer than pure GitHub dark */
+  --bg-page: #0c0c0c;
+  --bg-surface: #141414;
+  --bg-elevated: #1c1c1c;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+
+  /* Accents — terminal green + warm orange */
+  --accent-primary: #00ff9f;
+  --accent-primary-hover: #33ffb3;
+  --accent-primary-dim: #00cc7f;
+  --accent-primary-subtle: rgba(0, 255, 159, 0.07);
+  --accent-secondary: #ff6b2b;
+  --accent-secondary-hover: #ff8a55;
+  --accent-secondary-subtle: rgba(255, 107, 43, 0.07);
+
+  /* Status */
+  --status-success: #00ff9f;
+  --status-warning: #ffcc00;
+  --status-error: #ff3b30;
+  --status-info: #5ac8fa;
+
+  /* Text */
+  --text-primary: #e8e8e8;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-disabled: #30363d;
+
+  /* Borders */
+  --border-default: #1e1e1e;
+  --border-strong: #2a2a2a;
+  --border-accent: #00ff9f;
+
+  /* Terminal-specific */
+  --terminal-bg: #0a0a0a;
+  --terminal-text: #d4d4d4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- DESIGN SPECIMEN --- */
+.specimen-section {
+  padding: 32px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.specimen-section h3 {
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.palette-swatch {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* Typography specimen */
+.type-specimen h1 {
+  font-family: 'Geist', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.type-specimen h2 {
+  font-family: 'Geist', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.type-specimen h3 {
+  font-family: 'Geist', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.type-specimen h4 {
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.type-specimen p {
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  max-width: 600px;
+}
+
+.type-specimen .mono-sample {
+  font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  margin-top: 12px;
+}
+
+/* ============================================
+   SAMPLE SCREEN: LANDING PAGE (POPULATED)
+   ============================================ */
+
+.app-container {
+  max-width: 100%;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 48px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-header__brand {
+  font-family: 'Geist', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-header__brand-icon {
+  width: 22px;
+  height: 22px;
+  background: var(--accent-primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-page);
+}
+
+.app-header__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-strong);
+}
+
+.app-header__workspace {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.15s;
+}
+
+.app-header__workspace:hover {
+  border-color: var(--border-strong);
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header__upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.app-header__upload-btn:hover {
+  background: var(--accent-primary);
+  color: var(--bg-page);
+}
+
+.app-header__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary-dim), var(--accent-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Main content */
+.main-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* Upload strip (compact) */
+.upload-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  margin-bottom: 28px;
+  transition: all 0.2s;
+}
+
+.upload-strip:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.upload-strip__icon {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.upload-strip__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.upload-strip__text code {
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+}
+
+/* Search + Filters */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 14px 8px 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-subtle);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 6px 12px;
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-pill:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+/* Session cards */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.session-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.session-card:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-elevated);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 255, 159, 0.06);
+}
+
+.session-card--processing {
+  border-color: rgba(255, 204, 0, 0.25);
+}
+
+.session-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.session-card__top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-card__filename {
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.session-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.badge--claude-code {
+  background: rgba(255, 107, 43, 0.1);
+  color: var(--accent-secondary);
+}
+
+.badge--claude {
+  background: rgba(0, 255, 159, 0.08);
+  color: var(--accent-primary);
+}
+
+.badge--gemini {
+  background: rgba(90, 200, 250, 0.08);
+  color: var(--status-info);
+}
+
+.badge--codex {
+  background: rgba(255, 204, 0, 0.08);
+  color: var(--status-warning);
+}
+
+.badge--processing {
+  background: rgba(255, 204, 0, 0.08);
+  color: var(--status-warning);
+}
+
+.session-card__meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.session-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-card__meta-item .count {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.session-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.session-card__date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.session-card__size {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Toast */
+.toast-stack {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.toast--success {
+  border-color: rgba(0, 255, 159, 0.25);
+}
+
+.toast__icon {
+  color: var(--accent-primary);
+  font-size: 14px;
+}
+
+.toast__message {
+  color: var(--text-primary);
+}
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.toast__dismiss:hover {
+  color: var(--text-secondary);
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--text-disabled);
+  border-top-color: var(--status-warning);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- SECTION: SESSION DETAIL PREVIEW --- */
+.detail-preview {
+  margin-top: 0;
+  padding: 32px 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.detail-header__back {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 18px;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.detail-header__back:hover {
+  color: var(--accent-primary);
+}
+
+.detail-header__breadcrumb {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.detail-header__breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.detail-header__breadcrumb a:hover {
+  color: var(--accent-primary);
+}
+
+.detail-header__filename {
+  font-family: 'Geist Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.detail-header__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-header__nav-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.detail-header__nav-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.detail-header__edit-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+
+.detail-header__edit-btn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* Terminal chrome */
+.terminal-chrome {
+  background: var(--terminal-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.terminal-chrome__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.terminal-chrome__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-chrome__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.terminal-chrome__dot--red { background: #ff3b30; }
+.terminal-chrome__dot--yellow { background: #ffcc00; }
+.terminal-chrome__dot--green { background: #00ff9f; }
+
+.terminal-chrome__title {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+/* Section headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 16px;
+  background: var(--bg-surface);
+  border: none;
+  border-top: 1px solid var(--border-default);
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.section-header:first-child {
+  border-top: none;
+}
+
+.section-header:hover {
+  background: var(--bg-elevated);
+}
+
+.section-header__chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+  width: 1em;
+}
+
+.section-header__label {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.section-header--marker .section-header__label {
+  color: var(--accent-secondary);
+}
+
+.section-header__badge {
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.section-header__badge--detected {
+  background: var(--accent-primary-subtle);
+  color: var(--accent-primary);
+}
+
+.section-header__badge--marker {
+  background: var(--accent-secondary-subtle);
+  color: var(--accent-secondary);
+}
+
+.section-header__meta {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+}
+
+.section-header__curate {
+  display: none;
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  font-family: 'Geist', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.section-header:hover .section-header__curate {
+  display: inline-flex;
+}
+
+.section-header__curate:hover {
+  background: var(--accent-primary);
+  color: var(--bg-page);
+}
+
+/* Terminal content lines */
+.terminal-content {
+  padding: 8px 0;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.terminal-line {
+  display: flex;
+  min-height: 1.5em;
+  padding: 0 16px;
+}
+
+.terminal-line:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.terminal-line__number {
+  width: 4ch;
+  min-width: 4ch;
+  text-align: right;
+  padding-right: 1.5ch;
+  color: var(--text-disabled);
+  user-select: none;
+  border-right: 1px solid var(--border-default);
+  margin-right: 1.5ch;
+}
+
+.terminal-line__content {
+  color: var(--terminal-text);
+  white-space: pre;
+}
+
+.terminal-line__content .green { color: #00ff9f; }
+.terminal-line__content .orange { color: #ff6b2b; }
+.terminal-line__content .cyan { color: #5ac8fa; }
+.terminal-line__content .yellow { color: #ffcc00; }
+.terminal-line__content .muted { color: #666; }
+.terminal-line__content .bold { font-weight: 600; }
+
+/* Collapsed section */
+.section-collapsed {
+  opacity: 0.5;
+}
+
+/* Divider */
+.page-divider {
+  border: none;
+  border-top: 2px solid var(--border-strong);
+  margin: 48px 0;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== DESIGN SPECIMEN ========== -->
+
+<div style="border-bottom: 2px solid var(--border-strong); margin-bottom: 0;">
+
+  <!-- Palette -->
+  <div class="specimen-section">
+    <h3>Direction B Refined / Color Palette</h3>
+    <div class="palette-grid">
+      <div class="palette-swatch" style="background: #0c0c0c;">#0c0c0c page</div>
+      <div class="palette-swatch" style="background: #141414;">#141414 surface</div>
+      <div class="palette-swatch" style="background: #1c1c1c;">#1c1c1c elevated</div>
+      <div class="palette-swatch" style="background: #00ff9f;"><span style="color:#000">#00ff9f primary</span></div>
+      <div class="palette-swatch" style="background: #ff6b2b;"><span style="color:#000">#ff6b2b secondary</span></div>
+      <div class="palette-swatch" style="background: #00ff9f;"><span style="color:#000">#00ff9f success</span></div>
+      <div class="palette-swatch" style="background: #ffcc00;"><span style="color:#000">#ffcc00 warning</span></div>
+      <div class="palette-swatch" style="background: #ff3b30;">#ff3b30 error</div>
+      <div class="palette-swatch" style="background: #5ac8fa;"><span style="color:#000">#5ac8fa info</span></div>
+      <div class="palette-swatch" style="background: #e8e8e8;"><span style="color:#000">#e8e8e8 text-1</span></div>
+      <div class="palette-swatch" style="background: #8b949e;"><span style="color:#000">#8b949e text-2</span></div>
+      <div class="palette-swatch" style="background: #484f58;">#484f58 muted</div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="specimen-section">
+    <h3>Direction B Refined / Typography</h3>
+    <div class="type-specimen">
+      <h1>Terminal Sessions, Unfolded</h1>
+      <h2>session-pipeline.cast</h2>
+      <h3>Section Detection Complete</h3>
+      <h4>3 markers / 12 detected sections</h4>
+      <p>Geist for UI, Geist Mono for everything code. Direction A's terminal green and warm orange replace the GitHub blue/purple. The polish stays, the identity shifts — from "developer tool" to "developer tool built by terminal people."</p>
+      <p style="font-size: 12px; color: var(--text-muted);">Small/meta: Feb 27, 2026 8:33 PM  |  1.9 KB  |  24 events</p>
+      <div class="mono-sample">$ npm test<br>  <span style="color: #00ff9f;">&#10003;</span> should parse asciicast v3 format <span style="color: #484f58;">(5ms)</span><br>  <span style="color: #00ff9f;">&#10003;</span> should validate header fields <span style="color: #484f58;">(2ms)</span><br>  <span style="color: #ff3b30;">&#10007;</span> should handle resize events <span style="color: #484f58;">(3ms)</span><br>Tests: <span style="color: #ff3b30;">1 failed</span>, <span style="color: #00ff9f;">4 passed</span>, 5 total</div>
+    </div>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--text-muted);">
+      <strong>Heading:</strong> Geist 700/600 &nbsp; | &nbsp;
+      <strong>Body:</strong> Geist 400/500 &nbsp; | &nbsp;
+      <strong>Mono:</strong> Geist Mono 400/500 &nbsp; | &nbsp;
+      <strong>Fallback:</strong> -apple-system, sans-serif / 'JetBrains Mono', monospace
+    </div>
+  </div>
+
+  <!-- Mood -->
+  <div class="specimen-section" style="background: var(--bg-surface);">
+    <h3>Direction B Refined / Mood</h3>
+    <p style="font-family: 'Geist', sans-serif; font-size: 14px; color: var(--text-secondary); line-height: 1.7; max-width: 680px;">
+      <strong style="color: var(--accent-primary);">Polished, but lives in the terminal.</strong> This is Direction B's layout confidence — rounded cards, subtle elevation, considered spacing — wearing Direction A's terminal colors. The green accent is unmistakably terminal. The orange secondary gives agent types and markers their own visual lane. It doesn't look like GitHub, doesn't look like VS Code. It looks like a tool built by people who care about both design <em>and</em> their shell prompt.
+    </p>
+  </div>
+</div>
+
+<!-- ========== SAMPLE SCREEN 1: LANDING PAGE (POPULATED) ========== -->
+
+<div class="app-container">
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">
+        <div class="app-header__brand-icon">R</div>
+        RAGTS
+      </a>
+      <div class="app-header__divider"></div>
+      <div class="app-header__workspace">personal <span style="font-size: 10px; margin-left: 2px;">&#9662;</span></div>
+    </div>
+    <div class="app-header__right">
+      <button class="app-header__upload-btn">
+        <span style="font-size: 16px; line-height: 1;">+</span>
+        Upload
+      </button>
+      <div class="app-header__avatar">S</div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Compact upload strip -->
+    <div class="upload-strip">
+      <span class="upload-strip__icon">&uarr;</span>
+      <span class="upload-strip__text">Drop <code>.cast</code> files here to upload, or use the button above</span>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">/</span>
+        <input type="text" class="search-input" placeholder="Search sessions...">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Claude</button>
+        <button class="filter-pill">Claude Code</button>
+        <button class="filter-pill">Gemini</button>
+        <button class="filter-pill">Codex</button>
+      </div>
+    </div>
+
+    <!-- Session list -->
+    <div class="session-list">
+      <!-- Card 1 (hover state) -->
+      <a href="#" class="session-card" style="border-color: var(--accent-primary); background: var(--bg-elevated); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,255,159,0.06);">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">refactor-auth-middleware.cast</span>
+            <span class="session-card__badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">7</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">23</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">1,247</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">2 hours ago</span>
+          <span class="session-card__size">342 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">debug-pipeline-timeout.cast</span>
+            <span class="session-card__badge badge--claude">Claude</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">3</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">15</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">834</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">yesterday</span>
+          <span class="session-card__size">187 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">gemini-api-integration.cast</span>
+            <span class="session-card__badge badge--gemini">Gemini CLI</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">5</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">31</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">2,103</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">3 days ago</span>
+          <span class="session-card__size">521 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 4 - Processing -->
+      <a href="#" class="session-card session-card--processing">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">setup-ci-pipeline.cast</span>
+            <span class="session-card__badge badge--processing"><span class="spinner" style="margin-right: 4px;"></span> Processing</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item" style="color: var(--text-muted);">Detecting sections...</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">just now</span>
+          <span class="session-card__size">89 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">sample.cast</span>
+            <span class="session-card__badge badge--codex">Codex</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">3</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">1</span> section</span>
+            <span class="session-card__meta-item"><span class="count">24</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">Feb 27</span>
+          <span class="session-card__size">1.9 KB</span>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast-stack">
+    <div class="toast toast--success">
+      <span class="toast__icon">&#10003;</span>
+      <span class="toast__message">Session uploaded successfully</span>
+      <button class="toast__dismiss">&times;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== PAGE DIVIDER ========== -->
+<hr class="page-divider" style="max-width: 960px; margin: 48px auto;">
+
+<!-- ========== SAMPLE SCREEN 2: SESSION DETAIL (PARTIAL) ========== -->
+
+<div class="detail-preview">
+  <!-- Detail header -->
+  <div class="detail-header">
+    <a href="#" class="detail-header__back">&#8592;</a>
+    <span class="detail-header__breadcrumb"><a href="#">Sessions</a> &nbsp;/&nbsp;</span>
+    <span class="detail-header__filename">refactor-auth-middleware.cast</span>
+    <span class="session-card__badge badge--claude-code" style="margin-left: 4px;">Claude Code</span>
+    <div class="detail-header__actions">
+      <button class="detail-header__nav-btn" title="Previous session">&#8592;</button>
+      <button class="detail-header__nav-btn" title="Next session">&#8594;</button>
+      <button class="detail-header__edit-btn">&#9998; Edit</button>
+    </div>
+  </div>
+
+  <!-- Terminal chrome -->
+  <div class="terminal-chrome">
+    <div class="terminal-chrome__titlebar">
+      <div class="terminal-chrome__dots">
+        <span class="terminal-chrome__dot terminal-chrome__dot--red"></span>
+        <span class="terminal-chrome__dot terminal-chrome__dot--yellow"></span>
+        <span class="terminal-chrome__dot terminal-chrome__dot--green"></span>
+      </div>
+      <span class="terminal-chrome__title">refactor-auth-middleware.cast — 1,247 events — 23 sections</span>
+    </div>
+
+    <!-- Section 1: Expanded -->
+    <button class="section-header">
+      <span class="section-header__chevron">&#9662;</span>
+      <span class="section-header__label">Session Startup</span>
+      <span class="section-header__badge section-header__badge--detected">Detected</span>
+      <span class="section-header__meta">L1–L47 (47 lines)</span>
+      <span class="section-header__curate">Curate</span>
+    </button>
+    <div class="terminal-content">
+      <div class="terminal-line"><span class="terminal-line__number">1</span><span class="terminal-line__content"><span class="bold">Claude Code</span> v2.1.42</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">2</span><span class="terminal-line__content">    Opus 4.6 · Claude Team</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">3</span><span class="terminal-line__content">    <span class="cyan">~/git/simon/ragts-learning-platform</span></span></div>
+      <div class="terminal-line"><span class="terminal-line__number">4</span><span class="terminal-line__content"></span></div>
+      <div class="terminal-line"><span class="terminal-line__number">5</span><span class="terminal-line__content"><span class="green">●</span> I want to refactor the auth middleware to support</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">6</span><span class="terminal-line__content">  both built-in authentication and OIDC providers.</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">7</span><span class="terminal-line__content">  The current implementation is tightly coupled to</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">8</span><span class="terminal-line__content">  the session store...</span></div>
+    </div>
+
+    <!-- Section 2: Marker type, expanded -->
+    <button class="section-header section-header--marker" style="background: var(--bg-elevated);">
+      <span class="section-header__chevron">&#9662;</span>
+      <span class="section-header__label">Auth Strategy Pattern</span>
+      <span class="section-header__badge section-header__badge--marker">Marker</span>
+      <span class="section-header__meta">L48–L156 (108 lines)</span>
+      <span class="section-header__curate" style="display: inline-flex;">Curate</span>
+    </button>
+    <div class="terminal-content">
+      <div class="terminal-line"><span class="terminal-line__number">48</span><span class="terminal-line__content"><span class="green">●</span> I'll create a strategy pattern for auth providers.</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">49</span><span class="terminal-line__content">  Let me read the current middleware first.</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">50</span><span class="terminal-line__content"></span></div>
+      <div class="terminal-line"><span class="terminal-line__number">51</span><span class="terminal-line__content"><span class="muted">●</span> <span class="bold">Read</span>(src/server/middleware/auth.ts)</span></div>
+      <div class="terminal-line"><span class="terminal-line__number">52</span><span class="terminal-line__content">  <span class="muted">  → 47 lines</span></span></div>
+    </div>
+
+    <!-- Section 3: Collapsed -->
+    <button class="section-header section-collapsed">
+      <span class="section-header__chevron">&#9656;</span>
+      <span class="section-header__label">Test Execution</span>
+      <span class="section-header__badge section-header__badge--detected">Detected</span>
+      <span class="section-header__meta">L157–L289 (132 lines)</span>
+    </button>
+
+    <!-- Section 4: Collapsed -->
+    <button class="section-header section-collapsed">
+      <span class="section-header__chevron">&#9656;</span>
+      <span class="section-header__label">Error Recovery</span>
+      <span class="section-header__badge section-header__badge--detected">Detected</span>
+      <span class="section-header__meta">L290–L412 (122 lines)</span>
+    </button>
+  </div>
+</div>
+
+</body>
+</html>

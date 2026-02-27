@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction B: Developer Tool Aesthetic - RAGTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   DIRECTION B: DEVELOPER TOOL AESTHETIC
+
+   Mood: Polished, familiar, professional. Like
+   VS Code, GitHub, or Linear had a baby. Rounded
+   surfaces, subtle gradients, syntax-highlighting-
+   inspired accents. Everything feels considered
+   and intentional. A tool you trust because it
+   looks like it was built by people who care.
+   ============================================ */
+
+/* --- COLOR PALETTE --- */
+:root {
+  /* Backgrounds */
+  --bg-page: #0e1117;
+  --bg-surface: #161b22;
+  --bg-elevated: #1c2128;
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Accents */
+  --accent-primary: #58a6ff;       /* GitHub-blue, bright and trustworthy */
+  --accent-primary-hover: #79b8ff;
+  --accent-primary-subtle: rgba(88, 166, 255, 0.1);
+  --accent-secondary: #d2a8ff;     /* Soft purple, syntax-inspired */
+  --accent-secondary-subtle: rgba(210, 168, 255, 0.1);
+
+  /* Status */
+  --status-success: #3fb950;
+  --status-warning: #d29922;
+  --status-error: #f85149;
+  --status-info: #58a6ff;
+
+  /* Text */
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-disabled: #30363d;
+
+  /* Borders */
+  --border-default: #21262d;
+  --border-strong: #30363d;
+  --border-accent: #58a6ff;
+
+  /* Terminal-specific */
+  --terminal-bg: #0d1117;
+  --terminal-text: #c9d1d9;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- TYPOGRAPHY SPECIMEN --- */
+.specimen-section {
+  padding: 32px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.specimen-section h3 {
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+
+/* --- PALETTE DISPLAY --- */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.palette-swatch {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'Geist Mono', monospace;
+}
+
+/* --- TYPOGRAPHY --- */
+.type-specimen h1 {
+  font-family: 'Geist', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.type-specimen h2 {
+  font-family: 'Geist', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.type-specimen h3 {
+  font-family: 'Geist', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.type-specimen h4 {
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.type-specimen p {
+  font-family: 'Geist', sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  max-width: 600px;
+}
+
+.type-specimen .mono-sample {
+  font-family: 'Geist Mono', 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-default);
+  margin-top: 12px;
+}
+
+/* ============================================
+   SAMPLE SCREEN: LANDING PAGE (POPULATED)
+   ============================================ */
+
+.app-container {
+  max-width: 100%;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 48px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-header__brand {
+  font-family: 'Geist', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-header__brand-icon {
+  width: 22px;
+  height: 22px;
+  background: var(--accent-primary);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-page);
+}
+
+.app-header__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-default);
+}
+
+.app-header__workspace {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.15s;
+}
+
+.app-header__workspace:hover {
+  border-color: var(--border-strong);
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header__upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: var(--accent-primary);
+  border: none;
+  color: #fff;
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.app-header__upload-btn:hover {
+  background: var(--accent-primary-hover);
+}
+
+.app-header__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Main content */
+.main-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+/* Upload strip (compact) */
+.upload-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  margin-bottom: 28px;
+  transition: all 0.2s;
+}
+
+.upload-strip:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.upload-strip__icon {
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.upload-strip__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.upload-strip__text code {
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+}
+
+/* Search + Filters */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 14px 8px 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-primary-subtle);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 6px 12px;
+  font-family: 'Geist', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-pill:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+/* Session cards */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.session-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.session-card:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.session-card--processing {
+  border-color: rgba(210, 153, 34, 0.3);
+}
+
+.session-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.session-card__top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-card__filename {
+  font-family: 'Geist Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.session-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: 'Geist', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.badge--claude-code {
+  background: rgba(210, 168, 255, 0.1);
+  color: var(--accent-secondary);
+}
+
+.badge--claude {
+  background: rgba(63, 185, 80, 0.1);
+  color: var(--status-success);
+}
+
+.badge--gemini {
+  background: rgba(88, 166, 255, 0.1);
+  color: var(--accent-primary);
+}
+
+.badge--codex {
+  background: rgba(210, 153, 34, 0.1);
+  color: var(--status-warning);
+}
+
+.badge--processing {
+  background: rgba(210, 153, 34, 0.1);
+  color: var(--status-warning);
+}
+
+.session-card__meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.session-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-card__meta-item .count {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.session-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.session-card__date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.session-card__size {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Toast */
+.toast-stack {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-family: 'Geist', sans-serif;
+  font-size: 13px;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.toast--success {
+  border-color: rgba(63, 185, 80, 0.3);
+}
+
+.toast__icon {
+  font-size: 16px;
+}
+
+.toast__message {
+  color: var(--text-primary);
+}
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.toast__dismiss:hover {
+  color: var(--text-secondary);
+}
+
+/* Processing spinner */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--text-disabled);
+  border-top-color: var(--status-warning);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== DESIGN SPECIMEN ========== -->
+
+<div style="border-bottom: 2px solid var(--border-default); margin-bottom: 0;">
+
+  <!-- Palette -->
+  <div class="specimen-section">
+    <h3>Direction B / Color Palette</h3>
+    <div class="palette-grid">
+      <div class="palette-swatch" style="background: #0e1117;">#0e1117 page</div>
+      <div class="palette-swatch" style="background: #161b22;">#161b22 surface</div>
+      <div class="palette-swatch" style="background: #1c2128;">#1c2128 elevated</div>
+      <div class="palette-swatch" style="background: #58a6ff;"><span style="color:#000">#58a6ff primary</span></div>
+      <div class="palette-swatch" style="background: #d2a8ff;"><span style="color:#000">#d2a8ff secondary</span></div>
+      <div class="palette-swatch" style="background: #3fb950;"><span style="color:#000">#3fb950 success</span></div>
+      <div class="palette-swatch" style="background: #d29922;"><span style="color:#000">#d29922 warning</span></div>
+      <div class="palette-swatch" style="background: #f85149;">#f85149 error</div>
+      <div class="palette-swatch" style="background: #58a6ff;"><span style="color:#000">#58a6ff info</span></div>
+      <div class="palette-swatch" style="background: #e6edf3;"><span style="color:#000">#e6edf3 text-1</span></div>
+      <div class="palette-swatch" style="background: #8b949e;"><span style="color:#000">#8b949e text-2</span></div>
+      <div class="palette-swatch" style="background: #484f58;">#484f58 muted</div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="specimen-section">
+    <h3>Direction B / Typography</h3>
+    <div class="type-specimen">
+      <h1>Terminal Sessions, Unfolded</h1>
+      <h2>session-pipeline.cast</h2>
+      <h3>Section Detection Complete</h3>
+      <h4>3 markers / 12 detected sections</h4>
+      <p>Geist is Vercel's typeface -- clean, geometric, optimized for UI. Geist Mono is its monospaced companion. Together they give RAGTS the feel of a modern developer tool: sharp without being cold, precise without being sterile.</p>
+      <p style="font-size: 12px; color: var(--text-muted);">Small/meta text: Feb 27, 2026 8:33 PM  |  1.9 KB  |  24 events</p>
+      <div class="mono-sample">$ npm test<br>  should parse asciicast v3 format (5ms)<br>  should validate header fields (2ms)<br>Tests: 1 failed, 4 passed, 5 total</div>
+    </div>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--text-muted);">
+      <strong>Heading font:</strong> Geist 700/600 &nbsp; | &nbsp;
+      <strong>Body:</strong> Geist 400/500 &nbsp; | &nbsp;
+      <strong>Mono:</strong> Geist Mono 400/500 &nbsp; | &nbsp;
+      <strong>Fallback:</strong> -apple-system, sans-serif / 'JetBrains Mono', monospace
+    </div>
+  </div>
+
+  <!-- Spacing & Shape -->
+  <div class="specimen-section">
+    <h3>Direction B / Spacing & Shape</h3>
+    <div style="margin-bottom: 16px;">
+      <div style="display: flex; gap: 4px; align-items: flex-end; margin-bottom: 28px;">
+        <div style="width: 32px; height: 4px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">4px</span></div>
+        <div style="width: 32px; height: 8px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">8px</span></div>
+        <div style="width: 32px; height: 12px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">12px</span></div>
+        <div style="width: 32px; height: 16px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">16px</span></div>
+        <div style="width: 32px; height: 24px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">24px</span></div>
+        <div style="width: 32px; height: 32px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">32px</span></div>
+        <div style="width: 32px; height: 48px; background: var(--accent-primary); opacity: 0.3; border-radius: 2px; position: relative;"><span style="position: absolute; bottom: -16px; left: 0; font-size: 9px; color: var(--text-muted);">48px</span></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; margin-top: 32px;">
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 6px;"></div>
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 8px;"></div>
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 10px;"></div>
+      <div style="width: 60px; height: 28px; background: var(--accent-primary-subtle); border: 1px solid var(--accent-primary); border-radius: 20px;"></div>
+    </div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px;">
+      Medium radius (6-10px). Pill shapes for filters/tags. Subtle shadows for elevation. Comfortable 8px base grid.
+    </div>
+  </div>
+
+  <!-- Mood -->
+  <div class="specimen-section" style="background: var(--bg-surface);">
+    <h3>Direction B / Mood</h3>
+    <p style="font-family: 'Geist', sans-serif; font-size: 14px; color: var(--text-secondary); line-height: 1.7; max-width: 680px;">
+      <strong style="color: var(--accent-primary);">Familiar and trustworthy.</strong> This direction borrows from the developer tools you already use -- GitHub's surface hierarchy, VS Code's syntax palette, Linear's polish. Rounded cards, subtle elevation, pill-shaped filters. It does not try to be different for its own sake; it tries to be the best version of what developers expect. The accent pair (blue + purple) maps to the syntax highlighting mental model: code keywords and string literals.
+    </p>
+  </div>
+</div>
+
+<!-- ========== SAMPLE SCREEN: LANDING PAGE (POPULATED) ========== -->
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">
+        <div class="app-header__brand-icon">R</div>
+        RAGTS
+      </a>
+      <div class="app-header__divider"></div>
+      <div class="app-header__workspace">personal <span style="font-size: 10px; margin-left: 2px;">&#9662;</span></div>
+    </div>
+    <div class="app-header__right">
+      <button class="app-header__upload-btn">
+        <span style="font-size: 16px; line-height: 1;">+</span>
+        Upload
+      </button>
+      <div class="app-header__avatar">S</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Compact upload strip -->
+    <div class="upload-strip">
+      <span class="upload-strip__icon">&uarr;</span>
+      <span class="upload-strip__text">Drop <code>.cast</code> files here to upload, or use the button above</span>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" class="search-input" placeholder="Search sessions...">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Claude</button>
+        <button class="filter-pill">Claude Code</button>
+        <button class="filter-pill">Gemini</button>
+        <button class="filter-pill">Codex</button>
+      </div>
+    </div>
+
+    <!-- Session list -->
+    <div class="session-list">
+      <!-- Card 1 (hover state) -->
+      <a href="#" class="session-card" style="border-color: var(--border-strong); background: var(--bg-elevated);">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">refactor-auth-middleware.cast</span>
+            <span class="session-card__badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">7</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">23</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">1,247</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">2 hours ago</span>
+          <span class="session-card__size">342 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">debug-pipeline-timeout.cast</span>
+            <span class="session-card__badge badge--claude">Claude</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">3</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">15</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">834</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">yesterday</span>
+          <span class="session-card__size">187 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">gemini-api-integration.cast</span>
+            <span class="session-card__badge badge--gemini">Gemini CLI</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">5</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">31</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">2,103</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">3 days ago</span>
+          <span class="session-card__size">521 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 4 - Processing -->
+      <a href="#" class="session-card session-card--processing">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">setup-ci-pipeline.cast</span>
+            <span class="session-card__badge badge--processing"><span class="spinner" style="margin-right: 4px;"></span> Processing</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item" style="color: var(--text-muted);">Detecting sections...</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">just now</span>
+          <span class="session-card__size">89 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">sample.cast</span>
+            <span class="session-card__badge badge--codex">Codex</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">3</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">1</span> section</span>
+            <span class="session-card__meta-item"><span class="count">24</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">Feb 27</span>
+          <span class="session-card__size">1.9 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 6 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">migrate-database-schema.cast</span>
+            <span class="session-card__badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">11</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">42</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">3,891</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">Feb 24</span>
+          <span class="session-card__size">1.2 MB</span>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast-stack">
+    <div class="toast toast--success">
+      <span class="toast__icon" style="color: var(--status-success);">&#10003;</span>
+      <span class="toast__message">Session uploaded successfully</span>
+      <button class="toast__dismiss">&times;</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -70,6 +70,57 @@ When the Coordinator identifies UI work in the PLAN (new components, layout chan
 - REQUIREMENTS.md mentions user-facing visual changes
 - Architect's PLAN explicitly calls for design work
 
+### Pre-flight: Design Toolchain Verification (MANDATORY)
+
+**Before spawning the Frontend Designer, the Coordinator MUST verify the Penpot toolchain is operational.** The designer cannot design without working tools. Skipping this step wastes the designer's entire turn budget on setup issues.
+
+Run these checks in order:
+
+1. **Docker stack running:**
+   ```bash
+   docker compose ps --services --filter status=running 2>/dev/null | wc -l
+   ```
+   Must show 7 services. If not: `docker compose up -d --build` and wait.
+
+2. **Penpot UI reachable:**
+   ```bash
+   curl -sf --max-time 5 http://localhost:9001 > /dev/null && echo "OK" || echo "FAIL"
+   ```
+
+3. **Penpot MCP reachable:**
+   ```bash
+   curl -sf --max-time 5 -X POST http://localhost:4401/mcp \
+     -H "Content-Type: application/json" \
+     -H "Accept: application/json, text/event-stream" \
+     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' \
+     | grep -q "penpot-mcp-server" && echo "OK" || echo "FAIL"
+   ```
+
+4. **MCP registered with Claude Code:**
+   Check that `.mcp.json` exists in the project root and contains the penpot server entry.
+   If missing, create it:
+   ```bash
+   claude mcp add --transport http --scope project penpot http://localhost:4401/mcp
+   ```
+   **IMPORTANT:** If `.mcp.json` was just created, a session restart is required before MCP tools become available. Inform the user.
+
+5. **Penpot MCP tools available:**
+   Verify that `mcp__penpot__execute_code` is callable. If it's not in the tool list, the session needs a restart.
+
+6. **Browser plugin connected:**
+   Test the actual MCP connection:
+   ```
+   mcp__penpot__execute_code({ code: "return penpotUtils.getPages()" })
+   ```
+   - If this succeeds → toolchain is fully operational
+   - If this fails with a connection/plugin error → inform the user they need to:
+     1. Open http://localhost:9001 in Chrome
+     2. Open/create a design file
+     3. Load the plugin from http://localhost:4400/manifest.json
+   - **Wait for the user to confirm the plugin is connected before spawning the designer**
+
+**Only proceed to spawn the Frontend Designer after ALL checks pass.** Do not hand off to a designer with a broken toolchain.
+
 ### Flow
 
 ```text
@@ -80,28 +131,36 @@ Coordinator reads PLAN, checks for UI work
      │
      ├─ No UI work → skip to implementation
      │
-     └─ UI work present → spawn Frontend Designer
+     └─ UI work present
           │
           ▼
-     Task(frontend-designer, "Create designs for <UI work>.
-     Branch: <branch-name>
-     REQUIREMENTS: .state/<branch-name>/REQUIREMENTS.md
-     PLAN: .state/<branch-name>/PLAN.md
-     Existing UI: src/client/components/")
+     Coordinator runs Pre-flight: Design Toolchain Verification
           │
-          ▼
-     Designer iterates with user (max 5 per element)
+          ├─ Any check fails → fix it or inform user, do NOT spawn designer
           │
-          ▼
-     Designer reports: "Designs approved. Screenshots at .state/<branch>/designs/"
-          │
-          ▼
-     Coordinator spawns Frontend Engineer with design context:
-     Task(frontend-engineer, "Implement Stage N: <description>.
-     Branch: <branch-name>
-     ADR: .state/<branch-name>/ADR.md
-     PLAN: .state/<branch-name>/PLAN.md
-     Approved designs: .state/<branch-name>/designs/")
+          └─ All checks pass → spawn Frontend Designer
+               │
+               ▼
+          Task(frontend-designer, "Create designs for <UI work>.
+          Branch: <branch-name>
+          REQUIREMENTS: .state/<branch-name>/REQUIREMENTS.md
+          PLAN: .state/<branch-name>/PLAN.md
+          Existing UI: src/client/components/
+          Penpot: VERIFIED — MCP connected, plugin loaded, ready to design.")
+               │
+               ▼
+          Designer iterates with user (max 5 per element)
+               │
+               ▼
+          Designer reports: "Designs approved. Screenshots at .state/<branch>/designs/"
+               │
+               ▼
+          Coordinator spawns Frontend Engineer with design context:
+          Task(frontend-engineer, "Implement Stage N: <description>.
+          Branch: <branch-name>
+          ADR: .state/<branch-name>/ADR.md
+          PLAN: .state/<branch-name>/PLAN.md
+          Approved designs: .state/<branch-name>/designs/")
 ```
 
 ## Quick Implementation Loop (Direct Assist)

@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction C: Editorial/Unexpected - RAGTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   DIRECTION C: EDITORIAL / UNEXPECTED
+
+   Mood: Warm, literate, confident. The terminal
+   output is treated like manuscript text in a
+   high-end technical journal. Serif headings meet
+   monospace content. Cream-on-dark warmth replaces
+   cold blue-gray. The tool feels like it was
+   designed by someone who reads Butterick's
+   Practical Typography AND ships production code.
+   ============================================ */
+
+/* --- COLOR PALETTE --- */
+:root {
+  /* Backgrounds - warm dark, not cold */
+  --bg-page: #1a1814;
+  --bg-surface: #22201b;
+  --bg-elevated: #2a2824;
+  --bg-overlay: rgba(20, 18, 14, 0.9);
+
+  /* Accents - warm amber + cool teal */
+  --accent-primary: #e8a838;      /* Warm amber/gold */
+  --accent-primary-dim: #c48e2a;
+  --accent-primary-subtle: rgba(232, 168, 56, 0.08);
+  --accent-secondary: #5ec4b6;    /* Teal -- cool complement */
+  --accent-secondary-subtle: rgba(94, 196, 182, 0.08);
+
+  /* Status */
+  --status-success: #5ec4b6;      /* Teal doubles as success */
+  --status-warning: #e8a838;      /* Amber doubles as warning */
+  --status-error: #e85d5d;
+  --status-info: #7facd6;
+
+  /* Text - cream, not white */
+  --text-primary: #ede6d8;
+  --text-secondary: #a39b8b;
+  --text-muted: #6b6459;
+  --text-disabled: #4a453d;
+
+  /* Borders */
+  --border-default: #332f29;
+  --border-strong: #4a453d;
+  --border-accent: #e8a838;
+
+  /* Terminal-specific */
+  --terminal-bg: #16140f;
+  --terminal-text: #d4cfc5;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Space Grotesk', -apple-system, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- TYPOGRAPHY SPECIMEN --- */
+.specimen-section {
+  padding: 40px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.specimen-section > h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 24px;
+}
+
+/* --- PALETTE DISPLAY --- */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.palette-swatch {
+  height: 56px;
+  border-radius: 4px;
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* --- TYPOGRAPHY --- */
+.type-specimen h1 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.type-specimen h2 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 24px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--accent-primary);
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.type-specimen h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.type-specimen h4 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.type-specimen p {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 8px;
+  max-width: 600px;
+}
+
+.type-specimen .mono-sample {
+  font-family: 'IBM Plex Mono', 'Fira Code', monospace;
+  font-size: 13px;
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+  padding: 20px 24px;
+  border-radius: 4px;
+  border-left: 3px solid var(--accent-primary);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+/* ============================================
+   SAMPLE SCREEN: LANDING PAGE (POPULATED)
+   ============================================ */
+
+.app-container {
+  max-width: 100%;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 56px;
+  background: var(--bg-page);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.app-header__brand {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.app-header__brand-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  margin-left: 2px;
+}
+
+.app-header__workspace {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.app-header__workspace:hover {
+  border-color: var(--border-strong);
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-header__upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: var(--accent-primary);
+  border: none;
+  color: var(--bg-page);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.app-header__upload-btn:hover {
+  background: var(--accent-primary-dim);
+}
+
+.app-header__avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Instrument Serif', serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.app-header__avatar:hover {
+  border-color: var(--accent-primary);
+}
+
+/* Main content */
+.main-content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 32px;
+}
+
+/* Page title area */
+.page-intro {
+  margin-bottom: 40px;
+}
+
+.page-intro__title {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.page-intro__subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Upload strip (compact) */
+.upload-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 4px;
+  margin-bottom: 32px;
+  transition: all 0.2s;
+}
+
+.upload-strip:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.upload-strip__icon {
+  color: var(--accent-primary);
+  font-size: 18px;
+}
+
+.upload-strip__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.upload-strip__text code {
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+/* Search + Filters */
+.search-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 16px 10px 40px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.search-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 6px 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-pill:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+/* Divider between search and list */
+.list-divider {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin-bottom: 0;
+}
+
+/* Session cards -- editorial layout */
+.session-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-default);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.15s;
+  cursor: pointer;
+}
+
+.session-card:first-child {
+  border-top: 1px solid var(--border-default);
+}
+
+.session-card:hover {
+  padding-left: 16px;
+  border-left: 3px solid var(--accent-primary);
+  margin-left: -16px;
+}
+
+.session-card--processing {
+  opacity: 0.7;
+}
+
+.session-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.session-card__top-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.session-card__filename {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.session-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  border-radius: 3px;
+}
+
+.badge--claude-code {
+  background: rgba(232, 168, 56, 0.1);
+  color: var(--accent-primary);
+  border: 1px solid rgba(232, 168, 56, 0.2);
+}
+
+.badge--claude {
+  background: rgba(94, 196, 182, 0.1);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(94, 196, 182, 0.2);
+}
+
+.badge--gemini {
+  background: rgba(127, 172, 214, 0.1);
+  color: var(--status-info);
+  border: 1px solid rgba(127, 172, 214, 0.2);
+}
+
+.badge--codex {
+  background: rgba(232, 93, 93, 0.1);
+  color: var(--status-error);
+  border: 1px solid rgba(232, 93, 93, 0.2);
+}
+
+.badge--processing {
+  background: rgba(232, 168, 56, 0.08);
+  color: var(--accent-primary);
+  border: 1px solid rgba(232, 168, 56, 0.15);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.session-card__description {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 12px;
+}
+
+.session-card__description .sep {
+  color: var(--border-strong);
+}
+
+.session-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  min-width: 100px;
+}
+
+.session-card__date {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.session-card__size {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Toast */
+.toast-stack {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.toast--success {
+  border-left: 3px solid var(--status-success);
+}
+
+.toast__message {
+  color: var(--text-primary);
+}
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.toast__dismiss:hover {
+  color: var(--text-secondary);
+}
+
+/* Processing spinner */
+.spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--text-disabled);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== DESIGN SPECIMEN ========== -->
+
+<div style="border-bottom: 2px solid var(--border-default); margin-bottom: 0;">
+
+  <!-- Palette -->
+  <div class="specimen-section">
+    <h3>Direction C / Color Palette</h3>
+    <div class="palette-grid">
+      <div class="palette-swatch" style="background: #1a1814;">#1a1814 page</div>
+      <div class="palette-swatch" style="background: #22201b;">#22201b surface</div>
+      <div class="palette-swatch" style="background: #2a2824;">#2a2824 elevated</div>
+      <div class="palette-swatch" style="background: #e8a838;"><span style="color:#000">#e8a838 primary</span></div>
+      <div class="palette-swatch" style="background: #5ec4b6;"><span style="color:#000">#5ec4b6 secondary</span></div>
+      <div class="palette-swatch" style="background: #5ec4b6;"><span style="color:#000">#5ec4b6 success</span></div>
+      <div class="palette-swatch" style="background: #e8a838;"><span style="color:#000">#e8a838 warning</span></div>
+      <div class="palette-swatch" style="background: #e85d5d;">#e85d5d error</div>
+      <div class="palette-swatch" style="background: #7facd6;"><span style="color:#000">#7facd6 info</span></div>
+      <div class="palette-swatch" style="background: #ede6d8;"><span style="color:#000">#ede6d8 text-1</span></div>
+      <div class="palette-swatch" style="background: #a39b8b;"><span style="color:#000">#a39b8b text-2</span></div>
+      <div class="palette-swatch" style="background: #6b6459;">#6b6459 muted</div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="specimen-section">
+    <h3>Direction C / Typography</h3>
+    <div class="type-specimen">
+      <h1>Terminal Sessions, Unfolded</h1>
+      <h2>session-pipeline.cast</h2>
+      <h3>Section Detection Complete</h3>
+      <h4>3 markers / 12 detected sections</h4>
+      <p>Instrument Serif for display headings -- elegant, expressive, unexpected in a developer tool. Space Grotesk for body -- geometric with personality. IBM Plex Mono for all code and terminal content -- the most readable monospace typeface designed for extended reading.</p>
+      <p style="font-size: 12px; color: var(--text-muted);">Small/meta text: Feb 27, 2026 8:33 PM  |  1.9 KB  |  24 events</p>
+      <div class="mono-sample">$ npm test<br>  should parse asciicast v3 format (5ms)<br>  should validate header fields (2ms)<br>Tests: 1 failed, 4 passed, 5 total</div>
+    </div>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--text-muted);">
+      <strong>Display:</strong> Instrument Serif 400/italic &nbsp; | &nbsp;
+      <strong>Body:</strong> Space Grotesk 400/500/600 &nbsp; | &nbsp;
+      <strong>Mono:</strong> IBM Plex Mono 400/500 &nbsp; | &nbsp;
+      <strong>Fallback:</strong> Georgia, serif / -apple-system, sans-serif / 'Fira Code', monospace
+    </div>
+  </div>
+
+  <!-- Spacing & Shape -->
+  <div class="specimen-section">
+    <h3>Direction C / Spacing & Shape</h3>
+    <div style="margin-bottom: 16px;">
+      <div style="display: flex; gap: 6px; align-items: flex-end; margin-bottom: 32px;">
+        <div style="width: 36px; height: 4px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">4px</span></div>
+        <div style="width: 36px; height: 8px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">8px</span></div>
+        <div style="width: 36px; height: 12px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">12px</span></div>
+        <div style="width: 36px; height: 16px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">16px</span></div>
+        <div style="width: 36px; height: 24px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">24px</span></div>
+        <div style="width: 36px; height: 32px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">32px</span></div>
+        <div style="width: 36px; height: 48px; background: var(--accent-primary); opacity: 0.3; border-radius: 1px; position: relative;"><span style="position: absolute; bottom: -18px; left: 0; font-size: 9px; color: var(--text-muted);">48px</span></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 16px; margin-top: 32px;">
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 3px;"></div>
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 4px;"></div>
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border-left: 3px solid var(--accent-primary); border-radius: 0;"></div>
+      <div style="width: 1px; height: 40px; background: var(--border-default);"></div>
+    </div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px;">
+      Subtle radius (3-4px). Left-border accents for emphasis. Hairline dividers instead of card borders. Generous vertical rhythm. Airy, not dense.
+    </div>
+  </div>
+
+  <!-- Mood -->
+  <div class="specimen-section" style="background: var(--bg-surface);">
+    <h3>Direction C / Mood</h3>
+    <p style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; color: var(--text-secondary); line-height: 1.8; max-width: 680px;">
+      <strong style="color: var(--accent-primary);">The manuscript, not the terminal.</strong> This direction treats terminal sessions as primary-source documents worth reading carefully. Serif display type, warm amber tones, generous whitespace. The terminal content is the hero artifact -- framed, not decorated. It borrows from editorial design: clean type hierarchy, understated dividers, content that breathes. Feels like the tool was built by someone who thinks developer tools should be beautiful, not just functional.
+    </p>
+  </div>
+</div>
+
+<!-- ========== SAMPLE SCREEN: LANDING PAGE (POPULATED) ========== -->
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">
+        RAGTS<span class="app-header__brand-dot"></span>
+      </a>
+      <div class="app-header__workspace">personal <span style="font-size: 9px;">&#9662;</span></div>
+    </div>
+    <div class="app-header__right">
+      <button class="app-header__upload-btn">Upload</button>
+      <div class="app-header__avatar">S</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Page intro -->
+    <div class="page-intro">
+      <h1 class="page-intro__title">Sessions</h1>
+      <p class="page-intro__subtitle">Browse, search, and curate your agent terminal recordings.</p>
+    </div>
+
+    <!-- Compact upload strip -->
+    <div class="upload-strip">
+      <span class="upload-strip__icon">&uarr;</span>
+      <span class="upload-strip__text">Drop <code>.cast</code> files here to add new sessions</span>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">/</span>
+        <input type="text" class="search-input" placeholder="Search sessions...">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Claude</button>
+        <button class="filter-pill">Claude Code</button>
+        <button class="filter-pill">Gemini</button>
+        <button class="filter-pill">Codex</button>
+      </div>
+    </div>
+
+    <!-- Session list -- editorial style with dividers instead of cards -->
+    <div class="session-list">
+      <!-- Card 1 (hover state simulated) -->
+      <a href="#" class="session-card" style="padding-left: 16px; border-left: 3px solid var(--accent-primary); margin-left: -16px;">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">refactor-auth-middleware.cast</span>
+            <span class="session-card__badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="session-card__description">
+            <span>7 markers</span>
+            <span class="sep">/</span>
+            <span>23 sections</span>
+            <span class="sep">/</span>
+            <span>1,247 events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">2 hours ago</span>
+          <span class="session-card__size">342 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">debug-pipeline-timeout.cast</span>
+            <span class="session-card__badge badge--claude">Claude</span>
+          </div>
+          <div class="session-card__description">
+            <span>3 markers</span>
+            <span class="sep">/</span>
+            <span>15 sections</span>
+            <span class="sep">/</span>
+            <span>834 events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">yesterday</span>
+          <span class="session-card__size">187 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">gemini-api-integration.cast</span>
+            <span class="session-card__badge badge--gemini">Gemini CLI</span>
+          </div>
+          <div class="session-card__description">
+            <span>5 markers</span>
+            <span class="sep">/</span>
+            <span>31 sections</span>
+            <span class="sep">/</span>
+            <span>2,103 events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">3 days ago</span>
+          <span class="session-card__size">521 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 4 - Processing -->
+      <a href="#" class="session-card session-card--processing">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">setup-ci-pipeline.cast</span>
+            <span class="session-card__badge badge--processing"><span class="spinner" style="margin-right: 4px;"></span> Processing</span>
+          </div>
+          <div class="session-card__description">
+            <span style="font-style: italic;">Detecting sections...</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">just now</span>
+          <span class="session-card__size">89 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">sample.cast</span>
+            <span class="session-card__badge badge--codex">Codex</span>
+          </div>
+          <div class="session-card__description">
+            <span>3 markers</span>
+            <span class="sep">/</span>
+            <span>1 section</span>
+            <span class="sep">/</span>
+            <span>24 events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">Feb 27</span>
+          <span class="session-card__size">1.9 KB</span>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast-stack">
+    <div class="toast toast--success">
+      <span class="toast__message">Session uploaded successfully</span>
+      <button class="toast__dismiss">&times;</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

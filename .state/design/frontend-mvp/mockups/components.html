@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage 4: Component Library - RAGTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-page: #0c0c0c;
+  --bg-surface: #141414;
+  --bg-elevated: #1c1c1c;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+  --accent-primary: #00ff9f;
+  --accent-primary-hover: #33ffb3;
+  --accent-primary-dim: #00cc7f;
+  --accent-primary-subtle: rgba(0, 255, 159, 0.07);
+  --accent-secondary: #ff6b2b;
+  --accent-secondary-hover: #ff8a55;
+  --accent-secondary-subtle: rgba(255, 107, 43, 0.07);
+  --status-success: #00ff9f;
+  --status-warning: #ffcc00;
+  --status-error: #ff3b30;
+  --status-info: #5ac8fa;
+  --text-primary: #e8e8e8;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-disabled: #30363d;
+  --text-inverse: #0c0c0c;
+  --border-default: #1e1e1e;
+  --border-strong: #2a2a2a;
+  --border-accent: #00ff9f;
+  --terminal-bg: #0a0a0a;
+  --terminal-text: #d4d4d4;
+  --font-family-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  --font-family-heading: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-glow-primary: 0 0 0 3px rgba(0, 255, 159, 0.07);
+  --shadow-glow-error: 0 0 0 3px rgba(255, 59, 48, 0.15);
+  --shadow-card-hover: 0 4px 16px rgba(0, 255, 159, 0.06);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-family-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.comp-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.comp-page__title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.comp-page__subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+}
+
+/* Section layout */
+.comp-section {
+  margin-bottom: 56px;
+}
+
+.comp-section__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.comp-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.comp-row--col {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.comp-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+
+.comp-label:first-child { margin-top: 0; }
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 16px;
+  font-family: var(--font-family-body);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  white-space: nowrap;
+}
+
+.btn--sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+/* Primary */
+.btn--primary {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+.btn--primary-hover {
+  background: var(--accent-primary-hover);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary-hover);
+}
+.btn--primary-active {
+  background: var(--accent-primary-dim);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary-dim);
+}
+.btn--primary-disabled {
+  background: var(--bg-elevated);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.btn--primary-loading {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+  opacity: 0.8;
+  cursor: wait;
+}
+
+/* Secondary (outlined) */
+.btn--secondary {
+  background: transparent;
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+.btn--secondary-hover {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary);
+}
+.btn--secondary-active {
+  background: var(--accent-primary-dim);
+  color: var(--text-inverse);
+  border-color: var(--accent-primary-dim);
+}
+.btn--secondary-disabled {
+  background: transparent;
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+  cursor: not-allowed;
+}
+
+/* Ghost */
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+.btn--ghost-hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: transparent;
+}
+.btn--ghost-active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: transparent;
+}
+.btn--ghost-disabled {
+  background: transparent;
+  color: var(--text-disabled);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* Destructive */
+.btn--destructive {
+  background: var(--status-error);
+  color: #fff;
+  border-color: var(--status-error);
+}
+.btn--destructive-hover {
+  background: #ff5a52;
+  color: #fff;
+  border-color: #ff5a52;
+}
+.btn--destructive-active {
+  background: #cc2f27;
+  color: #fff;
+  border-color: #cc2f27;
+}
+.btn--destructive-disabled {
+  background: var(--bg-elevated);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+  cursor: not-allowed;
+}
+
+/* Spinner inside button */
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: var(--text-inverse);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================
+   INPUTS
+   ============================================ */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 280px;
+}
+
+.input-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.input-field {
+  padding: 8px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+  width: 100%;
+}
+
+.input-field::placeholder { color: var(--text-muted); }
+
+.input-field--focused {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.input-field--error {
+  border-color: var(--status-error);
+  box-shadow: var(--shadow-glow-error);
+}
+
+.input-field--disabled {
+  background: var(--bg-page);
+  color: var(--text-disabled);
+  border-color: var(--border-default);
+  cursor: not-allowed;
+}
+
+.input-helper {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.input-error-msg {
+  font-size: 11px;
+  color: var(--status-error);
+}
+
+.input-password-wrap {
+  position: relative;
+}
+
+.input-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-family-body);
+}
+
+.input-password-toggle:hover { color: var(--text-secondary); }
+
+/* ============================================
+   DROPDOWN
+   ============================================ */
+.dropdown {
+  position: relative;
+  min-width: 200px;
+}
+
+.dropdown__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color var(--duration-fast);
+}
+
+.dropdown__trigger:hover { border-color: var(--border-strong); }
+
+.dropdown__trigger--open {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.dropdown__chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.dropdown__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.dropdown__search {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.dropdown__search input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-size: 12px;
+  outline: none;
+}
+
+.dropdown__option {
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.dropdown__option:hover {
+  background: var(--accent-primary-subtle);
+  color: var(--text-primary);
+}
+
+.dropdown__option--selected {
+  color: var(--accent-primary);
+  font-weight: 500;
+}
+
+/* Multi-select tags */
+.multi-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  min-width: 280px;
+  padding: 6px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--accent-primary-subtle);
+  color: var(--accent-primary);
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+}
+
+.tag-pill__remove {
+  cursor: pointer;
+  opacity: 0.6;
+  font-size: 12px;
+}
+
+.tag-pill__remove:hover { opacity: 1; }
+
+.multi-select__input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-family-body);
+  flex: 1;
+  min-width: 60px;
+}
+
+.multi-select__input::placeholder { color: var(--text-muted); }
+
+/* ============================================
+   BADGES
+   ============================================ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-family-body);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.badge--sm {
+  padding: 1px 6px;
+  font-size: 10px;
+  border-radius: 8px;
+}
+
+.badge--claude { background: rgba(0,255,159,0.08); color: var(--accent-primary); }
+.badge--claude-code { background: rgba(255,107,43,0.1); color: var(--accent-secondary); }
+.badge--gemini { background: rgba(90,200,250,0.08); color: var(--status-info); }
+.badge--codex { background: rgba(255,204,0,0.08); color: var(--status-warning); }
+
+.badge--detected { background: var(--accent-primary-subtle); color: var(--accent-primary); }
+.badge--marker { background: var(--accent-secondary-subtle); color: var(--accent-secondary); }
+
+.badge--processing { background: rgba(255,204,0,0.08); color: var(--status-warning); }
+.badge--completed { background: rgba(0,255,159,0.08); color: var(--accent-primary); }
+.badge--failed { background: rgba(255,59,48,0.1); color: var(--status-error); }
+
+.badge-spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--text-disabled);
+  border-top-color: var(--status-warning);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ============================================
+   SESSION CARDS
+   ============================================ */
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.card--hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-elevated);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card--processing {
+  border-color: rgba(255, 204, 0, 0.25);
+}
+
+.card__main { display: flex; flex-direction: column; gap: 6px; }
+
+.card__top-row { display: flex; align-items: center; gap: 10px; }
+
+.card__filename {
+  font-family: var(--font-family-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.card__meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.card__meta .count { color: var(--text-secondary); font-weight: 500; }
+
+.card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.card__date { font-size: 12px; color: var(--text-secondary); }
+.card__size { font-size: 11px; color: var(--text-muted); }
+
+/* ============================================
+   MODAL SHELL
+   ============================================ */
+.modal-demo {
+  position: relative;
+  background: var(--bg-overlay);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+}
+
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 480px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.modal__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.modal__close:hover { color: var(--text-secondary); }
+
+.modal__body {
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-default);
+}
+
+/* ============================================
+   SLIDE-OVER PANEL
+   ============================================ */
+.slideover-demo {
+  display: flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  min-height: 320px;
+}
+
+.slideover-demo__content {
+  flex: 1;
+  background: var(--terminal-bg);
+  padding: 16px;
+  font-family: var(--font-family-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.slideover {
+  width: 380px;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+}
+
+.slideover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.slideover__title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.slideover__close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.slideover__body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.slideover__footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-default);
+}
+
+/* ============================================
+   TOASTS
+   ============================================ */
+.toast-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 20px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-lg);
+}
+
+.toast--success { border-color: rgba(0,255,159,0.25); }
+.toast--error { border-color: rgba(255,59,48,0.25); }
+.toast--info { border-color: rgba(90,200,250,0.25); }
+
+.toast__icon { font-size: 14px; }
+.toast__icon--success { color: var(--accent-primary); }
+.toast__icon--error { color: var(--status-error); }
+.toast__icon--info { color: var(--status-info); }
+
+.toast__message { color: var(--text-primary); }
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+}
+
+.toast__dismiss:hover { color: var(--text-secondary); }
+
+/* ============================================
+   SECTION HEADERS
+   ============================================ */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 16px;
+  background: var(--bg-surface);
+  border: none;
+  border-top: 1px solid var(--border-default);
+  font-family: var(--font-family-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.section-header:first-child { border-top: none; }
+
+.section-header--hover-state { background: var(--bg-elevated); }
+
+.section-header__chevron { font-size: 10px; color: var(--text-muted); width: 1em; }
+.section-header__label { font-weight: 600; }
+.section-header__label--detected { color: var(--accent-primary); }
+.section-header__label--marker { color: var(--accent-secondary); }
+.section-header__meta {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+}
+
+.section-header__curate {
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  font-family: var(--font-family-body);
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.section-header__curate--hover {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+.section-header--collapsed { opacity: 0.5; }
+
+/* ============================================
+   TERMINAL CHROME
+   ============================================ */
+.terminal-chrome {
+  background: var(--terminal-bg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.terminal-chrome__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.terminal-chrome__dots { display: flex; gap: 6px; }
+
+.terminal-chrome__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.terminal-chrome__dot--red { background: #ff3b30; }
+.terminal-chrome__dot--yellow { background: #ffcc00; }
+.terminal-chrome__dot--green { background: #00ff9f; }
+
+.terminal-chrome__title {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.terminal-content {
+  padding: 8px 0;
+  font-family: var(--font-family-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.terminal-line {
+  display: flex;
+  min-height: 1.5em;
+  padding: 0 16px;
+}
+
+.terminal-line__number {
+  width: 4ch;
+  min-width: 4ch;
+  text-align: right;
+  padding-right: 1.5ch;
+  color: var(--text-disabled);
+  user-select: none;
+  border-right: 1px solid var(--border-default);
+  margin-right: 1.5ch;
+}
+
+.terminal-line__content {
+  color: var(--terminal-text);
+  white-space: pre;
+}
+
+.green { color: #00ff9f; }
+.orange { color: #ff6b2b; }
+.cyan { color: #5ac8fa; }
+.yellow { color: #ffcc00; }
+.muted-text { color: #666; }
+.bold { font-weight: 600; }
+
+/* ============================================
+   SEARCH BAR + FILTER PILLS
+   ============================================ */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 14px 8px 36px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-family-body);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.search-input::placeholder { color: var(--text-muted); }
+
+.search-input--focused {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-family: var(--font-family-mono);
+  font-size: 13px;
+}
+
+.filter-pills { display: flex; gap: 6px; }
+
+.filter-pill {
+  padding: 6px 12px;
+  font-family: var(--font-family-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.filter-pill:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-elevated);
+}
+
+.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+/* ============================================
+   UPLOAD ZONE
+   ============================================ */
+.upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 32px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.upload-zone__icon {
+  font-size: 32px;
+  color: var(--text-muted);
+}
+
+.upload-zone__text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.upload-zone__text code {
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-mono);
+  font-size: 12px;
+}
+
+.upload-zone__hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.upload-zone--dragover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.upload-zone--dragover .upload-zone__icon { color: var(--accent-primary); }
+
+/* Compact upload strip */
+.upload-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-xl);
+  transition: all 0.2s;
+}
+
+.upload-strip--hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.upload-strip__icon { color: var(--text-muted); font-size: 16px; }
+
+.upload-strip__text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.upload-strip__text code {
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-mono);
+  font-size: 12px;
+}
+
+/* ============================================
+   HEADER BAR
+   ============================================ */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 48px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.app-header__left { display: flex; align-items: center; gap: 16px; }
+
+.app-header__brand {
+  font-family: var(--font-family-body);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-header__brand-icon {
+  width: 22px;
+  height: 22px;
+  background: var(--accent-primary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-inverse);
+}
+
+.app-header__divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-strong);
+}
+
+.app-header__workspace {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.app-header__right { display: flex; align-items: center; gap: 12px; }
+
+.app-header__upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  font-family: var(--font-family-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+
+.app-header__upload-btn--hover {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+.app-header__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-primary-dim), var(--accent-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ============================================
+   BREADCRUMB
+   ============================================ */
+.breadcrumb {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumb a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.breadcrumb a:hover { color: var(--accent-primary); }
+
+.breadcrumb__separator { color: var(--text-disabled); }
+
+.breadcrumb__current {
+  font-family: var(--font-family-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ============================================
+   PREV/NEXT NAV ARROWS
+   ============================================ */
+.nav-arrows {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-arrow {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.nav-arrow--hover {
+  border-color: var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.nav-arrow--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+}
+</style>
+</head>
+<body>
+
+<div class="comp-page">
+
+  <h1 class="comp-page__title">Component Library</h1>
+  <p class="comp-page__subtitle">All components with all interactive states. Engineers: build these as Vue 3 components using the design tokens from tokens.html.</p>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- BUTTONS                                    -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Button</h2>
+
+    <div class="comp-label">Primary</div>
+    <div class="comp-row">
+      <button class="btn btn--primary">Default</button>
+      <button class="btn btn--primary-hover">Hover</button>
+      <button class="btn btn--primary-active">Active</button>
+      <button class="btn btn--primary-disabled">Disabled</button>
+      <button class="btn btn--primary-loading"><span class="btn-spinner"></span> Loading</button>
+    </div>
+
+    <div class="comp-label">Secondary (Outlined Green -- Upload Button Style)</div>
+    <div class="comp-row">
+      <button class="btn btn--secondary">Default</button>
+      <button class="btn btn--secondary-hover">Hover</button>
+      <button class="btn btn--secondary-active">Active</button>
+      <button class="btn btn--secondary-disabled">Disabled</button>
+    </div>
+
+    <div class="comp-label">Ghost</div>
+    <div class="comp-row">
+      <button class="btn btn--ghost">Default</button>
+      <button class="btn btn--ghost-hover">Hover</button>
+      <button class="btn btn--ghost-active">Active</button>
+      <button class="btn btn--ghost-disabled">Disabled</button>
+    </div>
+
+    <div class="comp-label">Destructive</div>
+    <div class="comp-row">
+      <button class="btn btn--destructive">Default</button>
+      <button class="btn btn--destructive-hover">Hover</button>
+      <button class="btn btn--destructive-active">Active</button>
+      <button class="btn btn--destructive-disabled">Disabled</button>
+    </div>
+
+    <div class="comp-label">Small Size</div>
+    <div class="comp-row">
+      <button class="btn btn--primary btn--sm">Primary sm</button>
+      <button class="btn btn--secondary btn--sm">Secondary sm</button>
+      <button class="btn btn--ghost btn--sm">Ghost sm</button>
+      <button class="btn btn--destructive btn--sm">Destructive sm</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- INPUTS                                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Input</h2>
+
+    <div class="comp-row" style="align-items: flex-start; gap: 24px;">
+      <div class="input-group">
+        <label class="input-label">Default with label</label>
+        <input class="input-field" type="text" placeholder="Enter value...">
+        <span class="input-helper">Helper text goes here</span>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Focused</label>
+        <input class="input-field input-field--focused" type="text" value="user@example.com">
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Error state</label>
+        <input class="input-field input-field--error" type="text" value="invalid-email">
+        <span class="input-error-msg">Please enter a valid email address</span>
+      </div>
+    </div>
+
+    <div class="comp-row" style="align-items: flex-start; gap: 24px; margin-top: 16px;">
+      <div class="input-group">
+        <label class="input-label">Disabled</label>
+        <input class="input-field input-field--disabled" type="text" value="Cannot edit" disabled>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Password with toggle</label>
+        <div class="input-password-wrap">
+          <input class="input-field" type="password" value="secretpassword">
+          <button class="input-password-toggle">show</button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Monospace input (filename)</label>
+        <input class="input-field" type="text" value="refactor-auth-middleware.cast" style="font-family: var(--font-family-mono); font-size: 13px;">
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- DROPDOWN                                   -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Dropdown / Select</h2>
+
+    <div class="comp-row" style="align-items: flex-start; gap: 24px;">
+      <!-- Closed -->
+      <div>
+        <div class="comp-label">Closed</div>
+        <div class="dropdown">
+          <button class="dropdown__trigger">
+            <span>Claude Code</span>
+            <span class="dropdown__chevron">&#9662;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Open -->
+      <div>
+        <div class="comp-label">Open</div>
+        <div class="dropdown" style="min-width: 220px;">
+          <button class="dropdown__trigger dropdown__trigger--open">
+            <span>Select agent type...</span>
+            <span class="dropdown__chevron">&#9652;</span>
+          </button>
+          <div class="dropdown__menu" style="position: relative; top: 4px;">
+            <div class="dropdown__option dropdown__option--selected">Claude</div>
+            <div class="dropdown__option" style="background: var(--accent-primary-subtle); color: var(--text-primary);">Claude Code</div>
+            <div class="dropdown__option">Gemini CLI</div>
+            <div class="dropdown__option">Codex</div>
+            <div class="dropdown__option">Other</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- With search -->
+      <div>
+        <div class="comp-label">With search</div>
+        <div class="dropdown" style="min-width: 220px;">
+          <button class="dropdown__trigger dropdown__trigger--open">
+            <span>Search...</span>
+            <span class="dropdown__chevron">&#9652;</span>
+          </button>
+          <div class="dropdown__menu" style="position: relative; top: 4px;">
+            <div class="dropdown__search">
+              <input type="text" placeholder="Filter..." value="Cl">
+            </div>
+            <div class="dropdown__option">Claude</div>
+            <div class="dropdown__option">Claude Code</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-label">Multi-select (tags)</div>
+    <div class="comp-row">
+      <div class="multi-select">
+        <span class="tag-pill">debugging <span class="tag-pill__remove">&times;</span></span>
+        <span class="tag-pill">auth <span class="tag-pill__remove">&times;</span></span>
+        <span class="tag-pill">refactoring <span class="tag-pill__remove">&times;</span></span>
+        <input class="multi-select__input" type="text" placeholder="Add tag...">
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- BADGES                                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Badge</h2>
+
+    <div class="comp-label">Agent types (default size)</div>
+    <div class="comp-row">
+      <span class="badge badge--claude">Claude</span>
+      <span class="badge badge--claude-code">Claude Code</span>
+      <span class="badge badge--gemini">Gemini CLI</span>
+      <span class="badge badge--codex">Codex</span>
+    </div>
+
+    <div class="comp-label">Section types</div>
+    <div class="comp-row">
+      <span class="badge badge--detected">Detected</span>
+      <span class="badge badge--marker">Marker</span>
+    </div>
+
+    <div class="comp-label">Status</div>
+    <div class="comp-row">
+      <span class="badge badge--processing"><span class="badge-spinner"></span> Processing</span>
+      <span class="badge badge--completed">Completed</span>
+      <span class="badge badge--failed">Failed</span>
+    </div>
+
+    <div class="comp-label">Small size (for section headers)</div>
+    <div class="comp-row">
+      <span class="badge badge--sm badge--detected">Detected</span>
+      <span class="badge badge--sm badge--marker">Marker</span>
+      <span class="badge badge--sm badge--processing"><span class="badge-spinner"></span> Processing</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SESSION CARDS                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Card (Session)</h2>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px;">
+      <!-- Default -->
+      <div class="card">
+        <div class="card__main">
+          <div class="card__top-row">
+            <span class="card__filename">debug-pipeline-timeout.cast</span>
+            <span class="badge badge--claude">Claude</span>
+          </div>
+          <div class="card__meta">
+            <span><span class="count">3</span> markers</span>
+            <span><span class="count">15</span> sections</span>
+            <span><span class="count">834</span> events</span>
+          </div>
+        </div>
+        <div class="card__right">
+          <span class="card__date">yesterday</span>
+          <span class="card__size">187 KB</span>
+        </div>
+      </div>
+
+      <!-- Hover -->
+      <div class="card card--hover">
+        <div class="card__main">
+          <div class="card__top-row">
+            <span class="card__filename">refactor-auth-middleware.cast</span>
+            <span class="badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="card__meta">
+            <span><span class="count">7</span> markers</span>
+            <span><span class="count">23</span> sections</span>
+            <span><span class="count">1,247</span> events</span>
+          </div>
+        </div>
+        <div class="card__right">
+          <span class="card__date">2 hours ago</span>
+          <span class="card__size">342 KB</span>
+        </div>
+      </div>
+
+      <!-- Processing -->
+      <div class="card card--processing">
+        <div class="card__main">
+          <div class="card__top-row">
+            <span class="card__filename">setup-ci-pipeline.cast</span>
+            <span class="badge badge--processing"><span class="badge-spinner"></span> Processing</span>
+          </div>
+          <div class="card__meta">
+            <span style="color: var(--text-muted);">Detecting sections...</span>
+          </div>
+        </div>
+        <div class="card__right">
+          <span class="card__date">just now</span>
+          <span class="card__size">89 KB</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- MODAL SHELL                                -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Modal Shell</h2>
+    <div class="modal-demo">
+      <div class="modal">
+        <div class="modal__header">
+          <span class="modal__title">Modal Title</span>
+          <button class="modal__close">&times;</button>
+        </div>
+        <div class="modal__body">
+          <p style="color: var(--text-secondary); font-size: 13px;">Modal body content area. Scrollable if content exceeds max-height. Use for upload flows, edit forms, confirmations.</p>
+        </div>
+        <div class="modal__footer">
+          <button class="btn btn--ghost">Cancel</button>
+          <button class="btn btn--primary">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SLIDE-OVER PANEL                           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Slide-Over Panel</h2>
+    <div class="slideover-demo">
+      <div class="slideover-demo__content">
+        <div style="color: var(--text-muted);">[Terminal content at ~65% width]</div>
+        <br>
+        $ npm test<br>
+        <span class="green">PASS</span> src/server/routes/sessions.test.ts<br>
+        <span class="green">PASS</span> src/server/routes/upload.test.ts<br>
+        <span style="color: #ff3b30;">FAIL</span> src/server/middleware/auth.test.ts<br>
+        <br>
+        Tests: <span style="color: #ff3b30;">1 failed</span>, <span class="green">4 passed</span>, 5 total
+      </div>
+      <div class="slideover">
+        <div class="slideover__header">
+          <span class="slideover__title">Curate Section</span>
+          <button class="slideover__close">&times;</button>
+        </div>
+        <div class="slideover__body">
+          <p style="color: var(--text-secondary); font-size: 13px;">Panel body content. Used for curation form: title, tags, notes, retrieval intent.</p>
+        </div>
+        <div class="slideover__footer">
+          <button class="btn btn--ghost btn--sm">Cancel</button>
+          <button class="btn btn--primary btn--sm">Save</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TOASTS                                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Toast</h2>
+    <div class="toast-demo">
+      <div class="toast toast--success">
+        <span class="toast__icon toast__icon--success">&#10003;</span>
+        <span class="toast__message">Session uploaded successfully</span>
+        <button class="toast__dismiss">&times;</button>
+      </div>
+      <div class="toast toast--error">
+        <span class="toast__icon toast__icon--error">&#10007;</span>
+        <span class="toast__message">Upload failed: file too large</span>
+        <button class="toast__dismiss">&times;</button>
+      </div>
+      <div class="toast toast--info">
+        <span class="toast__icon toast__icon--info">&#9432;</span>
+        <span class="toast__message">Session is still processing</span>
+        <button class="toast__dismiss">&times;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION HEADERS                            -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Section Header</h2>
+    <div class="terminal-chrome" style="max-width: 720px;">
+      <div class="terminal-chrome__titlebar">
+        <div class="terminal-chrome__dots">
+          <span class="terminal-chrome__dot terminal-chrome__dot--red"></span>
+          <span class="terminal-chrome__dot terminal-chrome__dot--yellow"></span>
+          <span class="terminal-chrome__dot terminal-chrome__dot--green"></span>
+        </div>
+        <span class="terminal-chrome__title">Component reference</span>
+      </div>
+
+      <!-- Expanded Detected -->
+      <button class="section-header">
+        <span class="section-header__chevron">&#9662;</span>
+        <span class="section-header__label section-header__label--detected">Session Startup</span>
+        <span class="badge badge--sm badge--detected">Detected</span>
+        <span class="section-header__meta">L1-L47 (47 lines)</span>
+      </button>
+
+      <!-- Expanded Marker with hover and Curate visible -->
+      <button class="section-header section-header--hover-state">
+        <span class="section-header__chevron">&#9662;</span>
+        <span class="section-header__label section-header__label--marker">Auth Strategy Pattern</span>
+        <span class="badge badge--sm badge--marker">Marker</span>
+        <span class="section-header__meta">L48-L156 (108 lines)</span>
+        <span class="section-header__curate">Curate</span>
+      </button>
+
+      <!-- Hover with Curate hovered -->
+      <button class="section-header section-header--hover-state">
+        <span class="section-header__chevron">&#9662;</span>
+        <span class="section-header__label section-header__label--detected">Error Recovery</span>
+        <span class="badge badge--sm badge--detected">Detected</span>
+        <span class="section-header__meta">L290-L412 (122 lines)</span>
+        <span class="section-header__curate section-header__curate--hover">Curate</span>
+      </button>
+
+      <!-- Collapsed Detected -->
+      <button class="section-header section-header--collapsed">
+        <span class="section-header__chevron">&#9656;</span>
+        <span class="section-header__label section-header__label--detected">Test Execution</span>
+        <span class="badge badge--sm badge--detected">Detected</span>
+        <span class="section-header__meta">L157-L289 (132 lines)</span>
+      </button>
+
+      <!-- Collapsed Marker -->
+      <button class="section-header section-header--collapsed">
+        <span class="section-header__chevron">&#9656;</span>
+        <span class="section-header__label section-header__label--marker">Final Review</span>
+        <span class="badge badge--sm badge--marker">Marker</span>
+        <span class="section-header__meta">L413-L501 (88 lines)</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TERMINAL CHROME                            -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Terminal Chrome</h2>
+    <div class="terminal-chrome" style="max-width: 720px;">
+      <div class="terminal-chrome__titlebar">
+        <div class="terminal-chrome__dots">
+          <span class="terminal-chrome__dot terminal-chrome__dot--red"></span>
+          <span class="terminal-chrome__dot terminal-chrome__dot--yellow"></span>
+          <span class="terminal-chrome__dot terminal-chrome__dot--green"></span>
+        </div>
+        <span class="terminal-chrome__title">refactor-auth-middleware.cast -- 1,247 events -- 23 sections</span>
+      </div>
+      <div class="terminal-content">
+        <div class="terminal-line"><span class="terminal-line__number">1</span><span class="terminal-line__content"><span class="bold">Claude Code</span> v2.1.42</span></div>
+        <div class="terminal-line"><span class="terminal-line__number">2</span><span class="terminal-line__content">    Opus 4.6 &middot; Claude Team</span></div>
+        <div class="terminal-line"><span class="terminal-line__number">3</span><span class="terminal-line__content">    <span class="cyan">~/git/simon/ragts-learning-platform</span></span></div>
+        <div class="terminal-line"><span class="terminal-line__number">4</span><span class="terminal-line__content"></span></div>
+        <div class="terminal-line"><span class="terminal-line__number">5</span><span class="terminal-line__content"><span class="green">$</span> npm test -- --coverage</span></div>
+        <div class="terminal-line"><span class="terminal-line__number">6</span><span class="terminal-line__content"><span class="green">PASS</span> src/server/routes/sessions.test.ts</span></div>
+        <div class="terminal-line"><span class="terminal-line__number">7</span><span class="terminal-line__content"><span style="color: #ff3b30;">FAIL</span> src/server/middleware/auth.test.ts</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SEARCH BAR + FILTER PILLS                  -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Search Bar with Filter Pills</h2>
+
+    <div class="comp-label">Default</div>
+    <div class="search-bar" style="max-width: 720px;">
+      <div class="search-input-wrapper">
+        <span class="search-icon">/</span>
+        <input type="text" class="search-input" placeholder="Search sessions...">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Claude</button>
+        <button class="filter-pill">Claude Code</button>
+        <button class="filter-pill">Gemini</button>
+        <button class="filter-pill">Codex</button>
+      </div>
+    </div>
+
+    <div class="comp-label">Focused with active filter</div>
+    <div class="search-bar" style="max-width: 720px; margin-top: 8px;">
+      <div class="search-input-wrapper">
+        <span class="search-icon">/</span>
+        <input type="text" class="search-input search-input--focused" value="auth middleware" placeholder="Search sessions...">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill">All</button>
+        <button class="filter-pill filter-pill--active">Claude Code</button>
+        <button class="filter-pill">Gemini</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- UPLOAD ZONE                                -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Upload Zone</h2>
+
+    <div class="comp-row" style="align-items: flex-start; gap: 24px;">
+      <!-- Default -->
+      <div style="flex: 1;">
+        <div class="comp-label">Default</div>
+        <div class="upload-zone">
+          <span class="upload-zone__icon">&uarr;</span>
+          <span class="upload-zone__text">Drop <code>.cast</code> files here to upload</span>
+          <span class="upload-zone__hint">or click to browse</span>
+        </div>
+      </div>
+
+      <!-- Drag-over -->
+      <div style="flex: 1;">
+        <div class="comp-label">Drag-over</div>
+        <div class="upload-zone upload-zone--dragover">
+          <span class="upload-zone__icon">&darr;</span>
+          <span class="upload-zone__text">Drop to upload</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="comp-label">Compact strip (default)</div>
+    <div class="upload-strip" style="max-width: 720px;">
+      <span class="upload-strip__icon">&uarr;</span>
+      <span class="upload-strip__text">Drop <code>.cast</code> files here to upload, or use the button above</span>
+    </div>
+
+    <div class="comp-label">Compact strip (hover)</div>
+    <div class="upload-strip upload-strip--hover" style="max-width: 720px; margin-top: 8px;">
+      <span class="upload-strip__icon" style="color: var(--accent-primary);">&uarr;</span>
+      <span class="upload-strip__text">Drop <code>.cast</code> files here to upload, or use the button above</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- HEADER BAR                                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Header Bar</h2>
+
+    <div style="border: 1px solid var(--border-strong); border-radius: var(--radius-xl); overflow: hidden;">
+      <!-- Default -->
+      <header class="app-header">
+        <div class="app-header__left">
+          <a href="#" class="app-header__brand">
+            <div class="app-header__brand-icon">R</div>
+            RAGTS
+          </a>
+          <div class="app-header__divider"></div>
+          <div class="app-header__workspace">personal <span style="font-size: 10px; margin-left: 2px;">&#9662;</span></div>
+        </div>
+        <div class="app-header__right">
+          <button class="app-header__upload-btn">
+            <span style="font-size: 16px; line-height: 1;">+</span>
+            Upload
+          </button>
+          <div class="app-header__avatar">S</div>
+        </div>
+      </header>
+    </div>
+
+    <div class="comp-label">Upload button hover state</div>
+    <div style="border: 1px solid var(--border-strong); border-radius: var(--radius-xl); overflow: hidden; margin-top: 8px;">
+      <header class="app-header">
+        <div class="app-header__left">
+          <a href="#" class="app-header__brand">
+            <div class="app-header__brand-icon">R</div>
+            RAGTS
+          </a>
+          <div class="app-header__divider"></div>
+          <div class="app-header__workspace">personal <span style="font-size: 10px; margin-left: 2px;">&#9662;</span></div>
+        </div>
+        <div class="app-header__right">
+          <button class="app-header__upload-btn app-header__upload-btn--hover">
+            <span style="font-size: 16px; line-height: 1;">+</span>
+            Upload
+          </button>
+          <div class="app-header__avatar">S</div>
+        </div>
+      </header>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- BREADCRUMB                                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Breadcrumb</h2>
+    <div class="breadcrumb">
+      <a href="#">Sessions</a>
+      <span class="breadcrumb__separator">/</span>
+      <span class="breadcrumb__current">refactor-auth-middleware.cast</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PREV/NEXT NAV ARROWS                       -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Previous / Next Navigation</h2>
+    <div class="comp-row">
+      <div class="nav-arrows">
+        <button class="nav-arrow">&#8592;</button>
+        <button class="nav-arrow">&#8594;</button>
+      </div>
+      <span style="color: var(--text-muted); font-size: 12px; margin-left: 12px;">Default</span>
+    </div>
+    <div class="comp-row">
+      <div class="nav-arrows">
+        <button class="nav-arrow nav-arrow--hover">&#8592;</button>
+        <button class="nav-arrow">&#8594;</button>
+      </div>
+      <span style="color: var(--text-muted); font-size: 12px; margin-left: 12px;">Hover on prev</span>
+    </div>
+    <div class="comp-row">
+      <div class="nav-arrows">
+        <button class="nav-arrow nav-arrow--disabled">&#8592;</button>
+        <button class="nav-arrow">&#8594;</button>
+      </div>
+      <span style="color: var(--text-muted); font-size: 12px; margin-left: 12px;">Disabled (first session)</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SKELETON LOADING                           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="comp-section">
+    <h2 class="comp-section__title">Skeleton Loading</h2>
+    <div style="display: flex; flex-direction: column; gap: 8px; max-width: 720px;">
+      <!-- Skeleton card -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-xl);">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="skeleton" style="width: 220px; height: 16px;"></div>
+          <div class="skeleton" style="width: 180px; height: 12px;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div class="skeleton" style="width: 70px; height: 12px;"></div>
+          <div class="skeleton" style="width: 40px; height: 10px;"></div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-xl);">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="skeleton" style="width: 280px; height: 16px;"></div>
+          <div class="skeleton" style="width: 160px; height: 12px;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div class="skeleton" style="width: 60px; height: 12px;"></div>
+          <div class="skeleton" style="width: 45px; height: 10px;"></div>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-xl);">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div class="skeleton" style="width: 200px; height: 16px;"></div>
+          <div class="skeleton" style="width: 140px; height: 12px;"></div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+          <div class="skeleton" style="width: 80px; height: 12px;"></div>
+          <div class="skeleton" style="width: 35px; height: 10px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

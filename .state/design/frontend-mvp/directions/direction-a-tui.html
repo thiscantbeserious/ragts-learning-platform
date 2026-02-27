@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction A: Terminal/TUI Aesthetic - RAGTS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   DIRECTION A: TERMINAL/TUI AESTHETIC
+
+   Mood: Dense, monospace-heavy, high-contrast.
+   The UI feels like a well-designed TUI application
+   running in a browser. Sharp edges, minimal chrome,
+   every pixel earns its keep. Information-dense but
+   not cluttered. Feels like home for someone who
+   lives in the terminal.
+   ============================================ */
+
+/* --- COLOR PALETTE --- */
+:root {
+  /* Backgrounds */
+  --bg-page: #0c0c0c;
+  --bg-surface: #141414;
+  --bg-elevated: #1c1c1c;
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+
+  /* Accents */
+  --accent-primary: #00ff9f;      /* Bright terminal green */
+  --accent-primary-dim: #00cc7f;
+  --accent-secondary: #ff6b2b;    /* Warm orange for contrast */
+  --accent-secondary-dim: #cc5520;
+
+  /* Status */
+  --status-success: #00ff9f;
+  --status-warning: #ffcc00;
+  --status-error: #ff3b30;
+  --status-info: #5ac8fa;
+
+  /* Text */
+  --text-primary: #e8e8e8;
+  --text-secondary: #999;
+  --text-muted: #666;
+  --text-disabled: #444;
+
+  /* Borders */
+  --border-default: #2a2a2a;
+  --border-strong: #444;
+  --border-accent: #00ff9f;
+
+  /* Terminal-specific */
+  --terminal-bg: #0a0a0a;
+  --terminal-text: #d4d4d4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- TYPOGRAPHY SPECIMEN --- */
+.specimen-section {
+  padding: 32px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.specimen-section h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 20px;
+}
+
+/* --- PALETTE DISPLAY --- */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.palette-swatch {
+  height: 48px;
+  border-radius: 2px;
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: flex-end;
+  padding: 4px 6px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.palette-swatch.light-text { color: #000; }
+
+/* --- TYPOGRAPHY --- */
+.type-specimen h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.type-specimen h2 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.type-specimen h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.type-specimen h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.type-specimen p {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  max-width: 600px;
+}
+
+.type-specimen .mono-sample {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+  padding: 12px 16px;
+  border-radius: 2px;
+  border-left: 2px solid var(--accent-primary);
+  margin-top: 12px;
+}
+
+/* --- SPACING & SHAPE --- */
+.spacing-demo {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
+.spacing-block {
+  background: var(--accent-primary);
+  opacity: 0.3;
+  border-radius: 1px;
+  width: 32px;
+  position: relative;
+}
+
+.spacing-block::after {
+  content: attr(data-size);
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ============================================
+   SAMPLE SCREEN: LANDING PAGE (POPULATED)
+   ============================================ */
+
+.app-container {
+  max-width: 100%;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 40px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-header__brand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-primary);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.app-header__brand::before {
+  content: '> ';
+  color: var(--text-muted);
+}
+
+.app-header__workspace {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-header__upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+
+.app-header__upload-btn:hover {
+  background: var(--accent-primary);
+  color: var(--bg-page);
+}
+
+.app-header__avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+/* Main content */
+.main-content {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Upload strip (compact, populated state) */
+.upload-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  border: 1px dashed var(--border-default);
+  border-radius: 2px;
+  margin-bottom: 24px;
+  transition: border-color 0.15s;
+}
+
+.upload-strip:hover {
+  border-color: var(--accent-primary);
+}
+
+.upload-strip__icon {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.upload-strip__text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.upload-strip__text code {
+  color: var(--accent-primary);
+  background: rgba(0, 255, 159, 0.08);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+/* Search + Filters */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 6px 12px 6px 28px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 2px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.search-icon {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.filter-pills {
+  display: flex;
+  gap: 4px;
+}
+
+.filter-pill {
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-pill:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-secondary);
+}
+
+.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: rgba(0, 255, 159, 0.05);
+}
+
+/* Session cards */
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.session-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-surface);
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.1s;
+  cursor: pointer;
+}
+
+.session-card:hover {
+  background: var(--bg-elevated);
+  border-left-color: var(--accent-primary);
+}
+
+.session-card--processing {
+  border-left-color: var(--status-warning);
+}
+
+.session-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.session-card__top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-card__filename {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.session-card__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+}
+
+.badge--claude-code {
+  background: rgba(255, 107, 43, 0.12);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(255, 107, 43, 0.25);
+}
+
+.badge--claude {
+  background: rgba(0, 255, 159, 0.08);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 255, 159, 0.2);
+}
+
+.badge--gemini {
+  background: rgba(90, 200, 250, 0.08);
+  color: var(--status-info);
+  border: 1px solid rgba(90, 200, 250, 0.2);
+}
+
+.badge--processing {
+  background: rgba(255, 204, 0, 0.08);
+  color: var(--status-warning);
+  border: 1px solid rgba(255, 204, 0, 0.2);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.session-card__meta {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.session-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-card__meta-item .count {
+  color: var(--text-secondary);
+}
+
+.session-card__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+}
+
+.session-card__date {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.session-card__size {
+  font-size: 10px;
+  color: var(--text-disabled);
+}
+
+/* Toast */
+.toast-stack {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1000;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  border-radius: 2px;
+  border-left: 3px solid;
+}
+
+.toast--success {
+  background: rgba(0, 255, 159, 0.08);
+  border-left-color: var(--status-success);
+  color: var(--status-success);
+}
+
+.toast__dismiss {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.5;
+  padding: 0 4px;
+}
+
+/* Processing spinner */
+.spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--text-disabled);
+  border-top-color: var(--status-warning);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- MOOD DESCRIPTION (overlay) --- */
+.mood-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 24px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0) 100%);
+  z-index: 999;
+  pointer-events: none;
+}
+
+.direction-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 4px;
+}
+
+.mood-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+  max-width: 700px;
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== DESIGN SPECIMEN (TOP SECTION) ========== -->
+
+<div style="border-bottom: 2px solid var(--border-default); margin-bottom: 0;">
+
+  <!-- Palette -->
+  <div class="specimen-section">
+    <h3>Direction A / Color Palette</h3>
+    <div class="palette-grid">
+      <div class="palette-swatch" style="background: #0c0c0c;">#0c0c0c page</div>
+      <div class="palette-swatch" style="background: #141414;">#141414 surface</div>
+      <div class="palette-swatch" style="background: #1c1c1c;">#1c1c1c elevated</div>
+      <div class="palette-swatch" style="background: #00ff9f;" class="light-text"><span style="color:#000">#00ff9f primary</span></div>
+      <div class="palette-swatch" style="background: #ff6b2b;" class="light-text"><span style="color:#000">#ff6b2b secondary</span></div>
+      <div class="palette-swatch" style="background: #00ff9f;"><span style="color:#000">#00ff9f success</span></div>
+      <div class="palette-swatch" style="background: #ffcc00;"><span style="color:#000">#ffcc00 warning</span></div>
+      <div class="palette-swatch" style="background: #ff3b30;">#ff3b30 error</div>
+      <div class="palette-swatch" style="background: #5ac8fa;"><span style="color:#000">#5ac8fa info</span></div>
+      <div class="palette-swatch" style="background: #e8e8e8;"><span style="color:#000">#e8e8e8 text-1</span></div>
+      <div class="palette-swatch" style="background: #999;"><span style="color:#000">#999 text-2</span></div>
+      <div class="palette-swatch" style="background: #666;">#666 muted</div>
+    </div>
+  </div>
+
+  <!-- Typography -->
+  <div class="specimen-section">
+    <h3>Direction A / Typography</h3>
+    <div class="type-specimen">
+      <h1>Terminal Sessions, Unfolded</h1>
+      <h2>session-pipeline.cast</h2>
+      <h3>Section Detection Complete</h3>
+      <h4>3 markers / 12 detected sections</h4>
+      <p>Body text uses Inter for readability in longer passages -- notes, descriptions, curation annotations. Everything else is JetBrains Mono. The monospace dominance is the point.</p>
+      <p style="font-size: 12px; color: var(--text-muted);">Small/meta text: Feb 27, 2026 8:33 PM  |  1.9 KB  |  24 events</p>
+      <div class="mono-sample">$ npm test<br>  should parse asciicast v3 format (5ms)<br>  should validate header fields (2ms)<br>Tests: 1 failed, 4 passed, 5 total</div>
+    </div>
+    <div style="margin-top: 16px; font-size: 11px; color: var(--text-muted);">
+      <strong>Heading font:</strong> JetBrains Mono 700/600 &nbsp; | &nbsp;
+      <strong>Body:</strong> Inter 400/500 &nbsp; | &nbsp;
+      <strong>Mono:</strong> JetBrains Mono 400 &nbsp; | &nbsp;
+      <strong>Fallback:</strong> 'Fira Code', 'SF Mono', monospace / -apple-system, sans-serif
+    </div>
+  </div>
+
+  <!-- Spacing & Shape -->
+  <div class="specimen-section">
+    <h3>Direction A / Spacing & Shape</h3>
+    <div style="margin-bottom: 16px;">
+      <div class="spacing-demo">
+        <div class="spacing-block" style="height: 4px;" data-size="4px"></div>
+        <div class="spacing-block" style="height: 8px;" data-size="8px"></div>
+        <div class="spacing-block" style="height: 12px;" data-size="12px"></div>
+        <div class="spacing-block" style="height: 16px;" data-size="16px"></div>
+        <div class="spacing-block" style="height: 24px;" data-size="24px"></div>
+        <div class="spacing-block" style="height: 32px;" data-size="32px"></div>
+        <div class="spacing-block" style="height: 48px;" data-size="48px"></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; margin-top: 32px;">
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 0px;"></div>
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 2px;"></div>
+      <div style="width: 60px; height: 40px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: 2px; border-left: 3px solid var(--accent-primary);"></div>
+    </div>
+    <div style="font-size: 10px; color: var(--text-muted); margin-top: 8px;">
+      Sharp corners (0-2px radius). Left-border accent for active/selected states. No drop shadows. Dense 4px grid.
+    </div>
+  </div>
+
+  <!-- Mood -->
+  <div class="specimen-section" style="background: var(--bg-surface);">
+    <h3>Direction A / Mood</h3>
+    <p style="font-family: 'Inter', sans-serif; font-size: 14px; color: var(--text-secondary); line-height: 1.7; max-width: 680px;">
+      <strong style="color: var(--accent-primary);">The terminal is the UI.</strong> This direction treats the browser as a canvas for a TUI application. Monospace everywhere except long-form body text. Sharp edges, tight spacing, left-border accents instead of rounded highlights. The green-on-dark palette is unmistakably terminal. Information is dense but structured. Feels like the tool was built by someone who has strong opinions about their dotfiles.
+    </p>
+  </div>
+</div>
+
+<!-- ========== SAMPLE SCREEN: LANDING PAGE (POPULATED) ========== -->
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">RAGTS</a>
+      <div class="app-header__workspace">personal <span style="font-size: 9px;">&#9662;</span></div>
+    </div>
+    <div class="app-header__right">
+      <button class="app-header__upload-btn">+ Upload .cast</button>
+      <div class="app-header__avatar">S</div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Compact upload strip -->
+    <div class="upload-strip">
+      <span class="upload-strip__icon">&uarr;</span>
+      <span class="upload-strip__text">Drop <code>.cast</code> files here or use the upload button</span>
+    </div>
+
+    <!-- Search + Filters -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">/</span>
+        <input type="text" class="search-input" placeholder="search sessions...">
+      </div>
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Claude</button>
+        <button class="filter-pill">Claude Code</button>
+        <button class="filter-pill">Gemini</button>
+        <button class="filter-pill">Codex</button>
+      </div>
+    </div>
+
+    <!-- Session list -->
+    <div class="session-list">
+      <!-- Card 1 -->
+      <a href="#" class="session-card" style="border-left-color: var(--accent-primary);">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">refactor-auth-middleware.cast</span>
+            <span class="session-card__badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">7</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">23</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">1,247</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">2 hours ago</span>
+          <span class="session-card__size">342 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 2 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">debug-pipeline-timeout.cast</span>
+            <span class="session-card__badge badge--claude">Claude</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">3</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">15</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">834</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">yesterday</span>
+          <span class="session-card__size">187 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 3 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">gemini-api-integration.cast</span>
+            <span class="session-card__badge badge--gemini">Gemini CLI</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">5</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">31</span> sections</span>
+            <span class="session-card__meta-item"><span class="count">2,103</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">3 days ago</span>
+          <span class="session-card__size">521 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 4 - Processing -->
+      <a href="#" class="session-card session-card--processing">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">setup-ci-pipeline.cast</span>
+            <span class="session-card__badge badge--processing"><span class="spinner" style="margin-right: 4px;"></span> Processing</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item" style="color: var(--text-disabled);">detecting sections...</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">just now</span>
+          <span class="session-card__size">89 KB</span>
+        </div>
+      </a>
+
+      <!-- Card 5 -->
+      <a href="#" class="session-card">
+        <div class="session-card__main">
+          <div class="session-card__top-row">
+            <span class="session-card__filename">sample.cast</span>
+            <span class="session-card__badge badge--claude-code">Claude Code</span>
+          </div>
+          <div class="session-card__meta">
+            <span class="session-card__meta-item"><span class="count">3</span> markers</span>
+            <span class="session-card__meta-item"><span class="count">1</span> section</span>
+            <span class="session-card__meta-item"><span class="count">24</span> events</span>
+          </div>
+        </div>
+        <div class="session-card__right">
+          <span class="session-card__date">Feb 27</span>
+          <span class="session-card__size">1.9 KB</span>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast-stack">
+    <div class="toast toast--success">
+      <span>Session uploaded successfully</span>
+      <button class="toast__dismiss">&times;</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
