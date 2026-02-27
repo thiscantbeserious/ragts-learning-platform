@@ -12,7 +12,12 @@
     "build:wasm": "cd packages/vt-wasm && ./build.sh",
     "start": "NODE_ENV=production node dist/server/start.js",
     "test": "vitest",
-    "migrate:v2": "tsx src/server/scripts/migrate-v2.ts"
+    "test:snapshot": "vitest run tests/snapshots",
+    "test:visual": "npx playwright test",
+    "test:all": "vitest run && npx playwright test",
+    "test:update-snapshots": "vitest run tests/snapshots --update",
+    "migrate:v2": "tsx src/server/scripts/migrate-v2.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
@@ -23,6 +28,7 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.7",
     "@vitejs/plugin-vue": "^5.2.1",
@@ -30,6 +36,7 @@
     "@vue/test-utils": "^2.4.6",
     "concurrently": "^9.2.1",
     "happy-dom": "^20.6.1",
+    "husky": "^9.1.7",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^6.0.7",

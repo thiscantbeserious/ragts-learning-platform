@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SessionList component snapshots > empty state (no sessions) 1`] = `
+"<div data-v-2189a348="" class="session-list">
+  <div data-v-2189a348="" class="session-list__empty">
+    <p data-v-2189a348="">No sessions yet.</p>
+    <p data-v-2189a348="" class="session-list__empty-hint">Upload a <code data-v-2189a348="">.cast</code> file to get started.</p>
+  </div>
+</div>"
+`;
+
+exports[`SessionList component snapshots > error state 1`] = `
+"<div data-v-2189a348="" class="session-list">
+  <div data-v-2189a348="" class="session-list__error">Network error: connection refused</div>
+</div>"
+`;
+
+exports[`SessionList component snapshots > loading state 1`] = `
+"<div data-v-2189a348="" class="session-list">
+  <div data-v-2189a348="" class="session-list__loading">Loading sessions...</div>
+</div>"
+`;
+
+exports[`SessionList component snapshots > populated with sessions (fixed dates) 1`] = `
+"<div data-v-2189a348="" class="session-list">
+  <div data-v-2189a348="" class="session-list__grid"><a data-v-2189a348="" href="/session/sess-001" class="session-card">
+      <div data-v-2189a348="" class="session-card__header"><span data-v-2189a348="" class="session-card__filename">claude-session.cast</span><button data-v-2189a348="" class="session-card__delete" title="Delete session">×</button></div>
+      <div data-v-2189a348="" class="session-card__meta"><span data-v-2189a348="" class="session-card__size">239.9 KB</span><span data-v-2189a348="" class="session-card__markers">5 markers</span></div>
+      <div data-v-2189a348="" class="session-card__date">15.01.2024, 13:00</div>
+    </a><a data-v-2189a348="" href="/session/sess-002" class="session-card">
+      <div data-v-2189a348="" class="session-card__header"><span data-v-2189a348="" class="session-card__filename">codex-session.cast</span><button data-v-2189a348="" class="session-card__delete" title="Delete session">×</button></div>
+      <div data-v-2189a348="" class="session-card__meta"><span data-v-2189a348="" class="session-card__size">1.2 MB</span>
+        <!--v-if-->
+      </div>
+      <div data-v-2189a348="" class="session-card__date">15.01.2024, 13:00</div>
+    </a><a data-v-2189a348="" href="/session/sess-003" class="session-card">
+      <div data-v-2189a348="" class="session-card__header"><span data-v-2189a348="" class="session-card__filename">simple.cast</span><button data-v-2189a348="" class="session-card__delete" title="Delete session">×</button></div>
+      <div data-v-2189a348="" class="session-card__meta"><span data-v-2189a348="" class="session-card__size">512 B</span><span data-v-2189a348="" class="session-card__markers">1 marker</span></div>
+      <div data-v-2189a348="" class="session-card__date">15.01.2024, 13:00</div>
+    </a></div>
+</div>"
+`;
+
+exports[`SessionList component snapshots > session with zero markers (no badge) 1`] = `
+"<div data-v-2189a348="" class="session-list">
+  <div data-v-2189a348="" class="session-list__grid"><a data-v-2189a348="" href="/session/sess-no-markers" class="session-card">
+      <div data-v-2189a348="" class="session-card__header"><span data-v-2189a348="" class="session-card__filename">test-session.cast</span><button data-v-2189a348="" class="session-card__delete" title="Delete session">×</button></div>
+      <div data-v-2189a348="" class="session-card__meta"><span data-v-2189a348="" class="session-card__size">12.1 KB</span>
+        <!--v-if-->
+      </div>
+      <div data-v-2189a348="" class="session-card__date">15.01.2024, 13:00</div>
+    </a></div>
+</div>"
+`;

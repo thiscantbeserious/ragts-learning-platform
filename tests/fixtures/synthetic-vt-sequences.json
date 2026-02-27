@@ -1,0 +1,26 @@
+{
+  "description": "VT escape sequences for testing terminal rendering",
+  "sequences": {
+    "plainText": "Hello World",
+    "bold": "\u001b[1mBold Text\u001b[0m",
+    "italic": "\u001b[3mItalic Text\u001b[0m",
+    "underline": "\u001b[4mUnderlined\u001b[0m",
+    "strikethrough": "\u001b[9mStruck\u001b[0m",
+    "faint": "\u001b[2mFaint\u001b[0m",
+    "inverse": "\u001b[7mInverse\u001b[0m",
+    "fg16Red": "\u001b[31mRed\u001b[0m",
+    "fg16Green": "\u001b[32mGreen\u001b[0m",
+    "fg16BrightYellow": "\u001b[93mBright Yellow\u001b[0m",
+    "bg16Blue": "\u001b[44mBlue BG\u001b[0m",
+    "fg256Orange": "\u001b[38;5;208mOrange 256\u001b[0m",
+    "bg256Purple": "\u001b[48;5;135mPurple BG 256\u001b[0m",
+    "fgTrueColor": "\u001b[38;2;255;128;0mTrue Orange\u001b[0m",
+    "bgTrueColor": "\u001b[48;2;0;100;200mTrue Blue BG\u001b[0m",
+    "combined": "\u001b[1;3;4;31mBold Italic Underline Red\u001b[0m",
+    "screenClear": "\u001b[2J\u001b[H",
+    "altScreenEnter": "\u001b[?1049h",
+    "altScreenExit": "\u001b[?1049l",
+    "resize80x24": "80x24",
+    "resize120x40": "120x40"
+  }
+}

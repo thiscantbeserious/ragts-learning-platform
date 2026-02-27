@@ -1,0 +1,165 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`vt-wasm snapshots > 'bold' attribute 1`] = `
+[
+  {
+    "bold": true,
+    "text": "Bold Text",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 'italic' attribute 1`] = `
+[
+  {
+    "italic": true,
+    "text": "Italic Text",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 'strikethrough' attribute 1`] = `
+[
+  {
+    "strikethrough": true,
+    "text": "Struck",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 'underline' attribute 1`] = `
+[
+  {
+    "text": "Underlined",
+    "underline": true,
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 16-color foreground — span fg values 1`] = `
+[
+  {
+    "fg": 1,
+    "text": "Red",
+  },
+  {
+    "fg": 2,
+    "text": "Green",
+  },
+  {
+    "fg": 4,
+    "text": "Blue",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > 256-palette color — span fg values 1`] = `
+[
+  {
+    "fg": 208,
+    "text": "Orange",
+  },
+  {
+    "fg": 135,
+    "text": "Purple",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > faint and inverse attributes 1`] = `
+[
+  {
+    "faint": true,
+    "inverse": false,
+    "text": "Faint",
+  },
+  {
+    "faint": false,
+    "inverse": true,
+    "text": "Inverse",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > plain text — getView 1`] = `
+[
+  "Hello World",
+  "Second line",
+]
+`;
+
+exports[`vt-wasm snapshots > resize — terminal dimensions change 1`] = `
+{
+  "cols": 120,
+  "rows": 40,
+  "text": [
+    "Before resize                                                                                                           ",
+    "After resize                                                                                                            ",
+  ],
+  "viewCols": 120,
+  "viewRows": 40,
+}
+`;
+
+exports[`vt-wasm snapshots > screen clear + redraw — getAllLines 1`] = `
+[
+  "After clear",
+]
+`;
+
+exports[`vt-wasm snapshots > scrollback accumulation — getAllLines 1`] = `
+[
+  "Line 1",
+  "Line 2",
+  "Line 3",
+  "Line 4",
+  "Line 5",
+  "Line 6",
+  "Line 7",
+  "Line 8",
+  "Line 9",
+  "Line 10",
+  "Line 11",
+  "Line 12",
+  "Line 13",
+  "Line 14",
+  "Line 15",
+  "Line 16",
+  "Line 17",
+  "Line 18",
+  "Line 19",
+  "Line 20",
+  "Line 21",
+  "Line 22",
+  "Line 23",
+  "Line 24",
+  "Line 25",
+  "Line 26",
+  "Line 27",
+  "Line 28",
+  "Line 29",
+  "Line 30",
+]
+`;
+
+exports[`vt-wasm snapshots > true color — span fg values 1`] = `
+[
+  {
+    "fg": "#FF8000",
+    "text": "TrueOrange",
+  },
+  {
+    "fg": "#00C864",
+    "text": "TrueGreen",
+  },
+]
+`;
+
+exports[`vt-wasm snapshots > valid-with-markers.cast — first 5 feed events → getView 1`] = `
+[
+  "$ npm test                                                                                                              ",
+  "Running CI pipeline...                                                                                                  ",
+  "  PASS  src/utils.test.ts                                                                                               ",
+  "    ✓ parseConfig returns defaults (3ms)                                                                                ",
+]
+`;

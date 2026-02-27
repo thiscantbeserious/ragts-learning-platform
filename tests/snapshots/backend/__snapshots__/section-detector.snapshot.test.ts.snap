@@ -1,0 +1,113 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`section-detector snapshots > alt-screen exit signal 1`] = `
+[
+  {
+    "eventIndex": 150,
+    "label": "Section 1",
+    "score": 0.8,
+    "signals": [
+      "alt_screen_exit",
+    ],
+  },
+]
+`;
+
+exports[`section-detector snapshots > detectWithMarkers — marker precedence 1`] = `
+[
+  {
+    "eventIndex": 200,
+    "label": "Test Marker",
+    "score": "Infinity",
+    "signals": [
+      "marker",
+    ],
+  },
+]
+`;
+
+exports[`section-detector snapshots > maximum sections cap — 50 limit 1`] = `50`;
+
+exports[`section-detector snapshots > multiple signals merged within window 1`] = `
+[
+  {
+    "eventIndex": 150,
+    "label": "Section 1",
+    "score": 1.6,
+    "signals": [
+      "screen_clear",
+      "timing_gap",
+    ],
+  },
+]
+`;
+
+exports[`section-detector snapshots > real fixture boundaries — valid-with-markers.cast 1`] = `
+[
+  {
+    "eventIndex": 3,
+    "label": "Test Execution",
+    "score": "Infinity",
+    "signals": [
+      "marker",
+    ],
+  },
+  {
+    "eventIndex": 14,
+    "label": "Build",
+    "score": "Infinity",
+    "signals": [
+      "marker",
+    ],
+  },
+  {
+    "eventIndex": 24,
+    "label": "Deploy",
+    "score": "Infinity",
+    "signals": [
+      "marker",
+    ],
+  },
+]
+`;
+
+exports[`section-detector snapshots > screen clear signal — boundaries from clear sequences 1`] = `
+[
+  {
+    "eventIndex": 150,
+    "label": "Section 1",
+    "score": 1,
+    "signals": [
+      "screen_clear",
+    ],
+  },
+]
+`;
+
+exports[`section-detector snapshots > session below MIN_SESSION_SIZE — no boundaries 1`] = `[]`;
+
+exports[`section-detector snapshots > timing gap signal — boundaries from long pauses 1`] = `
+[
+  {
+    "eventIndex": 150,
+    "label": "Section 1",
+    "score": 2,
+    "signals": [
+      "timing_gap",
+    ],
+  },
+]
+`;
+
+exports[`section-detector snapshots > volume burst signal — after quiet period 1`] = `
+[
+  {
+    "eventIndex": 150,
+    "label": "Section 1",
+    "score": 0.3,
+    "signals": [
+      "volume_burst",
+    ],
+  },
+]
+`;

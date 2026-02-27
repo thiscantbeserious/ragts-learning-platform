@@ -1,0 +1,74 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`TerminalSnapshot component snapshots > 16-color background 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span" style="background-color: var(--term-color-1);">Red BG</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="background-color: var(--term-color-4);">Blue BG</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > 16-color foreground (ANSI 0-15) 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span" style="color: var(--term-color-1);">Red</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="color: var(--term-color-2);">Green</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="color: var(--term-color-4);">Blue</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span" style="color: var(--term-color-9);">BrightRed</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="color: var(--term-color-14);">BrightCyan</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > 256-palette colors (16-231 RGB cube + 232-255 grayscale) 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span" style="color: rgb(255, 135, 0);">Orange</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="color: rgb(175, 95, 255);">Purple</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span" style="color: rgb(88, 88, 88);">Gray</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="color: rgb(188, 188, 188);">Light</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > all text attributes 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--bold">Bold</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--italic">Italic</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--underline">Underline</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">4</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--strikethrough">Strikethrough</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">5</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--faint">Faint</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">6</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--blink">Blink</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">7</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--inverse">Inverse</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > combined attributes and colors 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--bold" style="color: var(--term-color-1);">Bold Red</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--italic" style="background-color: var(--term-color-2);">Italic Green BG</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span terminal-span--bold terminal-span--italic terminal-span--underline" style="color: #ff0000; background-color: #000080;">All attrs</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > empty snapshot (no lines) 1`] = `"<div data-v-68ff1956="" class="terminal-snapshot"></div>"`;
+
+exports[`TerminalSnapshot component snapshots > large input — 100 lines 1`] = `"<div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 1: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span></span></div>"`;
+
+exports[`TerminalSnapshot component snapshots > large input — 100 lines 2`] = `"<div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">100</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 100: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span></span></div>"`;
+
+exports[`TerminalSnapshot component snapshots > line numbers with startLineNumber 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">42</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">First</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">43</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Second</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > multi-span line with mixed styles 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">$ </span><span data-v-68ff1956="" class="terminal-span terminal-span--bold" style="color: var(--term-color-2);">npm</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="color: var(--term-color-14);">test</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > plain text lines 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Hello World</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Second line</span></span></div>
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Third line</span></span></div>
+</div>"
+`;
+
+exports[`TerminalSnapshot component snapshots > true color (#RRGGBB) 1`] = `
+"<div data-v-68ff1956="" class="terminal-snapshot">
+  <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span" style="color: #ff5733;">Custom FG</span><span data-v-68ff1956="" class="terminal-span"> </span><span data-v-68ff1956="" class="terminal-span" style="background-color: #0066cc;">Custom BG</span></span></div>
+</div>"
+`;
