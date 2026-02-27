@@ -72,14 +72,18 @@ See `tdd.md` for test organization and snapshot testing.
 
 Run all checks from `verification.md` before creating a PR.
 
-## Role Collaboration
+## When Blocked
 
-When blocked, ask through Coordinator only.
+Describe **what** you need, not who should answer. Route all requests through the Coordinator.
 
-Allowed targets:
-- Architect: design intent and ADR interpretation
-- Reviewer: quality and risk concerns before handoff
+Examples of valid blocked requests:
+- "I need clarification on the expected request/response shape for [feature] — the REQUIREMENTS.md is ambiguous"
+- "The ADR decision on [topic] doesn't cover this edge case — I need an interpretation"
+- "I need to know whether the client expects [format X or Y] from this endpoint"
 
-Parallel constraints:
-- If you need to touch client-side files, stop and ask Coordinator to involve Frontend Engineer
+The Coordinator decides who can answer and routes the question transparently.
+
+## Scope Boundaries
+
+- If you need to touch client-side files (`src/client/`), stop and request Coordinator involvement
 - Do not resolve ownership conflicts ad hoc in your branch

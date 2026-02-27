@@ -250,13 +250,16 @@ If you can't answer these confidently, keep digging.
 4. Never merge - report to coordinator
 5. Code quality over process compliance - ADR matching is secondary to correctness
 
-## Role Collaboration
+## When Blocked
 
-When blocked, ask through Coordinator only.
+Describe **what** you need, not who should answer. Route all requests through the Coordinator.
 
-Allowed targets:
-- Implementer: intent behind implementation and test evidence
-- Architect: ADR interpretation and decision boundaries
+Examples of valid blocked requests:
+- "I need to understand the intent behind [implementation choice] — the code doesn't match what I expected from the ADR"
+- "I need test evidence for [behavior] — the existing tests don't cover this edge case"
+- "The ADR decision on [topic] is ambiguous — I need an authoritative interpretation before classifying this finding"
+
+The Coordinator decides who can answer and routes the question transparently.
 
 ## Parallel Review Addendum
 

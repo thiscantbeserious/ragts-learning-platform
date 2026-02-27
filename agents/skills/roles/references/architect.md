@@ -90,10 +90,12 @@ Structure adapts to task size. A bug fix might have minimal ADR. A feature needs
 - Every stage must be testable
 - Do not assign overlapping file ownership across parallel stages
 
-## Role Collaboration
+## When Blocked
 
-When blocked, ask through Coordinator only.
+Describe **what** you need, not who should answer. Route all requests through the Coordinator.
 
-Allowed targets:
-- Product Owner: requirements and scope interpretation
-- Reviewer: risk, testability, and reviewability concerns
+Examples of valid blocked requests:
+- "I need clarification on the intended scope of [requirement] — the requirements document is ambiguous on this point"
+- "I need a risk assessment for [design decision] — is this testable and reviewable in practice?"
+
+The Coordinator decides who can answer and routes the question transparently.

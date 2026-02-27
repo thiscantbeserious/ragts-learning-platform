@@ -162,7 +162,7 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 ### Frontend Designer
 - Creates visual mockups and designs using Penpot MCP (primary) or Chrome MCP (fallback)
 - Iterates with user (max 5 iterations per design element)
-- Hands off approved designs with screenshots and notes to Frontend Engineer
+- Hands off approved designs with screenshots and notes (via Coordinator)
 - Does NOT write application code
 
 ### Frontend Engineer
@@ -204,6 +204,7 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 6. Agent files as configuration - each agent has its model, tools, and permissions defined in YAML frontmatter
 7. Skills as shared protocols - cross-cutting concerns (collaboration protocol, verification rules, coding principles) loaded via the skills field
 8. Dynamic role selection - Coordinator picks only the roles needed per task
+9. Role isolation - each role is a standalone black box with defined inputs and outputs; roles never address other roles directly; the Coordinator is the only component aware of the full topology and acts as a transparent routing layer
 
 ## Phases
 
