@@ -61,6 +61,61 @@ This means:
 
 The Coordinator is transparent: it does not inject its own domain opinions into routed messages. It is a message bus with gating logic, not a domain expert.
 
+### Role I/O Definitions
+
+Each role's contract — what it receives, what it produces, and what scope it owns.
+
+| Role | Inputs | Outputs | Scope |
+|------|--------|---------|-------|
+| Product Owner | User request, existing context | REQUIREMENTS.md | Requirements, acceptance criteria, scope boundaries |
+| Architect | REQUIREMENTS.md | ADR.md, PLAN.md | Options analysis, decisions, execution stages |
+| Frontend Designer | REQUIREMENTS.md, PLAN.md, existing UI (`src/client/components/`) | Approved mockup screenshots, design notes in PLAN.md | Visual design, layout, UX — no code |
+| Frontend Engineer | ADR.md, PLAN.md, approved designs (if any) | Code changes in `src/client/`, `src/shared/`, PR | Client-side implementation |
+| Backend Engineer | ADR.md, PLAN.md | Code changes in `src/server/`, `packages/`, PR | Server-side implementation |
+| Implementer | ADR.md, PLAN.md | Code changes (any scope), PR | Cross-cutting or infrastructure implementation |
+| Reviewer (pair) | PLAN stage diff, ADR.md, PLAN.md | Questions, observations, flags | Incremental stage validation |
+| Reviewer (internal) | Full PR diff, ADR.md, PLAN.md, pair review context | Severity-classified findings | Adversarial full-PR validation |
+| Reviewer (coderabbit) | CodeRabbit comments, ADR.md, PLAN.md | Valid/invalid classifications with fix descriptions | External finding triage |
+| Maintainer | PR, ADR.md, all approvals | Merged PR, updated ADR status | Merge, release, CI monitoring |
+
+### Coordinator Routing Map
+
+When a role submits a blocked request, the Coordinator uses this map to decide where to route it. This is the **complete** routing table — if a request category is missing, add it here before routing.
+
+| Requesting Role | Need Category | Route To |
+|-----------------|---------------|----------|
+| **Product Owner** | Technical feasibility of a requirement | Architect |
+| | Validation risk / testability of acceptance criteria | Reviewer (internal) |
+| | Existing codebase behavior or patterns | Implementer or relevant Engineer |
+| **Architect** | Requirements clarification or scope interpretation | Product Owner |
+| | Risk, testability, or reviewability of a design choice | Reviewer (internal) |
+| | Current implementation details or constraints | Implementer or relevant Engineer |
+| **Frontend Designer** | Requirements clarification | Product Owner |
+| | Technical feasibility of a design | Architect |
+| | Implementation feasibility of a visual pattern | Frontend Engineer |
+| | Existing codebase UI patterns | Frontend Engineer |
+| **Frontend Engineer** | Design clarification (mockup, layout, spacing) | Frontend Designer |
+| | ADR interpretation or design intent | Architect |
+| | API contract or server-side behavior | Backend Engineer |
+| | Requirements clarification | Product Owner |
+| **Backend Engineer** | ADR interpretation or design intent | Architect |
+| | Client-side expectations or contract shape | Frontend Engineer |
+| | Requirements clarification | Product Owner |
+| **Implementer** | ADR interpretation or design intent | Architect |
+| | Requirements clarification | Product Owner |
+| | Domain-specific implementation detail | Frontend Engineer or Backend Engineer (by file scope) |
+| **Reviewer (any phase)** | Implementation intent behind a code choice | The engineer who wrote it (Frontend/Backend/Implementer) |
+| | ADR interpretation or decision boundary | Architect |
+| | Requirements verification or acceptance criteria | Product Owner |
+| **Maintainer** | Blocking findings resolution status | Reviewer (internal) |
+| | Scope acceptance / release readiness | Product Owner |
+| | CI failure diagnosis | The engineer who last committed |
+
+**Routing rules:**
+- If a need doesn't match any row, the Coordinator asks the user before inventing a route
+- "Relevant Engineer" means the Coordinator checks file paths to determine Frontend vs Backend vs Implementer
+- The Coordinator never exposes the routing decision to the requesting role — it simply relays the answer back
+
 ### Sub-decisions
 
 1. **Penpot as primary design tool.** Free, open source, self-hostable, and the only tool with full programmatic create/modify/read access via MCP. Figma official MCP is read-only. Figma community MCP requires a paid subscription. Pencil.dev has no self-host option. Chrome MCP retained as fallback for quick prototyping.

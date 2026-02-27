@@ -170,24 +170,55 @@ Files:
 
 Depends on: none
 
+### Stage 10: Enforce role isolation via I/O contracts
+
+Goal: Every role is a standalone black box with defined inputs and outputs. Roles never address other roles directly. The Coordinator is the only component aware of the full role topology and acts as a transparent routing layer. A complete routing map exists for every blocked-request category.
+Owner: implementer
+
+- [x] Add "Core Architectural Principle: Role Isolation via Input/Output Contracts" to ADR.md
+- [x] Add "Role I/O Definitions" table to ADR.md — inputs, outputs, and scope for all 10 roles
+- [x] Add "Coordinator Routing Map" to ADR.md — complete routing table mapping every role's blocked-request categories to routing targets, with routing rules (fallback to user, file-path-based engineer selection, transparent routing)
+- [x] Replace "Allowed targets: [role names]" with "When Blocked" sections in all 8 role files: product-owner, architect, frontend-engineer, backend-engineer, frontend-designer, implementer, reviewer (all 3 phases), maintainer
+- [x] Rename SKILL.md Section 3 from "Role-to-Role Collaboration Protocol" to "Blocked Request Protocol" — request format uses `Need:` instead of `To Role:`
+- [x] Make cross-consultation protocol in SKILL.md role-agnostic (generic language, no named role targets)
+- [x] Add principle #9 to roles README.md: "Role isolation — each role is a standalone black box..."
+- [x] Update roles README.md flow diagram: designer hands off "via Coordinator" not directly to engineer
+
+Files:
+- `.state/chore/sdlc-overhaul/ADR.md` (modified — principle, I/O table, routing map)
+- `agents/skills/roles/references/product-owner.md` (modified — When Blocked)
+- `agents/skills/roles/references/architect.md` (modified — When Blocked)
+- `agents/skills/roles/references/frontend-engineer.md` (modified — When Blocked)
+- `agents/skills/roles/references/backend-engineer.md` (modified — When Blocked)
+- `agents/skills/roles/references/frontend-designer.md` (modified — When Blocked)
+- `agents/skills/roles/references/implementer.md` (modified — When Blocked)
+- `agents/skills/roles/references/reviewer.md` (modified — When Blocked for all 3 phases)
+- `agents/skills/roles/references/maintainer.md` (modified — When Blocked)
+- `agents/skills/roles/SKILL.md` (modified — Blocked Request Protocol)
+- `agents/skills/roles/README.md` (modified — principle #9, flow diagram)
+
+Depends on: Stages 4, 5, 7 (all role files, coordinator, and README must exist)
+
 ## Dependencies
 
 ```
-Stage 1 ─────────────────────────────────────────┐
-Stage 2 ─────────────────────────────────────────┤
-Stage 3 ─────────────────────────────────────────┤
-Stage 4 ─────────────────────────────────┐       ├─── All complete
-Stage 8 ─────────────────────────────────┤       │
-Stage 9 ─────────────────────────────────┤       │
-                                         │       │
-Stage 5 (depends on Stage 4) ────────────┤       │
-Stage 6 (depends on Stage 4) ────────────┤       │
-Stage 7 (depends on Stage 4, 5) ─────────┘───────┘
+Stage 1 ─────────────────────────────────────────────┐
+Stage 2 ─────────────────────────────────────────────┤
+Stage 3 ─────────────────────────────────────────────┤
+Stage 4 ─────────────────────────────────────┐       ├─── All complete
+Stage 8 ─────────────────────────────────────┤       │
+Stage 9 ─────────────────────────────────────┤       │
+                                             │       │
+Stage 5 (depends on Stage 4) ────────────────┤       │
+Stage 6 (depends on Stage 4) ────────────────┤       │
+Stage 7 (depends on Stage 4, 5) ─────────────┤       │
+Stage 10 (depends on Stage 4, 5, 7) ─────────┘───────┘
 ```
 
 Stages 1, 2, 3, 4, 8, 9 have no inter-dependencies and could have been implemented in parallel.
 Stages 5, 6, 7 depend on Stage 4 (role files must exist before coordinator/sdlc/readme can reference them).
 Stage 7 additionally depends on Stage 5 (coordinator must be finalized before README can document the flow).
+Stage 10 depends on Stages 4, 5, 7 (all role files, coordinator, and README must exist before isolation enforcement).
 
 ## File Change Manifest
 
@@ -213,10 +244,14 @@ Stage 7 additionally depends on Stage 5 (coordinator must be finalized before RE
 | `agents/skills/roles/README.md` | Modified | 7 |
 | `docker-compose.yml` | Created | 8 |
 | `AGENTS.md` | Modified | 9 |
+| `agents/skills/roles/references/product-owner.md` | Modified | 10 |
+| `agents/skills/roles/references/architect.md` | Modified | 10 |
+| `agents/skills/roles/references/maintainer.md` | Modified | 10 |
+| `.state/chore/sdlc-overhaul/ADR.md` | Modified | 10 |
 | `.state/chore/sdlc-overhaul/NOTES.md` | Created | (planning) |
 | `.state/chore/sdlc-overhaul/REQUIREMENTS.md` | Created | (planning) |
 
-Total: 22 files changed (8 created, 14 modified), ~1007 insertions, ~171 deletions.
+Total: 25 files changed (8 created, 17 modified). Note: `agents/skills/roles/references/frontend-engineer.md`, `backend-engineer.md`, `frontend-designer.md`, `implementer.md`, `reviewer.md`, `SKILL.md`, and `README.md` were also modified in Stage 10 but are already listed under their creation/modification stages above.
 
 ## Progress
 
@@ -233,3 +268,4 @@ Updated retroactively. All stages complete.
 | 7 | complete | roles README.md updated with new flow diagram and all role descriptions |
 | 8 | complete | docker-compose.yml created with 6 Penpot services |
 | 9 | complete | AGENTS.md bootstrapped with Your Purpose, Startup Proposal, The Project |
+| 10 | complete | Role isolation enforced: I/O contracts, When Blocked pattern across all 8 roles, Coordinator Routing Map, Blocked Request Protocol in SKILL.md |
