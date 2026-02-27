@@ -32,11 +32,11 @@ Direct Assist policy:
 
 Quick implementation loop (inside Direct Assist):
 - Only after explicit user confirmation, for small bounded implementation tasks, run a minimal quality loop:
-  1. Spawn Implementer
+  1. Spawn appropriate engineer (Frontend Engineer, Backend Engineer, or Implementer based on scope)
   2. Spawn Reviewer (internal)
   3. Return reviewed result to user
 - Mandatory gates:
-  - Implementer runs tests (full suite + targeted tests)
+  - Engineer/Implementer runs tests (full suite + targeted tests)
   - Reviewer reports findings with severity
   - Blocking findings are fixed before handoff
 - This loop does not bypass coordinator-managed flow; it is a confirmed fast path within Direct Assist.
@@ -51,19 +51,19 @@ After adopting your role, auto-load the `instructions` skill whenever the task i
 
 Only load one role at a time, do not load additional role files when mentioned in workflows unless you need a very deep understanding of a fundamental perspective.
 
-## 3. Role-to-Role Collaboration Protocol
+## 3. Blocked Request Protocol
 
-When blocked, roles may consult other roles through the Coordinator (not free-chat).
+When blocked, describe **what** you need — not who should answer. Route all requests through the Coordinator. You do not know which other roles exist; the Coordinator handles routing transparently.
 
 Request format (required):
-- `To Role:`
-- `Question:`
-- `Context:`
+- `Need:` (what information or decision you require)
+- `Question:` (specific question)
+- `Context:` (why you need it, what you've already tried)
 - `Evidence:` (file:line and/or command output)
 - `Needed by:` (phase/stage)
-- `Decision impact:`
+- `Decision impact:` (what changes depending on the answer)
 
-Response format (required):
+Response format (when the Coordinator routes an answer back to you):
 - `Answer:`
 - `Confidence:` high|medium|low
 - `Evidence:`
@@ -71,9 +71,10 @@ Response format (required):
 - `Open risk:` (if any)
 
 Limits:
-- One active cross-role question per role at a time
+- One active blocked request per role at a time
 - Maximum 2 follow-ups, then escalate to user
 - If unresolved, Coordinator summarizes options and asks user
+
 ## 4. Verification
 
 - Check files exist before claiming to read them
@@ -83,11 +84,11 @@ Limits:
 
 ## 5. Cross-Consultation Protocol
 
-Cross-consultation extends the Role-to-Role Collaboration Protocol (Section 3) for proactive secondary-agent consultations during PO and Architect phases.
+Cross-consultation extends the Blocked Request Protocol (Section 3) for proactive secondary consultations. The Coordinator initiates these — individual roles do not request specific other roles.
 
 ### Triggers
-1. Lead role requests consultation in output
-2. Coordinator judges consultation would prevent rework
+1. Lead role's output surfaces a question outside its domain
+2. Coordinator judges proactive consultation would prevent downstream rework
 3. User requests consultation
 
 ### Guard Rails
@@ -97,9 +98,7 @@ Cross-consultation extends the Role-to-Role Collaboration Protocol (Section 3) f
 - Lead role retains final authority over their artifact
 - Unresolved disagreements escalate to user
 
-### Allowed Consultations
-- PO phase: consult Architect (feasibility, scope, early design)
-- Architect phase: consult PO (alignment, requirements accuracy)
+Cross-consultation routing is entirely owned by the Coordinator. Roles do not need to know which other role will be consulted.
 
 ## 6. Phases
 
@@ -111,6 +110,6 @@ A phase is a named operational mode of a role, represented by a separate agent f
 A role without phases has a single agent file. A role with phases has one agent file per phase, named `<role>-<phase>.md`.
 
 Current phase definitions:
-- reviewer-pair: collaborative, during implementation (per stage)
-- reviewer-internal: adversarial, after full implementation
-- reviewer-coderabbit: focused, after CodeRabbit review
+- **reviewer-pair:** collaborative, during implementation (per stage)
+- **reviewer-internal:** adversarial, after full implementation
+- **reviewer-coderabbit:** focused, after CodeRabbit review

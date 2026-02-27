@@ -113,10 +113,12 @@ Before proposing a release to the user:
 - [ ] ADR statuses updated to "Accepted" for completed work
 - [ ] No blocking issues remain
 
-## Role Collaboration
+## When Blocked
 
-When blocked, ask through Coordinator only.
+Describe **what** you need, not who should answer. Route all requests through the Coordinator.
 
-Allowed targets:
-- Reviewer: blocking findings and merge-readiness clarifications
-- Product Owner: scope acceptance and release readiness
+Examples of valid blocked requests:
+- "I need confirmation that all blocking findings have been resolved before I can merge"
+- "I need scope acceptance confirmation — is the implementation complete per requirements?"
+
+The Coordinator decides who can answer and routes the question transparently.

@@ -1,0 +1,100 @@
+## Development stack for RAGTS designers
+## Provides Penpot (design tool) with all dependencies.
+## RAGTS itself runs via `npm run dev` (not containerized in dev mode).
+##
+## Usage:
+##   docker compose up -d          # Start Penpot stack
+##   docker compose down            # Stop
+##   docker compose down -v         # Stop and remove volumes
+##
+## Penpot UI:      http://localhost:9001
+## Penpot MCP:     http://localhost:4401/mcp
+## Penpot Plugin:  http://localhost:4400/manifest.json
+## Mail UI:        http://localhost:1080
+
+services:
+  penpot-frontend:
+    image: penpotapp/frontend:latest
+    restart: unless-stopped
+    ports:
+      - "9001:8080"
+    volumes:
+      - penpot_assets:/opt/data/assets
+    depends_on:
+      - penpot-backend
+      - penpot-exporter
+    environment:
+      - PENPOT_FLAGS=enable-registration disable-email-verification disable-secure-session-cookies enable-access-tokens
+
+  penpot-backend:
+    image: penpotapp/backend:latest
+    restart: unless-stopped
+    volumes:
+      - penpot_assets:/opt/data/assets
+    depends_on:
+      - penpot-postgres
+      - penpot-valkey
+    environment:
+      - PENPOT_FLAGS=enable-registration disable-email-verification disable-secure-session-cookies enable-access-tokens
+      - PENPOT_SECRET_KEY=ragts-dev-secret-change-in-production
+      - PENPOT_DATABASE_URI=postgresql://penpot-postgres/penpot
+      - PENPOT_DATABASE_USERNAME=penpot
+      - PENPOT_DATABASE_PASSWORD=penpot
+      - PENPOT_REDIS_URI=redis://penpot-valkey/0
+      - PENPOT_ASSETS_STORAGE_BACKEND=assets-fs
+      - PENPOT_STORAGE_ASSETS_FS_DIRECTORY=/opt/data/assets
+      - PENPOT_TELEMETRY_ENABLED=false
+      - PENPOT_SMTP_DEFAULT_FROM=no-reply@ragts.local
+      - PENPOT_SMTP_DEFAULT_REPLY_TO=no-reply@ragts.local
+      - PENPOT_SMTP_HOST=penpot-mailcatch
+      - PENPOT_SMTP_PORT=1025
+      - PENPOT_SMTP_TLS=false
+      - PENPOT_SMTP_SSL=false
+
+  penpot-exporter:
+    image: penpotapp/exporter:latest
+    restart: unless-stopped
+    depends_on:
+      - penpot-valkey
+    environment:
+      - PENPOT_PUBLIC_URI=http://penpot-frontend:8080
+      - PENPOT_REDIS_URI=redis://penpot-valkey/0
+
+  penpot-postgres:
+    image: postgres:15
+    restart: unless-stopped
+    volumes:
+      - penpot_postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=penpot
+      - POSTGRES_USER=penpot
+      - POSTGRES_PASSWORD=penpot
+      - POSTGRES_INITDB_ARGS=--data-checksums
+
+  penpot-valkey:
+    image: valkey/valkey:8.1
+    restart: unless-stopped
+    command: valkey-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  penpot-mcp:
+    build:
+      context: ./docker/penpot-mcp
+    restart: unless-stopped
+    ports:
+      - "4400:4400"
+      - "4401:4401"
+      - "4402:4402"
+    depends_on:
+      - penpot-frontend
+
+  penpot-mailcatch:
+    image: sj26/mailcatcher:latest
+    restart: unless-stopped
+    ports:
+      - "1080:1080"
+    expose:
+      - "1025"
+
+volumes:
+  penpot_postgres:
+  penpot_assets:

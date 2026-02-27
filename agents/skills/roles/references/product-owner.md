@@ -121,7 +121,7 @@ Before approving, complete each step:
 2. For each acceptance criterion:
    - State: PASS, FAIL, or UNVERIFIED
    - Include evidence (file:line or command output)
-3. If unclear → ask Reviewer or Implementer first, user last
+3. If unclear → route question through the Coordinator first, user last
 
 ### Splitting Out-of-Scope Work
 
@@ -144,10 +144,12 @@ Example:
 - Keep scope tight—split out extras rather than approving bloat
 - Always get sign-off before handoff to Architect
 
-## Role Collaboration
+## When Blocked
 
-When blocked, ask through Coordinator only.
+Describe **what** you need, not who should answer. Route all requests through the Coordinator.
 
-Allowed targets:
-- Architect: feasibility and design trade-offs that affect requirements scope
-- Reviewer: validation risk and acceptance-test blind spots
+Examples of valid blocked requests:
+- "I need a feasibility assessment for [proposed requirement] — is this technically achievable within the current architecture?"
+- "I need to understand the validation risk for [acceptance criterion] — are there blind spots in how we'd test this?"
+
+The Coordinator decides who can answer and routes the question transparently.
