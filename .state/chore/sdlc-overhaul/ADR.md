@@ -34,7 +34,7 @@ Forces at play:
 Replace all stale content, introduce specialized roles (frontend-engineer, backend-engineer, frontend-designer), rewrite the coordinator for dynamic role selection, add Penpot docker-compose for design sessions, and bootstrap AGENTS.md.
 
 - Pros: Comprehensive fix. Every instruction file matches the actual stack. Coordinator dynamically selects roles by task type. Design iteration phase added. Specialized engineers enforce scope boundaries. AGENTS.md matches the AGR project's bootstrap pattern.
-- Cons: Larger change (22 files, ~1000 lines net). Introduces Penpot dependency for design sessions (6-service docker-compose). More roles increase coordinator decision complexity. Requires agents to understand role selection logic.
+- Cons: Larger change (26 files, ~1000 lines net). Introduces Penpot dependency for design sessions (6-service docker-compose). More roles increase coordinator decision complexity. Requires agents to understand role selection logic.
 
 ### Option 3: Overhaul without design tooling
 
@@ -51,7 +51,9 @@ The overhaul addresses all four categories simultaneously because they are inter
 
 ### Core Architectural Principle: Role Isolation via Input/Output Contracts
 
-Every role is a **standalone black box**. It receives defined inputs, does its work, and produces defined outputs. Roles never address other roles directly — they don't know who else exists in the system. When a role needs information it cannot produce itself, it describes **what** it needs, not **who** should provide it. The Coordinator is the only component aware of the full role topology; it acts as a **transparent routing layer** between roles.
+Every role is a **standalone black box**. It receives defined inputs, does its work, and produces defined outputs. When a role needs information it cannot produce itself, it describes **what** it needs, not **who** should provide it. The Coordinator is the only component aware of the full role topology; it acts as a **transparent routing layer** between roles.
+
+**Isolation scope:** Isolation is enforced at the **operational** level — blocked requests, routing, and tool invocations. Roles may reference other roles by name in descriptive prose (e.g., "requirements are created by the Product Owner") for readability and workflow context, but they must never operationally address, invoke, or depend on another role directly. All operational inter-role communication flows through the Coordinator.
 
 This means:
 - **Inputs** are artifacts (REQUIREMENTS.md, ADR.md, PLAN.md, design screenshots, PR diffs) and context provided by the Coordinator at spawn time
