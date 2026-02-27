@@ -34,7 +34,7 @@ Forces at play:
 Replace all stale content, introduce specialized roles (frontend-engineer, backend-engineer, frontend-designer), rewrite the coordinator for dynamic role selection, add Penpot docker-compose for design sessions, and bootstrap AGENTS.md.
 
 - Pros: Comprehensive fix. Every instruction file matches the actual stack. Coordinator dynamically selects roles by task type. Design iteration phase added. Specialized engineers enforce scope boundaries. AGENTS.md matches the AGR project's bootstrap pattern.
-- Cons: Larger change (26 files, ~1000 lines net). Introduces Penpot dependency for design sessions (6-service docker-compose). More roles increase coordinator decision complexity. Requires agents to understand role selection logic.
+- Cons: Larger change (26 files, ~1000 lines net). Introduces Penpot dependency for design sessions (7-service docker-compose). More roles increase coordinator decision complexity. Requires agents to understand role selection logic.
 
 ### Option 3: Overhaul without design tooling
 

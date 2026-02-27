@@ -121,7 +121,7 @@ Before approving, complete each step:
 2. For each acceptance criterion:
    - State: PASS, FAIL, or UNVERIFIED
    - Include evidence (file:line or command output)
-3. If unclear → ask Reviewer or Implementer first, user last
+3. If unclear → route question through the Coordinator first, user last
 
 ### Splitting Out-of-Scope Work
 

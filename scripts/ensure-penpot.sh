@@ -8,7 +8,7 @@ set -euo pipefail
 COMPOSE_DIR="${CLAUDE_PROJECT_DIR:-.}"
 MCP_URL="http://localhost:4401/mcp"
 PENPOT_URL="http://localhost:9001"
-MAX_WAIT=120
+MAX_WAIT=180
 POLL_INTERVAL=3
 
 # Quick check: is MCP already responding?
