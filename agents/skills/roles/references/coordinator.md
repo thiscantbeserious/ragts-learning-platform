@@ -72,7 +72,7 @@ When the Coordinator identifies UI work in the PLAN (new components, layout chan
 
 ### Flow
 
-```
+```text
 Architect creates PLAN
      │
      ▼
@@ -127,7 +127,7 @@ Escalate to full SDLC immediately if scope expands, architectural decisions are 
 
 Spawn agents by name via the Task tool. Each agent has its own model, tools, and behavioral instructions preconfigured in its agent file at `agents/agents/`.
 
-```
+```text
 Task(product-owner, "Gather requirements for <description>.
 Branch: <branch-name>
 REQUIREMENTS: .state/<branch-name>/REQUIREMENTS.md")
@@ -201,7 +201,7 @@ Cross-consultation is triggered by one of three mechanisms:
 
 ### Consultation Flow
 
-```
+```text
 Lead role output mentions: "Recommend checking with Architect on feasibility"
      │
      ▼
@@ -242,7 +242,7 @@ During the implementation phase, the Coordinator orchestrates incremental pair r
 
 ### Flow
 
-```
+```text
 Engineer/Implementer completes Stage N
      │ Reports: "Stage N complete. Files changed: [list]"
      ▼
@@ -393,7 +393,7 @@ The overhead is minimal; the protection is significant.
 
 ## Flow
 
-```
+```text
 User Request
      │
      ▼

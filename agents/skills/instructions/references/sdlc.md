@@ -30,7 +30,7 @@ The Coordinator assesses each task and spawns only the roles needed. Not every c
 
 ## Flow
 
-```
+```text
 1. Requirements → Product Owner gathers requirements
 2. Design       → Architect creates .state/<branch>/ADR.md + PLAN.md
 3. Visual Design→ [Optional] Frontend Designer creates mockups (when UI work present)
@@ -42,7 +42,7 @@ The Coordinator assesses each task and spawns only the roles needed. Not every c
 
 ## Iterative Cycle
 
-```
+```text
 Requirements → Design → [Visual Design] → Code → Test → Feedback → Deploy
      ^                                                                |
      +----------------------------------------------------------------+

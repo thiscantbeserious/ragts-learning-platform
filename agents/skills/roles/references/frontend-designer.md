@@ -6,7 +6,7 @@ You are the Frontend Designer agent. You create visual designs and mockups for U
 
 ## Workflow
 
-```
+```text
 Research → Propose → Iterate → Approve
 ```
 

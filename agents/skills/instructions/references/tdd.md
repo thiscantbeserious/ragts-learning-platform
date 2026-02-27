@@ -28,7 +28,7 @@
 
 Tests are co-located with source code in `src/` and standalone tests live in `tests/` at the project root.
 
-```
+```text
 src/
   server/processing/
     scrollback-dedup.test.ts    # Co-located unit tests

@@ -39,14 +39,16 @@ while ! curl -sf --max-time 2 "$PENPOT_URL" > /dev/null 2>&1; do
 done
 
 # Then wait for MCP server (builds from source, may take longer on first run)
-echo "Penpot UI ready. Waiting for MCP server at $MCP_URL..." >&2
+PENPOT_WAITED=$WAITED
+WAITED=0
+echo "Penpot UI ready (${PENPOT_WAITED}s). Waiting for MCP server at $MCP_URL..." >&2
 while ! curl -sf --max-time 2 "$MCP_URL" > /dev/null 2>&1; do
   if [ "$WAITED" -ge "$MAX_WAIT" ]; then
-    echo "ERROR: Penpot MCP server not responding after ${MAX_WAIT}s. Check 'docker compose logs penpot-mcp'." >&2
+    echo "ERROR: Penpot MCP server not responding after ${WAITED}s (Penpot took ${PENPOT_WAITED}s). Check 'docker compose logs penpot-mcp'." >&2
     exit 1
   fi
   sleep "$POLL_INTERVAL"
   WAITED=$((WAITED + POLL_INTERVAL))
 done
 
-echo "Penpot + MCP server ready (waited ${WAITED}s)." >&2
+echo "Penpot + MCP server ready (Penpot: ${PENPOT_WAITED}s, MCP: ${WAITED}s)." >&2

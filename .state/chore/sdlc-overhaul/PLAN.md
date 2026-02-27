@@ -138,10 +138,10 @@ Depends on: Stage 4, Stage 5
 
 ### Stage 8: Create Penpot docker-compose
 
-Goal: A self-hosted Penpot design stack can be launched via docker-compose for design sessions. All 6 required services present with `enable-access-tokens` for MCP API access.
+Goal: A self-hosted Penpot design stack can be launched via docker-compose for design sessions. All 7 required services present with `enable-access-tokens` for MCP API access.
 Owner: implementer
 
-- [x] Create `docker-compose.yml` at project root with 6 services: `penpot-frontend`, `penpot-backend`, `penpot-exporter`, `penpot-postgres`, `penpot-valkey`, `penpot-mailcatch`
+- [x] Create `docker-compose.yml` at project root with 7 services: `penpot-frontend`, `penpot-backend`, `penpot-exporter`, `penpot-postgres`, `penpot-valkey`, `penpot-mailcatch`, `penpot-mcp`
 - [x] Configure `penpot-frontend` accessible at `http://localhost:9001`
 - [x] Configure `penpot-mailcatch` mail UI accessible at `http://localhost:1080`
 - [x] Add `enable-access-tokens` to `PENPOT_FLAGS` on frontend and backend services
@@ -201,7 +201,7 @@ Depends on: Stages 4, 5, 7 (all role files, coordinator, and README must exist)
 
 ## Dependencies
 
-```
+```text
 Stage 1 ─────────────────────────────────────────────┐
 Stage 2 ─────────────────────────────────────────────┤
 Stage 3 ─────────────────────────────────────────────┤

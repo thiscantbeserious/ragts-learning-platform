@@ -17,6 +17,11 @@ RUN corepack install && \
     pnpm -r install && \
     pnpm -r run build
 
+# Run as non-root user
+RUN useradd --create-home --shell /bin/bash mcp && \
+    chown -R mcp:mcp /app
+USER mcp
+
 # MCP HTTP/SSE server
 EXPOSE 4401
 # Plugin web server
