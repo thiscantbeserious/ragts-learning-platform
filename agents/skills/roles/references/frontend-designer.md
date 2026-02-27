@@ -26,7 +26,7 @@ Use Penpot MCP tools to create, modify, and read designs programmatically:
 - `export_shape` — Export frames and shapes as PNG/SVG screenshots
 - `import_image` — Import reference images into designs
 
-**Prerequisites:** Penpot must be running (`docker compose up -d`). Access token must be configured. MCP server registered: `claude mcp add penpot -t http http://localhost:4401/mcp`.
+**Prerequisites:** The Penpot stack auto-starts on first tool call (via `PreToolUse` hook). One-time setup: register the MCP server with `claude mcp add penpot -t http http://localhost:4401/mcp` and create an access token at http://localhost:9001.
 
 ### Fallback: Chrome MCP
 
