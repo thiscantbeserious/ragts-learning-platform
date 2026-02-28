@@ -745,7 +745,32 @@
         </div>
       </token-section>
 
-      <!-- 4. Shape -->
+      <!-- 4. Layout / Grid -->
+      <token-section title="Layout Tokens" description="Container sizing, grid gaps, breakpoints, and component height scale.">
+        <div class="subsection">
+          <h4 class="subsection-title">Container &amp; Grid</h4>
+          <div class="token-grid token-grid--single">
+            <spacing-token v-for="t in layout.container" :key="t.token"
+              :token="t.token" :value="t.value" :label="t.label" :width="t.width" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Breakpoints</h4>
+          <div class="token-grid token-grid--single">
+            <spacing-token v-for="t in layout.breakpoints" :key="t.token"
+              :token="t.token" :value="t.value" :label="t.label" :width="t.width" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Component Heights</h4>
+          <div class="token-grid token-grid--single">
+            <spacing-token v-for="t in layout.componentHeights" :key="t.token"
+              :token="t.token" :value="t.value" :label="t.label" :width="t.width" />
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 5. Shape -->
       <token-section title="Shape Tokens" description="Border radii from subtle rounding to fully circular, plus elevation shadows.">
         <div class="subsection">
           <h4 class="subsection-title">Border Radius</h4>
@@ -1033,6 +1058,29 @@
             { token: '--space-inline', value: 'var(--space-4)', label: 'Inline (horizontal padding)', width: '16px' },
             { token: '--space-stack', value: 'var(--space-3)', label: 'Stack (vertical gap)', width: '12px' },
           ],
+          layout: {
+            container: [
+              { token: '--container-max', value: '960px', label: 'Max content width', width: '100%' },
+              { token: '--container-padding', value: 'var(--space-6)', label: 'Container side padding', width: '24px' },
+              { token: '--grid-gap', value: 'var(--space-4)', label: 'Default grid gap', width: '16px' },
+              { token: '--header-height', value: '56px', label: 'Fixed header height', width: '56px' },
+            ],
+            breakpoints: [
+              { token: '--breakpoint-sm', value: '640px', label: 'Small (mobile landscape)', width: '64px' },
+              { token: '--breakpoint-md', value: '768px', label: 'Medium (tablet)', width: '77px' },
+              { token: '--breakpoint-lg', value: '1024px', label: 'Large (desktop)', width: '102px' },
+              { token: '--breakpoint-xl', value: '1280px', label: 'Extra large (wide)', width: '128px' },
+              { token: '--breakpoint-2xl', value: '1440px', label: '2XL (ultrawide)', width: '144px' },
+            ],
+            componentHeights: [
+              { token: '--btn-height-sm', value: '28px', label: 'Button small', width: '28px' },
+              { token: '--btn-height-md', value: '36px', label: 'Button medium', width: '36px' },
+              { token: '--btn-height-lg', value: '44px', label: 'Button large', width: '44px' },
+              { token: '--input-height-sm', value: '32px', label: 'Input small', width: '32px' },
+              { token: '--input-height-md', value: '40px', label: 'Input medium', width: '40px' },
+              { token: '--input-height-lg', value: '48px', label: 'Input large', width: '48px' },
+            ],
+          },
           shape: {
             radii: [
               { token: '--radius-sm', value: '4px', label: 'Small' },
@@ -1133,6 +1181,24 @@
             { token: '--space-12', value: '48px', usage: 'Page-level padding, hero spacing' },
             { token: '--space-inline', value: 'var(--space-4)', usage: 'Default horizontal padding shortcut' },
             { token: '--space-stack', value: 'var(--space-3)', usage: 'Default vertical gap shortcut' },
+            /* --- Layout / Grid --- */
+            { token: '--container-max', value: '960px', usage: 'Max content width for centered layouts' },
+            { token: '--container-padding', value: 'var(--space-6)', usage: 'Side padding for content container' },
+            { token: '--grid-gap', value: 'var(--space-4)', usage: 'Default gap between grid items' },
+            { token: '--header-height', value: '56px', usage: 'Fixed app header height' },
+            /* --- Breakpoints (raw values in @media, documented as tokens) --- */
+            { token: '--breakpoint-sm', value: '640px', usage: 'Mobile landscape and up' },
+            { token: '--breakpoint-md', value: '768px', usage: 'Tablet and up' },
+            { token: '--breakpoint-lg', value: '1024px', usage: 'Desktop and up' },
+            { token: '--breakpoint-xl', value: '1280px', usage: 'Wide desktop and up' },
+            { token: '--breakpoint-2xl', value: '1440px', usage: 'Ultrawide and up' },
+            /* --- Component Sizing --- */
+            { token: '--btn-height-sm', value: '28px', usage: 'Small button height (compact UI)' },
+            { token: '--btn-height-md', value: '36px', usage: 'Default button height' },
+            { token: '--btn-height-lg', value: '44px', usage: 'Large button height (touch targets)' },
+            { token: '--input-height-sm', value: '32px', usage: 'Small input height' },
+            { token: '--input-height-md', value: '40px', usage: 'Default input height' },
+            { token: '--input-height-lg', value: '48px', usage: 'Large input height (touch targets)' },
             /* --- Shape: Radii --- */
             { token: '--radius-sm', value: '4px', usage: 'Subtle rounding (inputs, small elements)' },
             { token: '--radius-md', value: '6px', usage: 'Buttons, badges' },
