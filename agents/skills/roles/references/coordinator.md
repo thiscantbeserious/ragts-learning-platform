@@ -72,57 +72,19 @@ When the Coordinator identifies UI work in the PLAN (new components, layout chan
 
 ### Pre-flight: Design Toolchain Verification (MANDATORY)
 
-**Before spawning the Frontend Designer, the Coordinator MUST verify the Penpot toolchain is operational.** The designer cannot design without working tools. Skipping this step wastes the designer's entire turn budget on setup issues.
+**Before spawning the Frontend Designer, the Coordinator MUST verify the design toolchain is operational.** The designer creates HTML + CSS mockup files and uses browser MCP (Playwright or Chrome) for visual verification.
 
-Run these checks in order:
+Run these checks:
 
-1. **Docker stack running:**
+1. **Browser MCP available:**
+   Check `.mcp.json` for a `playwright` or `claude-in-chrome` entry. If neither is configured, inform the user.
+
+2. **Design output directory exists:**
    ```bash
-   docker compose ps --services --filter status=running 2>/dev/null | wc -l
-   ```
-   Must show 7 services. If not: `docker compose up -d --build` and wait.
-
-2. **Penpot UI reachable:**
-   ```bash
-   curl -sf --max-time 5 http://localhost:9001 > /dev/null && echo "OK" || echo "FAIL"
+   ls -d .state/*/designs/ 2>/dev/null || echo "Will be created by designer"
    ```
 
-3. **Penpot MCP reachable:**
-   ```bash
-   curl -sf --max-time 5 -X POST http://localhost:4401/mcp \
-     -H "Content-Type: application/json" \
-     -H "Accept: application/json, text/event-stream" \
-     -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}' \
-     | grep -q "penpot-mcp-server" && echo "OK" || echo "FAIL"
-   ```
-
-4. **MCP registered with Claude Code:**
-   Check that `.mcp.json` exists in the project root and contains the penpot server entry:
-   ```json
-   { "mcpServers": { "penpot": { "type": "http", "url": "http://localhost:4401/mcp" } } }
-   ```
-   If missing, create it:
-   ```bash
-   claude mcp add --transport http --scope project penpot http://localhost:4401/mcp
-   ```
-   **IMPORTANT:** If `.mcp.json` was just created or changed, a session restart is required before MCP tools become available. Inform the user.
-
-5. **Penpot MCP tools available:**
-   Verify that `mcp__penpot__execute_code` is callable. If it's not in the tool list, the session needs a restart.
-
-6. **Browser plugin connected:**
-   Test the actual MCP connection:
-   ```
-   mcp__penpot__execute_code({ code: "return penpotUtils.getPages()" })
-   ```
-   - If this succeeds → toolchain is fully operational
-   - If this fails with a connection/plugin error → inform the user they need to:
-     1. Open http://localhost:9001 in Chrome
-     2. Open/create a design file
-     3. Load the plugin from http://localhost:4400/manifest.json
-   - **Wait for the user to confirm the plugin is connected before spawning the designer**
-
-**Only proceed to spawn the Frontend Designer after ALL checks pass.** Do not hand off to a designer with a broken toolchain.
+**Only proceed to spawn the Frontend Designer after browser MCP is available.** The designer needs it for screenshots and visual verification.
 
 ### Flow
 
@@ -149,7 +111,7 @@ Coordinator reads PLAN, checks for UI work
           REQUIREMENTS: .state/<branch-name>/REQUIREMENTS.md
           PLAN: .state/<branch-name>/PLAN.md
           Existing UI: src/client/components/
-          Penpot: VERIFIED — MCP connected, plugin loaded, ready to design.")
+          Design output: .state/<branch-name>/designs/")
                │
                ▼
           Designer iterates with user (max 5 per element)

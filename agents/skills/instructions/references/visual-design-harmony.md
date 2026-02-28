@@ -2,7 +2,7 @@
 
 This guide defines how human visual perception governs design decisions. Every section is grounded in cognitive science, Gestalt psychology, and established design systems theory. Compliance is mandatory, violations are design defects
 
-Project-specific values (palette, fonts, tokens) live in the Penpot design file. This guide provides the principles that determine how those values are composed, proportioned, and verified
+Project-specific values (palette, fonts, tokens) live in the design reference files. This guide provides the principles that determine how those values are composed, proportioned, and verified
 
 ---
 
@@ -47,7 +47,7 @@ Verify: section headers form clear horizontal layer-cake bands for scanning [1][
 Before modifying any element, complete in order:
 
 1. Audit the full target area programmatically. Read every element position, size, content, color, font. Store as ground truth
-2. Screenshot (Chrome MCP or export_shape). Look at it. Code audits miss visual defects obvious to the eye: overlapping text, invisible elements, broken alignment
+2. Screenshot (via browser MCP). Look at it. Code audits miss visual defects obvious to the eye: overlapping text, invisible elements, broken alignment
 3. Articulate the mental model before writing code: what sections exist, how they flow vertically, which cards share a row and must share alignment lines, reading order within each card, where the eye lands first
 4. Plan all changes as a batch per row. Calculate all target positions for adjacent cards at once. Verify cross-card alignment holds. Then apply
 
@@ -106,8 +106,8 @@ Phase 3 - Implementation:
 Every card or component modified must be visually verified before moving to the next
 
 1. Make programmatic changes
-2. Set viewport: `penpot.viewport.center = {x,y}; penpot.viewport.zoom = N;`
-3. Screenshot via Chrome MCP or export via export_shape
+2. Open the design file in a browser (via Playwright MCP or Chrome MCP)
+3. Take a screenshot for visual inspection
 4. Check: text visible and readable? Spacing proportional? Labels in label zone, content in content zone? Adjacent cards aligned horizontally?
 5. If anything is wrong, fix immediately. Do not accumulate defects
 
