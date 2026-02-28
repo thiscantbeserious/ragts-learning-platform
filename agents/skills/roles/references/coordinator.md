@@ -97,12 +97,15 @@ Run these checks in order:
    ```
 
 4. **MCP registered with Claude Code:**
-   Check that `.mcp.json` exists in the project root and contains the penpot server entry.
+   Check that `.mcp.json` exists in the project root and contains the penpot server entry:
+   ```json
+   { "mcpServers": { "penpot": { "type": "http", "url": "http://localhost:4401/mcp" } } }
+   ```
    If missing, create it:
    ```bash
    claude mcp add --transport http --scope project penpot http://localhost:4401/mcp
    ```
-   **IMPORTANT:** If `.mcp.json` was just created, a session restart is required before MCP tools become available. Inform the user.
+   **IMPORTANT:** If `.mcp.json` was just created or changed, a session restart is required before MCP tools become available. Inform the user.
 
 5. **Penpot MCP tools available:**
    Verify that `mcp__penpot__execute_code` is callable. If it's not in the tool list, the session needs a restart.

@@ -6,13 +6,14 @@
 set -euo pipefail
 
 COMPOSE_DIR="${CLAUDE_PROJECT_DIR:-.}"
-MCP_URL="http://localhost:4401/mcp"
+MCP_PORT=4401
 PENPOT_URL="http://localhost:9001"
 MAX_WAIT=180
 POLL_INTERVAL=3
 
 # Quick check: is MCP already responding?
-if curl -sf --max-time 2 "$MCP_URL" > /dev/null 2>&1; then
+# Use a TCP connect check — the /mcp endpoint requires POST with specific headers.
+if nc -z localhost "$MCP_PORT" 2>/dev/null; then
   exit 0
 fi
 
@@ -41,10 +42,10 @@ done
 # Then wait for MCP server (builds from source, may take longer on first run)
 PENPOT_WAITED=$WAITED
 WAITED=0
-echo "Penpot UI ready (${PENPOT_WAITED}s). Waiting for MCP server at $MCP_URL..." >&2
-while ! curl -sf --max-time 2 "$MCP_URL" > /dev/null 2>&1; do
+echo "Penpot UI ready (${PENPOT_WAITED}s). Waiting for MCP server on port $MCP_PORT..." >&2
+while ! nc -z localhost "$MCP_PORT" 2>/dev/null; do
   if [ "$WAITED" -ge "$MAX_WAIT" ]; then
-    echo "ERROR: Penpot MCP server not responding after ${WAITED}s (Penpot took ${PENPOT_WAITED}s). Check 'docker compose logs penpot-mcp'." >&2
+    echo "ERROR: Penpot MCP server not responding on port ${MCP_PORT} after ${WAITED}s (Penpot took ${PENPOT_WAITED}s). Check 'docker compose logs penpot-mcp'." >&2
     exit 1
   fi
   sleep "$POLL_INTERVAL"

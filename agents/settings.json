@@ -10,17 +10,7 @@
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "mcp__penpot__.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/ensure-penpot.sh\""
-          }
-        ]
-      }
-    ]
+    "PreToolUse": []
   },
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
