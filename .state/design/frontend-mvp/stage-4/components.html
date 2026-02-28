@@ -1,0 +1,2061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 4 — Component Library (DS-3)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ========================
+       1. DESIGN TOKENS (:root)
+       2. RESET + BASE
+       3. LAYOUT
+       4. ALL COMPONENT STYLES
+       ======================== */
+
+    :root {
+      /* --- Colors: Base palette (hand-picked — the ONLY raw values) --- */
+      --bg-page: #0c0c0c;
+      --bg-surface: #141414;
+      --bg-elevated: #1c1c1c;
+      --bg-overlay: rgba(0, 0, 0, 0.75);
+
+      /* Primary accent — mint green H153 S100% L50% */
+      --accent-primary: #00ff9f;
+      --accent-primary-hover: color-mix(in srgb, var(--accent-primary) 80%, white);
+      --accent-primary-dim: color-mix(in srgb, var(--accent-primary) 65%, var(--bg-page));
+      --accent-primary-subtle: color-mix(in srgb, var(--accent-primary) 7%, transparent);
+
+      /* Secondary accent — warm orange H28 S100% L58% (25+ from error red) */
+      --accent-secondary: #ff8c2b;
+      --accent-secondary-hover: color-mix(in srgb, var(--accent-secondary) 80%, white);
+      --accent-secondary-dim: color-mix(in srgb, var(--accent-secondary) 65%, var(--bg-page));
+      --accent-secondary-subtle: color-mix(in srgb, var(--accent-secondary) 7%, transparent);
+
+      /* Status — semantic colors (distinct from accent palette) */
+      --status-success: #34d399;
+      --status-success-subtle: color-mix(in srgb, var(--status-success) 7%, transparent);
+      --status-warning: #ffcc00;
+      --status-warning-subtle: color-mix(in srgb, var(--status-warning) 7%, transparent);
+      --status-error: #ff3b30;
+      --status-error-subtle: color-mix(in srgb, var(--status-error) 7%, transparent);
+      --status-info: #5ac8fa;
+      --status-info-subtle: color-mix(in srgb, var(--status-info) 7%, transparent);
+
+      /* Text hierarchy */
+      --text-primary: #e8e8e8;
+      --text-secondary: #8b949e;
+      --text-muted: #484f58;
+      --text-disabled: #30363d;
+      --text-inverse: var(--bg-page);
+
+      /* Borders */
+      --border-default: #1e1e1e;
+      --border-strong: #2a2a2a;
+      --border-accent: var(--accent-primary);
+
+      /* Terminal */
+      --terminal-bg: #0a0a0a;
+      --terminal-text: #d4d4d4;
+
+      /* --- Typography — Minor Third (1.2) from 14px base --- */
+      --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+
+      /* Type scale: 14px x 1.2^n, rounded to whole px */
+      --text-xs: 0.625rem;    /* 10px — step -2 */
+      --text-sm: 0.75rem;     /* 12px — step -1 */
+      --text-base: 0.875rem;  /* 14px — step 0 (base) */
+      --text-lg: 1.0625rem;   /* 17px — step +1 */
+      --text-xl: 1.25rem;     /* 20px — step +2 */
+      --text-2xl: 1.5rem;     /* 24px — step +3 */
+      --text-3xl: 1.8125rem;  /* 29px — step +4 (display) */
+
+      /* Line height: inverse relationship — bigger text = tighter */
+      --leading-tight: 1.2;     /* headings 24px+ */
+      --leading-snug: 1.35;     /* large body 17-24px */
+      --leading-normal: 1.5;    /* body text 14px */
+      --leading-relaxed: 1.65;  /* small text 10-12px */
+      --leading-mono: 1.6;      /* monospace at any size */
+
+      /* Letter spacing */
+      --tracking-tight: -0.02em;    /* display/headings */
+      --tracking-normal: 0;         /* body text */
+      --tracking-wide: 0.06em;      /* small uppercase labels */
+      --tracking-wider: 0.12em;     /* badges, timestamps */
+
+      /* Weights */
+      --weight-normal: 400;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+      --weight-bold: 700;
+
+      /* --- Spacing (4px base grid) --- */
+      --space-px: 1px;
+      --space-0\.5: 2px;
+      --space-1: 4px;
+      --space-1\.5: 6px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+
+      /* Named spacing shortcuts */
+      --space-inline: var(--space-4);   /* default horizontal padding */
+      --space-stack: var(--space-3);    /* default vertical gap between elements */
+
+      /* --- Shape --- */
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-xl: 10px;
+      --radius-full: 9999px;
+
+      /* --- Shadows --- */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+      --glow-accent: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+
+      /* --- Animation --- */
+      --duration-fast: 150ms;
+      --duration-normal: 250ms;
+      --duration-slow: 400ms;
+      --easing-default: ease-out;
+    }
+
+    /* --- Reset + Base --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* --- Page Layout --- */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-6);
+    }
+
+    .page__title {
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-tight);
+      color: var(--text-primary);
+      margin-bottom: var(--space-1);
+    }
+
+    .page__subtitle {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-12);
+    }
+
+    /* --- Section --- */
+    .section {
+      margin-bottom: var(--space-12);
+    }
+
+    .section__title {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-snug);
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+      padding-bottom: var(--space-2);
+      border-bottom: var(--space-px) solid var(--border-default);
+    }
+
+    .section__description {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--space-6);
+    }
+
+    /* --- State Showcase --- */
+    .state-group {
+      margin-bottom: var(--space-8);
+    }
+
+    .state-group__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      margin-bottom: var(--space-3);
+    }
+
+    .state-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+
+    .state-row--wrap {
+      flex-wrap: wrap;
+    }
+
+    .state-row--top {
+      align-items: flex-start;
+    }
+
+    .state-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      min-width: 80px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      line-height: var(--leading-relaxed);
+      flex-shrink: 0;
+    }
+
+    .state-label--wide {
+      min-width: 120px;
+    }
+
+    /* ======================
+       COMPONENT: BUTTON
+       ====================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      line-height: var(--leading-normal);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      border: var(--space-px) solid transparent;
+      background: transparent;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    /* Primary */
+    .btn--primary {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    .btn--primary:hover,
+    .btn--primary-hover {
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      box-shadow: var(--glow-accent);
+    }
+    .btn--primary:active,
+    .btn--primary-active {
+      background: var(--accent-primary-dim);
+      color: var(--text-inverse);
+      border-color: var(--accent-primary-dim);
+      box-shadow: none;
+    }
+    .btn--primary-disabled {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .btn--primary-loading {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      opacity: 0.65;
+      cursor: wait;
+    }
+
+    /* Secondary */
+    .btn--secondary {
+      border-color: var(--border-strong);
+      color: var(--text-secondary);
+    }
+    .btn--secondary:hover,
+    .btn--secondary-hover {
+      border-color: var(--text-secondary);
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+    .btn--secondary:active,
+    .btn--secondary-active {
+      background: var(--bg-surface);
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+    .btn--secondary-disabled {
+      border-color: var(--border-default);
+      color: var(--text-disabled);
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Ghost */
+    .btn--ghost {
+      color: var(--text-secondary);
+      border-color: transparent;
+    }
+    .btn--ghost:hover,
+    .btn--ghost-hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+    .btn--ghost:active,
+    .btn--ghost-active {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+    }
+    .btn--ghost-disabled {
+      color: var(--text-disabled);
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Destructive */
+    .btn--destructive {
+      border-color: var(--status-error);
+      color: var(--status-error);
+    }
+    .btn--destructive:hover,
+    .btn--destructive-hover {
+      background: var(--status-error);
+      color: var(--text-primary);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--status-error) 25%, transparent);
+    }
+    .btn--destructive:active,
+    .btn--destructive-active {
+      background: color-mix(in srgb, var(--status-error) 65%, var(--bg-page));
+      color: var(--text-primary);
+      border-color: color-mix(in srgb, var(--status-error) 65%, var(--bg-page));
+    }
+    .btn--destructive-disabled {
+      border-color: var(--status-error);
+      color: var(--status-error);
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Button sizes */
+    .btn--sm {
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--text-sm);
+    }
+
+    /* Loading spinner */
+    .btn__spinner {
+      display: inline-block;
+      width: var(--space-4);
+      height: var(--space-4);
+      border: var(--space-0\.5) solid transparent;
+      border-top-color: currentColor;
+      border-radius: var(--radius-full);
+      animation: spin 0.6s linear infinite;
+    }
+
+    .btn--sm .btn__spinner {
+      width: var(--space-3);
+      height: var(--space-3);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ======================
+       COMPONENT: INPUT
+       ====================== */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .input-group__label {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+    }
+
+    .input {
+      width: 100%;
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      outline: none;
+      transition: border-color var(--duration-fast) var(--easing-default),
+                  box-shadow var(--duration-fast) var(--easing-default);
+    }
+
+    .input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .input:focus,
+    .input--focused {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--accent-primary-subtle);
+    }
+
+    .input--error {
+      border-color: var(--status-error);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--status-error-subtle);
+    }
+
+    .input--disabled,
+    .input:disabled {
+      background: var(--bg-page);
+      color: var(--text-disabled);
+      border-color: var(--border-default);
+      cursor: not-allowed;
+    }
+
+    .input-group__helper {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--leading-relaxed);
+    }
+
+    .input-group__error {
+      font-size: var(--text-sm);
+      color: var(--status-error);
+      line-height: var(--leading-relaxed);
+    }
+
+    /* Textarea */
+    .textarea {
+      width: 100%;
+      padding: var(--space-3);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      outline: none;
+      resize: vertical;
+      min-height: 80px;
+      transition: border-color var(--duration-fast) var(--easing-default),
+                  box-shadow var(--duration-fast) var(--easing-default);
+    }
+
+    .textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .textarea:focus,
+    .textarea--focused {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--accent-primary-subtle);
+    }
+
+    .textarea--error {
+      border-color: var(--status-error);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--status-error-subtle);
+    }
+
+    /* ======================
+       COMPONENT: BADGE
+       ====================== */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      border-radius: var(--radius-full);
+      line-height: var(--leading-relaxed);
+      letter-spacing: var(--tracking-wide);
+      white-space: nowrap;
+    }
+
+    .badge--sm {
+      padding: var(--space-0\.5) var(--space-1\.5);
+      font-size: var(--text-xs);
+    }
+
+    .badge--accent {
+      background: var(--accent-primary-subtle);
+      color: var(--accent-primary);
+      border: var(--space-px) solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+
+    .badge--success {
+      background: var(--status-success-subtle);
+      color: var(--status-success);
+      border: var(--space-px) solid color-mix(in srgb, var(--status-success) 20%, transparent);
+    }
+
+    .badge--warning {
+      background: var(--status-warning-subtle);
+      color: var(--status-warning);
+      border: var(--space-px) solid color-mix(in srgb, var(--status-warning) 20%, transparent);
+    }
+
+    .badge--error {
+      background: var(--status-error-subtle);
+      color: var(--status-error);
+      border: var(--space-px) solid color-mix(in srgb, var(--status-error) 20%, transparent);
+    }
+
+    .badge--info {
+      background: var(--status-info-subtle);
+      color: var(--status-info);
+      border: var(--space-px) solid color-mix(in srgb, var(--status-info) 20%, transparent);
+    }
+
+    .badge--neutral {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: var(--space-px) solid var(--border-default);
+    }
+
+    .badge__dot {
+      width: var(--space-1\.5);
+      height: var(--space-1\.5);
+      border-radius: var(--radius-full);
+      background: currentColor;
+    }
+
+    /* ======================
+       COMPONENT: SESSION CARD
+       ====================== */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      transition: all var(--duration-fast) var(--easing-default);
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .session-card:hover,
+    .session-card--hover {
+      border-color: var(--accent-primary);
+      background: var(--bg-elevated);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .session-card--selected {
+      border-color: var(--accent-primary);
+      background: var(--bg-elevated);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--accent-primary-subtle),
+                  var(--shadow-sm);
+    }
+
+    .session-card__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .session-card__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .session-card__meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .session-card__meta-item svg {
+      width: var(--space-4);
+      height: var(--space-4);
+      color: var(--text-muted);
+    }
+
+    .session-card__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
+    /* ======================
+       COMPONENT: TOAST / NOTIFICATION
+       ====================== */
+    .toast {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--bg-elevated);
+      border: var(--space-px) solid var(--border-default);
+      box-shadow: var(--shadow-md);
+      min-width: 320px;
+      max-width: 420px;
+    }
+
+    .toast__icon {
+      flex-shrink: 0;
+      width: var(--space-5);
+      height: var(--space-5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: var(--space-0\.5);
+    }
+
+    .toast__content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toast__title {
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+      margin-bottom: var(--space-0\.5);
+    }
+
+    .toast__message {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      line-height: var(--leading-relaxed);
+    }
+
+    .toast__close {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--space-5);
+      height: var(--space-5);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: all var(--duration-fast) var(--easing-default);
+    }
+
+    .toast__close:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+    }
+
+    .toast--success {
+      border-left: var(--space-0\.5) solid var(--status-success);
+    }
+    .toast--success .toast__icon { color: var(--status-success); }
+
+    .toast--warning {
+      border-left: var(--space-0\.5) solid var(--status-warning);
+    }
+    .toast--warning .toast__icon { color: var(--status-warning); }
+
+    .toast--error {
+      border-left: var(--space-0\.5) solid var(--status-error);
+    }
+    .toast--error .toast__icon { color: var(--status-error); }
+
+    .toast--info {
+      border-left: var(--space-0\.5) solid var(--status-info);
+    }
+    .toast--info .toast__icon { color: var(--status-info); }
+
+    .toast-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    /* ======================
+       COMPONENT: APP HEADER
+       ====================== */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-6);
+      background: var(--bg-surface);
+      border-bottom: var(--space-px) solid var(--border-default);
+      height: 56px;
+    }
+
+    .app-header__left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+    }
+
+    .app-header__brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .app-header__logo {
+      width: var(--space-6);
+      height: var(--space-6);
+      background: var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--text-inverse);
+    }
+
+    .app-header__name {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .app-header__nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .app-header__nav-link {
+      padding: var(--space-1) var(--space-3);
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      transition: all var(--duration-fast) var(--easing-default);
+    }
+
+    .app-header__nav-link:hover,
+    .app-header__nav-link--hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .app-header__nav-link--active {
+      color: var(--accent-primary);
+    }
+
+    .app-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .app-header__avatar {
+      width: var(--space-8);
+      height: var(--space-8);
+      border-radius: var(--radius-full);
+      background: var(--bg-elevated);
+      border: var(--space-px) solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .app-header__avatar:hover {
+      border-color: var(--accent-primary);
+    }
+
+    /* ======================
+       COMPONENT: SEARCH BAR
+       ====================== */
+    .search-bar {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-bar__icon {
+      position: absolute;
+      left: var(--space-3);
+      color: var(--text-muted);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-bar__icon svg {
+      width: var(--space-4);
+      height: var(--space-4);
+    }
+
+    .search-bar__input {
+      width: 100%;
+      padding: var(--space-2) var(--space-3);
+      padding-left: var(--space-8);
+      padding-right: var(--space-8);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      outline: none;
+      transition: border-color var(--duration-fast) var(--easing-default),
+                  box-shadow var(--duration-fast) var(--easing-default);
+    }
+
+    .search-bar__input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-bar__input:focus,
+    .search-bar__input--focused {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--accent-primary-subtle);
+    }
+
+    .search-bar__clear {
+      position: absolute;
+      right: var(--space-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--space-5);
+      height: var(--space-5);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: color var(--duration-fast) var(--easing-default);
+    }
+
+    .search-bar__clear:hover {
+      color: var(--text-primary);
+    }
+
+    .search-bar__clear svg {
+      width: var(--space-3);
+      height: var(--space-3);
+    }
+
+    .search-bar__count {
+      position: absolute;
+      right: var(--space-8);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    /* ======================
+       COMPONENT: UPLOAD ZONE
+       ====================== */
+    .upload-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-3);
+      padding: var(--space-12) var(--space-8);
+      border: var(--space-0\.5) dashed var(--border-strong);
+      border-radius: var(--radius-xl);
+      background: var(--bg-surface);
+      transition: all var(--duration-normal) var(--easing-default);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .upload-zone__icon {
+      color: var(--text-muted);
+      margin-bottom: var(--space-2);
+    }
+
+    .upload-zone__icon svg {
+      width: var(--space-12);
+      height: var(--space-12);
+    }
+
+    .upload-zone__title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+    }
+
+    .upload-zone__subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    .upload-zone__browse {
+      font-size: var(--text-sm);
+      color: var(--accent-primary);
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* Drag over */
+    .upload-zone--drag-over {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .upload-zone--drag-over .upload-zone__icon {
+      color: var(--accent-primary);
+    }
+
+    .upload-zone--drag-over .upload-zone__title {
+      color: var(--accent-primary);
+    }
+
+    /* Uploading */
+    .upload-zone--uploading {
+      border-color: var(--accent-primary-dim);
+      border-style: solid;
+    }
+
+    .upload-zone__progress {
+      width: 200px;
+      height: var(--space-1);
+      background: var(--bg-page);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .upload-zone__progress-bar {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: var(--radius-full);
+      transition: width var(--duration-normal) var(--easing-default);
+    }
+
+    /* Success */
+    .upload-zone--success {
+      border-color: var(--status-success);
+      border-style: solid;
+    }
+
+    .upload-zone--success .upload-zone__icon {
+      color: var(--status-success);
+    }
+
+    /* Error */
+    .upload-zone--error {
+      border-color: var(--status-error);
+      border-style: solid;
+    }
+
+    .upload-zone--error .upload-zone__icon {
+      color: var(--status-error);
+    }
+
+    /* ======================
+       COMPONENT: SECTION HEADER
+       ====================== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      user-select: none;
+    }
+
+    .section-header:hover,
+    .section-header--hover {
+      background: var(--bg-elevated);
+      border-color: var(--border-strong);
+    }
+
+    .section-header__chevron {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--space-5);
+      height: var(--space-5);
+      color: var(--text-muted);
+      transition: transform var(--duration-fast) var(--easing-default);
+      flex-shrink: 0;
+      transform: rotate(90deg);
+    }
+
+    .section-header__chevron svg {
+      width: var(--space-4);
+      height: var(--space-4);
+    }
+
+    .section-header--collapsed .section-header__chevron {
+      transform: rotate(0deg);
+    }
+
+    .section-header__label {
+      flex: 1;
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+    }
+
+    .section-header__range {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .section-header--detected {
+      border-left: var(--space-0\.5) solid var(--accent-primary);
+    }
+
+    .section-header--marker {
+      border-left: var(--space-0\.5) solid var(--accent-secondary);
+    }
+
+    .section-header--collapsed {
+      opacity: 0.7;
+    }
+
+    /* ======================
+       COMPONENT: MODAL SHELL
+       ====================== */
+    .modal-overlay {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-overlay);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      min-height: 400px;
+    }
+
+    .modal {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    .modal__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-4) var(--space-5);
+      border-bottom: var(--space-px) solid var(--border-default);
+    }
+
+    .modal__title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .modal__close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--space-8);
+      height: var(--space-8);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      transition: all var(--duration-fast) var(--easing-default);
+    }
+
+    .modal__close:hover {
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    .modal__body {
+      padding: var(--space-5);
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal__footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      border-top: var(--space-px) solid var(--border-default);
+    }
+
+    /* ======================
+       COMPONENT: EMPTY STATE
+       ====================== */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-12) var(--space-8);
+    }
+
+    .empty-state__icon {
+      color: var(--text-muted);
+      margin-bottom: var(--space-6);
+    }
+
+    .empty-state__icon svg {
+      width: 64px;
+      height: 64px;
+      opacity: 0.5;
+    }
+
+    .empty-state__title {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .empty-state__description {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      max-width: 400px;
+      line-height: var(--leading-normal);
+      margin-bottom: var(--space-6);
+    }
+
+    /* ======================
+       COMPONENT: SKELETON LOADER
+       ====================== */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--bg-elevated) 0%,
+        var(--border-strong) 50%,
+        var(--bg-elevated) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+      border-radius: var(--radius-md);
+    }
+
+    .skeleton--text {
+      height: var(--space-4);
+      margin-bottom: var(--space-2);
+    }
+
+    .skeleton--text-sm {
+      height: var(--space-3);
+      width: 60%;
+    }
+
+    .skeleton--badge {
+      height: var(--space-5);
+      width: 80px;
+      border-radius: var(--radius-full);
+    }
+
+    .skeleton--card {
+      padding: var(--space-4) var(--space-5);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .skeleton--card .skeleton {
+      background: linear-gradient(
+        90deg,
+        var(--bg-elevated) 0%,
+        var(--border-default) 50%,
+        var(--bg-elevated) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.8s ease-in-out infinite;
+    }
+
+    .skeleton--card-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    /* --- Utility for showcase grid --- */
+    .component-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+
+    .component-grid--2col {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .component-grid--3col {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .input-demo {
+      width: 280px;
+    }
+
+    .card-demo {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* Divider between major sections */
+    .divider {
+      border: none;
+      border-top: var(--space-px) solid var(--border-default);
+      margin: var(--space-12) 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="page">
+      <h1 class="page__title">Component Library</h1>
+      <p class="page__subtitle">Stage 4 (DS-3) -- All components with every interactive state rendered.</p>
+
+      <!-- ==================== 1. BUTTON ==================== -->
+      <section class="section">
+        <h2 class="section__title">1. Button</h2>
+        <p class="section__description">Outlined buttons with fill-on-hover. Four variants, two sizes, five states each.</p>
+
+        <!-- Primary -->
+        <div class="state-group">
+          <div class="state-group__title">Primary</div>
+          <state-showcase label="default">
+            <button class="btn btn--primary">Upload Session</button>
+          </state-showcase>
+          <state-showcase label="hover">
+            <button class="btn btn--primary btn--primary-hover">Upload Session</button>
+          </state-showcase>
+          <state-showcase label="active">
+            <button class="btn btn--primary btn--primary-active">Upload Session</button>
+          </state-showcase>
+          <state-showcase label="disabled">
+            <button class="btn btn--primary btn--primary-disabled">Upload Session</button>
+          </state-showcase>
+          <state-showcase label="loading">
+            <button class="btn btn--primary btn--primary-loading"><span class="btn__spinner"></span> Uploading...</button>
+          </state-showcase>
+        </div>
+
+        <!-- Secondary -->
+        <div class="state-group">
+          <div class="state-group__title">Secondary</div>
+          <state-showcase label="default">
+            <button class="btn btn--secondary">Cancel</button>
+          </state-showcase>
+          <state-showcase label="hover">
+            <button class="btn btn--secondary btn--secondary-hover">Cancel</button>
+          </state-showcase>
+          <state-showcase label="active">
+            <button class="btn btn--secondary btn--secondary-active">Cancel</button>
+          </state-showcase>
+          <state-showcase label="disabled">
+            <button class="btn btn--secondary btn--secondary-disabled">Cancel</button>
+          </state-showcase>
+        </div>
+
+        <!-- Ghost -->
+        <div class="state-group">
+          <div class="state-group__title">Ghost</div>
+          <state-showcase label="default">
+            <button class="btn btn--ghost">Settings</button>
+          </state-showcase>
+          <state-showcase label="hover">
+            <button class="btn btn--ghost btn--ghost-hover">Settings</button>
+          </state-showcase>
+          <state-showcase label="active">
+            <button class="btn btn--ghost btn--ghost-active">Settings</button>
+          </state-showcase>
+          <state-showcase label="disabled">
+            <button class="btn btn--ghost btn--ghost-disabled">Settings</button>
+          </state-showcase>
+        </div>
+
+        <!-- Destructive -->
+        <div class="state-group">
+          <div class="state-group__title">Destructive</div>
+          <state-showcase label="default">
+            <button class="btn btn--destructive">Delete Session</button>
+          </state-showcase>
+          <state-showcase label="hover">
+            <button class="btn btn--destructive btn--destructive-hover">Delete Session</button>
+          </state-showcase>
+          <state-showcase label="active">
+            <button class="btn btn--destructive btn--destructive-active">Delete Session</button>
+          </state-showcase>
+          <state-showcase label="disabled">
+            <button class="btn btn--destructive btn--destructive-disabled">Delete Session</button>
+          </state-showcase>
+        </div>
+
+        <!-- Small size -->
+        <div class="state-group">
+          <div class="state-group__title">Small Size</div>
+          <state-showcase label="primary">
+            <button class="btn btn--primary btn--sm">Save</button>
+            <button class="btn btn--primary btn--sm btn--primary-hover">Save</button>
+          </state-showcase>
+          <state-showcase label="secondary">
+            <button class="btn btn--secondary btn--sm">Cancel</button>
+            <button class="btn btn--secondary btn--sm btn--secondary-hover">Cancel</button>
+          </state-showcase>
+          <state-showcase label="ghost">
+            <button class="btn btn--ghost btn--sm">Edit</button>
+            <button class="btn btn--ghost btn--sm btn--ghost-hover">Edit</button>
+          </state-showcase>
+          <state-showcase label="destructive">
+            <button class="btn btn--destructive btn--sm">Remove</button>
+            <button class="btn btn--destructive btn--sm btn--destructive-hover">Remove</button>
+          </state-showcase>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 2. INPUT ==================== -->
+      <section class="section">
+        <h2 class="section__title">2. Input</h2>
+        <p class="section__description">Text inputs with label, helper text, and error messaging. Also textarea variant.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Text Input States</div>
+          <div class="component-grid component-grid--2col">
+            <div class="input-demo">
+              <state-showcase label="default">
+                <div class="input-group">
+                  <label class="input-group__label">Session Name</label>
+                  <input class="input" type="text" placeholder="Enter session name...">
+                  <span class="input-group__helper">Give your session a descriptive name</span>
+                </div>
+              </state-showcase>
+            </div>
+
+            <div class="input-demo">
+              <state-showcase label="focused">
+                <div class="input-group">
+                  <label class="input-group__label">Session Name</label>
+                  <input class="input input--focused" type="text" placeholder="Enter session name..." value="debug-api-auth">
+                  <span class="input-group__helper">Give your session a descriptive name</span>
+                </div>
+              </state-showcase>
+            </div>
+
+            <div class="input-demo">
+              <state-showcase label="error">
+                <div class="input-group">
+                  <label class="input-group__label">Session Name</label>
+                  <input class="input input--error" type="text" value="">
+                  <span class="input-group__error">Session name is required</span>
+                </div>
+              </state-showcase>
+            </div>
+
+            <div class="input-demo">
+              <state-showcase label="disabled">
+                <div class="input-group">
+                  <label class="input-group__label">Session Name</label>
+                  <input class="input input--disabled" type="text" value="locked-session" disabled>
+                  <span class="input-group__helper">This field cannot be edited</span>
+                </div>
+              </state-showcase>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Textarea</div>
+          <div class="component-grid component-grid--2col">
+            <div class="input-demo">
+              <state-showcase label="default">
+                <div class="input-group">
+                  <label class="input-group__label">Notes</label>
+                  <textarea class="textarea" placeholder="Add notes about this session..."></textarea>
+                </div>
+              </state-showcase>
+            </div>
+            <div class="input-demo">
+              <state-showcase label="focused">
+                <div class="input-group">
+                  <label class="input-group__label">Notes</label>
+                  <textarea class="textarea textarea--focused">Fixed the auth token refresh issue by adding retry logic with exponential backoff.</textarea>
+                </div>
+              </state-showcase>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 3. BADGE ==================== -->
+      <section class="section">
+        <h2 class="section__title">3. Badge</h2>
+        <p class="section__description">Pill-shaped labels for status, agent types, and metadata. Default and small sizes.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Default Size</div>
+          <state-showcase label="variants">
+            <span class="badge badge--accent"><span class="badge__dot"></span>Accent</span>
+            <span class="badge badge--success"><span class="badge__dot"></span>Success</span>
+            <span class="badge badge--warning"><span class="badge__dot"></span>Warning</span>
+            <span class="badge badge--error"><span class="badge__dot"></span>Error</span>
+            <span class="badge badge--info"><span class="badge__dot"></span>Info</span>
+            <span class="badge badge--neutral">Neutral</span>
+          </state-showcase>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Small Size</div>
+          <state-showcase label="variants">
+            <span class="badge badge--accent badge--sm">Accent</span>
+            <span class="badge badge--success badge--sm">Success</span>
+            <span class="badge badge--warning badge--sm">Warning</span>
+            <span class="badge badge--error badge--sm">Error</span>
+            <span class="badge badge--info badge--sm">Info</span>
+            <span class="badge badge--neutral badge--sm">Neutral</span>
+          </state-showcase>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Agent Badges</div>
+          <state-showcase label="agents">
+            <span class="badge badge--accent"><span class="badge__dot"></span>Claude Code</span>
+            <span class="badge badge--info"><span class="badge__dot"></span>Gemini CLI</span>
+            <span class="badge badge--warning"><span class="badge__dot"></span>Codex</span>
+            <span class="badge badge--neutral">Custom</span>
+          </state-showcase>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Section Type</div>
+          <state-showcase label="types">
+            <span class="badge badge--accent badge--sm">Detected</span>
+            <span class="badge badge--warning badge--sm" style="color: var(--accent-secondary); background: var(--accent-secondary-subtle); border-color: color-mix(in srgb, var(--accent-secondary) 20%, transparent);">Marker</span>
+          </state-showcase>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 4. SESSION CARD ==================== -->
+      <section class="section">
+        <h2 class="section__title">4. Session Card</h2>
+        <p class="section__description">Primary list item. Shows session metadata with agent badge, timestamp, and metrics.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Default</div>
+          <div class="card-demo">
+            <div class="session-card">
+              <div class="session-card__header">
+                <span class="session-card__filename">debug-api-auth-flow.cast</span>
+                <span class="badge badge--accent badge--sm"><span class="badge__dot"></span>Claude Code</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+                  12m 34s
+                </span>
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
+                  8 sections
+                </span>
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 6V3H3v10h3"/><path d="M8 9l2 2 4-4"/></svg>
+                  2h ago
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Hover</div>
+          <div class="card-demo">
+            <div class="session-card session-card--hover">
+              <div class="session-card__header">
+                <span class="session-card__filename">refactor-database-schema.cast</span>
+                <span class="badge badge--info badge--sm"><span class="badge__dot"></span>Gemini CLI</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+                  45m 12s
+                </span>
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
+                  23 sections
+                </span>
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 6V3H3v10h3"/><path d="M8 9l2 2 4-4"/></svg>
+                  1d ago
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Selected</div>
+          <div class="card-demo">
+            <div class="session-card session-card--selected">
+              <div class="session-card__header">
+                <span class="session-card__filename">fix-memory-leak-worker.cast</span>
+                <span class="badge badge--warning badge--sm"><span class="badge__dot"></span>Codex</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5V8l2.5 1.5"/></svg>
+                  8m 55s
+                </span>
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
+                  5 sections
+                </span>
+                <span class="session-card__meta-item">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 6V3H3v10h3"/><path d="M8 9l2 2 4-4"/></svg>
+                  5d ago
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 5. TOAST / NOTIFICATION ==================== -->
+      <section class="section">
+        <h2 class="section__title">5. Toast / Notification</h2>
+        <p class="section__description">Transient notifications with left accent border. Four semantic variants with close button.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Variants</div>
+          <div class="toast-stack">
+            <div class="toast toast--success">
+              <div class="toast__icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M7 10l2 2 4-4"/></svg>
+              </div>
+              <div class="toast__content">
+                <div class="toast__title">Session uploaded</div>
+                <div class="toast__message">debug-api-auth-flow.cast has been processed successfully.</div>
+              </div>
+              <button class="toast__close">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+              </button>
+            </div>
+
+            <div class="toast toast--warning">
+              <div class="toast__icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2L1.5 17h17L10 2z"/><path d="M10 8v4M10 14v.5"/></svg>
+              </div>
+              <div class="toast__content">
+                <div class="toast__title">Large file detected</div>
+                <div class="toast__message">Processing may take longer than usual for files over 10MB.</div>
+              </div>
+              <button class="toast__close">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+              </button>
+            </div>
+
+            <div class="toast toast--error">
+              <div class="toast__icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M7 7l6 6M13 7l-6 6"/></svg>
+              </div>
+              <div class="toast__content">
+                <div class="toast__title">Upload failed</div>
+                <div class="toast__message">Invalid file format. Only .cast files are supported.</div>
+              </div>
+              <button class="toast__close">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+              </button>
+            </div>
+
+            <div class="toast toast--info">
+              <div class="toast__icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5v.5"/></svg>
+              </div>
+              <div class="toast__content">
+                <div class="toast__title">Processing started</div>
+                <div class="toast__message">Section detection is running. This page will update automatically.</div>
+              </div>
+              <button class="toast__close">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l8 8M11 3l-8 8"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 6. APP HEADER ==================== -->
+      <section class="section">
+        <h2 class="section__title">6. AppHeader</h2>
+        <p class="section__description">Top navigation bar with brand, navigation links, upload action, and user avatar.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Full Header</div>
+          <div style="border: var(--space-px) solid var(--border-default); border-radius: var(--radius-lg); overflow: hidden;">
+            <div class="app-header">
+              <div class="app-header__left">
+                <a class="app-header__brand" href="#">
+                  <div class="app-header__logo">R</div>
+                  <span class="app-header__name">RAGTS</span>
+                </a>
+                <nav class="app-header__nav">
+                  <a class="app-header__nav-link app-header__nav-link--active" href="#">Sessions</a>
+                  <a class="app-header__nav-link" href="#">Explore</a>
+                </nav>
+              </div>
+              <div class="app-header__right">
+                <button class="btn btn--primary btn--sm">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v10M2 7h10"/></svg>
+                  Upload
+                </button>
+                <div class="app-header__avatar">SM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Navigation States</div>
+          <state-showcase label="default">
+            <a class="app-header__nav-link" href="#" onclick="return false">Sessions</a>
+          </state-showcase>
+          <state-showcase label="hover">
+            <a class="app-header__nav-link app-header__nav-link--hover" href="#" onclick="return false">Sessions</a>
+          </state-showcase>
+          <state-showcase label="active">
+            <a class="app-header__nav-link app-header__nav-link--active" href="#" onclick="return false">Sessions</a>
+          </state-showcase>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 7. SEARCH BAR ==================== -->
+      <section class="section">
+        <h2 class="section__title">7. Search Bar</h2>
+        <p class="section__description">Search input with icon, placeholder, clear button, and results count.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">States</div>
+
+          <div style="margin-bottom: var(--space-4); max-width: 480px;">
+            <div class="state-group__title" style="margin-bottom: var(--space-2);">Default</div>
+            <div class="search-bar">
+              <span class="search-bar__icon">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+              </span>
+              <input class="search-bar__input" type="text" placeholder="Search sessions...">
+            </div>
+          </div>
+
+          <div style="margin-bottom: var(--space-4); max-width: 480px;">
+            <div class="state-group__title" style="margin-bottom: var(--space-2);">Focused</div>
+            <div class="search-bar">
+              <span class="search-bar__icon">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+              </span>
+              <input class="search-bar__input search-bar__input--focused" type="text" placeholder="Search sessions..." value="api auth">
+            </div>
+          </div>
+
+          <div style="margin-bottom: var(--space-4); max-width: 480px;">
+            <div class="state-group__title" style="margin-bottom: var(--space-2);">With Results</div>
+            <div class="search-bar">
+              <span class="search-bar__icon">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+              </span>
+              <input class="search-bar__input search-bar__input--focused" type="text" value="database">
+              <span class="search-bar__count">3 results</span>
+              <button class="search-bar__clear">
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2l8 8M10 2l-8 8"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 8. UPLOAD ZONE ==================== -->
+      <section class="section">
+        <h2 class="section__title">8. Upload Zone</h2>
+        <p class="section__description">Drag-and-drop area with five distinct states: default, drag-over, uploading, success, and error.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Default</div>
+          <div class="upload-zone">
+            <div class="upload-zone__icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 30V36H34V30"/><path d="M24 12V30"/><path d="M16 20L24 12L32 20"/></svg>
+            </div>
+            <div class="upload-zone__title">Drop .cast files here</div>
+            <div class="upload-zone__subtitle">or <span class="upload-zone__browse">browse files</span></div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Drag Over</div>
+          <div class="upload-zone upload-zone--drag-over">
+            <div class="upload-zone__icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 30V36H34V30"/><path d="M24 12V30"/><path d="M16 20L24 12L32 20"/></svg>
+            </div>
+            <div class="upload-zone__title">Release to upload</div>
+            <div class="upload-zone__subtitle">File will be processed automatically</div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Uploading</div>
+          <div class="upload-zone upload-zone--uploading">
+            <div class="upload-zone__icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 30V36H34V30"/><path d="M24 12V30"/><path d="M16 20L24 12L32 20"/></svg>
+            </div>
+            <div class="upload-zone__title" style="font-family: var(--font-mono); font-size: var(--text-sm);">debug-api-auth-flow.cast</div>
+            <div class="upload-zone__subtitle">Uploading... 67%</div>
+            <div class="upload-zone__progress">
+              <div class="upload-zone__progress-bar" style="width: 67%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Success</div>
+          <div class="upload-zone upload-zone--success">
+            <div class="upload-zone__icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="16"/><path d="M16 24l5 5 11-11"/></svg>
+            </div>
+            <div class="upload-zone__title">Upload complete</div>
+            <div class="upload-zone__subtitle">Session is being processed</div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Error</div>
+          <div class="upload-zone upload-zone--error">
+            <div class="upload-zone__icon">
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="16"/><path d="M18 18l12 12M30 18l-12 12"/></svg>
+            </div>
+            <div class="upload-zone__title">Upload failed</div>
+            <div class="upload-zone__subtitle">Invalid file format. Only .cast files are accepted.</div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 9. SECTION HEADER ==================== -->
+      <section class="section">
+        <h2 class="section__title">9. Section Header</h2>
+        <p class="section__description">Collapsible section headers for the terminal document view. Detected vs Marker distinction via left accent border.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Detected Section</div>
+          <state-showcase label="expanded" class="state-row--top">
+            <div style="flex: 1; max-width: 600px;">
+              <div class="section-header section-header--detected">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Installing dependencies</span>
+                <span class="badge badge--accent badge--sm">Detected</span>
+                <span class="section-header__range">L 12-47</span>
+              </div>
+            </div>
+          </state-showcase>
+          <state-showcase label="collapsed" class="state-row--top">
+            <div style="flex: 1; max-width: 600px;">
+              <div class="section-header section-header--detected section-header--collapsed">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Installing dependencies</span>
+                <span class="badge badge--accent badge--sm">Detected</span>
+                <span class="section-header__range">L 12-47</span>
+              </div>
+            </div>
+          </state-showcase>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Marker Section</div>
+          <state-showcase label="expanded" class="state-row--top">
+            <div style="flex: 1; max-width: 600px;">
+              <div class="section-header section-header--marker">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Fix: API authentication flow</span>
+                <span class="badge badge--sm" style="color: var(--accent-secondary); background: var(--accent-secondary-subtle); border: var(--space-px) solid color-mix(in srgb, var(--accent-secondary) 20%, transparent);">Marker</span>
+                <span class="section-header__range">L 48-92</span>
+              </div>
+            </div>
+          </state-showcase>
+          <state-showcase label="hover" class="state-row--top">
+            <div style="flex: 1; max-width: 600px;">
+              <div class="section-header section-header--marker section-header--hover">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Fix: API authentication flow</span>
+                <span class="badge badge--sm" style="color: var(--accent-secondary); background: var(--accent-secondary-subtle); border: var(--space-px) solid color-mix(in srgb, var(--accent-secondary) 20%, transparent);">Marker</span>
+                <span class="section-header__range">L 48-92</span>
+              </div>
+            </div>
+          </state-showcase>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 10. MODAL SHELL ==================== -->
+      <section class="section">
+        <h2 class="section__title">10. Modal Shell</h2>
+        <p class="section__description">Overlay container with header, scrollable body, and footer action area.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Modal with Content</div>
+          <div class="modal-overlay">
+            <div class="modal">
+              <div class="modal__header">
+                <h3 class="modal__title">Upload Session</h3>
+                <button class="modal__close">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4l10 10M14 4L4 14"/></svg>
+                </button>
+              </div>
+              <div class="modal__body">
+                <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+                  <div class="upload-zone" style="padding: var(--space-8) var(--space-6);">
+                    <div class="upload-zone__icon">
+                      <svg width="32" height="32" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 30V36H34V30"/><path d="M24 12V30"/><path d="M16 20L24 12L32 20"/></svg>
+                    </div>
+                    <div class="upload-zone__title" style="font-size: var(--text-base);">Drop .cast file here</div>
+                    <div class="upload-zone__subtitle">or <span class="upload-zone__browse">browse</span></div>
+                  </div>
+                  <div class="input-group">
+                    <label class="input-group__label">Agent Type</label>
+                    <select class="input" style="appearance: auto;">
+                      <option>Claude Code</option>
+                      <option>Gemini CLI</option>
+                      <option>Codex</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="modal__footer">
+                <button class="btn btn--secondary">Cancel</button>
+                <button class="btn btn--primary btn--primary-disabled">Upload</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 11. EMPTY STATE ==================== -->
+      <section class="section">
+        <h2 class="section__title">11. Empty State</h2>
+        <p class="section__description">Placeholder for when no sessions exist. Personality-driven copy with call to action.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">No Sessions</div>
+          <div style="border: var(--space-px) solid var(--border-default); border-radius: var(--radius-xl); background: var(--bg-surface);">
+            <div class="empty-state">
+              <div class="empty-state__icon">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="12" y="8" width="40" height="48" rx="4"/>
+                  <path d="M24 24h16M24 32h12M24 40h8"/>
+                  <circle cx="48" cy="48" r="12" fill="var(--bg-surface)" stroke="currentColor"/>
+                  <path d="M44 48h8M48 44v8"/>
+                </svg>
+              </div>
+              <h3 class="empty-state__title">No sessions yet</h3>
+              <p class="empty-state__description">Your terminal recordings will show up here. Drop a .cast file to get started, or record a session with AGR.</p>
+              <button class="btn btn--primary">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 2v10M2 7h10"/></svg>
+                Upload your first session
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 12. SKELETON LOADER ==================== -->
+      <section class="section">
+        <h2 class="section__title">12. Skeleton Loader</h2>
+        <p class="section__description">Loading placeholders for cards and content. Subtle shimmer animation.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Session Card Skeleton</div>
+          <div class="card-demo">
+            <div class="skeleton--card">
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text" style="width: 55%;"></div>
+                <div class="skeleton skeleton--badge"></div>
+              </div>
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text-sm" style="width: 70px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 80px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 60px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Multiple Card Skeletons</div>
+          <div class="card-demo" style="display: flex; flex-direction: column; gap: var(--space-3);">
+            <div class="skeleton--card">
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text" style="width: 60%;"></div>
+                <div class="skeleton skeleton--badge"></div>
+              </div>
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text-sm" style="width: 65px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 90px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 55px;"></div>
+              </div>
+            </div>
+            <div class="skeleton--card">
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text" style="width: 45%;"></div>
+                <div class="skeleton skeleton--badge"></div>
+              </div>
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text-sm" style="width: 75px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 60px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 70px;"></div>
+              </div>
+            </div>
+            <div class="skeleton--card">
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text" style="width: 50%;"></div>
+                <div class="skeleton skeleton--badge"></div>
+              </div>
+              <div class="skeleton--card-row">
+                <div class="skeleton skeleton--text-sm" style="width: 80px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 70px;"></div>
+                <div class="skeleton skeleton--text-sm" style="width: 50px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-group">
+          <div class="state-group__title">Content Skeleton</div>
+          <div style="max-width: 600px; display: flex; flex-direction: column; gap: var(--space-3);">
+            <div class="skeleton skeleton--text" style="width: 40%;"></div>
+            <div class="skeleton skeleton--text" style="width: 100%;"></div>
+            <div class="skeleton skeleton--text" style="width: 90%;"></div>
+            <div class="skeleton skeleton--text" style="width: 75%;"></div>
+            <div style="height: var(--space-4);"></div>
+            <div class="skeleton skeleton--text" style="width: 35%;"></div>
+            <div class="skeleton skeleton--text" style="width: 95%;"></div>
+            <div class="skeleton skeleton--text" style="width: 85%;"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, defineComponent } = Vue;
+
+    // StateShowcase — thin template component for labeling state rows
+    const StateShowcase = defineComponent({
+      props: {
+        label: { type: String, required: true }
+      },
+      template: `
+        <div class="state-row">
+          <span class="state-label">{{ label }}</span>
+          <slot/>
+        </div>`
+    });
+
+    const app = createApp({
+      template: document.getElementById('app').innerHTML
+    });
+
+    app.component('state-showcase', StateShowcase);
+    app.mount('#app');
+  </script>
+</body>
+</html>
