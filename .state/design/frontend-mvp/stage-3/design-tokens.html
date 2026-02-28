@@ -49,6 +49,7 @@
       --text-secondary: #8b949e;
       --text-muted: #484f58;
       --text-disabled: #30363d;
+      --text-inverse: var(--bg-page);
 
       /* Borders */
       --border-default: #1e1e1e;
@@ -103,6 +104,10 @@
       --space-6: 24px;
       --space-8: 32px;
       --space-12: 48px;
+
+      /* Named spacing shortcuts */
+      --space-inline: var(--space-4);   /* default horizontal padding */
+      --space-stack: var(--space-3);    /* default vertical gap between elements */
 
       /* --- Shape --- */
       --radius-sm: 4px;
@@ -946,6 +951,7 @@
               { token: '--text-secondary', value: '#8b949e', label: 'Secondary' },
               { token: '--text-muted', value: '#484f58', label: 'Muted' },
               { token: '--text-disabled', value: '#30363d', label: 'Disabled' },
+              { token: '--text-inverse', value: 'var(--bg-page)', label: 'Inverse' },
             ],
             borders: [
               { token: '--border-default', value: '#1e1e1e', label: 'Default' },
@@ -1003,6 +1009,8 @@
             { token: '--space-6', value: '24px', label: '6x', width: '24px' },
             { token: '--space-8', value: '32px', label: '8x', width: '32px' },
             { token: '--space-12', value: '48px', label: '12x', width: '48px' },
+            { token: '--space-inline', value: 'var(--space-4)', label: 'Inline (horizontal padding)', width: '16px' },
+            { token: '--space-stack', value: 'var(--space-3)', label: 'Stack (vertical gap)', width: '12px' },
           ],
           shape: {
             radii: [
@@ -1026,59 +1034,96 @@
             { token: '--easing-default', value: 'ease-out', label: 'Default Easing' },
           ],
           cssMap: [
+            /* --- Colors: Backgrounds --- */
             { token: '--bg-page', value: '#0c0c0c', usage: 'Main page background' },
             { token: '--bg-surface', value: '#141414', usage: 'Card and panel backgrounds' },
             { token: '--bg-elevated', value: '#1c1c1c', usage: 'Dropdowns, tooltips, hover states' },
             { token: '--bg-overlay', value: 'rgba(0,0,0,0.75)', usage: 'Modal backdrop' },
+            /* --- Colors: Primary Accent --- */
             { token: '--accent-primary', value: '#00ff9f', usage: 'Buttons, links, focus rings, active states' },
-            { token: '--accent-primary-hover', value: 'mix(primary 80%, white)', usage: 'Hover state for primary accent elements' },
-            { token: '--accent-primary-dim', value: 'mix(primary 65%, bg-page)', usage: 'Dimmed accent for text on dark surfaces' },
-            { token: '--accent-primary-subtle', value: 'mix(primary 7%, transparent)', usage: 'Focus ring glow, selected row tint' },
+            { token: '--accent-primary-hover', value: 'color-mix(primary 80%, white)', usage: 'Hover state for primary accent elements' },
+            { token: '--accent-primary-dim', value: 'color-mix(primary 65%, bg-page)', usage: 'Dimmed accent for text on dark surfaces' },
+            { token: '--accent-primary-subtle', value: 'color-mix(primary 7%, transparent)', usage: 'Focus ring glow, selected row tint' },
+            /* --- Colors: Secondary Accent --- */
             { token: '--accent-secondary', value: '#ff8c2b', usage: 'Tags, category markers, secondary CTAs' },
-            { token: '--accent-secondary-hover', value: 'mix(secondary 80%, white)', usage: 'Hover state for secondary accent elements' },
-            { token: '--accent-secondary-dim', value: 'mix(secondary 65%, bg-page)', usage: 'Dimmed secondary for text on dark surfaces' },
-            { token: '--accent-secondary-subtle', value: 'mix(secondary 7%, transparent)', usage: 'Secondary tint for badges and alerts' },
+            { token: '--accent-secondary-hover', value: 'color-mix(secondary 80%, white)', usage: 'Hover state for secondary accent elements' },
+            { token: '--accent-secondary-dim', value: 'color-mix(secondary 65%, bg-page)', usage: 'Dimmed secondary for text on dark surfaces' },
+            { token: '--accent-secondary-subtle', value: 'color-mix(secondary 7%, transparent)', usage: 'Secondary tint for badges and alerts' },
+            /* --- Colors: Status --- */
             { token: '--status-success', value: '#34d399', usage: 'Completion indicators, positive feedback' },
-            { token: '--status-success-subtle', value: 'mix(success 7%, transparent)', usage: 'Success background tint' },
+            { token: '--status-success-subtle', value: 'color-mix(success 7%, transparent)', usage: 'Success background tint' },
             { token: '--status-warning', value: '#ffcc00', usage: 'Caution banners, validation hints' },
-            { token: '--status-warning-subtle', value: 'mix(warning 7%, transparent)', usage: 'Warning background tint' },
+            { token: '--status-warning-subtle', value: 'color-mix(warning 7%, transparent)', usage: 'Warning background tint' },
             { token: '--status-error', value: '#ff3b30', usage: 'Error messages, destructive action highlights' },
-            { token: '--status-error-subtle', value: 'mix(error 7%, transparent)', usage: 'Error background tint' },
+            { token: '--status-error-subtle', value: 'color-mix(error 7%, transparent)', usage: 'Error background tint' },
             { token: '--status-info', value: '#5ac8fa', usage: 'Informational tooltips, help text accents' },
-            { token: '--status-info-subtle', value: 'mix(info 7%, transparent)', usage: 'Info background tint' },
+            { token: '--status-info-subtle', value: 'color-mix(info 7%, transparent)', usage: 'Info background tint' },
+            /* --- Colors: Text --- */
             { token: '--text-primary', value: '#e8e8e8', usage: 'Headings, body text, primary labels' },
             { token: '--text-secondary', value: '#8b949e', usage: 'Descriptions, secondary labels, metadata' },
             { token: '--text-muted', value: '#484f58', usage: 'Placeholders, timestamps, subtle annotations' },
             { token: '--text-disabled', value: '#30363d', usage: 'Disabled input text, inactive items' },
+            { token: '--text-inverse', value: 'var(--bg-page)', usage: 'Text on accent backgrounds (buttons, filled badges)' },
+            /* --- Colors: Borders --- */
             { token: '--border-default', value: '#1e1e1e', usage: 'Card borders, dividers, table rules' },
             { token: '--border-strong', value: '#2a2a2a', usage: 'Emphasized dividers, active card borders' },
             { token: '--border-accent', value: 'var(--accent-primary)', usage: 'Focus outlines, selected card highlight' },
+            /* --- Colors: Terminal --- */
             { token: '--terminal-bg', value: '#0a0a0a', usage: 'Terminal replay background' },
             { token: '--terminal-text', value: '#d4d4d4', usage: 'Terminal replay text' },
-            { token: '--font-body', value: 'Geist, system', usage: 'All UI text: headings, body, labels, buttons' },
-            { token: '--font-mono', value: 'Geist Mono, fallback', usage: 'Code blocks, terminal, filenames, tokens' },
-            { token: '--text-3xl', value: '1.8125rem', usage: 'Display text, hero headlines' },
-            { token: '--text-2xl', value: '1.5rem', usage: 'Page titles' },
-            { token: '--text-xl', value: '1.25rem', usage: 'Section headings' },
-            { token: '--text-lg', value: '1.0625rem', usage: 'Subheadings, large body text' },
-            { token: '--text-base', value: '0.875rem', usage: 'Default body text' },
-            { token: '--text-sm', value: '0.75rem', usage: 'Badges, timestamps, uppercase labels' },
-            { token: '--text-xs', value: '0.625rem', usage: 'Fine print, captions' },
+            /* --- Typography: Families --- */
+            { token: '--font-body', value: "Geist, -apple-system, sans-serif", usage: 'All UI text: headings, body, labels, buttons' },
+            { token: '--font-mono', value: "Geist Mono, JetBrains Mono, monospace", usage: 'Code blocks, terminal, filenames, tokens' },
+            /* --- Typography: Scale --- */
+            { token: '--text-3xl', value: '1.8125rem (29px)', usage: 'Display text, hero headlines' },
+            { token: '--text-2xl', value: '1.5rem (24px)', usage: 'Page titles' },
+            { token: '--text-xl', value: '1.25rem (20px)', usage: 'Section headings' },
+            { token: '--text-lg', value: '1.0625rem (17px)', usage: 'Subheadings, large body text' },
+            { token: '--text-base', value: '0.875rem (14px)', usage: 'Default body text' },
+            { token: '--text-sm', value: '0.75rem (12px)', usage: 'Badges, timestamps, uppercase labels' },
+            { token: '--text-xs', value: '0.625rem (10px)', usage: 'Fine print, captions' },
+            /* --- Typography: Line Height --- */
             { token: '--leading-tight', value: '1.2', usage: 'Headings 24px+' },
             { token: '--leading-snug', value: '1.35', usage: 'Large body 17–24px' },
             { token: '--leading-normal', value: '1.5', usage: 'Body text 14px' },
             { token: '--leading-relaxed', value: '1.65', usage: 'Small text 10–12px' },
             { token: '--leading-mono', value: '1.6', usage: 'Monospace at any size' },
+            /* --- Typography: Letter Spacing --- */
             { token: '--tracking-tight', value: '-0.02em', usage: 'Display and heading text' },
             { token: '--tracking-normal', value: '0', usage: 'Body text (default)' },
             { token: '--tracking-wide', value: '0.06em', usage: 'Small uppercase labels' },
             { token: '--tracking-wider', value: '0.12em', usage: 'Badges, timestamps' },
-            { token: '--space-1 ... --space-12', value: '4px ... 48px', usage: '4px base grid: padding, margin, gap' },
-            { token: '--radius-sm ... --radius-full', value: '4px ... 9999px', usage: 'Border radii for cards, buttons, pills' },
-            { token: '--shadow-sm', value: '0 2px 8px ...', usage: 'Subtle lift for cards, buttons' },
-            { token: '--shadow-md', value: '0 8px 24px ...', usage: 'Dropdowns, elevated panels' },
-            { token: '--shadow-lg', value: '0 16px 48px ...', usage: 'Modals, popovers, dialogs' },
-            { token: '--glow-accent', value: 'mix(primary 25%) glow', usage: 'Hover glow on interactive cards' },
+            /* --- Typography: Weights --- */
+            { token: '--weight-normal', value: '400', usage: 'Body text, descriptions' },
+            { token: '--weight-medium', value: '500', usage: 'Labels, buttons, nav items' },
+            { token: '--weight-semibold', value: '600', usage: 'Section headings, emphasis' },
+            { token: '--weight-bold', value: '700', usage: 'Page titles, display text' },
+            /* --- Spacing --- */
+            { token: '--space-px', value: '1px', usage: 'Borders, hairline dividers' },
+            { token: '--space-0.5', value: '2px', usage: 'Tight internal padding' },
+            { token: '--space-1', value: '4px', usage: 'Minimal gap, icon offsets' },
+            { token: '--space-1.5', value: '6px', usage: 'Small badge padding' },
+            { token: '--space-2', value: '8px', usage: 'Compact card padding, small gaps' },
+            { token: '--space-3', value: '12px', usage: 'Default element gap' },
+            { token: '--space-4', value: '16px', usage: 'Card padding, section gaps' },
+            { token: '--space-5', value: '20px', usage: 'Generous card padding' },
+            { token: '--space-6', value: '24px', usage: 'Section separation' },
+            { token: '--space-8', value: '32px', usage: 'Major section gaps' },
+            { token: '--space-12', value: '48px', usage: 'Page-level padding, hero spacing' },
+            { token: '--space-inline', value: 'var(--space-4)', usage: 'Default horizontal padding shortcut' },
+            { token: '--space-stack', value: 'var(--space-3)', usage: 'Default vertical gap shortcut' },
+            /* --- Shape: Radii --- */
+            { token: '--radius-sm', value: '4px', usage: 'Subtle rounding (inputs, small elements)' },
+            { token: '--radius-md', value: '6px', usage: 'Buttons, badges' },
+            { token: '--radius-lg', value: '8px', usage: 'Cards, panels' },
+            { token: '--radius-xl', value: '10px', usage: 'Large cards, modals' },
+            { token: '--radius-full', value: '9999px', usage: 'Pills, avatars, circular elements' },
+            /* --- Shape: Shadows --- */
+            { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.3)', usage: 'Subtle lift for cards, buttons' },
+            { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.5)', usage: 'Dropdowns, elevated panels' },
+            { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.7)', usage: 'Modals, popovers, dialogs' },
+            { token: '--glow-accent', value: 'color-mix(primary 25%) glow', usage: 'Hover glow on interactive cards' },
+            /* --- Animation --- */
             { token: '--duration-fast', value: '150ms', usage: 'Button hover, focus ring, micro interactions' },
             { token: '--duration-normal', value: '250ms', usage: 'Card transitions, panel slides' },
             { token: '--duration-slow', value: '400ms', usage: 'Page transitions, modal enter/exit' },
