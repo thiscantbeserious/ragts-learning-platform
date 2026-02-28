@@ -160,7 +160,7 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Can be consulted during PO phase for feasibility checks
 
 ### Frontend Designer
-- Creates visual mockups and designs using Penpot MCP (primary) or Chrome MCP (fallback)
+- Creates visual mockups and designs as HTML + CSS files, verified via browser MCP
 - Iterates with user (max 5 iterations per design element)
 - Hands off approved designs with screenshots and notes (via Coordinator)
 - Does NOT write application code

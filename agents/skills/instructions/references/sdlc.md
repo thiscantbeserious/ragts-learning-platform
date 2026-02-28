@@ -9,7 +9,7 @@ The Software Development Life Cycle using orchestrated roles. Each cycle deliver
 | Coordinator | Orchestration | Assesses tasks, spawns roles dynamically, gates transitions |
 | Product Owner | Requirements | Gathers requirements, validates final result |
 | Architect | Design | Creates ADR + PLAN, proposes options |
-| Frontend Designer | Visual Design | Creates mockups in Penpot, iterates with user |
+| Frontend Designer | Visual Design | Creates HTML + CSS mockups, iterates with user |
 | Frontend Engineer | Frontend Code | Implements client-side code to match approved designs |
 | Backend Engineer | Backend Code | Implements server-side code, APIs, DB, WASM |
 | Implementer | General Code | Full-stack fallback when scope crosses boundaries |
