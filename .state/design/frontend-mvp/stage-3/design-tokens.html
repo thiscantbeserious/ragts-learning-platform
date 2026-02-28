@@ -288,7 +288,7 @@
     .type-cascade {
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
+      gap: var(--space-4);
     }
 
     .type-cascade__row {
@@ -415,6 +415,138 @@
 
     .type-specimen--mono {
       font-family: var(--font-mono);
+    }
+
+    /* --- Grid Demo --- */
+    .grid-demo {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+    }
+
+    .grid-demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      margin-bottom: var(--space-3);
+    }
+
+    .grid-demo__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: var(--grid-gap);
+    }
+
+    .grid-demo__cell {
+      height: 48px;
+      background: var(--accent-primary-subtle);
+      border: var(--space-px) solid var(--accent-primary-dim);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .grid-demo__meta {
+      margin-top: var(--space-3);
+      display: flex;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .grid-demo__meta-item {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .grid-demo__meta-item code {
+      color: var(--accent-primary-dim);
+    }
+
+    /* --- Height Swatch --- */
+    .height-swatch-row {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .height-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .height-swatch__block {
+      width: var(--space-5);
+      background: var(--accent-primary-subtle);
+      border: var(--space-px) solid var(--accent-primary-dim);
+      border-radius: var(--radius-sm);
+    }
+
+    .height-swatch__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+    }
+
+    .height-swatch__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    /* --- Breakpoint Scale --- */
+    .breakpoint-scale {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .breakpoint-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .breakpoint-bar__track {
+      height: var(--space-2);
+      background: var(--accent-primary);
+      border-radius: var(--radius-full);
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    .breakpoint-bar__meta {
+      display: flex;
+      gap: var(--space-2);
+      align-items: baseline;
+      flex-shrink: 0;
+      min-width: 200px;
+    }
+
+    .breakpoint-bar__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      font-weight: var(--weight-medium);
+    }
+
+    .breakpoint-bar__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
     }
 
     /* --- Spacing Bar --- */
@@ -748,24 +880,45 @@
       <!-- 4. Layout / Grid -->
       <token-section title="Layout Tokens" description="Container sizing, grid gaps, breakpoints, and component height scale.">
         <div class="subsection">
-          <h4 class="subsection-title">Container &amp; Grid</h4>
-          <div class="token-grid token-grid--single">
-            <spacing-token v-for="t in layout.container" :key="t.token"
-              :token="t.token" :value="t.value" :label="t.label" :width="t.width" />
+          <h4 class="subsection-title">Grid System</h4>
+          <div class="grid-demo">
+            <div class="grid-demo__label">auto-fill grid · gap: var(--grid-gap)</div>
+            <div class="grid-demo__grid">
+              <div class="grid-demo__cell">1</div>
+              <div class="grid-demo__cell">2</div>
+              <div class="grid-demo__cell">3</div>
+              <div class="grid-demo__cell">4</div>
+              <div class="grid-demo__cell">5</div>
+              <div class="grid-demo__cell">6</div>
+            </div>
+            <div class="grid-demo__meta">
+              <span class="grid-demo__meta-item"><code>--container-max</code> 960px</span>
+              <span class="grid-demo__meta-item"><code>--container-padding</code> var(--space-6)</span>
+              <span class="grid-demo__meta-item"><code>--grid-gap</code> var(--space-4)</span>
+              <span class="grid-demo__meta-item"><code>--header-height</code> 56px</span>
+            </div>
           </div>
         </div>
         <div class="subsection">
           <h4 class="subsection-title">Breakpoints</h4>
-          <div class="token-grid token-grid--single">
-            <spacing-token v-for="t in layout.breakpoints" :key="t.token"
-              :token="t.token" :value="t.value" :label="t.label" :width="t.width" />
+          <div class="breakpoint-scale">
+            <div v-for="bp in layout.breakpoints" :key="bp.token" class="breakpoint-bar">
+              <div class="breakpoint-bar__track" :style="{ width: (parseInt(bp.value) / 14.4) + 'px' }"></div>
+              <div class="breakpoint-bar__meta">
+                <span class="breakpoint-bar__name">{{ bp.label }}</span>
+                <span class="breakpoint-bar__value">{{ bp.token }} · {{ bp.value }}</span>
+              </div>
+            </div>
           </div>
         </div>
         <div class="subsection">
           <h4 class="subsection-title">Component Heights</h4>
-          <div class="token-grid token-grid--single">
-            <spacing-token v-for="t in layout.componentHeights" :key="t.token"
-              :token="t.token" :value="t.value" :label="t.label" :width="t.width" />
+          <div class="height-swatch-row">
+            <div v-for="h in layout.componentHeights" :key="h.token" class="height-swatch">
+              <div class="height-swatch__block" :style="{ height: h.value }"></div>
+              <span class="height-swatch__label">{{ h.label }}</span>
+              <span class="height-swatch__value">{{ h.value }}</span>
+            </div>
           </div>
         </div>
       </token-section>
@@ -1059,26 +1212,20 @@
             { token: '--space-stack', value: 'var(--space-3)', label: 'Stack (vertical gap)', width: '12px' },
           ],
           layout: {
-            container: [
-              { token: '--container-max', value: '960px', label: 'Max content width', width: '100%' },
-              { token: '--container-padding', value: 'var(--space-6)', label: 'Container side padding', width: '24px' },
-              { token: '--grid-gap', value: 'var(--space-4)', label: 'Default grid gap', width: '16px' },
-              { token: '--header-height', value: '56px', label: 'Fixed header height', width: '56px' },
-            ],
             breakpoints: [
-              { token: '--breakpoint-sm', value: '640px', label: 'Small (mobile landscape)', width: '64px' },
-              { token: '--breakpoint-md', value: '768px', label: 'Medium (tablet)', width: '77px' },
-              { token: '--breakpoint-lg', value: '1024px', label: 'Large (desktop)', width: '102px' },
-              { token: '--breakpoint-xl', value: '1280px', label: 'Extra large (wide)', width: '128px' },
-              { token: '--breakpoint-2xl', value: '1440px', label: '2XL (ultrawide)', width: '144px' },
+              { token: '--breakpoint-sm', value: '640px', label: 'sm' },
+              { token: '--breakpoint-md', value: '768px', label: 'md' },
+              { token: '--breakpoint-lg', value: '1024px', label: 'lg' },
+              { token: '--breakpoint-xl', value: '1280px', label: 'xl' },
+              { token: '--breakpoint-2xl', value: '1440px', label: '2xl' },
             ],
             componentHeights: [
-              { token: '--btn-height-sm', value: '28px', label: 'Button small', width: '28px' },
-              { token: '--btn-height-md', value: '36px', label: 'Button medium', width: '36px' },
-              { token: '--btn-height-lg', value: '44px', label: 'Button large', width: '44px' },
-              { token: '--input-height-sm', value: '32px', label: 'Input small', width: '32px' },
-              { token: '--input-height-md', value: '40px', label: 'Input medium', width: '40px' },
-              { token: '--input-height-lg', value: '48px', label: 'Input large', width: '48px' },
+              { token: '--btn-height-sm', value: '28px', label: 'btn-sm' },
+              { token: '--btn-height-md', value: '36px', label: 'btn-md' },
+              { token: '--btn-height-lg', value: '44px', label: 'btn-lg' },
+              { token: '--input-height-sm', value: '32px', label: 'input-sm' },
+              { token: '--input-height-md', value: '40px', label: 'input-md' },
+              { token: '--input-height-lg', value: '48px', label: 'input-lg' },
             ],
           },
           shape: {
