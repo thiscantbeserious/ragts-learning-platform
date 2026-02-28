@@ -16,43 +16,76 @@
        ======================== */
 
     :root {
-      /* --- Colors --- */
+      /* --- Colors: Base palette (hand-picked — the ONLY raw values) --- */
       --bg-page: #0c0c0c;
       --bg-surface: #141414;
       --bg-elevated: #1c1c1c;
       --bg-overlay: rgba(0, 0, 0, 0.75);
+
+      /* Primary accent — mint green H153° S100% L50% */
       --accent-primary: #00ff9f;
-      --accent-primary-hover: #33ffb3;
-      --accent-primary-dim: #00cc7f;
-      --accent-primary-subtle: rgba(0, 255, 159, 0.07);
-      --accent-secondary: #ff6b2b;
-      --accent-secondary-hover: #ff8a55;
-      --accent-secondary-subtle: rgba(255, 107, 43, 0.07);
-      --status-success: #00ff9f;
+      --accent-primary-hover: color-mix(in srgb, var(--accent-primary) 80%, white);
+      --accent-primary-dim: color-mix(in srgb, var(--accent-primary) 65%, var(--bg-page));
+      --accent-primary-subtle: color-mix(in srgb, var(--accent-primary) 7%, transparent);
+
+      /* Secondary accent — warm orange H28° S100% L58% (25°+ from error red) */
+      --accent-secondary: #ff8c2b;
+      --accent-secondary-hover: color-mix(in srgb, var(--accent-secondary) 80%, white);
+      --accent-secondary-dim: color-mix(in srgb, var(--accent-secondary) 65%, var(--bg-page));
+      --accent-secondary-subtle: color-mix(in srgb, var(--accent-secondary) 7%, transparent);
+
+      /* Status — semantic colors (distinct from accent palette) */
+      --status-success: #34d399;
+      --status-success-subtle: color-mix(in srgb, var(--status-success) 7%, transparent);
       --status-warning: #ffcc00;
+      --status-warning-subtle: color-mix(in srgb, var(--status-warning) 7%, transparent);
       --status-error: #ff3b30;
-      --status-error-subtle: rgba(255, 59, 48, 0.07);
+      --status-error-subtle: color-mix(in srgb, var(--status-error) 7%, transparent);
       --status-info: #5ac8fa;
+      --status-info-subtle: color-mix(in srgb, var(--status-info) 7%, transparent);
+
+      /* Text hierarchy */
       --text-primary: #e8e8e8;
       --text-secondary: #8b949e;
       --text-muted: #484f58;
       --text-disabled: #30363d;
+
+      /* Borders */
       --border-default: #1e1e1e;
       --border-strong: #2a2a2a;
-      --border-accent: #00ff9f;
+      --border-accent: var(--accent-primary);
+
+      /* Terminal */
       --terminal-bg: #0a0a0a;
       --terminal-text: #d4d4d4;
 
-      /* --- Typography --- */
+      /* --- Typography — Minor Third (1.2) from 14px base --- */
       --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
       --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
-      --text-xs: 0.625rem;
-      --text-sm: 0.6875rem;
-      --text-base: 0.8125rem;
-      --text-md: 0.875rem;
-      --text-lg: 1rem;
-      --text-xl: 1.25rem;
-      --text-2xl: 1.75rem;
+
+      /* Type scale: 14px × 1.2^n, rounded to whole px */
+      --text-xs: 0.625rem;    /* 10px — step -2 */
+      --text-sm: 0.75rem;     /* 12px — step -1 */
+      --text-base: 0.875rem;  /* 14px — step 0 (base) */
+      --text-lg: 1.0625rem;   /* 17px — step +1 */
+      --text-xl: 1.25rem;     /* 20px — step +2 */
+      --text-2xl: 1.5rem;     /* 24px — step +3 */
+      --text-3xl: 1.8125rem;  /* 29px — step +4 (display) */
+
+      /* Line height: inverse relationship — bigger text = tighter */
+      --leading-tight: 1.2;     /* headings 24px+ */
+      --leading-snug: 1.35;     /* large body 17-24px */
+      --leading-normal: 1.5;    /* body text 14px */
+      --leading-relaxed: 1.65;  /* small text 10-12px */
+      --leading-mono: 1.6;      /* monospace at any size */
+
+      /* Letter spacing */
+      --tracking-tight: -0.02em;    /* display/headings — tighter feels more confident */
+      --tracking-normal: 0;         /* body text */
+      --tracking-wide: 0.06em;      /* small uppercase labels */
+      --tracking-wider: 0.12em;     /* badges, timestamps */
+
+      /* Weights */
       --weight-normal: 400;
       --weight-medium: 500;
       --weight-semibold: 600;
@@ -79,8 +112,10 @@
       --radius-full: 9999px;
 
       /* --- Shadows --- */
-      --shadow-sm: 0 4px 16px rgba(0, 255, 159, 0.06);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
       --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+      --glow-accent: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
 
       /* --- Animation --- */
       --duration-fast: 150ms;
@@ -96,8 +131,8 @@
       font-family: var(--font-body);
       background: var(--bg-page);
       color: var(--text-primary);
-      font-size: var(--text-md);
-      line-height: 1.5;
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -118,13 +153,13 @@
       font-size: var(--text-2xl);
       font-weight: var(--weight-bold);
       color: var(--text-primary);
-      letter-spacing: -0.02em;
+      letter-spacing: var(--tracking-tight);
       margin-bottom: var(--space-2);
     }
 
     .page-subtitle {
       font-family: var(--font-body);
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       font-weight: var(--weight-normal);
       color: var(--text-secondary);
       max-width: 640px;
@@ -146,7 +181,7 @@
       font-size: var(--text-xl);
       font-weight: var(--weight-semibold);
       color: var(--text-primary);
-      letter-spacing: -0.01em;
+      letter-spacing: var(--tracking-tight);
       margin-bottom: var(--space-1);
     }
 
@@ -186,7 +221,7 @@
       font-size: var(--text-sm);
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: var(--tracking-wider);
     }
 
     .token-card__name {
@@ -215,7 +250,7 @@
       display: block;
     }
 
-    .color-info {
+    .token-card__meta {
       display: flex;
       flex-direction: column;
       gap: var(--space-1);
@@ -223,11 +258,132 @@
       padding: var(--space-3);
     }
 
-    /* --- Typography Specimen --- */
+    /* --- Typography Cascade (scale hierarchy) --- */
+    .type-cascade {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .type-cascade__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      padding: var(--space-3) var(--space-5);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-lg);
+    }
+
+    .type-cascade__specimen {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    .type-cascade__meta {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-0\.5);
+      text-align: right;
+      min-width: 160px;
+    }
+
+    .type-cascade__role {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* --- Leading Specimen --- */
+    .leading-specimen {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* --- Tracking Specimen --- */
+    .tracking-specimen {
+      font-family: var(--font-body);
+      color: var(--text-primary);
+    }
+
+    /* --- Type in Context --- */
+    .type-context {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .type-context__display {
+      font-family: var(--font-body);
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      line-height: var(--leading-tight);
+      letter-spacing: var(--tracking-tight);
+      color: var(--text-primary);
+    }
+
+    .type-context__heading {
+      font-family: var(--font-body);
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-tight);
+      color: var(--text-secondary);
+    }
+
+    .type-context__body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-normal);
+      line-height: var(--leading-normal);
+      color: var(--text-secondary);
+      max-width: 640px;
+    }
+
+    .type-context__code {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+      padding: var(--space-0\.5) var(--space-1);
+      border-radius: var(--radius-sm);
+    }
+
+    .type-context__small {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-normal);
+      line-height: var(--leading-relaxed);
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-muted);
+    }
+
+    .type-context__mono {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--leading-mono);
+      color: var(--terminal-text);
+      background: var(--terminal-bg);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      border: var(--space-px) solid var(--border-default);
+    }
+
+    /* --- Legacy type-specimen (weight/family cards) --- */
     .type-specimen {
       font-family: var(--font-body);
       color: var(--text-primary);
-      line-height: 1.3;
+      line-height: var(--leading-normal);
       word-break: break-word;
     }
 
@@ -259,12 +415,23 @@
       height: 56px;
       background: var(--bg-elevated);
       border-radius: var(--radius-lg);
+      transition: box-shadow var(--duration-normal) var(--easing-default);
+    }
+
+    .shadow-preview--hover-only {
+      cursor: pointer;
+    }
+
+    .shadow-preview--hover-only:hover {
+      box-shadow: var(--glow-accent);
     }
 
     /* --- Animation Preview --- */
     .anim-preview {
       width: 48px;
       height: 48px;
+      aspect-ratio: 1;
+      flex-shrink: 0;
       background: var(--accent-primary-subtle);
       border: var(--space-px) solid var(--accent-primary);
       border-radius: var(--radius-md);
@@ -297,7 +464,7 @@
       font-weight: var(--weight-semibold);
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
+      letter-spacing: var(--tracking-wide);
     }
 
     .css-map td {
@@ -345,7 +512,7 @@
 
     .subsection-title {
       font-family: var(--font-body);
-      font-size: var(--text-md);
+      font-size: var(--text-base);
       font-weight: var(--weight-semibold);
       color: var(--text-secondary);
       margin-bottom: var(--space-4);
@@ -358,9 +525,8 @@
       gap: var(--space-5);
     }
 
-    .token-card--row .color-info {
+    .token-card--row .token-card__meta {
       padding: 0;
-      flex: 1;
     }
 
     /* --- Responsive --- */
@@ -461,15 +627,58 @@
       </token-section>
 
       <!-- 2. Typography -->
-      <token-section title="Typography Tokens" description="Geist for UI, Geist Mono for code. Modular scale with Minor Third ratio.">
+      <token-section title="Typography Tokens" description="Minor Third (1.2) modular scale from 14px base. Geist for UI, Geist Mono for code.">
+
+        <!-- Type Scale — visual hierarchy cascade -->
         <div class="subsection">
           <h4 class="subsection-title">Type Scale</h4>
-          <div class="token-grid token-grid--single">
-            <type-token v-for="t in typography.scale" :key="t.token"
-              :token="t.token" :value="t.value" :label="t.label"
-              :sample="t.sample" :style-overrides="t.style" />
+          <div class="type-cascade">
+            <div v-for="t in typography.scale" :key="t.token" class="type-cascade__row">
+              <div class="type-cascade__specimen" :style="t.style">{{ t.sample }}</div>
+              <div class="type-cascade__meta">
+                <code class="token-card__label">{{ t.token }}</code>
+                <span class="token-card__value">{{ t.value }}</span>
+                <span class="type-cascade__role">{{ t.label }}</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Line Height -->
+        <div class="subsection">
+          <h4 class="subsection-title">Line Height</h4>
+          <div class="token-grid token-grid--single">
+            <div v-for="lh in typography.lineHeights" :key="lh.token" class="token-card token-card--row">
+              <div class="leading-specimen" :style="{ lineHeight: lh.numValue }">
+                The quick brown fox jumps over the lazy dog.<br>Agent sessions unfold line by line.<br>Every keystroke is recorded and searchable.
+              </div>
+              <div class="token-card__meta" style="flex-shrink: 0; min-width: 180px; text-align: right;">
+                <span class="token-card__name">{{ lh.label }}</span>
+                <code class="token-card__label">{{ lh.token }}</code>
+                <span class="token-card__value">{{ lh.value }} — {{ lh.usage }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Letter Spacing -->
+        <div class="subsection">
+          <h4 class="subsection-title">Letter Spacing</h4>
+          <div class="token-grid token-grid--wide">
+            <div v-for="ls in typography.letterSpacing" :key="ls.token" class="token-card">
+              <div class="tracking-specimen" :style="{ letterSpacing: ls.numValue, fontSize: ls.demoSize, fontWeight: ls.demoWeight, textTransform: ls.transform || 'none' }">
+                {{ ls.sample }}
+              </div>
+              <div class="token-card__meta">
+                <span class="token-card__name">{{ ls.label }}</span>
+                <code class="token-card__label">{{ ls.token }}</code>
+                <span class="token-card__value">{{ ls.value }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Font Weights -->
         <div class="subsection">
           <h4 class="subsection-title">Font Weights</h4>
           <div class="token-grid">
@@ -477,12 +686,26 @@
               :token="w.token" :value="w.value" :label="w.label" />
           </div>
         </div>
+
+        <!-- Font Families -->
         <div class="subsection">
           <h4 class="subsection-title">Font Families</h4>
           <div class="token-grid token-grid--wide">
             <family-token v-for="f in typography.families" :key="f.token"
               :token="f.token" :value="f.value" :label="f.label"
               :is-mono="f.isMono" />
+          </div>
+        </div>
+
+        <!-- Type in Context -->
+        <div class="subsection">
+          <h4 class="subsection-title">Type in Context</h4>
+          <div class="type-context">
+            <h1 class="type-context__display">Terminal Sessions, Unfolded</h1>
+            <h2 class="type-context__heading">Browse and explore agent recordings</h2>
+            <p class="type-context__body">RAGTS transforms raw terminal sessions into navigable, searchable documents. Upload a <code class="type-context__code">.cast</code> file and the system detects sections, highlights markers, and makes every keystroke findable.</p>
+            <p class="type-context__small">Last updated 2 hours ago · 1,247 events · 23 sections detected</p>
+            <div class="type-context__mono">$ npm test<br>✓ should parse asciicast v3 format <span style="color: var(--text-muted);">(5ms)</span></div>
           </div>
         </div>
       </token-section>
@@ -509,7 +732,8 @@
           <h4 class="subsection-title">Shadows</h4>
           <div class="token-grid token-grid--wide">
             <shadow-token v-for="s in shape.shadows" :key="s.token"
-              :token="s.token" :value="s.value" :label="s.label" />
+              :token="s.token" :value="s.value" :label="s.label"
+              :hover-only="s.hoverOnly || false" />
           </div>
         </div>
       </token-section>
@@ -570,8 +794,8 @@
       props: { token: String, value: String, label: String },
       template: `
         <div class="token-card token-card--color">
-          <div class="color-swatch" :style="{ background: value }"></div>
-          <div class="color-info">
+          <div class="color-swatch" :style="{ background: 'var(' + token + ')' }"></div>
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -587,7 +811,7 @@
           <div style="flex: 1; min-width: 0;">
             <span class="type-specimen" :style="styleOverrides">{{ sample }}</span>
           </div>
-          <div class="color-info" style="flex-shrink: 0; text-align: right;">
+          <div class="token-card__meta" style="flex-shrink: 0; text-align: right;">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -601,7 +825,7 @@
       template: `
         <div class="token-card">
           <span class="type-specimen" :style="{ fontWeight: value, fontSize: 'var(--text-lg)' }">Aa</span>
-          <div class="color-info">
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -618,7 +842,7 @@
             style="font-size: var(--text-lg);">
             The quick brown fox jumps over the lazy dog
           </span>
-          <div class="color-info">
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value" style="word-break: break-all;">{{ value }}</span>
@@ -632,7 +856,7 @@
       template: `
         <div class="token-card token-card--row">
           <div class="spacing-bar" :style="{ width: width }"></div>
-          <div class="color-info">
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -646,7 +870,7 @@
       template: `
         <div class="token-card">
           <div class="shape-preview" :style="{ borderRadius: value }"></div>
-          <div class="color-info">
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -656,11 +880,13 @@
 
     /* --- Shadow Token --- */
     const ShadowToken = defineComponent({
-      props: { token: String, value: String, label: String },
+      props: { token: String, value: String, label: String, hoverOnly: Boolean },
       template: `
         <div class="token-card">
-          <div class="shadow-preview" :style="{ boxShadow: value }"></div>
-          <div class="color-info">
+          <div class="shadow-preview"
+            :class="{ 'shadow-preview--hover-only': hoverOnly }"
+            :style="!hoverOnly ? { boxShadow: 'var(' + token + ')' } : {}"></div>
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -674,7 +900,7 @@
       template: `
         <div class="token-card token-card--row">
           <div class="anim-preview" :style="{ transitionDuration: value }"></div>
-          <div class="color-info">
+          <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
             <span class="token-card__label">{{ token }}</span>
             <span class="token-card__value">{{ value }}</span>
@@ -695,20 +921,25 @@
             ],
             primaryAccent: [
               { token: '--accent-primary', value: '#00ff9f', label: 'Primary' },
-              { token: '--accent-primary-hover', value: '#33ffb3', label: 'Primary Hover' },
-              { token: '--accent-primary-dim', value: '#00cc7f', label: 'Primary Dim' },
-              { token: '--accent-primary-subtle', value: 'rgba(0,255,159,0.07)', label: 'Primary Subtle' },
+              { token: '--accent-primary-hover', value: 'color-mix(primary 80%, white)', label: 'Hover' },
+              { token: '--accent-primary-dim', value: 'color-mix(primary 65%, bg-page)', label: 'Dim' },
+              { token: '--accent-primary-subtle', value: 'color-mix(primary 7%, transparent)', label: 'Subtle' },
             ],
             secondaryAccent: [
-              { token: '--accent-secondary', value: '#ff6b2b', label: 'Secondary' },
-              { token: '--accent-secondary-hover', value: '#ff8a55', label: 'Secondary Hover' },
-              { token: '--accent-secondary-subtle', value: 'rgba(255,107,43,0.07)', label: 'Secondary Subtle' },
+              { token: '--accent-secondary', value: '#ff8c2b', label: 'Secondary' },
+              { token: '--accent-secondary-hover', value: 'color-mix(secondary 80%, white)', label: 'Hover' },
+              { token: '--accent-secondary-dim', value: 'color-mix(secondary 65%, bg-page)', label: 'Dim' },
+              { token: '--accent-secondary-subtle', value: 'color-mix(secondary 7%, transparent)', label: 'Subtle' },
             ],
             status: [
-              { token: '--status-success', value: '#00ff9f', label: 'Success' },
+              { token: '--status-success', value: '#34d399', label: 'Success' },
+              { token: '--status-success-subtle', value: 'color-mix(success 7%, transparent)', label: 'Success Subtle' },
               { token: '--status-warning', value: '#ffcc00', label: 'Warning' },
+              { token: '--status-warning-subtle', value: 'color-mix(warning 7%, transparent)', label: 'Warning Subtle' },
               { token: '--status-error', value: '#ff3b30', label: 'Error' },
+              { token: '--status-error-subtle', value: 'color-mix(error 7%, transparent)', label: 'Error Subtle' },
               { token: '--status-info', value: '#5ac8fa', label: 'Info' },
+              { token: '--status-info-subtle', value: 'color-mix(info 7%, transparent)', label: 'Info Subtle' },
             ],
             text: [
               { token: '--text-primary', value: '#e8e8e8', label: 'Primary' },
@@ -719,7 +950,7 @@
             borders: [
               { token: '--border-default', value: '#1e1e1e', label: 'Default' },
               { token: '--border-strong', value: '#2a2a2a', label: 'Strong' },
-              { token: '--border-accent', value: '#00ff9f', label: 'Accent' },
+              { token: '--border-accent', value: 'var(--accent-primary)', label: 'Accent' },
             ],
             terminal: [
               { token: '--terminal-bg', value: '#0a0a0a', label: 'Background' },
@@ -728,13 +959,26 @@
           },
           typography: {
             scale: [
-              { token: '--text-2xl', value: '1.75rem (28px)', label: 'Display', sample: 'Agent Sessions', style: { fontSize: 'var(--text-2xl)', fontWeight: 'var(--weight-bold)', letterSpacing: '-0.02em' } },
-              { token: '--text-xl', value: '1.25rem (20px)', label: 'Heading', sample: 'Session Explorer', style: { fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-semibold)', letterSpacing: '-0.01em' } },
-              { token: '--text-lg', value: '1rem (16px)', label: 'Large', sample: 'Browse terminal recordings', style: { fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-medium)' } },
-              { token: '--text-md', value: '0.875rem (14px)', label: 'Medium', sample: 'Default body text for paragraphs and descriptions', style: { fontSize: 'var(--text-md)', fontWeight: 'var(--weight-normal)' } },
-              { token: '--text-base', value: '0.8125rem (13px)', label: 'Base', sample: 'Secondary labels and meta information', style: { fontSize: 'var(--text-base)', fontWeight: 'var(--weight-medium)' } },
-              { token: '--text-sm', value: '0.6875rem (11px)', label: 'Small', sample: 'TIMESTAMPS AND BADGES', style: { fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', letterSpacing: '0.12em', textTransform: 'uppercase' } },
-              { token: '--text-xs', value: '0.625rem (10px)', label: 'Extra Small', sample: 'Fine print and annotations', style: { fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-normal)' } },
+              { token: '--text-3xl', value: '1.8125rem (29px)', label: 'Display', sample: 'Terminal Sessions', style: { fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-bold)', letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-tight)' } },
+              { token: '--text-2xl', value: '1.5rem (24px)', label: 'Page title', sample: 'Agent Sessions', style: { fontSize: 'var(--text-2xl)', fontWeight: 'var(--weight-bold)', letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-tight)' } },
+              { token: '--text-xl', value: '1.25rem (20px)', label: 'Section heading', sample: 'Session Explorer', style: { fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-semibold)', letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-snug)' } },
+              { token: '--text-lg', value: '1.0625rem (17px)', label: 'Subheading', sample: 'Browse terminal recordings', style: { fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-medium)', lineHeight: 'var(--leading-snug)' } },
+              { token: '--text-base', value: '0.875rem (14px)', label: 'Body text', sample: 'Default body text for paragraphs and descriptions', style: { fontSize: 'var(--text-base)', fontWeight: 'var(--weight-normal)', lineHeight: 'var(--leading-normal)' } },
+              { token: '--text-sm', value: '0.75rem (12px)', label: 'Small / Label', sample: 'TIMESTAMPS AND BADGES', style: { fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', letterSpacing: 'var(--tracking-wider)', textTransform: 'uppercase', lineHeight: 'var(--leading-relaxed)' } },
+              { token: '--text-xs', value: '0.625rem (10px)', label: 'Caption', sample: 'Fine print and annotations', style: { fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-normal)', lineHeight: 'var(--leading-relaxed)' } },
+            ],
+            lineHeights: [
+              { token: '--leading-tight', numValue: '1.2', demoSize: 'var(--text-2xl)', label: 'Tight', value: '1.2', usage: 'Headings 24px+' },
+              { token: '--leading-snug', numValue: '1.35', demoSize: 'var(--text-lg)', label: 'Snug', value: '1.35', usage: 'Large body 17–24px' },
+              { token: '--leading-normal', numValue: '1.5', demoSize: 'var(--text-base)', label: 'Normal', value: '1.5', usage: 'Body text 14px' },
+              { token: '--leading-relaxed', numValue: '1.65', demoSize: 'var(--text-sm)', label: 'Relaxed', value: '1.65', usage: 'Small text 10–12px' },
+              { token: '--leading-mono', numValue: '1.6', demoSize: 'var(--text-base)', label: 'Mono', value: '1.6', usage: 'Monospace at any size' },
+            ],
+            letterSpacing: [
+              { token: '--tracking-tight', numValue: '-0.02em', demoSize: 'var(--text-2xl)', demoWeight: '700', sample: 'Terminal Sessions', label: 'Tight', value: '-0.02em' },
+              { token: '--tracking-normal', numValue: '0', demoSize: 'var(--text-base)', demoWeight: '400', sample: 'Default body text reads naturally', label: 'Normal', value: '0' },
+              { token: '--tracking-wide', numValue: '0.06em', demoSize: 'var(--text-sm)', demoWeight: '600', transform: 'uppercase', sample: 'Small uppercase labels', label: 'Wide', value: '0.06em' },
+              { token: '--tracking-wider', numValue: '0.12em', demoSize: 'var(--text-xs)', demoWeight: '600', transform: 'uppercase', sample: 'Badges & timestamps', label: 'Wider', value: '0.12em' },
             ],
             weights: [
               { token: '--weight-normal', value: '400', label: 'Normal' },
@@ -769,8 +1013,10 @@
               { token: '--radius-full', value: '9999px', label: 'Full / Pill' },
             ],
             shadows: [
-              { token: '--shadow-sm', value: '0 4px 16px rgba(0,255,159,0.06)', label: 'Small (accent glow)' },
-              { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.5)', label: 'Medium (elevation)' },
+              { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.3)', label: 'Small (subtle lift)' },
+              { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.5)', label: 'Medium (cards, dropdowns)' },
+              { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.7)', label: 'Large (modals, popovers)' },
+              { token: '--glow-accent', value: 'color-mix(--accent-primary 25%)', label: 'Accent glow (hover)', hoverOnly: true },
             ],
           },
           animation: [
@@ -785,38 +1031,54 @@
             { token: '--bg-elevated', value: '#1c1c1c', usage: 'Dropdowns, tooltips, hover states' },
             { token: '--bg-overlay', value: 'rgba(0,0,0,0.75)', usage: 'Modal backdrop' },
             { token: '--accent-primary', value: '#00ff9f', usage: 'Buttons, links, focus rings, active states' },
-            { token: '--accent-primary-hover', value: '#33ffb3', usage: 'Hover state for primary accent elements' },
-            { token: '--accent-primary-dim', value: '#00cc7f', usage: 'Desaturated accent for text on dark surfaces' },
-            { token: '--accent-primary-subtle', value: 'rgba(0,255,159,0.07)', usage: 'Focus ring glow, selected row tint' },
-            { token: '--accent-secondary', value: '#ff6b2b', usage: 'Tags, category markers, secondary CTAs' },
-            { token: '--accent-secondary-hover', value: '#ff8a55', usage: 'Hover state for secondary accent elements' },
-            { token: '--accent-secondary-subtle', value: 'rgba(255,107,43,0.07)', usage: 'Secondary tint for badges and alerts' },
-            { token: '--status-success', value: '#00ff9f', usage: 'Completion indicators, positive feedback' },
+            { token: '--accent-primary-hover', value: 'mix(primary 80%, white)', usage: 'Hover state for primary accent elements' },
+            { token: '--accent-primary-dim', value: 'mix(primary 65%, bg-page)', usage: 'Dimmed accent for text on dark surfaces' },
+            { token: '--accent-primary-subtle', value: 'mix(primary 7%, transparent)', usage: 'Focus ring glow, selected row tint' },
+            { token: '--accent-secondary', value: '#ff8c2b', usage: 'Tags, category markers, secondary CTAs' },
+            { token: '--accent-secondary-hover', value: 'mix(secondary 80%, white)', usage: 'Hover state for secondary accent elements' },
+            { token: '--accent-secondary-dim', value: 'mix(secondary 65%, bg-page)', usage: 'Dimmed secondary for text on dark surfaces' },
+            { token: '--accent-secondary-subtle', value: 'mix(secondary 7%, transparent)', usage: 'Secondary tint for badges and alerts' },
+            { token: '--status-success', value: '#34d399', usage: 'Completion indicators, positive feedback' },
+            { token: '--status-success-subtle', value: 'mix(success 7%, transparent)', usage: 'Success background tint' },
             { token: '--status-warning', value: '#ffcc00', usage: 'Caution banners, validation hints' },
+            { token: '--status-warning-subtle', value: 'mix(warning 7%, transparent)', usage: 'Warning background tint' },
             { token: '--status-error', value: '#ff3b30', usage: 'Error messages, destructive action highlights' },
+            { token: '--status-error-subtle', value: 'mix(error 7%, transparent)', usage: 'Error background tint' },
             { token: '--status-info', value: '#5ac8fa', usage: 'Informational tooltips, help text accents' },
+            { token: '--status-info-subtle', value: 'mix(info 7%, transparent)', usage: 'Info background tint' },
             { token: '--text-primary', value: '#e8e8e8', usage: 'Headings, body text, primary labels' },
             { token: '--text-secondary', value: '#8b949e', usage: 'Descriptions, secondary labels, metadata' },
             { token: '--text-muted', value: '#484f58', usage: 'Placeholders, timestamps, subtle annotations' },
             { token: '--text-disabled', value: '#30363d', usage: 'Disabled input text, inactive items' },
             { token: '--border-default', value: '#1e1e1e', usage: 'Card borders, dividers, table rules' },
             { token: '--border-strong', value: '#2a2a2a', usage: 'Emphasized dividers, active card borders' },
-            { token: '--border-accent', value: '#00ff9f', usage: 'Focus outlines, selected card highlight' },
+            { token: '--border-accent', value: 'var(--accent-primary)', usage: 'Focus outlines, selected card highlight' },
             { token: '--terminal-bg', value: '#0a0a0a', usage: 'Terminal replay background' },
             { token: '--terminal-text', value: '#d4d4d4', usage: 'Terminal replay text' },
             { token: '--font-body', value: 'Geist, system', usage: 'All UI text: headings, body, labels, buttons' },
             { token: '--font-mono', value: 'Geist Mono, fallback', usage: 'Code blocks, terminal, filenames, tokens' },
-            { token: '--text-2xl', value: '1.75rem', usage: 'Page titles, hero text' },
+            { token: '--text-3xl', value: '1.8125rem', usage: 'Display text, hero headlines' },
+            { token: '--text-2xl', value: '1.5rem', usage: 'Page titles' },
             { token: '--text-xl', value: '1.25rem', usage: 'Section headings' },
-            { token: '--text-lg', value: '1rem', usage: 'Large body text, subheadings' },
-            { token: '--text-md', value: '0.875rem', usage: 'Default body text' },
-            { token: '--text-base', value: '0.8125rem', usage: 'Secondary labels, meta text' },
-            { token: '--text-sm', value: '0.6875rem', usage: 'Badges, timestamps, uppercase labels' },
+            { token: '--text-lg', value: '1.0625rem', usage: 'Subheadings, large body text' },
+            { token: '--text-base', value: '0.875rem', usage: 'Default body text' },
+            { token: '--text-sm', value: '0.75rem', usage: 'Badges, timestamps, uppercase labels' },
             { token: '--text-xs', value: '0.625rem', usage: 'Fine print, captions' },
+            { token: '--leading-tight', value: '1.2', usage: 'Headings 24px+' },
+            { token: '--leading-snug', value: '1.35', usage: 'Large body 17–24px' },
+            { token: '--leading-normal', value: '1.5', usage: 'Body text 14px' },
+            { token: '--leading-relaxed', value: '1.65', usage: 'Small text 10–12px' },
+            { token: '--leading-mono', value: '1.6', usage: 'Monospace at any size' },
+            { token: '--tracking-tight', value: '-0.02em', usage: 'Display and heading text' },
+            { token: '--tracking-normal', value: '0', usage: 'Body text (default)' },
+            { token: '--tracking-wide', value: '0.06em', usage: 'Small uppercase labels' },
+            { token: '--tracking-wider', value: '0.12em', usage: 'Badges, timestamps' },
             { token: '--space-1 ... --space-12', value: '4px ... 48px', usage: '4px base grid: padding, margin, gap' },
             { token: '--radius-sm ... --radius-full', value: '4px ... 9999px', usage: 'Border radii for cards, buttons, pills' },
-            { token: '--shadow-sm', value: '0 4px 16px ...', usage: 'Subtle accent glow on hover cards' },
-            { token: '--shadow-md', value: '0 8px 24px ...', usage: 'Modal and dropdown elevation' },
+            { token: '--shadow-sm', value: '0 2px 8px ...', usage: 'Subtle lift for cards, buttons' },
+            { token: '--shadow-md', value: '0 8px 24px ...', usage: 'Dropdowns, elevated panels' },
+            { token: '--shadow-lg', value: '0 16px 48px ...', usage: 'Modals, popovers, dialogs' },
+            { token: '--glow-accent', value: 'mix(primary 25%) glow', usage: 'Hover glow on interactive cards' },
             { token: '--duration-fast', value: '150ms', usage: 'Button hover, focus ring, micro interactions' },
             { token: '--duration-normal', value: '250ms', usage: 'Card transitions, panel slides' },
             { token: '--duration-slow', value: '400ms', usage: 'Page transitions, modal enter/exit' },
