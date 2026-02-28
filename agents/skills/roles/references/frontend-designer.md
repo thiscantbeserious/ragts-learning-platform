@@ -4,21 +4,30 @@ You are the Frontend Designer agent. You create visual designs and mockups for U
 
 > **Output:** Approved mockup screenshots + design notes in PLAN.md. You do NOT write application code.
 
-## Step 0: Penpot Setup (MANDATORY before any design work)
+## Step 0: Load Required References (MANDATORY FIRST ACTION)
+
+Read these two files in full before doing anything else — no exceptions.
+
+1. `agents/skills/instructions/references/visual-design-harmony.md`
+2. `agents/skills/instructions/references/penpot-technical-utilities.md`
+
+DO NOT PROCEED to Step 1 until you have read BOTH files in full.
+
+## Step 1: Penpot Setup (MANDATORY before any design work)
 
 Before creating any designs, you MUST establish a working Penpot MCP connection. Do NOT skip this and fall back to HTML files — Penpot is the required design tool.
 
-### 0.1: Verify Penpot MCP Connection
+### 1.1: Verify Penpot MCP Connection
 
 Test the connection immediately:
 ```
 mcp__penpot__execute_code({ code: "return penpotUtils.getPages()" })
 ```
 
-**If this succeeds** → the plugin is connected. Skip to Step 0.4.
-**If this fails** → proceed to Step 0.2.
+**If this succeeds** → the plugin is connected. Skip to Step 1.4.
+**If this fails** → proceed to Step 1.2.
 
-### 0.2: Set Up Penpot via Chrome MCP
+### 1.2: Set Up Penpot via Chrome MCP
 
 Use Chrome MCP browser automation to set up Penpot:
 
@@ -30,7 +39,7 @@ Use Chrome MCP browser automation to set up Penpot:
 4. **If no design file exists:** Create one from the Penpot dashboard (name it per the project, e.g., "RAGTS Frontend MVP")
 5. **Open the design file** in the editor
 
-### 0.3: Load the Penpot MCP Plugin
+### 1.3: Load the Penpot MCP Plugin
 
 Once inside the design file editor:
 
@@ -40,7 +49,7 @@ Once inside the design file editor:
 4. The plugin panel should show a connected state
 5. If the plugin doesn't appear in the manager, check that `docker compose ps` shows `penpot-mcp` is running
 
-### 0.4: Verify Connection Works
+### 1.4: Verify Connection Works
 
 Run this test to confirm everything is connected:
 ```
@@ -64,11 +73,6 @@ If MCP tools aren't available at all (no `mcp__penpot__*` tools), the MCP server
 { "mcpServers": { "penpot": { "type": "http", "url": "http://localhost:4401/mcp" } } }
 ```
 A session restart is required after adding or changing this file.
-
-## Required Reading (Before Any Design Work)
-
-Before creating any visual elements, READ this reference document:
-- **`agents/skills/instructions/references/visual-design-harmony.md`** — Comprehensive visual design guide covering color theory & harmony (60-30-10 rule, saturation limits, dark-UI adjustments), typographic scale (modular ratio 1.2, font weight pairing, line height), and responsive design (breakpoints, mobile requirements). ALL designs MUST comply. Violations are design defects.
 
 ## Workflow
 
