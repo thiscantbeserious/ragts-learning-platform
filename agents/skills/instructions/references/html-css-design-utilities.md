@@ -1,17 +1,19 @@
 # HTML + CSS Design Utilities
 
-Technical patterns for creating design mockups as standalone HTML files that map directly to Vue 3 SFC components. Use alongside `visual-design-harmony.md` for design principles.
+Technical patterns for creating design mockups as standalone HTML files using Vue 3 components. Use alongside `visual-design-harmony.md` for design principles.
 
 ## File Structure
 
 ```
 .state/design/<branch-name>/
   stage-N/
-    <name>.html          # Self-contained mockup (embedded styles)
+    <name>.html          # Self-contained Vue 3 mockup
     <name>.png           # Screenshot for handoff
 ```
 
-Each HTML file must be self-contained: embedded `<style>`, Google Fonts via CDN, viewable by opening directly in a browser. No external stylesheets, no build step.
+## Mockup File Skeleton
+
+One HTML file = one shared `<style>` block + Vue components that reference those shared styles. Vue 3 is loaded via CDN for mockup portability (no dev server needed to open in a browser).
 
 ```html
 <!DOCTYPE html>
@@ -24,52 +26,157 @@ Each HTML file must be self-contained: embedded `<style>`, Google Fonts via CDN,
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=..." rel="stylesheet">
   <style>
-    /* Tokens → Layout → Components → States */
+    /* ========================
+       1. DESIGN TOKENS (:root)
+       2. RESET + BASE
+       3. LAYOUT
+       4. ALL COMPONENT STYLES
+       ======================== */
+
+    :root {
+      /* Tokens here — the ONLY place raw values appear */
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-size: var(--text-md);
+      line-height: 1.5;
+    }
+
+    /* Shared component styles — all components reference these */
+    .btn { /* ... */ }
+    .badge { /* ... */ }
+    .input { /* ... */ }
+    .session-card { /* ... */ }
   </style>
 </head>
 <body>
-  <!-- Content -->
+  <div id="app"></div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, defineComponent } = Vue;
+
+    // Components are THIN — template + props only, NO inline styles
+    const AppBadge = defineComponent({ /* ... */ });
+    const AppButton = defineComponent({ /* ... */ });
+
+    const app = createApp({ /* root template */ });
+    app.component('AppBadge', AppBadge);
+    app.mount('#app');
+  </script>
 </body>
 </html>
 ```
 
-## CSS Custom Properties as Design Tokens
+**Key principle: ONE shared stylesheet, components are just templates.** Components contain zero CSS — they reference class names from the single `<style>` block. This mirrors the production pattern where tokens and base styles are a global CSS file and `<style scoped>` in SFCs only adds component-specific overrides.
 
-All design values are defined as CSS custom properties in `:root`. This maps 1:1 to the token system the frontend engineer will implement.
+## Design Tokens — ZERO Magic Numbers
+
+**Every visual value must be a CSS custom property.** The ONLY place raw `#hex`, `px`, `ms`, or `rgba()` values appear is inside `:root`. Component styles use ONLY `var(--*)` references.
 
 ```css
 :root {
-  /* Structure: --category-name: value; */
-  /* Colors */
+  /* --- Colors --- */
   --bg-page: #0c0c0c;
+  --bg-surface: #141414;
+  --bg-elevated: #1c1c1c;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
   --accent-primary: #00ff9f;
-  /* Typography */
-  --font-body: 'Geist', sans-serif;
-  --font-mono: 'Geist Mono', monospace;
-  /* Spacing (8px grid) */
+  --accent-primary-hover: #33ffb3;
+  --accent-primary-dim: #00cc7f;
+  --accent-primary-subtle: rgba(0, 255, 159, 0.07);
+  --accent-secondary: #ff6b2b;
+  --accent-secondary-hover: #ff8a55;
+  --accent-secondary-subtle: rgba(255, 107, 43, 0.07);
+  --status-success: #00ff9f;
+  --status-warning: #ffcc00;
+  --status-error: #ff3b30;
+  --status-error-subtle: rgba(255, 59, 48, 0.07);
+  --status-info: #5ac8fa;
+  --text-primary: #e8e8e8;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-disabled: #30363d;
+  --border-default: #1e1e1e;
+  --border-strong: #2a2a2a;
+  --border-accent: #00ff9f;
+  --terminal-bg: #0a0a0a;
+  --terminal-text: #d4d4d4;
+
+  /* --- Typography --- */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --text-xs: 0.625rem;
+  --text-sm: 0.6875rem;
+  --text-base: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* --- Spacing (4px base grid) --- */
+  --space-px: 1px;
+  --space-0.5: 2px;
   --space-1: 4px;
+  --space-1.5: 6px;
   --space-2: 8px;
-  /* Shape */
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* --- Shape --- */
+  --radius-sm: 4px;
   --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 4px 16px rgba(0, 255, 159, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* --- Animation --- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-default: ease-out;
 }
 ```
 
-Rules:
-- Every magic number should be a token — if you type a raw `#hex` or `px` value more than once, extract it
-- Token names use kebab-case with category prefix: `--bg-*`, `--text-*`, `--space-*`, `--radius-*`
-- Semantic names over raw values: `--bg-surface` not `--bg-141414`
+Font pairing pattern:
+- **UI text:** `var(--font-body)` at `var(--text-base)` weight `var(--weight-medium)`
+- **Headings:** `var(--font-body)` at `var(--text-xl)`+ weight `var(--weight-bold)`, negative letter-spacing
+- **Code/mono:** `var(--font-mono)` at one step smaller than surrounding UI text
+- **Labels/meta:** `var(--font-body)` at `var(--text-sm)`, uppercase, `letter-spacing: 0.12em`, color `var(--text-muted)`
+
+Spacing rules from `visual-design-harmony.md`:
+- Internal spacing <= external spacing (padding inside a card <= gap between cards)
+- Content fills 65-80% of its container
+- Consistent gaps within a group, larger gaps between groups (proximity principle)
 
 ## Layout: CSS Grid + Flexbox
 
-Use **Grid for page-level structure**, **Flexbox for component internals**. Do not use floats, absolute positioning for layout, or manual pixel placement.
+**Grid for page-level structure and card grids. Flexbox for component internals.** No floats, no absolute positioning for layout.
 
-### Page Layout with Grid
+### Page Layout
 
 ```css
 .page {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr auto; /* header / content / footer */
+  grid-template-rows: auto 1fr auto;
   min-height: 100vh;
 }
 
@@ -83,118 +190,120 @@ Use **Grid for page-level structure**, **Flexbox for component internals**. Do n
 ### Card Grids
 
 ```css
-/* Auto-fill responsive grid */
+/* Responsive auto-fill */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: var(--space-2);
 }
 
-/* Fixed column count */
-.token-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-2);
-}
-```
-
-### Subgrid for Aligned Cards
-
-When cards in a grid need their internal rows (header, body, footer) to align across columns:
-
-```css
-.card-grid {
+/* Subgrid: align card internals across columns */
+.card-grid--aligned {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto; /* let subgrid children define rows */
   gap: var(--space-2);
 }
-
-.card {
+.card-grid--aligned > .card {
   display: grid;
   grid-template-rows: subgrid;
-  grid-row: span 3; /* match number of internal rows */
+  grid-row: span 3;
 }
 ```
 
-### Component Layout with Flexbox
+### Container Queries
 
-```css
-/* Horizontal bar: items spaced apart */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--space-6);
-  height: 48px;
-}
-
-/* Vertical stack with gap */
-.card-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Inline group */
-.badge-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-```
-
-### Container Queries for Reusable Components
-
-Components that adapt to their container rather than the viewport:
+Components that adapt to their container, not the viewport:
 
 ```css
 .card-container {
   container-type: inline-size;
   container-name: card;
 }
-
-@container card (min-width: 400px) {
-  .card__layout {
-    flex-direction: row; /* side-by-side when container is wide */
-  }
-}
-
 @container card (max-width: 399px) {
-  .card__layout {
-    flex-direction: column; /* stacked when container is narrow */
-  }
+  .card__layout { flex-direction: column; }
 }
 ```
 
-## Component HTML Patterns
+## Shared Component Styles
 
-Design mockups use BEM-style class naming that maps to Vue component structure. Each top-level BEM block = one Vue SFC.
+These go in the single `<style>` block. Components are templates that reference these classes.
 
+### Buttons
+
+```css
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  border: var(--space-px) solid transparent;
+  background: transparent;
+}
+.btn--primary { border-color: var(--accent-primary); color: var(--accent-primary); }
+.btn--primary:hover { background: var(--accent-primary); color: var(--bg-page); }
+.btn--secondary { border-color: var(--accent-secondary); color: var(--accent-secondary); }
+.btn--ghost { color: var(--text-secondary); }
+.btn--ghost:hover { background: var(--bg-elevated); color: var(--text-primary); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+.btn--sm { padding: var(--space-0.5) var(--space-2); font-size: var(--text-sm); }
 ```
-.component-name           → ComponentName.vue
-.component-name__element  → element within the component template
-.component-name--modifier → prop/state variant
+
+### Badges
+
+```css
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0.5) var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-full);
+}
+.badge--sm { padding: var(--space-px) var(--space-1.5); font-size: var(--text-xs); }
 ```
 
-### Card Component
+### Inputs
 
-```html
-<div class="session-card session-card--hover">
-  <div class="session-card__main">
-    <div class="session-card__top-row">
-      <span class="session-card__filename">file.cast</span>
-      <span class="badge badge--agent-claude">Claude</span>
-    </div>
-    <div class="session-card__meta">
-      <span class="session-card__meta-item"><span class="count">7</span> markers</span>
-    </div>
-  </div>
-  <div class="session-card__right">
-    <span class="session-card__date">2 hours ago</span>
-  </div>
-</div>
+```css
+.input-group__label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
+}
+.input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface);
+  border: var(--space-px) solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  outline: none;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+.input::placeholder { color: var(--text-muted); }
+.input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 var(--space-0.5) var(--accent-primary-subtle);
+}
+.input--error {
+  border-color: var(--status-error);
+  box-shadow: 0 0 0 var(--space-0.5) var(--status-error-subtle);
+}
+.input-group__helper { font-size: var(--text-sm); color: var(--text-muted); margin-top: var(--space-1); }
+.input-group__error { font-size: var(--text-sm); color: var(--status-error); margin-top: var(--space-1); }
 ```
+
+### Cards
 
 ```css
 .session-card {
@@ -203,234 +312,119 @@ Design mockups use BEM-style class naming that maps to Vue component structure. 
   align-items: center;
   padding: var(--space-4) var(--space-5);
   background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  border: var(--space-px) solid var(--border-default);
   border-radius: var(--radius-xl);
-  transition: all 0.15s ease-out;
+  transition: all var(--duration-fast) var(--easing-default);
+  text-decoration: none;
+  color: inherit;
 }
-
-.session-card--hover,
 .session-card:hover {
   border-color: var(--accent-primary);
   background: var(--bg-elevated);
-  transform: translateY(-1px);
+  transform: translateY(calc(-1 * var(--space-px)));
   box-shadow: var(--shadow-sm);
 }
 ```
 
-### Button Component
+## Vue Component Definitions
 
-```html
-<button class="btn btn--primary">Upload</button>
-<button class="btn btn--primary" disabled>Upload</button>
-<button class="btn btn--ghost btn--sm">Edit</button>
+Components are thin — props, slots, template structure. No styles. They reference the shared class names.
+
+```js
+const AppBadge = defineComponent({
+  props: { variant: String, size: { type: String, default: 'default' } },
+  template: `
+    <span class="badge"
+      :class="['badge--' + variant, size !== 'default' && 'badge--' + size]">
+      <slot/>
+    </span>`
+});
+
+const AppButton = defineComponent({
+  props: {
+    variant: { type: String, default: 'primary' },
+    size: { type: String, default: 'default' },
+    disabled: Boolean
+  },
+  template: `
+    <button class="btn"
+      :class="['btn--' + variant, size !== 'default' && 'btn--' + size]"
+      :disabled="disabled">
+      <slot/>
+    </button>`
+});
+
+const AppInput = defineComponent({
+  props: { label: String, helper: String, error: String, modelValue: String, placeholder: String, type: { type: String, default: 'text' } },
+  emits: ['update:modelValue'],
+  template: `
+    <div class="input-group">
+      <label v-if="label" class="input-group__label">{{ label }}</label>
+      <input class="input" :class="{ 'input--error': error }" :type="type"
+        :placeholder="placeholder" :value="modelValue"
+        @input="$emit('update:modelValue', $event.target.value)">
+      <span v-if="error" class="input-group__error">{{ error }}</span>
+      <span v-else-if="helper" class="input-group__helper">{{ helper }}</span>
+    </div>`
+});
 ```
 
-```css
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 5px 14px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.15s ease-out;
-  border: 1px solid transparent;
-  background: transparent;
-}
+## Production Mapping: Mockup → Vue SFCs
 
-.btn--primary {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-}
-.btn--primary:hover {
-  background: var(--accent-primary);
-  color: var(--bg-page);
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
+The single shared `<style>` block maps to a global stylesheet. Components become `.vue` SFCs.
 
-.btn--sm {
-  padding: 3px 10px;
-  font-size: 12px;
-}
 ```
-
-### Badge Component
-
-```html
-<span class="badge badge--success">Detected</span>
-<span class="badge badge--warning badge--sm">Processing</span>
-```
-
-```css
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: 12px;
-}
-.badge--sm {
-  padding: 1px 6px;
-  font-size: 10px;
-  border-radius: 8px;
-}
-```
-
-### Input Component
-
-```html
-<div class="input-group">
-  <label class="input-group__label">Email</label>
-  <div class="input-wrapper">
-    <span class="input-wrapper__icon">/</span>
-    <input class="input" type="text" placeholder="Search sessions...">
-  </div>
-  <span class="input-group__helper">Helper text</span>
-</div>
-```
-
-```css
-.input {
-  width: 100%;
-  padding: 8px 14px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  color: var(--text-primary);
-  font-family: var(--font-body);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.input::placeholder { color: var(--text-muted); }
-.input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-primary-subtle);
-}
-.input--error {
-  border-color: var(--status-error);
-  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.07);
-}
-```
-
-## Representing States in Static HTML
-
-Since mockups are static HTML, show interactive states by duplicating elements with modifier classes. Label each state visually.
-
-```html
-<!-- State showcase pattern -->
-<div class="state-row">
-  <div class="state-label">Default</div>
-  <button class="btn btn--primary">Upload</button>
-</div>
-<div class="state-row">
-  <div class="state-label">Hover</div>
-  <button class="btn btn--primary btn--primary-hover">Upload</button>
-</div>
-<div class="state-row">
-  <div class="state-label">Disabled</div>
-  <button class="btn btn--primary" disabled>Upload</button>
-</div>
-```
-
-For hover states that can't be shown statically, create explicit `--hover` modifier classes that mirror the `:hover` styles:
-
-```css
-.btn--primary:hover,
-.btn--primary-hover {
-  background: var(--accent-primary);
-  color: var(--bg-page);
-}
-```
-
-## Typography System
-
-Use a modular type scale. Define sizes as tokens, not magic numbers.
-
-```css
-:root {
-  --text-xs: 10px;
-  --text-sm: 11px;
-  --text-base: 13px;
-  --text-md: 14px;
-  --text-lg: 16px;
-  --text-xl: 20px;
-  --text-2xl: 28px;
-}
-```
-
-Font pairing pattern:
-- **UI text:** `var(--font-body)` at `var(--text-base)` weight 400-500
-- **Headings:** `var(--font-body)` at `var(--text-xl)`+ weight 600-700, negative letter-spacing
-- **Code/mono:** `var(--font-mono)` at one step smaller than surrounding UI text
-- **Labels/meta:** `var(--font-body)` at `var(--text-sm)`, uppercase, `letter-spacing: 0.12em`, `var(--text-muted)`
-
-## Spacing System
-
-8px base grid. All spacing values are multiples of 4px.
-
-```css
-:root {
-  --space-1: 4px;   /* micro: badge padding, tight gaps */
-  --space-2: 8px;   /* base: card gaps, list gaps, standard spacing */
-  --space-3: 12px;  /* comfortable: input padding, search gaps */
-  --space-4: 16px;  /* spacious: terminal padding, header gaps */
-  --space-5: 20px;  /* card padding, section header margins */
-  --space-6: 24px;  /* page horizontal padding */
-  --space-8: 32px;  /* section vertical padding */
-  --space-12: 48px; /* large section breaks */
-}
-```
-
-Rules from `visual-design-harmony.md`:
-- Internal spacing ≤ external spacing (padding inside a card ≤ gap between cards)
-- Content fills 65-80% of its container
-- Consistent gaps within a group, larger gaps between groups (proximity principle)
-
-## Mapping to Vue 3 SFCs
-
-The HTML mockup should map cleanly to Vue components. One BEM block = one `.vue` file.
-
-**Mockup HTML:**
-```html
-<div class="session-card">
-  <span class="session-card__filename">file.cast</span>
-  <span class="badge badge--agent-claude">Claude</span>
-</div>
-```
-
-**Vue SFC equivalent:**
-```vue
-<template>
-  <div class="session-card">
-    <span class="session-card__filename">{{ session.filename }}</span>
-    <AppBadge :variant="session.agentType">{{ session.agentLabel }}</AppBadge>
-  </div>
-</template>
-
-<style scoped>
-.session-card { /* same CSS as mockup */ }
-.session-card__filename { /* same CSS */ }
+Mockup                              Production
+──────────────────────────          ──────────────────────────
+<style>                             src/client/styles/
+  :root { tokens }                    tokens.css     (design tokens)
+  .btn { ... }                        base.css       (reset + base)
+  .badge { ... }                      components.css (shared styles)
+  .session-card { ... }
 </style>
+
+<script>                            src/client/components/
+  AppBadge = defineComponent(...)     AppBadge.vue   (<style scoped> for overrides only)
+  AppButton = defineComponent(...)    AppButton.vue
+  SessionCard = defineComponent(...)  SessionCard.vue
+</script>
 ```
 
-Key Vue CSS features to design for:
-- **`scoped` styles** — each component's CSS is isolated. Design tokens in `:root` cascade through, scoped styles don't leak.
-- **`v-bind()` in CSS** — component props can drive CSS values: `color: v-bind(accentColor)`. Design with props in mind.
-- **CSS Modules** — alternative to scoped for stricter isolation. Class names become `$style.className`.
+In production SFCs, `<style scoped>` is used sparingly — only for component-specific overrides. Shared styles (tokens, component base classes) are global CSS files imported in `main.ts`.
+
+## Representing States
+
+Show interactive states by rendering each state as a separate component instance. Use a showcase wrapper:
+
+```js
+const StateShowcase = defineComponent({
+  props: { label: String },
+  template: `
+    <div class="state-row">
+      <span class="state-label">{{ label }}</span>
+      <slot/>
+    </div>`
+});
+```
+
+```css
+.state-row { display: flex; align-items: center; gap: var(--space-4); }
+.state-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  min-width: 80px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+```
+
+For hover/focus states, add explicit modifier classes that mirror the pseudo-class:
+```css
+.btn--primary:hover, .btn--primary-hover { /* same styles */ }
+```
 
 ## Responsive Breakpoints
-
-From `visual-design-harmony.md`:
 
 ```css
 /* Mobile first */
@@ -441,92 +435,28 @@ From `visual-design-harmony.md`:
 
 Mobile adjustments:
 - Stack horizontal layouts vertically
-- Full-width cards (single column)
+- Single-column card grids
 - Touch targets minimum 44x44px
 - Reduce horizontal padding: `var(--space-4)` instead of `var(--space-6)`
 
-## Token Documentation Pattern
-
-When creating design token reference pages, use this structure:
-
-```html
-<section class="token-section">
-  <h3 class="token-section__title">Color Tokens</h3>
-  <p class="token-section__desc">Background, accent, text, and status colors.</p>
-  <div class="token-grid">
-    <div class="token-card">
-      <div class="token-card__swatch" style="background: var(--bg-surface);"></div>
-      <div class="token-card__info">
-        <code class="token-card__name">--bg-surface</code>
-        <span class="token-card__value">#141414</span>
-        <span class="token-card__usage">Card backgrounds, panels</span>
-      </div>
-    </div>
-    <!-- more cards -->
-  </div>
-</section>
-```
-
-```css
-.token-section__title {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: var(--space-5);
-}
-
-.token-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-2);
-}
-
-.token-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.token-card__swatch {
-  height: 48px;
-  width: 100%;
-}
-
-.token-card__info {
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.token-card__name {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-}
-
-.token-card__value {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
-}
-
-.token-card__usage {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-}
-```
-
 ## Visual Verification Checklist
 
-Before handing off any design, verify in browser (via Playwright or Chrome MCP):
+Before handing off any design, verify in browser (via Playwright or Chrome MCP) at **both viewports**:
 
+### Desktop (1280px wide)
 1. All text is readable — no clipping, overflow, or invisible-on-background
 2. Interactive states are distinct — hover, focus, active, disabled all visually different
 3. Alignment — elements in a row share a baseline, columns align their edges
-4. Spacing consistency — same gaps between same-level siblings, no orphaned tight/loose spots
-5. Token coverage — no raw hex/px values that should be tokens
-6. Responsive — content doesn't overflow at 375px width, still uses space well at 1440px
+4. Spacing consistency — same gaps between same-level siblings
+5. Grid layouts fill space well — no excessive whitespace or cramped columns
+6. Token coverage — **zero** raw hex/px/rgba values outside `:root`
+
+### Mobile (375px wide)
+1. No horizontal overflow — nothing extends beyond the viewport
+2. Layouts stack correctly — horizontal rows become vertical stacks
+3. Touch targets are at least 44x44px
+4. Text remains legible — no truncation that hides meaning
+5. Card grids collapse to single column
+6. Padding reduces appropriately (`var(--space-4)` instead of `var(--space-6)`)
+
+Take a screenshot at each viewport and include both in the handoff.
