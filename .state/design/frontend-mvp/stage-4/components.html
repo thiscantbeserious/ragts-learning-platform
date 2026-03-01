@@ -1126,6 +1126,225 @@
     }
 
     /* ======================
+       COMPONENT: SPINNERS & LOADERS
+       ====================== */
+
+    /* --- Ring Spinner (sm / md / lg) --- */
+    .spinner {
+      display: inline-block;
+      border: var(--space-0\.5) solid var(--border-strong);
+      border-top-color: var(--accent-primary);
+      border-radius: var(--radius-full);
+      animation: spin 0.7s linear infinite;
+    }
+
+    .spinner--sm {
+      width: var(--space-4);
+      height: var(--space-4);
+    }
+
+    .spinner--md {
+      width: var(--space-8);
+      height: var(--space-8);
+      border-width: var(--space-0\.5);
+    }
+
+    .spinner--lg {
+      width: var(--space-12);
+      height: var(--space-12);
+      border-width: var(--space-1);
+    }
+
+    .spinner--secondary {
+      border-top-color: var(--accent-secondary);
+    }
+
+    /* --- Dot Spinner (inline) --- */
+    .dot-spinner {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .dot-spinner__dot {
+      width: var(--space-1\.5);
+      height: var(--space-1\.5);
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+      animation: dot-bounce 1.4s ease-in-out infinite both;
+    }
+
+    .dot-spinner__dot:nth-child(2) { animation-delay: 0.16s; }
+    .dot-spinner__dot:nth-child(3) { animation-delay: 0.32s; }
+
+    .dot-spinner--secondary .dot-spinner__dot {
+      background: var(--accent-secondary);
+    }
+
+    .dot-spinner--muted .dot-spinner__dot {
+      background: var(--text-muted);
+    }
+
+    @keyframes dot-bounce {
+      0%, 80%, 100% { transform: scale(0.4); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* --- Bar Loader (indeterminate) --- */
+    .bar-loader {
+      width: 100%;
+      height: var(--space-0\.5);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-loader__track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background: var(--accent-primary);
+      border-radius: var(--radius-full);
+      animation: bar-slide 1.5s ease-in-out infinite;
+    }
+
+    .bar-loader--secondary .bar-loader__track {
+      background: var(--accent-secondary);
+    }
+
+    @keyframes bar-slide {
+      0% { left: -40%; }
+      100% { left: 100%; }
+    }
+
+    /* --- Determinate Progress Bar --- */
+    .progress-bar {
+      width: 100%;
+      height: var(--space-1);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar__fill {
+      height: 100%;
+      background: var(--accent-primary);
+      border-radius: var(--radius-full);
+      transition: width var(--duration-normal) var(--easing-default);
+    }
+
+    .progress-bar--success .progress-bar__fill {
+      background: var(--status-success);
+    }
+
+    /* --- Pulse Spinner (full-page / section placeholder) --- */
+    .pulse-spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .pulse-spinner__ring {
+      width: var(--space-12);
+      height: var(--space-12);
+      border-radius: var(--radius-full);
+      border: var(--space-0\.5) solid var(--accent-primary);
+      animation: pulse-ring 1.5s ease-out infinite;
+    }
+
+    .pulse-spinner__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    /* --- Matrix Rain (branded) --- */
+    .matrix-loader {
+      position: relative;
+      width: var(--progress-width);
+      height: var(--progress-width);
+      overflow: hidden;
+      background: var(--terminal-bg);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .matrix-loader__rain {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      gap: var(--space-1);
+      padding: var(--space-1);
+      overflow: hidden;
+    }
+
+    .matrix-loader__column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-0\.5);
+      animation: matrix-fall linear infinite;
+    }
+
+    .matrix-loader__column:nth-child(1) { animation-duration: 2.1s; }
+    .matrix-loader__column:nth-child(2) { animation-duration: 1.7s; animation-delay: -0.3s; }
+    .matrix-loader__column:nth-child(3) { animation-duration: 2.4s; animation-delay: -0.8s; }
+    .matrix-loader__column:nth-child(4) { animation-duration: 1.9s; animation-delay: -0.5s; }
+    .matrix-loader__column:nth-child(5) { animation-duration: 2.6s; animation-delay: -1.1s; }
+    .matrix-loader__column:nth-child(6) { animation-duration: 1.5s; animation-delay: -0.2s; }
+    .matrix-loader__column:nth-child(7) { animation-duration: 2.2s; animation-delay: -0.7s; }
+    .matrix-loader__column:nth-child(8) { animation-duration: 1.8s; animation-delay: -1.3s; }
+
+    .matrix-loader__char {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1;
+      color: var(--accent-primary);
+      opacity: 0.3;
+      text-align: center;
+    }
+
+    .matrix-loader__char:first-child {
+      opacity: 0.9;
+      text-shadow: 0 0 var(--space-2) var(--accent-primary);
+    }
+
+    .matrix-loader__char:nth-child(2) {
+      opacity: 0.6;
+    }
+
+    @keyframes matrix-fall {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+
+    .matrix-loader__overlay {
+      position: relative;
+      z-index: 1;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--accent-primary);
+      text-shadow: 0 0 var(--space-3) var(--accent-primary);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    /* ======================
        COMPONENT: DROPDOWN / SELECT
        ====================== */
     .dropdown {
@@ -1992,7 +2211,7 @@
         <div class="state-group">
           <div class="state-group__title">States</div>
 
-          <div style="margin-bottom: var(--space-4); max-width: 480px;">
+          <div style="margin-bottom: var(--space-4); max-width: var(--modal-max-width);">
             <div class="state-group__title" style="margin-bottom: var(--space-2);">Default</div>
             <div class="search-bar">
               <span class="search-bar__icon">
@@ -2002,7 +2221,7 @@
             </div>
           </div>
 
-          <div style="margin-bottom: var(--space-4); max-width: 480px;">
+          <div style="margin-bottom: var(--space-4); max-width: var(--modal-max-width);">
             <div class="state-group__title" style="margin-bottom: var(--space-2);">Focused</div>
             <div class="search-bar">
               <span class="search-bar__icon">
@@ -2012,7 +2231,7 @@
             </div>
           </div>
 
-          <div style="margin-bottom: var(--space-4); max-width: 480px;">
+          <div style="margin-bottom: var(--space-4); max-width: var(--modal-max-width);">
             <div class="state-group__title" style="margin-bottom: var(--space-2);">With Results</div>
             <div class="search-bar">
               <span class="search-bar__icon">
@@ -2676,6 +2895,206 @@
               <span class="filter-pill filter-pill--active">Gemini CLI</span>
               <span class="filter-pill">Codex</span>
               <span class="filter-pill">Other</span>
+            </div>
+          </state-showcase>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 20. SPINNERS & LOADERS ==================== -->
+      <section class="section">
+        <h2 class="section__title">20. Spinners & Loaders</h2>
+        <p class="section__description">Loading indicators for every context — inline actions, section loads, full-page transitions, and the branded matrix effect.</p>
+
+        <!-- Ring Spinners -->
+        <div class="state-group">
+          <div class="state-group__title">Ring Spinner</div>
+          <state-showcase label="small">
+            <span class="spinner spinner--sm"></span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary); margin-left: var(--space-2);">Inline with text</span>
+          </state-showcase>
+          <state-showcase label="medium">
+            <span class="spinner spinner--md"></span>
+          </state-showcase>
+          <state-showcase label="large">
+            <span class="spinner spinner--lg"></span>
+          </state-showcase>
+          <state-showcase label="secondary">
+            <span class="spinner spinner--md spinner--secondary"></span>
+          </state-showcase>
+        </div>
+
+        <!-- Dot Spinner -->
+        <div class="state-group">
+          <div class="state-group__title">Dot Spinner</div>
+          <state-showcase label="primary">
+            <span class="dot-spinner">
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+            </span>
+            <span style="font-size: var(--text-sm); color: var(--text-secondary); margin-left: var(--space-2);">Loading sessions</span>
+          </state-showcase>
+          <state-showcase label="secondary">
+            <span class="dot-spinner dot-spinner--secondary">
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+            </span>
+          </state-showcase>
+          <state-showcase label="muted">
+            <span class="dot-spinner dot-spinner--muted">
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+            </span>
+          </state-showcase>
+        </div>
+
+        <!-- Bar Loaders -->
+        <div class="state-group">
+          <div class="state-group__title">Bar Loader (Indeterminate)</div>
+          <div style="max-width: var(--toast-max-width); display: flex; flex-direction: column; gap: var(--space-4);">
+            <state-showcase label="primary">
+              <div class="bar-loader" style="flex: 1;">
+                <div class="bar-loader__track"></div>
+              </div>
+            </state-showcase>
+            <state-showcase label="secondary">
+              <div class="bar-loader bar-loader--secondary" style="flex: 1;">
+                <div class="bar-loader__track"></div>
+              </div>
+            </state-showcase>
+          </div>
+        </div>
+
+        <!-- Determinate Progress -->
+        <div class="state-group">
+          <div class="state-group__title">Progress Bar (Determinate)</div>
+          <div style="max-width: var(--toast-max-width); display: flex; flex-direction: column; gap: var(--space-4);">
+            <state-showcase label="25%">
+              <div class="progress-bar" style="flex: 1;">
+                <div class="progress-bar__fill" style="width: 25%;"></div>
+              </div>
+            </state-showcase>
+            <state-showcase label="67%">
+              <div class="progress-bar" style="flex: 1;">
+                <div class="progress-bar__fill" style="width: 67%;"></div>
+              </div>
+            </state-showcase>
+            <state-showcase label="100%">
+              <div class="progress-bar progress-bar--success" style="flex: 1;">
+                <div class="progress-bar__fill" style="width: 100%;"></div>
+              </div>
+            </state-showcase>
+          </div>
+        </div>
+
+        <!-- Pulse Spinner -->
+        <div class="state-group">
+          <div class="state-group__title">Pulse Spinner (Section / Page Load)</div>
+          <state-showcase label="with label">
+            <div class="pulse-spinner">
+              <div class="pulse-spinner__ring"></div>
+              <span class="pulse-spinner__label">Processing</span>
+            </div>
+          </state-showcase>
+          <state-showcase label="no label">
+            <div class="pulse-spinner">
+              <div class="pulse-spinner__ring"></div>
+            </div>
+          </state-showcase>
+        </div>
+
+        <!-- Matrix Rain -->
+        <div class="state-group">
+          <div class="state-group__title">Matrix Rain (Branded)</div>
+          <state-showcase label="loading">
+            <div class="matrix-loader">
+              <div class="matrix-loader__rain">
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">R</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">A</span>
+                  <span class="matrix-loader__char">G</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">T</span>
+                  <span class="matrix-loader__char">S</span>
+                  <span class="matrix-loader__char">0</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">$</span>
+                  <span class="matrix-loader__char">_</span>
+                  <span class="matrix-loader__char">></span>
+                  <span class="matrix-loader__char">|</span>
+                  <span class="matrix-loader__char">#</span>
+                  <span class="matrix-loader__char">~</span>
+                  <span class="matrix-loader__char">/</span>
+                  <span class="matrix-loader__char">@</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">A</span>
+                  <span class="matrix-loader__char">G</span>
+                  <span class="matrix-loader__char">E</span>
+                  <span class="matrix-loader__char">N</span>
+                  <span class="matrix-loader__char">T</span>
+                  <span class="matrix-loader__char">S</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">></span>
+                  <span class="matrix-loader__char">_</span>
+                  <span class="matrix-loader__char">$</span>
+                  <span class="matrix-loader__char">%</span>
+                  <span class="matrix-loader__char">^</span>
+                  <span class="matrix-loader__char">&</span>
+                  <span class="matrix-loader__char">*</span>
+                  <span class="matrix-loader__char">#</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">L</span>
+                  <span class="matrix-loader__char">E</span>
+                  <span class="matrix-loader__char">A</span>
+                  <span class="matrix-loader__char">R</span>
+                  <span class="matrix-loader__char">N</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                </div>
+                <div class="matrix-loader__column">
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">0</span>
+                  <span class="matrix-loader__char">1</span>
+                  <span class="matrix-loader__char">1</span>
+                </div>
+              </div>
+              <span class="matrix-loader__overlay">Loading</span>
             </div>
           </state-showcase>
         </div>
