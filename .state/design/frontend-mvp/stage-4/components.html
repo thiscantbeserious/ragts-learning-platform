@@ -768,11 +768,17 @@
                   </div>
                   <div class="input-group">
                     <label class="input-group__label">Agent Type</label>
-                    <div class="dropdown">
-                      <button class="dropdown__trigger" type="button">
+                    <div class="dropdown dropdown--open">
+                      <button class="dropdown__trigger dropdown__trigger--focused" type="button">
                         <span>Claude Code</span>
                         <span class="dropdown__chevron"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg></span>
                       </button>
+                      <div class="dropdown__menu">
+                        <div class="dropdown__option dropdown__option--selected">Claude Code</div>
+                        <div class="dropdown__option">Gemini CLI</div>
+                        <div class="dropdown__option">Codex</div>
+                        <div class="dropdown__option">Other</div>
+                      </div>
                     </div>
                   </div>
                 </div>
