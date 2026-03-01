@@ -5,138 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stage 4 — Component Library (DS-3)</title>
   <link rel="stylesheet" href="../shared/layout.css">
+  <link rel="stylesheet" href="../shared/page.css">
   <link rel="stylesheet" href="../shared/components.css">
   <link rel="stylesheet" href="../shared/icons.css">
   <style>
     /* ========================
        Stage 4 — Component Library
        Tokens + grid utilities imported from ../shared/layout.css
+       Page scaffold imported from ../shared/page.css
        Component styles imported from ../shared/components.css
        Icon utilities imported from ../shared/icons.css
        This file contains only page-specific showcase styles
        ======================== */
 
-    /* --- Page Layout --- */
-    .page {
-      max-width: var(--container-max);
-      margin: 0 auto;
-      padding: var(--space-12) var(--container-padding);
-    }
-
-    .page__title {
-      font-size: var(--text-3xl);
-      font-weight: var(--weight-bold);
-      letter-spacing: var(--tracking-tight);
-      line-height: var(--leading-tight);
-      color: var(--text-primary);
-      margin-bottom: var(--space-1);
-    }
-
-    .page__subtitle {
-      font-size: var(--text-base);
-      color: var(--text-secondary);
-      margin-bottom: var(--space-12);
-    }
-
-    /* --- Section --- */
-    .section {
-      margin-bottom: var(--space-12);
-    }
-
-    .section__title {
-      font-size: var(--text-xl);
-      font-weight: var(--weight-semibold);
-      letter-spacing: var(--tracking-tight);
-      line-height: var(--leading-snug);
-      color: var(--text-primary);
-      margin-bottom: var(--space-2);
-      padding-bottom: var(--space-2);
-      border-bottom: var(--space-px) solid var(--border-default);
-    }
-
-    .section__description {
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      margin-bottom: var(--space-6);
-    }
-
-    /* --- State Showcase --- */
-    .state-group {
-      margin-bottom: var(--space-8);
-    }
-
-    .state-group__title {
-      font-family: var(--font-mono);
-      font-size: var(--text-xs);
-      font-weight: var(--weight-medium);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: var(--tracking-wider);
-      margin-bottom: var(--space-3);
-    }
-
-    .state-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-4);
-      margin-bottom: var(--space-3);
-    }
-
-    .state-row--wrap {
-      flex-wrap: wrap;
-    }
-
-    .state-row--top {
-      align-items: flex-start;
-    }
-
-    .state-label {
-      font-family: var(--font-mono);
-      font-size: var(--text-xs);
-      color: var(--text-muted);
-      min-width: 80px;
-      text-transform: uppercase;
-      letter-spacing: var(--tracking-wider);
-      line-height: var(--leading-relaxed);
-      flex-shrink: 0;
-    }
-
-    .state-label--wide {
-      min-width: 120px;
-    }
-
-
     /* Component styles live in ../shared/components.css */
 
-    /* --- Utility for showcase grid --- */
-    .component-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: var(--space-6);
+    /* --- Demo-specific wrappers (page layout, not component styles) --- */
+
+    /* Header demo wrapper: framed preview */
+    .demo-header-frame {
+      border: var(--space-px) solid var(--border-default);
+      border-bottom: none;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      overflow: hidden;
     }
 
-    .component-grid--2col {
-      grid-template-columns: 1fr 1fr;
+    /* Search bar demo wrappers */
+    .demo-search-group {
+      margin-bottom: var(--space-4);
+      max-width: var(--modal-max-width);
     }
 
-    .component-grid--3col {
-      grid-template-columns: 1fr 1fr 1fr;
+    .demo-search-group .state-group__title {
+      margin-bottom: var(--space-2);
     }
 
-    .input-demo {
-      width: 280px;
+    /* Section header demo wrapper */
+    .demo-section-header-wrap {
+      flex: 1;
+      max-width: 600px;
     }
 
-    .card-demo {
-      width: 100%;
-      max-width: 520px;
+    /* Empty state demo wrapper */
+    .demo-empty-state-frame {
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      background: var(--bg-surface);
     }
 
-    /* Divider between major sections */
-    .divider {
-      border: none;
-      border-top: var(--space-px) solid var(--border-default);
-      margin: var(--space-12) 0;
+    /* Skeleton card list demo */
+    .demo-skeleton-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    /* Content skeleton demo */
+    .demo-content-skeleton {
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    /* Vertical spacer for skeleton content */
+    .demo-spacer {
+      height: var(--space-4);
+    }
+
+    /* Dropdown open state demo */
+    .demo-dropdown-open {
+      margin-bottom: var(--space-12);
+    }
+
+    /* Loader demo wrapper */
+    .demo-loader-wrap {
+      max-width: var(--toast-max-width);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    /* Loader items need flex:1 to fill available space in state-row */
+    .demo-loader-wrap .bar-loader,
+    .demo-loader-wrap .progress-bar {
+      flex: 1;
     }
   </style>
 </head>
@@ -146,9 +99,112 @@
       <h1 class="page__title">Component Library</h1>
       <p class="page__subtitle">Stage 4 (DS-3) -- All components with every interactive state rendered.</p>
 
-      <!-- ==================== 1. BUTTON ==================== -->
+      <!-- ==================== 1. CARD (BASE) ==================== -->
       <section class="section">
-        <h2 class="section__title">1. Button</h2>
+        <h2 class="section__title">1. Card (Base)</h2>
+        <p class="section__description">Foundational surface container. Four modifiers and structured children (.card__title, .card__label, .card__value, .card__desc, .card__body, .card__media).</p>
+
+        <!-- Default -->
+        <div class="state-group">
+          <div class="state-group__title">Default</div>
+          <div class="card-demo">
+            <div class="card">
+              <span class="card__title">.card — Default</span>
+              <span class="card__label">--space-5 padding</span>
+              <span class="card__value">Column layout, radius-xl. The standard container for grouped content.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compact -->
+        <div class="state-group">
+          <div class="state-group__title">Compact</div>
+          <div class="card-demo">
+            <div class="card card--compact">
+              <span class="card__label">--space-3 / --space-4</span>
+              <span class="card__title">.card--compact</span>
+              <span class="card__desc">Tighter padding, smaller radius. For dense lists and token grids.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row -->
+        <div class="state-group">
+          <div class="state-group__title">Row</div>
+          <div class="card-demo">
+            <div class="card card--row">
+              <div class="card__body flex-fill">
+                <span class="card__title">Leading Whitespace Detection</span>
+                <span class="card__value">12 sections &middot; 8m 34s</span>
+              </div>
+              <span class="badge badge--accent badge--sm"><span class="badge__dot"></span>Claude Code</span>
+            </div>
+          </div>
+          <div class="card-demo" style="margin-top: var(--space-3);">
+            <div class="card card--row">
+              <div style="width: 40px; height: 40px; flex-shrink: 0; background: var(--accent-primary-subtle); border: var(--space-px) solid var(--accent-primary); border-radius: var(--radius-md);"></div>
+              <div class="card__body">
+                <span class="card__title">Normal</span>
+                <span class="card__label">--duration-normal</span>
+                <span class="card__value">250ms</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flush + Media -->
+        <div class="state-group">
+          <div class="state-group__title">Flush + Media</div>
+          <div class="component-grid component-grid--3col">
+            <div class="card card--flush">
+              <div class="card__media" style="height: 80px; background: linear-gradient(135deg, var(--accent-primary-dim), var(--accent-secondary-dim));"></div>
+              <div class="card__body">
+                <span class="card__title">Media Card</span>
+                <span class="card__label">--accent-primary</span>
+                <span class="card__value">#00ff9f</span>
+              </div>
+            </div>
+            <div class="card card--flush">
+              <div class="card__media" style="height: 80px; background: var(--terminal-bg);"></div>
+              <div class="card__body">
+                <span class="card__title">Terminal BG</span>
+                <span class="card__label">--terminal-bg</span>
+                <span class="card__value">#1e1e22</span>
+              </div>
+            </div>
+            <div class="card card--flush">
+              <div class="card__media" style="height: 80px; background: linear-gradient(135deg, var(--status-success), var(--status-info));"></div>
+              <div class="card__body">
+                <span class="card__title">Gradient</span>
+                <span class="card__label">Custom media</span>
+                <span class="card__value">Full-bleed visual area</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Composition example -->
+        <div class="state-group">
+          <div class="state-group__title">Composition</div>
+          <p class="section__description">Cards compose with child classes. Session Card extends this base.</p>
+          <div class="component-grid component-grid--2col">
+            <div class="card card--compact">
+              <span class="card__label">Sessions</span>
+              <span class="card__title" style="font-size: var(--text-2xl); font-weight: var(--weight-bold);">127</span>
+            </div>
+            <div class="card card--compact">
+              <span class="card__label">Total Duration</span>
+              <span class="card__title" style="font-size: var(--text-2xl); font-weight: var(--weight-bold); color: var(--accent-primary);">48h 12m</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== 2. BUTTON ==================== -->
+      <section class="section">
+        <h2 class="section__title">2. Button</h2>
         <p class="section__description">Outlined buttons with fill-on-hover. Four variants, two sizes, five states each.</p>
 
         <!-- Primary -->
@@ -246,9 +302,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 2. INPUT ==================== -->
+      <!-- ==================== 3. INPUT ==================== -->
       <section class="section">
-        <h2 class="section__title">2. Input</h2>
+        <h2 class="section__title">3. Input</h2>
         <p class="section__description">Text inputs with label, helper text, and error messaging. Also textarea variant.</p>
 
         <div class="state-group">
@@ -321,9 +377,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 3. BADGE ==================== -->
+      <!-- ==================== 4. BADGE ==================== -->
       <section class="section">
-        <h2 class="section__title">3. Badge</h2>
+        <h2 class="section__title">4. Badge</h2>
         <p class="section__description">Pill-shaped labels for status, agent types, and metadata. Default and small sizes.</p>
 
         <div class="state-group">
@@ -371,9 +427,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 4. SESSION CARD ==================== -->
+      <!-- ==================== 5. SESSION CARD ==================== -->
       <section class="section">
-        <h2 class="section__title">4. Session Card</h2>
+        <h2 class="section__title">5. Session Card</h2>
         <p class="section__description">Primary list item. Shows session metadata with agent badge, timestamp, and metrics.</p>
 
         <div class="state-group">
@@ -457,9 +513,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 5. TOAST / NOTIFICATION ==================== -->
+      <!-- ==================== 6. TOAST / NOTIFICATION ==================== -->
       <section class="section">
-        <h2 class="section__title">5. Toast / Notification</h2>
+        <h2 class="section__title">6. Toast / Notification</h2>
         <p class="section__description">Transient notifications with left accent border. Four semantic variants with close button.</p>
 
         <div class="state-group">
@@ -522,14 +578,14 @@
 
       <hr class="divider">
 
-      <!-- ==================== 6. APP HEADER ==================== -->
+      <!-- ==================== 7. APP HEADER ==================== -->
       <section class="section">
-        <h2 class="section__title">6. AppHeader</h2>
+        <h2 class="section__title">7. AppHeader</h2>
         <p class="section__description">Top navigation bar with brand, navigation links, upload action, and user avatar.</p>
 
         <div class="state-group">
           <div class="state-group__title">Full Header</div>
-          <div style="border: var(--space-px) solid var(--border-default); border-bottom: none; border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden;">
+          <div class="demo-header-frame">
             <div class="app-header">
               <div class="app-header__left">
                 <a class="app-header__brand" href="#">
@@ -568,16 +624,16 @@
 
       <hr class="divider">
 
-      <!-- ==================== 7. SEARCH BAR ==================== -->
+      <!-- ==================== 8. SEARCH BAR ==================== -->
       <section class="section">
-        <h2 class="section__title">7. Search Bar</h2>
+        <h2 class="section__title">8. Search Bar</h2>
         <p class="section__description">Search input with icon, placeholder, clear button, and results count.</p>
 
         <div class="state-group">
           <div class="state-group__title">States</div>
 
-          <div style="margin-bottom: var(--space-4); max-width: var(--modal-max-width);">
-            <div class="state-group__title" style="margin-bottom: var(--space-2);">Default</div>
+          <div class="demo-search-group">
+            <div class="state-group__title">Default</div>
             <div class="search-bar">
               <span class="search-bar__icon">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
@@ -586,8 +642,8 @@
             </div>
           </div>
 
-          <div style="margin-bottom: var(--space-4); max-width: var(--modal-max-width);">
-            <div class="state-group__title" style="margin-bottom: var(--space-2);">Focused</div>
+          <div class="demo-search-group">
+            <div class="state-group__title">Focused</div>
             <div class="search-bar">
               <span class="search-bar__icon">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
@@ -596,8 +652,8 @@
             </div>
           </div>
 
-          <div style="margin-bottom: var(--space-4); max-width: var(--modal-max-width);">
-            <div class="state-group__title" style="margin-bottom: var(--space-2);">With Results</div>
+          <div class="demo-search-group">
+            <div class="state-group__title">With Results</div>
             <div class="search-bar">
               <span class="search-bar__icon">
                 <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
@@ -614,9 +670,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 8. UPLOAD ZONE ==================== -->
+      <!-- ==================== 9. UPLOAD ZONE ==================== -->
       <section class="section">
-        <h2 class="section__title">8. Upload Zone</h2>
+        <h2 class="section__title">9. Upload Zone</h2>
         <p class="section__description">Drag-and-drop area with five distinct states: default, drag-over, uploading, success, and error.</p>
 
         <div class="state-group">
@@ -647,7 +703,7 @@
             <div class="upload-zone__icon">
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 30V36H34V30"/><path d="M24 12V30"/><path d="M16 20L24 12L32 20"/></svg>
             </div>
-            <div class="upload-zone__title" style="font-family: var(--font-mono); font-size: var(--text-sm);">debug-api-auth-flow.cast</div>
+            <div class="upload-zone__title">debug-api-auth-flow.cast</div>
             <div class="upload-zone__subtitle">Uploading... 67%</div>
             <div class="upload-zone__progress">
               <div class="upload-zone__progress-bar" style="width: 67%"></div>
@@ -680,15 +736,15 @@
 
       <hr class="divider">
 
-      <!-- ==================== 9. SECTION HEADER ==================== -->
+      <!-- ==================== 10. SECTION HEADER ==================== -->
       <section class="section">
-        <h2 class="section__title">9. Section Header</h2>
+        <h2 class="section__title">10. Section Header</h2>
         <p class="section__description">Collapsible section headers for the terminal document view. Detected vs Marker distinction via left accent border.</p>
 
         <div class="state-group">
           <div class="state-group__title">Detected Section</div>
           <state-showcase label="expanded" class="state-row--top">
-            <div style="flex: 1; max-width: 600px;">
+            <div class="demo-section-header-wrap">
               <div class="section-header section-header--detected">
                 <div class="section-header__chevron">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
@@ -700,7 +756,7 @@
             </div>
           </state-showcase>
           <state-showcase label="collapsed" class="state-row--top">
-            <div style="flex: 1; max-width: 600px;">
+            <div class="demo-section-header-wrap">
               <div class="section-header section-header--detected section-header--collapsed">
                 <div class="section-header__chevron">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
@@ -716,7 +772,7 @@
         <div class="state-group">
           <div class="state-group__title">Marker Section</div>
           <state-showcase label="expanded" class="state-row--top">
-            <div style="flex: 1; max-width: 600px;">
+            <div class="demo-section-header-wrap">
               <div class="section-header section-header--marker">
                 <div class="section-header__chevron">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
@@ -728,7 +784,7 @@
             </div>
           </state-showcase>
           <state-showcase label="hover" class="state-row--top">
-            <div style="flex: 1; max-width: 600px;">
+            <div class="demo-section-header-wrap">
               <div class="section-header section-header--marker section-header--hover">
                 <div class="section-header__chevron">
                   <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
@@ -744,9 +800,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 10. MODAL SHELL ==================== -->
+      <!-- ==================== 11. MODAL SHELL ==================== -->
       <section class="section">
-        <h2 class="section__title">10. Modal Shell</h2>
+        <h2 class="section__title">11. Modal Shell</h2>
         <p class="section__description">Overlay container with header, scrollable body, and footer action area.</p>
 
         <div class="state-group">
@@ -760,12 +816,12 @@
                 </button>
               </div>
               <div class="modal__body">
-                <div style="display: flex; flex-direction: column; gap: var(--space-5);">
-                  <div class="upload-zone" style="padding: var(--space-8) var(--space-6);">
+                <div class="modal__body-stack">
+                  <div class="upload-zone upload-zone--compact">
                     <div class="upload-zone__icon">
                       <svg width="32" height="32" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 30V36H34V30"/><path d="M24 12V30"/><path d="M16 20L24 12L32 20"/></svg>
                     </div>
-                    <div class="upload-zone__title" style="font-size: var(--text-base);">Drop .cast file here</div>
+                    <div class="upload-zone__title">Drop .cast file here</div>
                     <div class="upload-zone__subtitle">or <span class="upload-zone__browse">browse</span></div>
                   </div>
                   <div class="input-group">
@@ -798,14 +854,14 @@
 
       <hr class="divider">
 
-      <!-- ==================== 11. EMPTY STATE ==================== -->
+      <!-- ==================== 12. EMPTY STATE ==================== -->
       <section class="section">
-        <h2 class="section__title">11. Empty State</h2>
+        <h2 class="section__title">12. Empty State</h2>
         <p class="section__description">Placeholder for when no sessions exist. Personality-driven copy with call to action.</p>
 
         <div class="state-group">
           <div class="state-group__title">No Sessions</div>
-          <div style="border: var(--space-px) solid var(--border-default); border-radius: var(--radius-xl); background: var(--bg-surface);">
+          <div class="demo-empty-state-frame">
             <div class="empty-state">
               <div class="empty-state__icon">
                 <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -828,9 +884,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 12. SKELETON LOADER ==================== -->
+      <!-- ==================== 13. SKELETON LOADER ==================== -->
       <section class="section">
-        <h2 class="section__title">12. Skeleton Loader</h2>
+        <h2 class="section__title">13. Skeleton Loader</h2>
         <p class="section__description">Loading placeholders for cards and content. Subtle shimmer animation.</p>
 
         <div class="state-group">
@@ -852,7 +908,7 @@
 
         <div class="state-group">
           <div class="state-group__title">Multiple Card Skeletons</div>
-          <div class="card-demo" style="display: flex; flex-direction: column; gap: var(--space-3);">
+          <div class="card-demo demo-skeleton-list">
             <div class="skeleton--card">
               <div class="skeleton--card-row">
                 <div class="skeleton skeleton--text" style="width: 60%;"></div>
@@ -891,12 +947,12 @@
 
         <div class="state-group">
           <div class="state-group__title">Content Skeleton</div>
-          <div style="max-width: 600px; display: flex; flex-direction: column; gap: var(--space-3);">
+          <div class="demo-content-skeleton">
             <div class="skeleton skeleton--text" style="width: 40%;"></div>
             <div class="skeleton skeleton--text" style="width: 100%;"></div>
             <div class="skeleton skeleton--text" style="width: 90%;"></div>
             <div class="skeleton skeleton--text" style="width: 75%;"></div>
-            <div style="height: var(--space-4);"></div>
+            <div class="demo-spacer"></div>
             <div class="skeleton skeleton--text" style="width: 35%;"></div>
             <div class="skeleton skeleton--text" style="width: 95%;"></div>
             <div class="skeleton skeleton--text" style="width: 85%;"></div>
@@ -906,9 +962,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 13. DROPDOWN / SELECT ==================== -->
+      <!-- ==================== 14. DROPDOWN / SELECT ==================== -->
       <section class="section">
-        <h2 class="section__title">13. Dropdown / Select</h2>
+        <h2 class="section__title">14. Dropdown / Select</h2>
         <p class="section__description">Custom select with label, options list. Five states: default, open, focused, disabled, error.</p>
 
         <div class="state-group">
@@ -976,15 +1032,15 @@
 
         <div class="state-group">
           <div class="state-group__title">Open / Expanded</div>
-          <div class="input-demo" style="margin-bottom: var(--space-12);">
+          <div class="input-demo demo-dropdown-open">
             <div class="input-group">
               <label class="input-group__label">Agent Type</label>
-              <div class="dropdown dropdown--open" style="position: relative;">
+              <div class="dropdown dropdown--open dropdown--static">
                 <button class="dropdown__trigger dropdown__trigger--focused" type="button">
                   <span>Claude Code</span>
                   <span class="dropdown__chevron"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg></span>
                 </button>
-                <div class="dropdown__menu" style="position: relative; top: var(--space-1);">
+                <div class="dropdown__menu">
                   <div class="dropdown__option dropdown__option--selected">Claude Code</div>
                   <div class="dropdown__option">Gemini CLI</div>
                   <div class="dropdown__option">Codex</div>
@@ -998,9 +1054,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 14. DATE INPUT ==================== -->
+      <!-- ==================== 15. DATE INPUT ==================== -->
       <section class="section">
-        <h2 class="section__title">14. Date Input</h2>
+        <h2 class="section__title">15. Date Input</h2>
         <p class="section__description">Styled date input with label. States: default, focused, with value, disabled, error.</p>
 
         <div class="state-group">
@@ -1074,9 +1130,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 15. EMAIL INPUT ==================== -->
+      <!-- ==================== 16. EMAIL INPUT ==================== -->
       <section class="section">
-        <h2 class="section__title">15. Email Input</h2>
+        <h2 class="section__title">16. Email Input</h2>
         <p class="section__description">Email-specific input with inline validation feedback. States: default, focused, valid, invalid, disabled.</p>
 
         <div class="state-group">
@@ -1110,12 +1166,12 @@
                 <div class="input-group">
                   <label class="input-group__label">Email</label>
                   <div class="email-input-wrap">
-                    <input class="input" type="email" value="admin@ragts.dev" style="border-color: var(--status-success);">
+                    <input class="input input--valid" type="email" value="admin@ragts.dev">
                     <span class="email-input__status email-input__status--valid">
                       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l4 4 6-6"/></svg>
                     </span>
                   </div>
-                  <span class="input-group__helper" style="color: var(--status-success);">Email address is valid</span>
+                  <span class="input-group__helper input-group__helper--valid">Email address is valid</span>
                 </div>
               </state-showcase>
             </div>
@@ -1152,9 +1208,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 16. TERMINAL CHROME ==================== -->
+      <!-- ==================== 17. TERMINAL CHROME ==================== -->
       <section class="section">
-        <h2 class="section__title">16. Terminal Chrome</h2>
+        <h2 class="section__title">17. Terminal Chrome</h2>
         <p class="section__description">Container frame for terminal content. Title bar with faux traffic lights, monospace content area.</p>
 
         <div class="state-group">
@@ -1167,7 +1223,7 @@
                 <div class="terminal-chrome__dot"></div>
               </div>
               <span class="terminal-chrome__title">debug-api-auth-flow.cast</span>
-              <div style="width: var(--space-12);"></div>
+              <div class="terminal-chrome__spacer"></div>
             </div>
             <div class="terminal-chrome__body">
               <div class="terminal-chrome__line"><span class="terminal-chrome__prompt">$</span> npm run test -- --filter auth</div>
@@ -1187,9 +1243,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 17. BREADCRUMB ==================== -->
+      <!-- ==================== 18. BREADCRUMB ==================== -->
       <section class="section">
-        <h2 class="section__title">17. Breadcrumb</h2>
+        <h2 class="section__title">18. Breadcrumb</h2>
         <p class="section__description">Navigation breadcrumb for session detail pages.</p>
 
         <div class="state-group">
@@ -1206,9 +1262,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 18. PREV/NEXT ARROWS ==================== -->
+      <!-- ==================== 19. PREV/NEXT ARROWS ==================== -->
       <section class="section">
-        <h2 class="section__title">18. Previous / Next Navigation</h2>
+        <h2 class="section__title">19. Previous / Next Navigation</h2>
         <p class="section__description">Session-to-session navigation controls with disabled state for first/last.</p>
 
         <div class="state-group">
@@ -1236,9 +1292,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 19. FILTER PILLS ==================== -->
+      <!-- ==================== 20. FILTER PILLS ==================== -->
       <section class="section">
-        <h2 class="section__title">19. Filter Pills</h2>
+        <h2 class="section__title">20. Filter Pills</h2>
         <p class="section__description">Agent type filter pills for session search. Adjacent to search bar.</p>
 
         <div class="state-group">
@@ -1275,9 +1331,9 @@
 
       <hr class="divider">
 
-      <!-- ==================== 20. SPINNERS & LOADERS ==================== -->
+      <!-- ==================== 21. SPINNERS & LOADERS ==================== -->
       <section class="section">
-        <h2 class="section__title">20. Spinners & Loaders</h2>
+        <h2 class="section__title">21. Spinners & Loaders</h2>
         <p class="section__description">Loading indicators for every context — inline actions, section loads, full-page transitions, and the branded matrix effect.</p>
 
         <!-- Ring Spinners -->
@@ -1285,7 +1341,7 @@
           <div class="state-group__title">Ring Spinner</div>
           <state-showcase label="small">
             <span class="spinner spinner--sm"></span>
-            <span style="font-size: var(--text-sm); color: var(--text-secondary); margin-left: var(--space-2);">Inline with text</span>
+            <span class="spinner__label">Inline with text</span>
           </state-showcase>
           <state-showcase label="medium">
             <span class="spinner spinner--md"></span>
@@ -1307,7 +1363,7 @@
               <span class="dot-spinner__dot"></span>
               <span class="dot-spinner__dot"></span>
             </span>
-            <span style="font-size: var(--text-sm); color: var(--text-secondary); margin-left: var(--space-2);">Loading sessions</span>
+            <span class="spinner__label">Loading sessions</span>
           </state-showcase>
           <state-showcase label="secondary">
             <span class="dot-spinner dot-spinner--secondary">
@@ -1328,14 +1384,14 @@
         <!-- Bar Loaders -->
         <div class="state-group">
           <div class="state-group__title">Bar Loader (Indeterminate)</div>
-          <div style="max-width: var(--toast-max-width); display: flex; flex-direction: column; gap: var(--space-4);">
+          <div class="demo-loader-wrap">
             <state-showcase label="primary">
-              <div class="bar-loader" style="flex: 1;">
+              <div class="bar-loader">
                 <div class="bar-loader__track"></div>
               </div>
             </state-showcase>
             <state-showcase label="secondary">
-              <div class="bar-loader bar-loader--secondary" style="flex: 1;">
+              <div class="bar-loader bar-loader--secondary">
                 <div class="bar-loader__track"></div>
               </div>
             </state-showcase>
@@ -1345,19 +1401,19 @@
         <!-- Determinate Progress -->
         <div class="state-group">
           <div class="state-group__title">Progress Bar (Determinate)</div>
-          <div style="max-width: var(--toast-max-width); display: flex; flex-direction: column; gap: var(--space-4);">
+          <div class="demo-loader-wrap">
             <state-showcase label="25%">
-              <div class="progress-bar" style="flex: 1;">
+              <div class="progress-bar">
                 <div class="progress-bar__fill" style="width: 25%;"></div>
               </div>
             </state-showcase>
             <state-showcase label="67%">
-              <div class="progress-bar" style="flex: 1;">
+              <div class="progress-bar">
                 <div class="progress-bar__fill" style="width: 67%;"></div>
               </div>
             </state-showcase>
             <state-showcase label="100%">
-              <div class="progress-bar progress-bar--success" style="flex: 1;">
+              <div class="progress-bar progress-bar--success">
                 <div class="progress-bar__fill" style="width: 100%;"></div>
               </div>
             </state-showcase>

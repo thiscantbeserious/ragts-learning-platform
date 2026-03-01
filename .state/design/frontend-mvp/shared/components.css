@@ -7,6 +7,7 @@
    Requires: shared/layout.css (design tokens, reset, grid utilities)
 
    Contents:
+     - Card (.card, --compact, --flush, --row)
      - Button (.btn, variants, sizes, states)
      - Input (.input, .textarea, .input-group)
      - Badge (.badge, variants, sizes)
@@ -30,6 +31,102 @@
      - Filter Pills (.filter-pills, .filter-pill)
 
    ================================================================ */
+
+/* ======================
+   BASE: CARD
+   ======================
+   Reusable card foundation. Use alone or extend with modifiers.
+   .card                — default (column layout, space-5 padding, radius-xl)
+   .card--compact       — tighter padding (space-3 / space-4) and radius-lg
+   .card--flush         — zero padding, overflow hidden (for full-bleed content)
+   .card--row           — horizontal layout
+   ====================== */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: var(--space-px) solid var(--border-default);
+  border-radius: var(--radius-xl);
+}
+
+.card--compact {
+  padding: var(--space-3) var(--space-4);
+  gap: var(--space-1);
+  border-radius: var(--radius-lg);
+}
+
+.card--flush {
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+}
+
+.card--row {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* --- Card children --- */
+.card__media {
+  width: 100%;
+  display: block;
+}
+
+.card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3);
+}
+
+.card--row .card__body {
+  padding: 0;
+}
+
+.card__body--right {
+  flex-shrink: 0;
+  min-width: var(--progress-width);
+  text-align: right;
+}
+
+.card__body--compact-right {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.card__title {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+}
+
+.card__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.card__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.card__value--break {
+  word-break: break-all;
+}
+
+.card__desc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
 
 /* ======================
    COMPONENT: BUTTON
@@ -368,6 +465,8 @@
    COMPONENT: SESSION CARD
    ====================== */
 .session-card {
+  /* Extends .card — use class="card session-card" in markup,
+     or apply .card base via session-card overrides below */
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -1680,4 +1779,69 @@
   border-color: var(--accent-primary);
   color: var(--accent-primary);
   background: var(--accent-primary-subtle);
+}
+
+/* ======================
+   COMPONENT: UPLOAD ZONE — Uploading state title
+   ====================== */
+.upload-zone--uploading .upload-zone__title {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/* Upload zone compact variant (modal context) */
+.upload-zone--compact {
+  padding: var(--space-8) var(--space-6);
+}
+
+.upload-zone--compact .upload-zone__title {
+  font-size: var(--text-base);
+}
+
+/* ======================
+   COMPONENT: MODAL — Body stack layout
+   ====================== */
+.modal__body-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ======================
+   COMPONENT: INPUT — Valid state
+   ====================== */
+.input--valid {
+  border-color: var(--status-success);
+}
+
+.input-group__helper--valid {
+  color: var(--status-success);
+}
+
+/* ======================
+   COMPONENT: SPINNER — Inline label
+   ====================== */
+.spinner__label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-left: var(--space-2);
+}
+
+/* ======================
+   COMPONENT: TERMINAL CHROME — Titlebar spacer
+   ====================== */
+.terminal-chrome__spacer {
+  width: var(--space-12);
+}
+
+/* ======================
+   COMPONENT: DROPDOWN — Static showcase overrides
+   ====================== */
+.dropdown--static {
+  position: relative;
+}
+
+.dropdown--static .dropdown__menu {
+  position: relative;
+  top: var(--space-1);
 }

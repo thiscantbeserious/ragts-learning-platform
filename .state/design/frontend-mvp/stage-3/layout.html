@@ -5,65 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stage 3 — Design Tokens</title>
   <link rel="stylesheet" href="../shared/layout.css">
+  <link rel="stylesheet" href="../shared/page.css">
+  <link rel="stylesheet" href="../shared/components.css">
   <style>
     /* ========================
        Stage 3 — Design Tokens Page
        Tokens imported from ../shared/layout.css
-       This file contains only page-specific styles
+       Page scaffold imported from ../shared/page.css
+       This file contains only stage-specific styles
        ======================== */
-
-    /* --- Layout --- */
-    .page {
-      max-width: var(--container-max);
-      margin: 0 auto;
-      padding: var(--space-12) var(--space-6);
-    }
-
-    .page-header {
-      margin-bottom: var(--space-12);
-    }
-
-    .page-title {
-      font-family: var(--font-body);
-      font-size: var(--text-2xl);
-      font-weight: var(--weight-bold);
-      color: var(--text-primary);
-      letter-spacing: var(--tracking-tight);
-      margin-bottom: var(--space-2);
-    }
-
-    .page-subtitle {
-      font-family: var(--font-body);
-      font-size: var(--text-base);
-      font-weight: var(--weight-normal);
-      color: var(--text-secondary);
-      max-width: var(--breakpoint-sm);
-    }
-
-    /* --- Section --- */
-    .section {
-      margin-bottom: var(--space-12);
-    }
-
-    .section-header {
-      margin-bottom: var(--space-6);
-      padding-bottom: var(--space-3);
-      border-bottom: var(--space-px) solid var(--border-default);
-    }
-
-    .section-title {
-      font-family: var(--font-body);
-      font-size: var(--text-xl);
-      font-weight: var(--weight-semibold);
-      color: var(--text-primary);
-      letter-spacing: var(--tracking-tight);
-      margin-bottom: var(--space-1);
-    }
-
-    .section-description {
-      font-size: var(--text-base);
-      color: var(--text-secondary);
-    }
 
     /* --- Token Grid --- */
     .token-grid {
@@ -82,57 +32,9 @@
       grid-template-columns: 1fr;
     }
 
-    /* --- Token Card --- */
-    .token-card {
-      background: var(--bg-surface);
-      border: var(--space-px) solid var(--border-default);
-      border-radius: var(--radius-xl);
-      padding: var(--space-5);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-    }
-
-    .token-card__label {
-      font-family: var(--font-mono);
-      font-size: var(--text-sm);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: var(--tracking-wider);
-    }
-
-    .token-card__name {
-      font-family: var(--font-body);
-      font-size: var(--text-base);
-      font-weight: var(--weight-medium);
-      color: var(--text-primary);
-    }
-
-    .token-card__value {
-      font-family: var(--font-mono);
-      font-size: var(--text-sm);
-      color: var(--text-secondary);
-    }
-
-    /* --- Color Card (full-bleed swatch) --- */
-    .token-card--color {
-      padding: 0;
-      overflow: hidden;
-      gap: 0;
-    }
-
-    .color-swatch {
-      width: 100%;
+    /* --- Color swatch: aspect ratio override for color token cards --- */
+    .card__media--swatch {
       aspect-ratio: 3 / 2;
-      display: block;
-    }
-
-    .token-card__meta {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-      min-width: 0;
-      padding: var(--space-3);
     }
 
     /* --- Typography Cascade (scale hierarchy) --- */
@@ -373,32 +275,15 @@
       margin-bottom: var(--space-5);
     }
 
-    .grid-token-card {
-      background: var(--bg-surface);
-      border: var(--space-px) solid var(--border-default);
-      border-radius: var(--radius-lg);
-      padding: var(--space-3) var(--space-4);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-    }
-
-    .grid-token-card__name {
-      font-family: var(--font-mono);
-      font-size: var(--text-sm);
+    /* Layout grid cards — size overrides for compact token display */
+    .token-grid--wide .card__label {
       color: var(--accent-primary-dim);
     }
 
-    .grid-token-card__value {
-      font-family: var(--font-mono);
+    .token-grid--wide .card__value {
       font-size: var(--text-lg);
       font-weight: var(--weight-semibold);
       color: var(--text-primary);
-    }
-
-    .grid-token-card__desc {
-      font-size: var(--text-xs);
-      color: var(--text-muted);
     }
 
     /* --- Height Swatch --- */
@@ -443,6 +328,7 @@
       display: flex;
       flex-direction: column;
       gap: var(--space-3);
+      overflow: hidden;
     }
 
     .breakpoint-bar {
@@ -513,12 +399,7 @@
       box-shadow: var(--glow-accent);
     }
 
-    /* --- Animation Preview --- */
-    .token-card--anim {
-      flex-direction: row;
-      align-items: center;
-      gap: var(--space-4);
-    }
+    /* --- Animation Preview: uses .card.card--row --- */
 
     .anim-preview {
       width: var(--input-height-md);
@@ -583,12 +464,7 @@
       border-bottom: none;
     }
 
-    .table-wrapper {
-      background: var(--bg-surface);
-      border: var(--space-px) solid var(--border-default);
-      border-radius: var(--radius-xl);
-      overflow: hidden;
-    }
+    /* .table-wrapper: uses .card.card--flush in markup */
 
     .table-scroll {
       overflow-x: auto;
@@ -611,37 +487,14 @@
       margin-bottom: var(--space-4);
     }
 
-    /* --- Row layout for inline token cards --- */
-    .token-card--row {
-      flex-direction: row;
-      align-items: center;
-      gap: var(--space-5);
-    }
-
-    .token-card--row .token-card__meta {
-      padding: 0;
-    }
-
-    /* --- Responsive --- */
+    /* --- Responsive (stage-specific overrides) --- */
     @media (max-width: 767px) {
-      .page {
-        padding: var(--space-8) var(--space-4);
-      }
-
       .token-grid,
       .token-grid--wide {
         grid-template-columns: 1fr;
       }
 
-      .page-title {
-        font-size: var(--text-xl);
-      }
-
-      .section-title {
-        font-size: var(--text-lg);
-      }
-
-      .token-card--row {
+      .card--row {
         flex-direction: column;
         align-items: flex-start;
       }
@@ -669,13 +522,11 @@
   <div id="app">
     <div class="page">
       <!-- Page Header -->
-      <header class="page-header">
-        <h1 class="page-title">Design Tokens</h1>
-        <p class="page-subtitle">
-          The complete token reference for RAGTS. Every visual value is defined
-          once in :root and referenced by CSS custom properties throughout.
-        </p>
-      </header>
+      <h1 class="page__title">Design Tokens</h1>
+      <p class="page__subtitle">
+        The complete token reference for RAGTS. Every visual value is defined
+        once in :root and referenced by CSS custom properties throughout.
+      </p>
 
       <!-- 1. Colors -->
       <token-section title="Color Tokens" description="Neutral surfaces, accent palette, status indicators, and text hierarchy.">
@@ -732,16 +583,15 @@
 
       <!-- 2. Typography -->
       <token-section title="Typography Tokens" description="Minor Third (1.2) modular scale from 14px base. Geist for UI, Geist Mono for code.">
-
-        <!-- Type Scale — visual hierarchy cascade -->
+        <!-- Type Scale -->
         <div class="subsection">
           <h4 class="subsection-title">Type Scale</h4>
           <div class="type-cascade">
             <div v-for="t in typography.scale" :key="t.token" class="type-cascade__row">
               <div class="type-cascade__specimen" :style="t.style">{{ t.sample }}</div>
               <div class="type-cascade__meta">
-                <code class="token-card__label">{{ t.token }}</code>
-                <span class="token-card__value">{{ t.value }}</span>
+                <code class="card__label">{{ t.token }}</code>
+                <span class="card__value">{{ t.value }}</span>
                 <span class="type-cascade__role">{{ t.label }}</span>
               </div>
             </div>
@@ -752,14 +602,14 @@
         <div class="subsection">
           <h4 class="subsection-title">Line Height</h4>
           <div class="token-grid token-grid--single">
-            <div v-for="lh in typography.lineHeights" :key="lh.token" class="token-card token-card--row">
+            <div v-for="lh in typography.lineHeights" :key="lh.token" class="card card--row">
               <div class="leading-specimen" :style="{ lineHeight: lh.numValue }">
                 The quick brown fox jumps over the lazy dog.<br>Agent sessions unfold line by line.<br>Every keystroke is recorded and searchable.
               </div>
-              <div class="token-card__meta" style="flex-shrink: 0; min-width: var(--progress-width); text-align: right;">
-                <span class="token-card__name">{{ lh.label }}</span>
-                <code class="token-card__label">{{ lh.token }}</code>
-                <span class="token-card__value">{{ lh.value }} — {{ lh.usage }}</span>
+              <div class="card__body card__body card__body--right">
+                <span class="card__title">{{ lh.label }}</span>
+                <code class="card__label">{{ lh.token }}</code>
+                <span class="card__value">{{ lh.value }} — {{ lh.usage }}</span>
               </div>
             </div>
           </div>
@@ -769,14 +619,14 @@
         <div class="subsection">
           <h4 class="subsection-title">Letter Spacing</h4>
           <div class="token-grid token-grid--wide">
-            <div v-for="ls in typography.letterSpacing" :key="ls.token" class="token-card">
+            <div v-for="ls in typography.letterSpacing" :key="ls.token" class="card">
               <div class="tracking-specimen" :style="{ letterSpacing: ls.numValue, fontSize: ls.demoSize, fontWeight: ls.demoWeight, textTransform: ls.transform || 'none' }">
                 {{ ls.sample }}
               </div>
-              <div class="token-card__meta">
-                <span class="token-card__name">{{ ls.label }}</span>
-                <code class="token-card__label">{{ ls.token }}</code>
-                <span class="token-card__value">{{ ls.value }}</span>
+              <div class="card__body">
+                <span class="card__title">{{ ls.label }}</span>
+                <code class="card__label">{{ ls.token }}</code>
+                <span class="card__value">{{ ls.value }}</span>
               </div>
             </div>
           </div>
@@ -809,7 +659,7 @@
             <h2 class="type-context__heading">Browse and explore agent recordings</h2>
             <p class="type-context__body">RAGTS transforms raw terminal sessions into navigable, searchable documents. Upload a <code class="type-context__code">.cast</code> file and the system detects sections, highlights markers, and makes every keystroke findable.</p>
             <p class="type-context__small">Last updated 2 hours ago · 1,247 events · 23 sections detected</p>
-            <div class="type-context__mono">$ npm test<br>✓ should parse asciicast v3 format <span style="color: var(--text-muted);">(5ms)</span></div>
+            <div class="type-context__mono">$ npm test<br>✓ should parse asciicast v3 format <span class="text-muted">(5ms)</span></div>
           </div>
         </div>
       </token-section>
@@ -830,32 +680,32 @@
 
           <!-- Token summary cards -->
           <div class="grid-tokens-summary">
-            <div class="grid-token-card">
-              <span class="grid-token-card__name">--container-max</span>
-              <span class="grid-token-card__value">960px</span>
-              <span class="grid-token-card__desc">Max content width for centered layouts</span>
+            <div class="card card--compact">
+              <span class="card__label">--container-max</span>
+              <span class="card__value">960px</span>
+              <span class="card__desc">Max content width for centered layouts</span>
             </div>
-            <div class="grid-token-card">
-              <span class="grid-token-card__name">--container-padding</span>
-              <span class="grid-token-card__value">var(--space-6)</span>
-              <span class="grid-token-card__desc">Side padding for content container</span>
+            <div class="card card--compact">
+              <span class="card__label">--container-padding</span>
+              <span class="card__value">var(--space-6)</span>
+              <span class="card__desc">Side padding for content container</span>
             </div>
-            <div class="grid-token-card">
-              <span class="grid-token-card__name">--grid-gap</span>
-              <span class="grid-token-card__value">var(--space-4)</span>
-              <span class="grid-token-card__desc">Default gap between grid items</span>
+            <div class="card card--compact">
+              <span class="card__label">--grid-gap</span>
+              <span class="card__value">var(--space-4)</span>
+              <span class="card__desc">Default gap between grid items</span>
             </div>
-            <div class="grid-token-card">
-              <span class="grid-token-card__name">--header-height</span>
-              <span class="grid-token-card__value">56px</span>
-              <span class="grid-token-card__desc">Fixed app header height</span>
+            <div class="card card--compact">
+              <span class="card__label">--header-height</span>
+              <span class="card__value">56px</span>
+              <span class="card__desc">Fixed app header height</span>
             </div>
           </div>
 
           <!-- Grid classes (from shared/layout.css) -->
-          <h4 class="subsection-title" style="margin-top: var(--space-8);">Grid Classes</h4>
-          <p style="color: var(--text-secondary); font-size: var(--text-base); line-height: var(--leading-normal); margin-bottom: var(--space-4); max-width: var(--breakpoint-sm);">
-            These utility classes live in <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">shared/layout.css</code> and are available to all stages. Apply <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">.grid</code> as the base class for <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">display: grid</code> and <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">gap</code>, then add a modifier like <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">.grid--sidebar</code> to set the column template. All multi-column grids collapse to a single column below 768px.
+          <h4 class="subsection-title subsection-title--spaced">Grid Classes</h4>
+          <p class="section__body-text">
+            These utility classes live in <code class="code-highlight">shared/layout.css</code> and are available to all stages. Apply <code class="code-highlight">.grid</code> as the base class for <code class="code-highlight">display: grid</code> and <code class="code-highlight">gap</code>, then add a modifier like <code class="code-highlight">.grid--sidebar</code> to set the column template. All multi-column grids collapse to a single column below 768px.
           </p>
           <div class="grid-examples">
 
@@ -920,19 +770,17 @@
             <div class="grid-demo">
               <div class="grid-demo__label">.grid.grid--2col · repeat(2, 1fr)</div>
               <div class="grid grid--2col">
-                <div class="grid-demo__cell grid-demo__cell--span-full grid-demo__cell--header">grid-column: 1 / -1 (span full)</div>
                 <div class="grid-demo__cell">1fr</div>
                 <div class="grid-demo__cell">1fr</div>
-                <div class="grid-demo__cell">1fr</div>
-                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell grid-demo__cell--span-full">span full width</div>
               </div>
               <div class="grid-demo__meta">
-                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px), <code>grid-column: 1 / -1</code> (span full width)</span>
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code>, <code>grid-column: 1 / -1</code> for full span</span>
               </div>
             </div>
-
           </div>
         </div>
+
         <div class="subsection">
           <h4 class="subsection-title">Breakpoints</h4>
           <div class="breakpoint-scale">
@@ -940,11 +788,12 @@
               <div class="breakpoint-bar__track" :style="{ width: (parseInt(bp.value) / 1440 * 100) + '%' }"></div>
               <div class="breakpoint-bar__meta">
                 <span class="breakpoint-bar__name">{{ bp.label }}</span>
-                <span class="breakpoint-bar__value">{{ bp.token }} · {{ bp.value }}</span>
+                <span class="breakpoint-bar__value">{{ bp.token }}: {{ bp.value }}</span>
               </div>
             </div>
           </div>
         </div>
+
         <div class="subsection">
           <h4 class="subsection-title">Component Heights</h4>
           <div class="height-swatch-row">
@@ -986,7 +835,7 @@
 
       <!-- 6. CSS Custom Properties Map -->
       <token-section title="CSS Custom Properties Map" description="Complete mapping of token names to values and intended usage.">
-        <div class="table-wrapper">
+        <div class="card card--flush">
           <div class="table-scroll">
             <table class="css-map">
               <thead>
@@ -1010,7 +859,7 @@
 
       <!-- 7. Layout Utility Classes -->
       <token-section title="Layout Utility Classes" description="Reusable CSS classes from shared/layout.css. These consume design tokens but are not tokens themselves — use them directly on HTML elements.">
-        <div class="table-wrapper">
+        <div class="card card--flush">
           <div class="table-scroll">
             <table class="css-map">
               <thead>
@@ -1043,10 +892,8 @@
       props: { title: String, description: String },
       template: `
         <section class="section">
-          <div class="section-header">
-            <h2 class="section-title">{{ title }}</h2>
-            <p v-if="description" class="section-description">{{ description }}</p>
-          </div>
+          <h2 class="section__title">{{ title }}</h2>
+          <p v-if="description" class="section__description">{{ description }}</p>
           <slot />
         </section>`
     });
@@ -1055,12 +902,12 @@
     const ColorToken = defineComponent({
       props: { token: String, value: String, label: String },
       template: `
-        <div class="token-card token-card--color">
-          <div class="color-swatch" :style="{ background: 'var(' + token + ')' }"></div>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+        <div class="card card--flush">
+          <div class="card__media card__media--swatch" :style="{ background: 'var(' + token + ')' }"></div>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1069,14 +916,14 @@
     const TypeToken = defineComponent({
       props: { token: String, value: String, label: String, sample: String, styleOverrides: Object },
       template: `
-        <div class="token-card token-card--row">
-          <div style="flex: 1; min-width: 0;">
+        <div class="card card--row">
+          <div class="flex-fill">
             <span class="type-specimen" :style="styleOverrides">{{ sample }}</span>
           </div>
-          <div class="token-card__meta" style="flex-shrink: 0; text-align: right;">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+          <div class="card__body card__body card__body--compact-right">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1085,12 +932,12 @@
     const WeightToken = defineComponent({
       props: { token: String, value: String, label: String },
       template: `
-        <div class="token-card">
+        <div class="card">
           <span class="type-specimen" :style="{ fontWeight: value, fontSize: 'var(--text-lg)' }">Aa</span>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1099,15 +946,14 @@
     const FamilyToken = defineComponent({
       props: { token: String, value: String, label: String, isMono: Boolean },
       template: `
-        <div class="token-card">
-          <span class="type-specimen" :class="{ 'type-specimen--mono': isMono }"
-            style="font-size: var(--text-lg);">
+        <div class="card">
+          <span class="type-specimen type-specimen--lg" :class="{ 'type-specimen--mono': isMono }">
             The quick brown fox jumps over the lazy dog
           </span>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value" style="word-break: break-all;">{{ value }}</span>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value card__value card__value--break">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1116,12 +962,12 @@
     const SpacingToken = defineComponent({
       props: { token: String, value: String, label: String, width: String },
       template: `
-        <div class="token-card token-card--row">
+        <div class="card card--row">
           <div class="spacing-bar" :style="{ width: width }"></div>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1130,12 +976,12 @@
     const ShapeToken = defineComponent({
       props: { token: String, value: String, label: String },
       template: `
-        <div class="token-card">
+        <div class="card">
           <div class="shape-preview" :style="{ borderRadius: value }"></div>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1144,14 +990,14 @@
     const ShadowToken = defineComponent({
       props: { token: String, value: String, label: String, hoverOnly: Boolean },
       template: `
-        <div class="token-card">
+        <div class="card">
           <div class="shadow-preview"
             :class="{ 'shadow-preview--hover-only': hoverOnly }"
             :style="!hoverOnly ? { boxShadow: 'var(' + token + ')' } : {}"></div>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
@@ -1160,12 +1006,12 @@
     const AnimToken = defineComponent({
       props: { token: String, value: String, label: String },
       template: `
-        <div class="token-card token-card--anim">
+        <div class="card card--row">
           <div class="anim-preview" :style="{ transitionDuration: value }"></div>
-          <div class="token-card__meta">
-            <span class="token-card__name">{{ label }}</span>
-            <span class="token-card__label">{{ token }}</span>
-            <span class="token-card__value">{{ value }}</span>
+          <div class="card__body">
+            <span class="card__title">{{ label }}</span>
+            <span class="card__label">{{ token }}</span>
+            <span class="card__value">{{ value }}</span>
           </div>
         </div>`
     });
