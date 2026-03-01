@@ -768,16 +768,18 @@
                   </div>
                   <div class="input-group">
                     <label class="input-group__label">Agent Type</label>
-                    <div class="dropdown dropdown--open">
-                      <button class="dropdown__trigger dropdown__trigger--focused" type="button">
-                        <span>Claude Code</span>
+                    <div class="dropdown" :class="{ 'dropdown--open': modalDropdownOpen }">
+                      <button class="dropdown__trigger" :class="{ 'dropdown__trigger--focused': modalDropdownOpen }" type="button" @click="modalDropdownOpen = !modalDropdownOpen">
+                        <span>{{ modalAgent }}</span>
                         <span class="dropdown__chevron"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg></span>
                       </button>
-                      <div class="dropdown__menu">
-                        <div class="dropdown__option dropdown__option--selected">Claude Code</div>
-                        <div class="dropdown__option">Gemini CLI</div>
-                        <div class="dropdown__option">Codex</div>
-                        <div class="dropdown__option">Other</div>
+                      <div class="dropdown__menu" v-if="modalDropdownOpen">
+                        <div v-for="agent in agentTypes" :key="agent"
+                             class="dropdown__option"
+                             :class="{ 'dropdown__option--selected': agent === modalAgent }"
+                             @click="modalAgent = agent; modalDropdownOpen = false">
+                          {{ agent }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1489,7 +1491,14 @@
     });
 
     const app = createApp({
-      template: document.getElementById('app').innerHTML
+      template: document.getElementById('app').innerHTML,
+      data() {
+        return {
+          modalDropdownOpen: false,
+          modalAgent: 'Claude Code',
+          agentTypes: ['Claude Code', 'Gemini CLI', 'Codex', 'Other'],
+        };
+      },
     });
 
     app.component('state-showcase', StateShowcase);
