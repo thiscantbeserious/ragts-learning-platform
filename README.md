@@ -103,13 +103,15 @@ This project uses **dual licensing**:
 
 | Scope | License | File |
 |-------|---------|------|
-| Application code (`src/`, scripts, config) | **AGPL-3.0** | [LICENSE](LICENSE) |
-| RAGTS Design System (tokens, components, icons, page scaffold) | **Elastic License 2.0 (ELv2)** | [LICENSE (ELv2)](.state/design-system-bootstrap/shared/LICENSE) |
+| Application code | **AGPL-3.0** | [LICENSE](LICENSE) |
+| RAGTS Design System | **Elastic License 2.0 (ELv2)** | see individual LICENSE files |
 
-The **RAGTS Design System** includes all design tokens, CSS component styles, icon definitions, and page scaffold classes. Files covered by the ELv2 are marked with a copyright header. The license path will move to its final location once the design system graduates from the bootstrap phase into `src/`.
+### RAGTS Design System (ELv2)
 
-**What this means:**
-- The **application** is copyleft open-source — you can use, modify, and distribute it, but network use requires sharing your source (AGPL).
-- The **design system** is source-available but **may not be offered as a hosted or managed service**. You can use it freely in your own deployments.
+The visual design, composition, layout patterns, token values, and individual styles that make up the **RAGTS Design System** are protected creative work. This includes — but is not limited to — color palettes, typography scales, spacing systems, component designs, icon definitions, and page scaffolding.
 
-See each LICENSE file for full terms.
+Protected files carry a copyright header pointing to their accompanying LICENSE file. The ELv2 permits free use in your own deployments but **prohibits offering the design system as part of a hosted or managed service**.
+
+### Application Code (AGPL-3.0)
+
+The application source code is copyleft open-source. You can use, modify, and distribute it, but network use requires sharing your source.
