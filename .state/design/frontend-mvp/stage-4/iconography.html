@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 4 — Iconography</title>
+  <link rel="stylesheet" href="../shared/layout.css">
+  <link rel="stylesheet" href="../shared/components.css">
+  <link rel="stylesheet" href="../shared/icons.css">
+  <style>
+    /* ========================
+       Stage 4 — Iconography Catalog
+       Tokens + grid utilities imported from ../shared/layout.css
+       Component styles imported from ../shared/components.css
+       Icon utilities imported from ../shared/icons.css
+       This file contains only page-specific showcase styles
+       ======================== */
+
+    /* --- Page Layout --- */
+    .page {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-12) var(--container-padding);
+    }
+
+    .page__title {
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-tight);
+      color: var(--text-primary);
+      margin-bottom: var(--space-1);
+    }
+
+    .page__subtitle {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-12);
+    }
+
+    /* --- Section --- */
+    .section {
+      margin-bottom: var(--space-12);
+    }
+
+    .section__title {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-snug);
+      color: var(--text-primary);
+      margin-bottom: var(--space-2);
+      padding-bottom: var(--space-2);
+      border-bottom: var(--space-px) solid var(--border-default);
+    }
+
+    .section__description {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--space-6);
+    }
+
+    /* --- State Showcase --- */
+    .state-group {
+      margin-bottom: var(--space-8);
+    }
+
+    .state-group__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      margin-bottom: var(--space-3);
+    }
+
+    .state-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-3);
+    }
+
+    .state-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      min-width: 80px;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      line-height: var(--leading-relaxed);
+      flex-shrink: 0;
+    }
+
+    /* Divider between major sections */
+    .divider {
+      border: none;
+      border-top: var(--space-px) solid var(--border-default);
+      margin: var(--space-12) 0;
+    }
+
+    /* --- Icon Catalog Table --- */
+    .icon-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .icon-table th {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      padding: var(--space-2) var(--space-3);
+      text-align: left;
+      border-bottom: var(--space-px) solid var(--border-strong);
+    }
+
+    .icon-table td {
+      padding: var(--space-3) var(--space-3);
+      border-bottom: var(--space-px) solid var(--border-default);
+      vertical-align: middle;
+    }
+
+    .icon-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .icon-table__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+    }
+
+    .icon-table__class {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .icon-table__sizes {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .icon-table__size-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .icon-table__size-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+    }
+
+    /* --- Color Inheritance Demo --- */
+    .color-demo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .color-demo__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    .color-demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* --- Typography Baseline Match --- */
+    .baseline-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-bottom: var(--space-3);
+    }
+
+    .baseline-row__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      min-width: 60px;
+      flex-shrink: 0;
+    }
+
+    .baseline-row__text--xs {
+      font-size: var(--text-xs);
+      line-height: var(--leading-relaxed);
+      color: var(--text-primary);
+    }
+
+    .baseline-row__text--sm {
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      color: var(--text-primary);
+    }
+
+    .baseline-row__text--base {
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      color: var(--text-primary);
+    }
+
+    .baseline-row__text--lg {
+      font-size: var(--text-lg);
+      line-height: var(--leading-snug);
+      color: var(--text-primary);
+    }
+
+    .baseline-row__text--xl {
+      font-size: var(--text-xl);
+      line-height: var(--leading-snug);
+      color: var(--text-primary);
+    }
+
+    .baseline-row__text--2xl {
+      font-size: var(--text-2xl);
+      line-height: var(--leading-tight);
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="page">
+      <h1 class="page__title">Iconography</h1>
+      <p class="page__subtitle">Complete icon catalog for RAGTS. Stroke-based SVGs that inherit currentColor. Five size classes from 12px (xs) to 32px (xl). 52 icons across 6 groups.</p>
+
+      <!-- ==================== SIZE CLASSES REFERENCE ==================== -->
+      <section class="section">
+        <h2 class="section__title">Size Classes Reference</h2>
+        <p class="section__description">Icon sizes are mapped to spacing tokens. Each size class applies a fixed width and height. All SVGs share a 20x20 viewBox for consistent scaling.</p>
+
+        <table class="icon-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Size</th>
+              <th>Token</th>
+              <th>Usage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="icon-table__name">.icon--xs</span></td>
+              <td><span class="icon-table__class">12px</span></td>
+              <td><span class="icon-table__class">--space-3</span></td>
+              <td><span class="icon-table__class">Inline with small text</span></td>
+            </tr>
+            <tr>
+              <td><span class="icon-table__name">.icon--sm</span></td>
+              <td><span class="icon-table__class">16px</span></td>
+              <td><span class="icon-table__class">--space-4</span></td>
+              <td><span class="icon-table__class">Badges, small buttons, inline</span></td>
+            </tr>
+            <tr>
+              <td><span class="icon-table__name">.icon--md</span></td>
+              <td><span class="icon-table__class">20px</span></td>
+              <td><span class="icon-table__class">--space-5</span></td>
+              <td><span class="icon-table__class">Default, most components</span></td>
+            </tr>
+            <tr>
+              <td><span class="icon-table__name">.icon--lg</span></td>
+              <td><span class="icon-table__class">24px</span></td>
+              <td><span class="icon-table__class">--space-6</span></td>
+              <td><span class="icon-table__class">Upload zone, empty state</span></td>
+            </tr>
+            <tr>
+              <td><span class="icon-table__name">.icon--xl</span></td>
+              <td><span class="icon-table__class">32px</span></td>
+              <td><span class="icon-table__class">--space-8</span></td>
+              <td><span class="icon-table__class">Hero, feature icons</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== ICON CATALOG ==================== -->
+      <section class="section" v-for="(icons, groupName) in iconGroups" :key="groupName">
+        <h2 class="section__title">{{ groupLabels[groupName] }}</h2>
+        <p class="section__description">{{ groupDescriptions[groupName] }}</p>
+
+        <table class="icon-table">
+          <thead>
+            <tr>
+              <th style="width: 200px;">Name</th>
+              <th>xs (12)</th>
+              <th>sm (16)</th>
+              <th>md (20)</th>
+              <th>lg (24)</th>
+              <th>xl (32)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="icon in icons" :key="icon.name">
+              <td>
+                <span class="icon-table__name">{{ icon.name }}</span><br>
+                <span class="icon-table__class">{{ icon.usage }}</span>
+              </td>
+              <td><span class="icon icon--xs" v-html="icon.svg"></span></td>
+              <td><span class="icon icon--sm" v-html="icon.svg"></span></td>
+              <td><span class="icon icon--md" v-html="icon.svg"></span></td>
+              <td><span class="icon icon--lg" v-html="icon.svg"></span></td>
+              <td><span class="icon icon--xl" v-html="icon.svg"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== COLOR INHERITANCE ==================== -->
+      <section class="section">
+        <h2 class="section__title">Color Inheritance</h2>
+        <p class="section__description">Icons use stroke="currentColor" and inherit the parent element's text color. Any CSS color value propagates through the icon.</p>
+
+        <div class="color-demo">
+          <div class="color-demo__item">
+            <span style="color: var(--text-primary);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">text-primary</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--accent-primary);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">accent-primary</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--accent-secondary);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">accent-secondary</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--status-success);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">status-success</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--status-error);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">status-error</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--status-warning);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">status-warning</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--status-info);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">status-info</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--text-muted);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">text-muted</span>
+          </div>
+          <div class="color-demo__item">
+            <span style="color: var(--text-disabled);" class="icon icon--lg"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="color-demo__label">text-disabled</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ==================== TYPOGRAPHY BASELINE MATCH ==================== -->
+      <section class="section">
+        <h2 class="section__title">Typography Baseline Match</h2>
+        <p class="section__description">Icons sized to sit inline with text at each type scale step. The icon height matches the computed line height of its paired text, keeping vertical rhythm.</p>
+
+        <div class="state-group">
+          <div class="baseline-row">
+            <span class="baseline-row__label">xs</span>
+            <span class="icon icon--xs" style="color: var(--accent-primary);"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="baseline-row__text--xs">12px icon with text-xs (10px) -- inline labels, fine metadata</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">sm</span>
+            <span class="icon icon--sm" style="color: var(--accent-primary);"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="baseline-row__text--sm">16px icon with text-sm (12px) -- badges, small buttons, compact rows</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">md</span>
+            <span class="icon icon--md" style="color: var(--accent-primary);"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="baseline-row__text--base">20px icon with text-base (14px) -- default body text, form labels</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">lg</span>
+            <span class="icon icon--lg" style="color: var(--accent-primary);"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="baseline-row__text--lg">24px icon with text-lg (17px) -- section titles, card headers</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">xl</span>
+            <span class="icon icon--xl" style="color: var(--accent-primary);"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="baseline-row__text--xl">32px icon with text-xl (20px) -- page headings, hero elements</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">xl+</span>
+            <span class="icon icon--xl" style="color: var(--accent-primary);"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span>
+            <span class="baseline-row__text--2xl">32px icon with text-2xl (24px) -- display headings</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    const app = createApp({
+      template: document.getElementById('app').innerHTML,
+      data() {
+        return {
+          groupLabels: {
+            navigation: 'Navigation',
+            status: 'Status',
+            actions: 'Actions',
+            content: 'Content',
+            playback: 'Playback',
+            system: 'System',
+          },
+          groupDescriptions: {
+            navigation: 'Directional and navigation controls. Used in menus, breadcrumbs, pagination, and modal close actions.',
+            status: 'Feedback indicators for success, warning, error, and info states. Used in toasts, form validation, and inline status.',
+            actions: 'User-initiated operations. Used in toolbars, context menus, session management, and bulk actions.',
+            content: 'Content type indicators and metadata display. Used in session cards, file listings, and detail views.',
+            playback: 'Terminal session replay controls. Used in the session player timeline and transport bar.',
+            system: 'Application-level controls. Used in settings, preferences, layout toggles, and account actions.',
+          },
+          iconGroups: {
+            navigation: [
+              { name: 'chevron-right', usage: 'Section expand', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7.5 4l5 6-5 6"/></svg>' },
+              { name: 'chevron-down', usage: 'Dropdown trigger', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 7.5l5 5 5-5"/></svg>' },
+              { name: 'chevron-left', usage: 'Previous nav', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12.5 4L7.5 10l5 6"/></svg>' },
+              { name: 'chevron-up', usage: 'Collapse / scroll up', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.5l5-5 5 5"/></svg>' },
+              { name: 'arrow-left', usage: 'Back navigation', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 10H4M4 10l5-5M4 10l5 5"/></svg>' },
+              { name: 'arrow-right', usage: 'Next navigation', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10h12M16 10l-5-5M16 10l-5 5"/></svg>' },
+              { name: 'close', usage: 'Modal close, dismiss', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5l10 10M15 5L5 15"/></svg>' },
+              { name: 'home', usage: 'Home / landing', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 10l7-7 7 7"/><path d="M5 8.5V17h4v-4h2v4h4V8.5"/></svg>' },
+              { name: 'menu', usage: 'Mobile hamburger', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h14M3 10h14M3 15h14"/></svg>' },
+              { name: 'external-link', usage: 'Open in new tab', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 3h6v6"/><path d="M17 3L9 11"/><path d="M15 11v5a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1h5"/></svg>' },
+            ],
+            status: [
+              { name: 'check-circle', usage: 'Success toast, done', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg>' },
+              { name: 'warning', usage: 'Warning toast', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5L1.5 17h17L10 2.5z"/><path d="M10 8v4M10 14v.5"/></svg>' },
+              { name: 'error-circle', usage: 'Error toast, fail', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7 7l6 6M13 7l-6 6"/></svg>' },
+              { name: 'info-circle', usage: 'Info toast', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 9v5M10 6.5v.5"/></svg>' },
+              { name: 'checkmark', usage: 'Inline valid', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10l5 5 7-7"/></svg>' },
+              { name: 'x-mark', usage: 'Inline invalid', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 5l10 10M15 5L5 15"/></svg>' },
+              { name: 'help-circle', usage: 'Help / FAQ', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M7.5 7.5a2.5 2.5 0 014.5 1.5c0 1.5-2 2-2 3.5M10 15v.5"/></svg>' },
+            ],
+            actions: [
+              { name: 'upload', usage: 'Upload zone/button', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5.5 12.5v2.5h9v-2.5"/><path d="M10 4v8.5"/><path d="M6.5 7.5L10 4l3.5 3.5"/></svg>' },
+              { name: 'download', usage: 'Export session', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5.5 12.5v2.5h9v-2.5"/><path d="M10 3.5v8.5"/><path d="M6.5 8.5L10 12l3.5-3.5"/></svg>' },
+              { name: 'plus', usage: 'Add / create', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4v12M4 10h12"/></svg>' },
+              { name: 'search', usage: 'Search bar', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4"/></svg>' },
+              { name: 'edit', usage: 'Edit notes / metadata', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 3.5l3 3L7 16H4v-3l9.5-9.5z"/></svg>' },
+              { name: 'trash', usage: 'Delete session', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12M8 6V4h4v2"/><path d="M5.5 6l.5 10h8l.5-10"/><path d="M8.5 9v4M11.5 9v4"/></svg>' },
+              { name: 'copy', usage: 'Copy command / URL', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="6" width="10" height="11" rx="1.5"/><path d="M4 14V4.5A1.5 1.5 0 015.5 3H13"/></svg>' },
+              { name: 'share', usage: 'Share session', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="14" cy="5" r="2.5"/><circle cx="6" cy="10" r="2.5"/><circle cx="14" cy="15" r="2.5"/><path d="M8.2 8.8l3.6-2.6M8.2 11.2l3.6 2.6"/></svg>' },
+              { name: 'bookmark', usage: 'Save session', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3h10v14l-5-3.5L5 17V3z"/></svg>' },
+              { name: 'star', usage: 'Favorite', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5l2.5 5 5.5.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.5-.8z"/></svg>' },
+              { name: 'refresh', usage: 'Reload / retry', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.5 3.5v5h5"/><path d="M3.5 8.5A7 7 0 0117 10"/><path d="M16.5 16.5v-5h-5"/><path d="M16.5 11.5A7 7 0 013 10"/></svg>' },
+              { name: 'link', usage: 'Copy link', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8.5 11.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1"/><path d="M11.5 8.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1"/></svg>' },
+            ],
+            content: [
+              { name: 'terminal', usage: 'Session type, core', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="16" height="14" rx="2"/><path d="M5.5 8l3 2-3 2"/><path d="M10.5 13h4"/></svg>' },
+              { name: 'code', usage: 'Code snippet', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6L2 10l4 4"/><path d="M14 6l4 4-4 4"/><path d="M11.5 3l-3 14"/></svg>' },
+              { name: 'clock', usage: 'Session duration', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 1.5"/></svg>' },
+              { name: 'sections', usage: 'Section count', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5.5h14M3 10h14M3 14.5h10"/></svg>' },
+              { name: 'file-check', usage: 'Session verified', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.5 7.5V4H4.5v12h3.5"/><path d="M10 11l2 2 4-4"/></svg>' },
+              { name: 'calendar', usage: 'Date input', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4.5" width="14" height="12" rx="2"/><path d="M3 8.5h14"/><path d="M7 2.5v3M13 2.5v3"/></svg>' },
+              { name: 'document', usage: 'File / transcript', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="2.5" width="12" height="15" rx="1.5"/><path d="M7.5 7.5h5M7.5 10.5h4M7.5 13.5h2.5"/></svg>' },
+              { name: 'folder', usage: 'Collection / group', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 5.5V15a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V7.5a1.5 1.5 0 00-1.5-1.5H10L8 4H4A1.5 1.5 0 002.5 5.5z"/></svg>' },
+              { name: 'tag', usage: 'Label / category', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 3.5h6l8 8-6 6-8-8v-6z"/><circle cx="6.5" cy="7.5" r="1.25" fill="currentColor" stroke="none"/></svg>' },
+              { name: 'comment', usage: 'Annotation / note', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 4h14a1 1 0 011 1v8a1 1 0 01-1 1h-4l-3 3v-3H3a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg>' },
+            ],
+            playback: [
+              { name: 'play', usage: 'Start replay', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l10 6-10 6V4z"/></svg>' },
+              { name: 'pause', usage: 'Pause replay', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v12M14 4v12"/></svg>' },
+              { name: 'stop', usage: 'Stop replay', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4.5" y="4.5" width="11" height="11" rx="1.5"/></svg>' },
+              { name: 'rewind', usage: 'Jump backward', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 4L2 10l8 6V4z"/><path d="M18 4l-8 6 8 6V4z"/></svg>' },
+              { name: 'fast-forward', usage: 'Jump forward', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l8 6-8 6V4z"/><path d="M10 4l8 6-8 6V4z"/></svg>' },
+              { name: 'skip-back', usage: 'Prev section', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 4l-8 6 8 6V4z"/><path d="M5 4v12"/></svg>' },
+              { name: 'skip-forward', usage: 'Next section', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 4l8 6-8 6V4z"/><path d="M15 4v12"/></svg>' },
+            ],
+            system: [
+              { name: 'user', usage: 'Profile / avatar', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="7" r="3.5"/><path d="M3.5 17.5c0-3.5 3-6.5 6.5-6.5s6.5 3 6.5 6.5"/></svg>' },
+              { name: 'settings', usage: 'Preferences', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="3"/><path d="M10 2v2M10 16v2M3.5 5.5l1.5 1M15 13.5l1.5 1M2 10h2M16 10h2M3.5 14.5l1.5-1M15 6.5l1.5-1"/></svg>' },
+              { name: 'filter', usage: 'Filter sessions', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4h15l-5.5 6.5V16l-4-2v-3.5L2.5 4z"/></svg>' },
+              { name: 'sort', usage: 'Sort order', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v12M6 16l-3-3M6 16l3-3"/><path d="M14 16V4M14 4l-3 3M14 4l3 3"/></svg>' },
+              { name: 'grid-view', usage: 'Grid layout', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>' },
+              { name: 'list-view', usage: 'List layout', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 5h10M7 10h10M7 15h10"/><circle cx="3.5" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="3.5" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="3.5" cy="15" r="1" fill="currentColor" stroke="none"/></svg>' },
+              { name: 'eye', usage: 'Show / visible', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10s3.5-5 8-5 8 5 8 5-3.5 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2.5"/></svg>' },
+              { name: 'eye-off', usage: 'Hide / hidden', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3l14 14"/><path d="M8.5 8.5a2.5 2.5 0 003.5 3.5"/><path d="M2 10s3.5-5 8-5c1.2 0 2.3.3 3.2.7M18 10s-1.5 2.2-3.8 3.5"/></svg>' },
+              { name: 'expand', usage: 'Fullscreen', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7V3h4M17 7V3h-4M3 13v4h4M17 13v4h-4"/></svg>' },
+              { name: 'collapse', usage: 'Exit fullscreen', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 3v4H3M13 3v4h4M7 17v-4H3M13 17v-4h4"/></svg>' },
+              { name: 'bell', usage: 'Notifications', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5a5 5 0 00-5 5v3l-1.5 2.5h13L15 10.5v-3a5 5 0 00-5-5z"/><path d="M8 15.5a2 2 0 004 0"/></svg>' },
+              { name: 'logout', usage: 'Sign out', svg: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 17H4a1 1 0 01-1-1V4a1 1 0 011-1h3"/><path d="M10 10h7M17 10l-3-3M17 10l-3 3"/></svg>' },
+            ],
+          },
+        };
+      },
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>
