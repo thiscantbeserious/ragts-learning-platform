@@ -4,168 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stage 3 — Design Tokens</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/layout.css">
   <style>
     /* ========================
-       1. DESIGN TOKENS (:root)
-       2. RESET + BASE
-       3. LAYOUT
-       4. ALL COMPONENT STYLES
+       Stage 3 — Design Tokens Page
+       Tokens imported from ../shared/layout.css
+       This file contains only page-specific styles
        ======================== */
-
-    :root {
-      /* --- Colors: Base palette (hand-picked — the ONLY raw values) --- */
-      --bg-page: #0c0c0c;
-      --bg-surface: #141414;
-      --bg-elevated: #1c1c1c;
-      --bg-overlay: rgba(0, 0, 0, 0.75);
-
-      /* Primary accent — mint green H153° S100% L50% */
-      --accent-primary: #00ff9f;
-      --accent-primary-hover: color-mix(in srgb, var(--accent-primary) 80%, white);
-      --accent-primary-dim: color-mix(in srgb, var(--accent-primary) 65%, var(--bg-page));
-      --accent-primary-subtle: color-mix(in srgb, var(--accent-primary) 7%, transparent);
-
-      /* Secondary accent — warm orange H28° S100% L58% (25°+ from error red) */
-      --accent-secondary: #ff8c2b;
-      --accent-secondary-hover: color-mix(in srgb, var(--accent-secondary) 80%, white);
-      --accent-secondary-dim: color-mix(in srgb, var(--accent-secondary) 65%, var(--bg-page));
-      --accent-secondary-subtle: color-mix(in srgb, var(--accent-secondary) 7%, transparent);
-
-      /* Status — semantic colors (distinct from accent palette) */
-      --status-success: #34d399;
-      --status-success-subtle: color-mix(in srgb, var(--status-success) 7%, transparent);
-      --status-warning: #ffcc00;
-      --status-warning-subtle: color-mix(in srgb, var(--status-warning) 7%, transparent);
-      --status-error: #ff3b30;
-      --status-error-subtle: color-mix(in srgb, var(--status-error) 7%, transparent);
-      --status-info: #5ac8fa;
-      --status-info-subtle: color-mix(in srgb, var(--status-info) 7%, transparent);
-
-      /* Text hierarchy */
-      --text-primary: #e8e8e8;
-      --text-secondary: #8b949e;
-      --text-muted: #484f58;
-      --text-disabled: #30363d;
-      --text-inverse: var(--bg-page);
-
-      /* Borders */
-      --border-default: #1e1e1e;
-      --border-strong: #2a2a2a;
-      --border-accent: var(--accent-primary);
-
-      /* Terminal */
-      --terminal-bg: #0a0a0a;
-      --terminal-text: #d4d4d4;
-
-      /* --- Typography — Minor Third (1.2) from 14px base --- */
-      --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
-
-      /* Type scale: 14px × 1.2^n, rounded to whole px */
-      --text-xs: 0.625rem;    /* 10px — step -2 */
-      --text-sm: 0.75rem;     /* 12px — step -1 */
-      --text-base: 0.875rem;  /* 14px — step 0 (base) */
-      --text-lg: 1.0625rem;   /* 17px — step +1 */
-      --text-xl: 1.25rem;     /* 20px — step +2 */
-      --text-2xl: 1.5rem;     /* 24px — step +3 */
-      --text-3xl: 1.8125rem;  /* 29px — step +4 (display) */
-
-      /* Line height: inverse relationship — bigger text = tighter */
-      --leading-tight: 1.2;     /* headings 24px+ */
-      --leading-snug: 1.35;     /* large body 17-24px */
-      --leading-normal: 1.5;    /* body text 14px */
-      --leading-relaxed: 1.65;  /* small text 10-12px */
-      --leading-mono: 1.6;      /* monospace at any size */
-
-      /* Letter spacing */
-      --tracking-tight: -0.02em;    /* display/headings — tighter feels more confident */
-      --tracking-normal: 0;         /* body text */
-      --tracking-wide: 0.06em;      /* small uppercase labels */
-      --tracking-wider: 0.12em;     /* badges, timestamps */
-
-      /* Weights */
-      --weight-normal: 400;
-      --weight-medium: 500;
-      --weight-semibold: 600;
-      --weight-bold: 700;
-
-      /* --- Spacing (4px base grid) --- */
-      --space-px: 1px;
-      --space-0\.5: 2px;
-      --space-1: 4px;
-      --space-1\.5: 6px;
-      --space-2: 8px;
-      --space-3: 12px;
-      --space-4: 16px;
-      --space-5: 20px;
-      --space-6: 24px;
-      --space-8: 32px;
-      --space-12: 48px;
-
-      /* Named spacing shortcuts */
-      --space-inline: var(--space-4);   /* default horizontal padding */
-      --space-stack: var(--space-3);    /* default vertical gap between elements */
-
-      /* --- Layout / Grid --- */
-      --container-max: 960px;
-      --container-padding: var(--space-6);
-      --grid-gap: var(--space-4);
-      --header-height: 56px;
-
-      /* Breakpoints (documented as tokens; used as raw values in @media) */
-      --breakpoint-sm: 640px;
-      --breakpoint-md: 768px;
-      --breakpoint-lg: 1024px;
-      --breakpoint-xl: 1280px;
-      --breakpoint-2xl: 1440px;
-
-      /* --- Component sizing --- */
-      --btn-height-sm: 28px;
-      --btn-height-md: 36px;
-      --btn-height-lg: 44px;
-      --input-height-sm: 32px;
-      --input-height-md: 40px;
-      --input-height-lg: 48px;
-
-      /* --- Shape --- */
-      --radius-sm: 4px;
-      --radius-md: 6px;
-      --radius-lg: 8px;
-      --radius-xl: 10px;
-      --radius-full: 9999px;
-
-      /* --- Shadows --- */
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
-      --glow-accent: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
-
-      /* --- Animation --- */
-      --duration-fast: 150ms;
-      --duration-normal: 250ms;
-      --duration-slow: 400ms;
-      --easing-default: ease-out;
-    }
-
-    /* --- Reset + Base --- */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg-page);
-      color: var(--text-primary);
-      font-size: var(--text-base);
-      line-height: var(--leading-normal);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
 
     /* --- Layout --- */
     .page {
-      max-width: 960px;
+      max-width: var(--container-max);
       margin: 0 auto;
       padding: var(--space-12) var(--space-6);
     }
@@ -188,7 +37,7 @@
       font-size: var(--text-base);
       font-weight: var(--weight-normal);
       color: var(--text-secondary);
-      max-width: 640px;
+      max-width: var(--breakpoint-sm);
     }
 
     /* --- Section --- */
@@ -219,11 +68,13 @@
     /* --- Token Grid --- */
     .token-grid {
       display: grid;
+      /* raw value required: var() is invalid inside repeat(auto-fill, ...) per CSS Grid spec */
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: var(--space-4);
     }
 
     .token-grid--wide {
+      /* raw value required: var() is invalid inside repeat(auto-fill, ...) per CSS Grid spec */
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     }
 
@@ -315,7 +166,7 @@
       flex-direction: column;
       gap: var(--space-0\.5);
       text-align: right;
-      min-width: 160px;
+      min-width: var(--progress-width); /* 200px — holds token name + value */
     }
 
     .type-cascade__role {
@@ -373,7 +224,7 @@
       font-weight: var(--weight-normal);
       line-height: var(--leading-normal);
       color: var(--text-secondary);
-      max-width: 640px;
+      max-width: var(--breakpoint-sm);
     }
 
     .type-context__code {
@@ -434,33 +285,10 @@
       margin-bottom: var(--space-3);
     }
 
-    .grid-demo__grid {
-      display: grid;
-      gap: var(--grid-gap);
-    }
-
-    .grid-demo__grid--auto-fill {
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-
-    .grid-demo__grid--2col {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    .grid-demo__grid--3col {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .grid-demo__grid--sidebar {
-      grid-template-columns: 200px 1fr;
-    }
-
-    .grid-demo__grid--holy-grail {
-      grid-template-columns: 160px 1fr 160px;
-    }
+    /* Grid layout classes (.grid, .grid--auto-fill, etc.) come from shared/layout.css */
 
     .grid-demo__cell {
-      min-height: 48px;
+      min-height: var(--input-height-lg);
       background: var(--accent-primary-subtle);
       border: var(--space-px) solid var(--accent-primary-dim);
       border-radius: var(--radius-md);
@@ -486,7 +314,7 @@
     }
 
     .grid-demo__cell--tall {
-      min-height: 120px;
+      min-height: calc(var(--space-8) * 3 + var(--space-6)); /* ~120px from spacing scale */
     }
 
     .grid-demo__cell--header {
@@ -503,7 +331,7 @@
 
     .grid-demo__cell--content {
       background: var(--accent-primary-subtle);
-      min-height: 120px;
+      min-height: calc(var(--space-8) * 3 + var(--space-6)); /* ~120px from spacing scale */
     }
 
     .grid-demo__meta {
@@ -641,7 +469,7 @@
       font-size: var(--text-sm);
       color: var(--text-primary);
       font-weight: var(--weight-semibold);
-      min-width: 28px;
+      min-width: var(--btn-height-sm);
     }
 
     .breakpoint-bar__value {
@@ -662,8 +490,8 @@
 
     /* --- Shape Preview --- */
     .shape-preview {
-      width: 64px;
-      height: 40px;
+      width: var(--space-12);     /* 48px — closest spacing token */
+      height: var(--input-height-md);
       background: var(--bg-elevated);
       border: var(--space-px) solid var(--accent-primary);
     }
@@ -671,7 +499,7 @@
     /* --- Shadow Preview --- */
     .shadow-preview {
       width: 100%;
-      height: 56px;
+      height: var(--header-height);
       background: var(--bg-elevated);
       border-radius: var(--radius-lg);
       transition: box-shadow var(--duration-normal) var(--easing-default);
@@ -686,9 +514,15 @@
     }
 
     /* --- Animation Preview --- */
+    .token-card--anim {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
     .anim-preview {
-      width: 48px;
-      height: 48px;
+      width: var(--input-height-md);
+      height: var(--input-height-md);
       aspect-ratio: 1;
       flex-shrink: 0;
       background: var(--accent-primary-subtle);
@@ -822,21 +656,7 @@
         grid-template-columns: 1fr;
       }
 
-      .grid-demo__grid--3col {
-        grid-template-columns: 1fr;
-      }
-
-      .grid-demo__grid--sidebar {
-        grid-template-columns: 1fr;
-      }
-
-      .grid-demo__grid--holy-grail {
-        grid-template-columns: 1fr;
-      }
-
-      .grid-demo__grid--2col {
-        grid-template-columns: 1fr;
-      }
+      /* Grid responsive collapse (.grid--2col, etc.) handled by shared/layout.css */
 
       .grid-demo__cell--span-2,
       .grid-demo__cell--span-full {
@@ -936,7 +756,7 @@
               <div class="leading-specimen" :style="{ lineHeight: lh.numValue }">
                 The quick brown fox jumps over the lazy dog.<br>Agent sessions unfold line by line.<br>Every keystroke is recorded and searchable.
               </div>
-              <div class="token-card__meta" style="flex-shrink: 0; min-width: 180px; text-align: right;">
+              <div class="token-card__meta" style="flex-shrink: 0; min-width: var(--progress-width); text-align: right;">
                 <span class="token-card__name">{{ lh.label }}</span>
                 <code class="token-card__label">{{ lh.token }}</code>
                 <span class="token-card__value">{{ lh.value }} — {{ lh.usage }}</span>
@@ -1006,7 +826,7 @@
       <!-- 4. Layout / Grid -->
       <token-section title="Layout Tokens" description="Container sizing, grid gaps, breakpoints, and component height scale.">
         <div class="subsection">
-          <h4 class="subsection-title">Grid System</h4>
+          <h4 class="subsection-title">Layout Tokens</h4>
 
           <!-- Token summary cards -->
           <div class="grid-tokens-summary">
@@ -1032,78 +852,82 @@
             </div>
           </div>
 
-          <!-- Grid examples -->
+          <!-- Grid classes (from shared/layout.css) -->
+          <h4 class="subsection-title" style="margin-top: var(--space-8);">Grid Classes</h4>
+          <p style="color: var(--text-secondary); font-size: var(--text-base); line-height: var(--leading-normal); margin-bottom: var(--space-4); max-width: var(--breakpoint-sm);">
+            These utility classes live in <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">shared/layout.css</code> and are available to all stages. Apply <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">.grid</code> as the base class for <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">display: grid</code> and <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">gap</code>, then add a modifier like <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">.grid--sidebar</code> to set the column template. All multi-column grids collapse to a single column below 768px.
+          </p>
           <div class="grid-examples">
 
             <!-- Auto-fill responsive -->
             <div class="grid-demo">
-              <div class="grid-demo__label">auto-fill · minmax(120px, 1fr) · gap: var(--grid-gap)</div>
-              <div class="grid-demo__grid grid-demo__grid--auto-fill">
-                <div class="grid-demo__cell">1</div>
-                <div class="grid-demo__cell">2</div>
-                <div class="grid-demo__cell">3</div>
-                <div class="grid-demo__cell">4</div>
-                <div class="grid-demo__cell">5</div>
-                <div class="grid-demo__cell">6</div>
+              <div class="grid-demo__label">.grid.grid--auto-fill · repeat(auto-fill, minmax(200px, 1fr))</div>
+              <div class="grid grid--auto-fill">
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
               </div>
               <div class="grid-demo__meta">
-                <span class="grid-demo__meta-item">Session card grid — responsive auto-fill</span>
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px gap) · Note: minmax uses raw 200px — var() invalid in repeat(auto-fill)</span>
               </div>
             </div>
 
             <!-- 3-column equal -->
             <div class="grid-demo">
-              <div class="grid-demo__label">3-column equal · repeat(3, 1fr)</div>
-              <div class="grid-demo__grid grid-demo__grid--3col">
-                <div class="grid-demo__cell">col 1</div>
-                <div class="grid-demo__cell">col 2</div>
-                <div class="grid-demo__cell">col 3</div>
-                <div class="grid-demo__cell">col 1</div>
+              <div class="grid-demo__label">.grid.grid--3col · repeat(3, 1fr)</div>
+              <div class="grid grid--3col">
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
                 <div class="grid-demo__cell grid-demo__cell--span-2">span 2</div>
               </div>
               <div class="grid-demo__meta">
-                <span class="grid-demo__meta-item">Dashboard stats, feature cards</span>
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px), <code>grid-column: span 2</code></span>
               </div>
             </div>
 
             <!-- Sidebar layout -->
             <div class="grid-demo">
-              <div class="grid-demo__label">sidebar layout · 200px 1fr</div>
-              <div class="grid-demo__grid grid-demo__grid--sidebar">
-                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">sidebar</div>
-                <div class="grid-demo__cell grid-demo__cell--content">main content</div>
+              <div class="grid-demo__label">.grid.grid--sidebar · var(--progress-width) 1fr</div>
+              <div class="grid grid--sidebar">
+                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">--progress-width (200px)</div>
+                <div class="grid-demo__cell grid-demo__cell--content">1fr content</div>
               </div>
               <div class="grid-demo__meta">
-                <span class="grid-demo__meta-item">Session detail — sidebar + terminal viewer</span>
+                <span class="grid-demo__meta-item">Tokens: <code>--progress-width</code> (200px sidebar), <code>--grid-gap</code></span>
               </div>
             </div>
 
             <!-- Holy grail with header/footer -->
             <div class="grid-demo">
-              <div class="grid-demo__label">page layout · header + sidebar + content + aside</div>
-              <div class="grid-demo__grid grid-demo__grid--holy-grail">
-                <div class="grid-demo__cell grid-demo__cell--header grid-demo__cell--span-full">header (--header-height: 56px)</div>
-                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">nav</div>
-                <div class="grid-demo__cell grid-demo__cell--content">content area</div>
-                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">aside</div>
+              <div class="grid-demo__label">.grid.grid--holy-grail · var(--progress-width) 1fr var(--progress-width)</div>
+              <div class="grid grid--holy-grail">
+                <div class="grid-demo__cell grid-demo__cell--header grid-demo__cell--span-full">--header-height (56px)</div>
+                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">--progress-width</div>
+                <div class="grid-demo__cell grid-demo__cell--content">1fr content</div>
+                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">--progress-width</div>
               </div>
               <div class="grid-demo__meta">
-                <span class="grid-demo__meta-item">Full page scaffold — curation panel + session detail</span>
+                <span class="grid-demo__meta-item">Tokens: <code>--header-height</code>, <code>--progress-width</code>, <code>--grid-gap</code></span>
               </div>
             </div>
 
             <!-- 2-column with spanning -->
             <div class="grid-demo">
-              <div class="grid-demo__label">2-column · repeat(2, 1fr) + spanning</div>
-              <div class="grid-demo__grid grid-demo__grid--2col">
-                <div class="grid-demo__cell grid-demo__cell--span-full grid-demo__cell--header">full-width section header</div>
-                <div class="grid-demo__cell">card</div>
-                <div class="grid-demo__cell">card</div>
-                <div class="grid-demo__cell">card</div>
-                <div class="grid-demo__cell">card</div>
+              <div class="grid-demo__label">.grid.grid--2col · repeat(2, 1fr)</div>
+              <div class="grid grid--2col">
+                <div class="grid-demo__cell grid-demo__cell--span-full grid-demo__cell--header">grid-column: 1 / -1 (span full)</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
               </div>
               <div class="grid-demo__meta">
-                <span class="grid-demo__meta-item">Landing page — section header + card pairs</span>
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px), <code>grid-column: 1 / -1</code> (span full width)</span>
               </div>
             </div>
 
@@ -1176,6 +1000,30 @@
                 <tr v-for="row in cssMap" :key="row.token">
                   <td class="css-map__token">{{ row.token }}</td>
                   <td class="css-map__value">{{ row.value }}</td>
+                  <td class="css-map__usage">{{ row.usage }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 7. Layout Utility Classes -->
+      <token-section title="Layout Utility Classes" description="Reusable CSS classes from shared/layout.css. These consume design tokens but are not tokens themselves — use them directly on HTML elements.">
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table class="css-map">
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>CSS Output</th>
+                  <th>Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in utilityClasses" :key="row.cls">
+                  <td class="css-map__token">{{ row.cls }}</td>
+                  <td class="css-map__value">{{ row.output }}</td>
                   <td class="css-map__usage">{{ row.usage }}</td>
                 </tr>
               </tbody>
@@ -1312,7 +1160,7 @@
     const AnimToken = defineComponent({
       props: { token: String, value: String, label: String },
       template: `
-        <div class="token-card token-card--row">
+        <div class="token-card token-card--anim">
           <div class="anim-preview" :style="{ transitionDuration: value }"></div>
           <div class="token-card__meta">
             <span class="token-card__name">{{ label }}</span>
@@ -1572,6 +1420,16 @@
             { token: '--duration-normal', value: '250ms', usage: 'Card transitions, panel slides' },
             { token: '--duration-slow', value: '400ms', usage: 'Page transitions, modal enter/exit' },
             { token: '--easing-default', value: 'ease-out', usage: 'All transitions (decelerating feel)' },
+          ],
+
+          utilityClasses: [
+            { cls: '.container', output: 'max-width: 960px; margin: 0 auto; padding-inline: 24px', usage: 'Centered content wrapper — use on the outermost page content div' },
+            { cls: '.grid', output: 'display: grid; gap: var(--grid-gap)', usage: 'Base grid — always required, add a modifier for column layout' },
+            { cls: '.grid.grid--auto-fill', output: 'grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))', usage: 'Responsive card grids that auto-wrap based on available width' },
+            { cls: '.grid.grid--2col', output: 'grid-template-columns: repeat(2, 1fr)', usage: 'Two equal columns — forms, side-by-side comparisons' },
+            { cls: '.grid.grid--3col', output: 'grid-template-columns: repeat(3, 1fr)', usage: 'Three equal columns — dashboards, feature grids' },
+            { cls: '.grid.grid--sidebar', output: 'grid-template-columns: 200px 1fr', usage: 'Fixed sidebar + fluid content — navigation panels, filters' },
+            { cls: '.grid.grid--holy-grail', output: 'grid-template-columns: 200px 1fr 200px', usage: 'Sidebar + content + sidebar — full page layouts with dual panels' },
           ],
         };
       },

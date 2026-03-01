@@ -28,6 +28,50 @@ Stage 11 can run in parallel with Stages 5-9.
 
 ---
 
+## Shared CSS Convention
+
+All stage HTML files import shared CSS via `<link rel="stylesheet" href="../shared/layout.css">`.
+
+**File structure:**
+
+| File | Purpose | Contents |
+|------|---------|----------|
+| `shared/layout.css` | Foundation | Design tokens (`:root`), Google Fonts import, reset (`*`, `body`), grid/layout utility classes |
+| `shared/components.css` | Reusable UI | Component styles consumed by multiple stages (introduced in Stage 4, imported by Stages 5+) |
+| `stage-N/*.html` | Page-specific | Styles in `<style>` block — no `:root`, no grid class duplication |
+
+**What lives where:**
+
+| Category | File | Examples |
+|----------|------|----------|
+| Design tokens | `layout.css` | `--accent-primary`, `--text-base`, `--space-4`, `--radius-md` |
+| Reset + body base | `layout.css` | `* { box-sizing }`, `body { font-family }` |
+| Layout utilities | `layout.css` | `.container`, `.grid`, `.grid--2col`, `.grid--sidebar`, `.grid--holy-grail` |
+| Reusable components | `components.css` | Buttons, inputs, badges, cards, modals, toasts (Stage 4+) |
+| Page-specific styles | `stage-N/*.html` | Demo visualizations, section layouts, page-only presentation |
+
+**Available grid classes (from `layout.css`):**
+
+| Class | Columns | Use case |
+|-------|---------|----------|
+| `.grid` | — (base) | Sets `display: grid` + `gap: var(--grid-gap)` |
+| `.grid--auto-fill` | `repeat(auto-fill, minmax(200px, 1fr))` | Responsive card grids |
+| `.grid--2col` | `repeat(2, 1fr)` | Two equal columns |
+| `.grid--3col` | `repeat(3, 1fr)` | Three equal columns |
+| `.grid--sidebar` | `var(--progress-width) 1fr` | Sidebar + content |
+| `.grid--holy-grail` | `var(--progress-width) 1fr var(--progress-width)` | Sidebar + content + sidebar |
+
+All multi-column grids collapse to single column below 768px viewport.
+
+**Rules:**
+- No `:root` block in individual stage HTML files — all tokens live in `layout.css`
+- Use shared `.grid--*` classes for layout — don't redefine them in stage files
+- `var()` cannot be used inside `repeat(auto-fill, ...)` — use raw px values with a comment
+- Component styles reused across stages go in `components.css`, not in stage HTML
+- Stage-specific presentation styles stay in the HTML file's `<style>` block
+
+---
+
 ## Stage 0: Explore the Current Application
 
 **Owner:** Frontend Designer

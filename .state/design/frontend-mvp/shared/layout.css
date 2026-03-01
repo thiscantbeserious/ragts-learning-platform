@@ -1,0 +1,257 @@
+/* ================================================================
+   RAGTS Layout — Single Source of Truth
+   ================================================================
+   All stage HTML files import this file via:
+     <link rel="stylesheet" href="../shared/layout.css">
+
+   This file contains:
+     1. Design tokens    — :root custom properties (colors, type, spacing, etc.)
+     2. Reset + base     — *, body
+     3. Layout utilities — .container, .grid, .grid--* variants
+
+   No :root block should appear in individual stage files.
+   Stage-specific CSS goes in <style> within each HTML file.
+
+   Layout classes:
+
+     .container              — max-width 960px, centered, 24px inline padding
+     .grid                   — display:grid, gap 16px
+     .grid.grid--auto-fill   — repeat(auto-fill, minmax(200px, 1fr))
+     .grid.grid--2col        — repeat(2, 1fr)
+     .grid.grid--3col        — repeat(3, 1fr)
+     .grid.grid--sidebar     — 200px 1fr  (--progress-width)
+     .grid.grid--holy-grail  — 200px 1fr 200px  (--progress-width)
+
+     All multi-col grids collapse to 1fr below 768px.
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ============================================================
+     COLORS
+     ============================================================ */
+
+  /* --- Backgrounds --- */
+  --bg-page: #0c0c0c;
+  --bg-surface: #141414;
+  --bg-elevated: #1c1c1c;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+
+  /* --- Primary accent — mint green H153 S100% L50% --- */
+  --accent-primary: #00ff9f;
+  --accent-primary-hover: color-mix(in srgb, var(--accent-primary) 80%, white);
+  --accent-primary-dim: color-mix(in srgb, var(--accent-primary) 65%, var(--bg-page));
+  --accent-primary-subtle: color-mix(in srgb, var(--accent-primary) 7%, transparent);
+
+  /* --- Secondary accent — warm orange H28 S100% L58% --- */
+  --accent-secondary: #ff8c2b;
+  --accent-secondary-hover: color-mix(in srgb, var(--accent-secondary) 80%, white);
+  --accent-secondary-dim: color-mix(in srgb, var(--accent-secondary) 65%, var(--bg-page));
+  --accent-secondary-subtle: color-mix(in srgb, var(--accent-secondary) 7%, transparent);
+
+  /* --- Status — semantic colors --- */
+  --status-success: #34d399;
+  --status-success-subtle: color-mix(in srgb, var(--status-success) 7%, transparent);
+  --status-warning: #ffcc00;
+  --status-warning-subtle: color-mix(in srgb, var(--status-warning) 7%, transparent);
+  --status-error: #ff3b30;
+  --status-error-subtle: color-mix(in srgb, var(--status-error) 7%, transparent);
+  --status-error-dim: color-mix(in srgb, var(--status-error) 65%, var(--bg-page));
+  --status-info: #5ac8fa;
+  --status-info-subtle: color-mix(in srgb, var(--status-info) 7%, transparent);
+
+  /* --- Text hierarchy --- */
+  --text-primary: #e8e8e8;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+  --text-disabled: #30363d;
+  --text-inverse: var(--bg-page);
+
+  /* --- Borders --- */
+  --border-default: #1e1e1e;
+  --border-strong: #2a2a2a;
+  --border-accent: var(--accent-primary);
+
+  /* --- Terminal --- */
+  --terminal-bg: #0a0a0a;
+  --terminal-text: #d4d4d4;
+
+  /* ============================================================
+     TYPOGRAPHY — Minor Third (1.2) from 14px base
+     ============================================================ */
+
+  /* Font families */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+
+  /* Type scale: 14px x 1.2^n, rounded to whole px */
+  --text-xs: 0.625rem;    /* 10px — step -2 */
+  --text-sm: 0.75rem;     /* 12px — step -1 */
+  --text-base: 0.875rem;  /* 14px — step 0 (base) */
+  --text-lg: 1.0625rem;   /* 17px — step +1 */
+  --text-xl: 1.25rem;     /* 20px — step +2 */
+  --text-2xl: 1.5rem;     /* 24px — step +3 */
+  --text-3xl: 1.8125rem;  /* 29px — step +4 (display) */
+
+  /* Line height: inverse relationship — bigger text = tighter */
+  --leading-tight: 1.2;     /* headings 24px+ */
+  --leading-snug: 1.35;     /* large body 17-24px */
+  --leading-normal: 1.5;    /* body text 14px */
+  --leading-relaxed: 1.65;  /* small text 10-12px */
+  --leading-mono: 1.6;      /* monospace at any size */
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;    /* display/headings — tighter feels more confident */
+  --tracking-normal: 0;         /* body text */
+  --tracking-wide: 0.06em;      /* small uppercase labels */
+  --tracking-wider: 0.12em;     /* badges, timestamps */
+
+  /* Weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ============================================================
+     SPACING (4px base grid)
+     ============================================================ */
+  --space-px: 1px;
+  --space-0\.5: 2px;
+  --space-1: 4px;
+  --space-1\.5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Named spacing shortcuts */
+  --space-inline: var(--space-4);   /* default horizontal padding */
+  --space-stack: var(--space-3);    /* default vertical gap between elements */
+
+  /* ============================================================
+     LAYOUT / GRID
+     ============================================================ */
+  --container-max: 960px;
+  --container-padding: var(--space-6);
+  --grid-gap: var(--space-4);
+  --header-height: 56px;
+
+  /* Breakpoints (documented as tokens; used as raw values in @media) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+
+  /* ============================================================
+     COMPONENT SIZING
+     ============================================================ */
+  --btn-height-sm: 28px;
+  --btn-height-md: 36px;
+  --btn-height-lg: 44px;
+  --input-height-sm: 32px;
+  --input-height-md: 40px;
+  --input-height-lg: 48px;
+
+  /* Component-specific sizing */
+  --toast-min-width: 320px;
+  --toast-max-width: 420px;
+  --modal-max-width: 480px;
+  --progress-width: 200px;
+
+  /* ============================================================
+     SHAPE
+     ============================================================ */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* ============================================================
+     SHADOWS
+     ============================================================ */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --glow-accent: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
+  --glow-error: 0 0 20px color-mix(in srgb, var(--status-error) 25%, transparent);
+
+  /* ============================================================
+     ANIMATION
+     ============================================================ */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-default: ease-out;
+}
+
+/* ================================================================
+   RESET + BASE
+   ================================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================================
+   LAYOUT UTILITIES
+   ================================================================
+   Reusable layout classes that consume tokens.
+   These are NOT tokens — they are utility classes for common patterns.
+   ================================================================ */
+
+/* --- Container --- */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding-inline: var(--container-padding);
+}
+
+/* --- Grid layouts --- */
+.grid {
+  display: grid;
+  gap: var(--grid-gap);
+}
+
+/* auto-fill: raw value required — var() invalid in repeat(auto-fill, ...) per CSS Grid spec */
+.grid--auto-fill {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.grid--2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid--3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid--sidebar {
+  grid-template-columns: var(--progress-width) 1fr;
+}
+
+.grid--holy-grail {
+  grid-template-columns: var(--progress-width) 1fr var(--progress-width);
+}
+
+/* --- Responsive grid collapse --- */
+@media (max-width: 767px) {
+  .grid--2col,
+  .grid--3col,
+  .grid--sidebar,
+  .grid--holy-grail {
+    grid-template-columns: 1fr;
+  }
+}
