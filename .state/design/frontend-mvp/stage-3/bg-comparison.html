@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 3 -- Background Palette Comparison</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ================================================================
+       PAGE-LEVEL STYLES -- comparison scaffold
+       This page does NOT import shared layout.css because it needs
+       a light page background to contrast the dark panels.
+       All component styles are duplicated here (subset) so panels
+       are self-contained via CSS custom property overrides.
+       ================================================================ */
+
+    :root {
+      --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+
+      /* Type scale (Minor Third 1.2 from 14px) */
+      --text-xs: 0.625rem;
+      --text-sm: 0.75rem;
+      --text-base: 0.875rem;
+      --text-lg: 1.0625rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+      --text-3xl: 1.8125rem;
+
+      --leading-tight: 1.2;
+      --leading-snug: 1.35;
+      --leading-normal: 1.5;
+      --leading-relaxed: 1.65;
+      --leading-mono: 1.6;
+
+      --tracking-tight: -0.02em;
+      --tracking-normal: 0;
+      --tracking-wide: 0.06em;
+      --tracking-wider: 0.12em;
+
+      --weight-normal: 400;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+      --weight-bold: 700;
+
+      /* Spacing */
+      --space-px: 1px;
+      --space-half: 2px;
+      --space-1: 4px;
+      --space-1h: 6px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+
+      /* Shape */
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-xl: 10px;
+      --radius-full: 9999px;
+
+      /* Sizing */
+      --btn-height-md: 36px;
+
+      /* Animation */
+      --duration-fast: 150ms;
+      --easing-default: ease-out;
+
+      /* Fixed accent colors (unchanged across all options) */
+      --accent-primary: #00ff9f;
+      --accent-primary-hover: #33ffb3;
+      --accent-secondary: #ff8c2b;
+      --accent-secondary-hover: #ff9f4d;
+
+      /* Fixed status colors */
+      --status-success: #34d399;
+      --status-warning: #ffcc00;
+      --status-error: #ff3b30;
+      --status-info: #5ac8fa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: #f0f0f0;
+      color: #1a1a1a;
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Page header */
+    .page-header {
+      text-align: center;
+      padding: 32px 24px 24px;
+    }
+    .page-header h1 {
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: var(--text-base);
+      color: #555;
+      max-width: 780px;
+      margin: 0 auto;
+      line-height: var(--leading-normal);
+    }
+    .page-header .current-ref {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: #888;
+      margin-top: 8px;
+    }
+
+    /* Three-column comparison grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 0 20px 40px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* Each option panel */
+    .option-panel {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+
+    /* Panel header (light background label) */
+    .panel-label {
+      background: #fff;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .panel-label h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: 4px;
+    }
+    .panel-label .subtitle {
+      font-size: var(--text-sm);
+      color: #666;
+    }
+
+    /* Dark panel body: takes palette from CSS vars on .option-body */
+    .option-body {
+      background: var(--bg-page);
+      color: var(--text-primary);
+      padding: 20px;
+    }
+
+    /* Section labels within panels */
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .section-gap { margin-top: 24px; }
+
+    /* ================================================================
+       SWATCH GRID
+       ================================================================ */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .swatch {
+      border-radius: var(--radius-md);
+      padding: 10px 8px 8px;
+      border: 1px solid var(--border-default);
+      min-height: 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .swatch-name {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+    }
+    .swatch-lstar {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    /* ================================================================
+       CONTRAST TABLE
+       ================================================================ */
+    .contrast-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      font-family: var(--font-mono);
+    }
+    .contrast-table th {
+      text-align: left;
+      padding: 4px 6px;
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .contrast-table td {
+      padding: 3px 6px;
+      border-bottom: 1px solid var(--border-default);
+      color: var(--text-secondary);
+    }
+    .contrast-table .pair-name {
+      color: var(--text-primary);
+      font-size: 10px;
+    }
+    .contrast-table .ratio {
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
+    .contrast-table .pass { color: #34d399; }
+    .contrast-table .warn { color: #ffcc00; }
+    .contrast-table .fail { color: #ff3b30; }
+    .adjusted-note {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: #00ff9f;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: rgba(0,255,159,0.06);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(0,255,159,0.15);
+      line-height: 1.6;
+    }
+
+    /* ================================================================
+       COMPONENT PREVIEW STRIP
+       ================================================================ */
+
+    /* --- Typography Preview --- */
+    .typo-preview h2 {
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-tight);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .typo-preview p {
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      color: var(--text-secondary);
+    }
+
+    /* --- Session Card Mock --- */
+    .mock-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color var(--duration-fast) var(--easing-default);
+    }
+    .mock-card:hover {
+      border-color: var(--accent-primary);
+    }
+    .mock-card__info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mock-card__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+    }
+    .mock-card__meta {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mock-card__right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* --- Buttons --- */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      height: var(--btn-height-md);
+      padding: 0 var(--space-4);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      border: 1px solid transparent;
+      background: transparent;
+      text-decoration: none;
+    }
+    .btn--primary {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+    .btn--primary:hover {
+      background: var(--accent-primary);
+      color: var(--bg-page);
+    }
+    .btn--ghost {
+      color: var(--text-secondary);
+      border-color: var(--border-strong);
+    }
+    .btn--ghost:hover {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+    .btn--destructive {
+      border-color: var(--status-error);
+      color: var(--status-error);
+    }
+    .btn--destructive:hover {
+      background: var(--status-error);
+      color: #fff;
+    }
+
+    /* --- Terminal Chrome --- */
+    .terminal-chrome {
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .terminal-chrome__titlebar {
+      background: var(--bg-elevated);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .terminal-chrome__dots {
+      display: flex;
+      gap: 6px;
+    }
+    .terminal-chrome__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .terminal-chrome__dot--red { background: #ff5f57; }
+    .terminal-chrome__dot--yellow { background: #febc2e; }
+    .terminal-chrome__dot--green { background: #28c840; }
+    .terminal-chrome__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      flex: 1;
+      text-align: center;
+    }
+    .terminal-chrome__body {
+      background: var(--terminal-bg);
+      padding: 12px 16px;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--leading-mono);
+      color: var(--terminal-text);
+      min-height: 80px;
+    }
+    .terminal-chrome__body .prompt {
+      color: var(--accent-primary);
+    }
+    .terminal-chrome__body .cmd {
+      color: var(--text-primary);
+    }
+    .terminal-chrome__body .output {
+      color: var(--text-secondary);
+    }
+
+    /* --- Toast --- */
+    .mock-toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: var(--radius-lg);
+      border-left: 3px solid var(--status-success);
+      background: var(--bg-elevated);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+    }
+    .mock-toast__icon {
+      color: var(--status-success);
+      font-size: var(--text-lg);
+    }
+
+    /* --- Input --- */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .input-group__label {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+    }
+    .mock-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+    }
+    .mock-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* --- Badges --- */
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      border-radius: var(--radius-full);
+    }
+    .badge--claude {
+      background: rgba(0, 255, 159, 0.1);
+      color: var(--accent-primary);
+      border: 1px solid rgba(0, 255, 159, 0.25);
+    }
+    .badge--gemini {
+      background: rgba(90, 200, 250, 0.1);
+      color: var(--status-info);
+      border: 1px solid rgba(90, 200, 250, 0.25);
+    }
+    .badge--gpt {
+      background: rgba(255, 140, 43, 0.1);
+      color: var(--accent-secondary);
+      border: 1px solid rgba(255, 140, 43, 0.25);
+    }
+    .badge--copilot {
+      background: rgba(255, 204, 0, 0.1);
+      color: var(--status-warning);
+      border: 1px solid rgba(255, 204, 0, 0.25);
+    }
+
+    /* Component gap */
+    .comp-gap { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="page-header">
+      <h1>Background Palette Comparison</h1>
+      <p>Three mid-tone background options for RAGTS. Target L* 17-26 range
+         (current palette is L* 5-11, unreadable outdoors).
+         Accents, status colors, and typography scale remain unchanged.
+         text-muted is adjusted per option to maintain WCAG AA-Large (3:1) on both page and surface.</p>
+      <div class="current-ref">Current: bg-page #0c0c0c L*5 | bg-surface #141414 L*8 | bg-elevated #1c1c1c L*11</div>
+    </div>
+
+    <div class="comparison-grid">
+      <div class="option-panel" v-for="opt in options" :key="opt.id">
+        <div class="panel-label">
+          <h2>{{ opt.label }}</h2>
+          <div class="subtitle">{{ opt.description }}</div>
+        </div>
+
+        <div class="option-body" :style="opt.cssVars">
+
+          <!-- COLOR SWATCHES -->
+          <div class="section-title">Color Swatches</div>
+          <div class="swatch-grid">
+            <div v-for="s in opt.swatches" :key="s.name"
+                 class="swatch" :style="{ background: s.hex }">
+              <div class="swatch-name">{{ s.name }}</div>
+              <div class="swatch-hex">{{ s.hex }}</div>
+              <div class="swatch-lstar">L*{{ s.lstar }}</div>
+            </div>
+          </div>
+
+          <!-- WCAG CONTRAST AUDIT -->
+          <div class="section-gap">
+            <div class="section-title">WCAG Contrast Audit</div>
+            <table class="contrast-table">
+              <thead>
+                <tr>
+                  <th>Pair</th>
+                  <th>Ratio</th>
+                  <th>Grade</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in opt.contrastRows" :key="row.pair">
+                  <td class="pair-name">{{ row.pair }}</td>
+                  <td class="ratio">{{ row.ratio }}</td>
+                  <td :class="row.cls">{{ row.grade }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-if="opt.adjustments.length" class="adjusted-note">
+              <div v-for="adj in opt.adjustments" :key="adj">{{ adj }}</div>
+            </div>
+          </div>
+
+          <!-- COMPONENT PREVIEW STRIP -->
+          <div class="section-gap">
+            <div class="section-title">Component Preview</div>
+
+            <!-- Typography -->
+            <div class="typo-preview">
+              <h2>Session Explorer</h2>
+              <p>Browse, search, and learn from recorded agent terminal sessions.
+                 Fold sections, annotate, and curate knowledge.</p>
+            </div>
+
+            <!-- Session Card -->
+            <div class="comp-gap">
+              <div class="mock-card">
+                <div class="mock-card__info">
+                  <div class="mock-card__title">refactor-auth-module.cast</div>
+                  <div class="mock-card__meta">
+                    <span>42 sections</span>
+                    <span>12m 34s</span>
+                  </div>
+                </div>
+                <div class="mock-card__right">
+                  <span class="badge badge--claude">Claude</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="comp-gap">
+              <div class="btn-row">
+                <button class="btn btn--primary">Upload</button>
+                <button class="btn btn--ghost">Cancel</button>
+                <button class="btn btn--destructive">Delete</button>
+              </div>
+            </div>
+
+            <!-- Terminal Chrome -->
+            <div class="comp-gap">
+              <div class="terminal-chrome">
+                <div class="terminal-chrome__titlebar">
+                  <div class="terminal-chrome__dots">
+                    <span class="terminal-chrome__dot terminal-chrome__dot--red"></span>
+                    <span class="terminal-chrome__dot terminal-chrome__dot--yellow"></span>
+                    <span class="terminal-chrome__dot terminal-chrome__dot--green"></span>
+                  </div>
+                  <div class="terminal-chrome__title">~/projects/ragts</div>
+                </div>
+                <div class="terminal-chrome__body">
+                  <div><span class="prompt">$</span> <span class="cmd">npm run dev</span></div>
+                  <div class="output">VITE v5.4.2 ready in 342ms</div>
+                  <div class="output">Local: http://localhost:5173/</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toast -->
+            <div class="comp-gap">
+              <div class="mock-toast">
+                <span class="mock-toast__icon">&#10003;</span>
+                <span>Session uploaded successfully</span>
+              </div>
+            </div>
+
+            <!-- Input -->
+            <div class="comp-gap">
+              <div class="input-group">
+                <label class="input-group__label">Session Name</label>
+                <input class="mock-input" type="text" placeholder="e.g. refactor-auth-module" readonly>
+              </div>
+            </div>
+
+            <!-- Badges -->
+            <div class="comp-gap">
+              <div class="badge-row">
+                <span class="badge badge--claude">Claude Code</span>
+                <span class="badge badge--gemini">Gemini CLI</span>
+                <span class="badge badge--gpt">GPT-4</span>
+                <span class="badge badge--copilot">Copilot</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp } = Vue;
+
+    /* ================================================================
+       WCAG CONTRAST HELPERS
+       ================================================================ */
+
+    function hexToRGB(hex) {
+      hex = hex.replace('#', '');
+      return {
+        r: parseInt(hex.substring(0, 2), 16) / 255,
+        g: parseInt(hex.substring(2, 4), 16) / 255,
+        b: parseInt(hex.substring(4, 6), 16) / 255,
+      };
+    }
+
+    function sRGBtoLinear(c) {
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    }
+
+    function relativeLuminance(hex) {
+      const { r, g, b } = hexToRGB(hex);
+      return 0.2126 * sRGBtoLinear(r) + 0.7152 * sRGBtoLinear(g) + 0.0722 * sRGBtoLinear(b);
+    }
+
+    function contrastRatio(fg, bg) {
+      const L1 = relativeLuminance(fg);
+      const L2 = relativeLuminance(bg);
+      const lighter = Math.max(L1, L2);
+      const darker = Math.min(L1, L2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function gradeContrast(ratio) {
+      if (ratio >= 7.0)  return { grade: 'AAA  ' + ratio.toFixed(1) + ':1', cls: 'pass' };
+      if (ratio >= 4.5)  return { grade: 'AA   ' + ratio.toFixed(1) + ':1', cls: 'pass' };
+      if (ratio >= 3.0)  return { grade: 'AA-Lg ' + ratio.toFixed(1) + ':1', cls: 'warn' };
+      return { grade: 'FAIL  ' + ratio.toFixed(1) + ':1', cls: 'fail' };
+    }
+
+    function cieLstar(hex) {
+      const Y = relativeLuminance(hex);
+      if (Y <= 0.008856) return 903.3 * Y;
+      return 116 * Math.pow(Y, 1 / 3) - 16;
+    }
+
+    /* ================================================================
+       PALETTE DEFINITIONS
+       All values verified via Node.js audit:
+         - text-primary on all bgs: >= 7:1 (AAA)
+         - text-secondary on page/surface: >= 4.5:1 (AA)
+         - text-muted on page/surface: >= 3:1 (AA-Large)
+         - accents on page/surface: >= 3:1 (AA-Large)
+         - status colors on surface: >= 3:1 (AA-Large)
+       ================================================================ */
+
+    // Option A: Cool Slate -- subtle blue-grey tint
+    // Inspired by VS Code Dark+, JetBrains Darcula, Warp
+    const optA = {
+      id: 'a',
+      label: 'Option A: Cool Slate',
+      description: 'Subtle blue-grey tint. VS Code Dark+ / JetBrains Darcula territory.',
+      bgPage:        '#262d35',   // L*18
+      bgSurface:     '#2e3640',   // L*22
+      bgElevated:    '#373f4b',   // L*26
+      terminalBg:    '#1e242b',   // L*14
+      borderDefault: '#3f4856',   // L*30
+      borderStrong:  '#505c6b',   // L*39
+      textPrimary:   '#e8e8e8',
+      textSecondary: '#9ba4ae',   // same hue family as borders
+      textMuted:     '#758492',   // adjusted from #484f58 for 3:1+ on surface
+      textDisabled:  '#4a5565',
+    };
+
+    // Option B: Warm Stone -- subtle warm brown-grey tint
+    // Inspired by Solarized Dark, Monokai Pro, iTerm2 warm themes
+    const optB = {
+      id: 'b',
+      label: 'Option B: Warm Stone',
+      description: 'Subtle warm brown-grey tint. Solarized Dark / Monokai Pro territory.',
+      bgPage:        '#2e2924',   // L*17
+      bgSurface:     '#36302a',   // L*20
+      bgElevated:    '#403933',   // L*25
+      terminalBg:    '#241f1a',   // L*12
+      borderDefault: '#4c443b',   // L*29
+      borderStrong:  '#5e5549',   // L*37
+      textPrimary:   '#e8e8e8',
+      textSecondary: '#a39d96',   // warm-tinted secondary
+      textMuted:     '#857c74',   // adjusted from #484f58 for 3:1+ on surface
+      textDisabled:  '#5e5549',
+    };
+
+    // Option C: Neutral Zinc -- near-pure grey, minimal tint
+    // Inspired by GitHub Dark, Tailwind Zinc scale
+    const optC = {
+      id: 'c',
+      label: 'Option C: Neutral Zinc',
+      description: 'Near-pure grey, minimal tint. GitHub Dark / Tailwind Zinc scale.',
+      bgPage:        '#2a2a2a',   // L*17
+      bgSurface:     '#323232',   // L*21
+      bgElevated:    '#3b3b3b',   // L*25
+      terminalBg:    '#222222',   // L*13
+      borderDefault: '#474747',   // L*30
+      borderStrong:  '#585858',   // L*37
+      textPrimary:   '#e8e8e8',
+      textSecondary: '#9e9e9e',   // pure neutral
+      textMuted:     '#808080',   // adjusted from #484f58 for 3:1+ on surface
+      textDisabled:  '#585858',
+    };
+
+    function buildOption(opt) {
+      const swatches = [
+        { name: 'bg-page',       hex: opt.bgPage,        lstar: cieLstar(opt.bgPage).toFixed(0) },
+        { name: 'bg-surface',    hex: opt.bgSurface,     lstar: cieLstar(opt.bgSurface).toFixed(0) },
+        { name: 'bg-elevated',   hex: opt.bgElevated,    lstar: cieLstar(opt.bgElevated).toFixed(0) },
+        { name: 'terminal-bg',   hex: opt.terminalBg,    lstar: cieLstar(opt.terminalBg).toFixed(0) },
+        { name: 'border-default',hex: opt.borderDefault,  lstar: cieLstar(opt.borderDefault).toFixed(0) },
+        { name: 'border-strong', hex: opt.borderStrong,   lstar: cieLstar(opt.borderStrong).toFixed(0) },
+      ];
+
+      const pairs = [
+        { name: 'text-primary / bg-page',      fg: opt.textPrimary,  bg: opt.bgPage },
+        { name: 'text-primary / bg-surface',    fg: opt.textPrimary,  bg: opt.bgSurface },
+        { name: 'text-primary / bg-elevated',   fg: opt.textPrimary,  bg: opt.bgElevated },
+        { name: 'text-secondary / bg-page',     fg: opt.textSecondary,bg: opt.bgPage },
+        { name: 'text-secondary / bg-surface',  fg: opt.textSecondary,bg: opt.bgSurface },
+        { name: 'text-muted / bg-page',         fg: opt.textMuted,    bg: opt.bgPage },
+        { name: 'text-muted / bg-surface',      fg: opt.textMuted,    bg: opt.bgSurface },
+        { name: 'accent-primary / bg-page',     fg: '#00ff9f',        bg: opt.bgPage },
+        { name: 'accent-primary / bg-surface',  fg: '#00ff9f',        bg: opt.bgSurface },
+        { name: 'accent-secondary / bg-page',   fg: '#ff8c2b',        bg: opt.bgPage },
+        { name: 'accent-secondary / bg-surface', fg: '#ff8c2b',       bg: opt.bgSurface },
+        { name: 'status-success / bg-surface',  fg: '#34d399',        bg: opt.bgSurface },
+        { name: 'status-warning / bg-surface',  fg: '#ffcc00',        bg: opt.bgSurface },
+        { name: 'status-error / bg-surface',    fg: '#ff3b30',        bg: opt.bgSurface },
+        { name: 'status-info / bg-surface',     fg: '#5ac8fa',        bg: opt.bgSurface },
+      ];
+
+      const contrastRows = pairs.map(p => {
+        const ratio = contrastRatio(p.fg, p.bg);
+        const { grade, cls } = gradeContrast(ratio);
+        return { pair: p.name, ratio: ratio.toFixed(1) + ':1', grade, cls };
+      });
+
+      // Document adjustments from original values
+      const adjustments = [];
+      adjustments.push(
+        'text-muted adjusted: #484f58 -> ' + opt.textMuted +
+        ' (page ' + contrastRatio(opt.textMuted, opt.bgPage).toFixed(1) + ':1' +
+        ', surface ' + contrastRatio(opt.textMuted, opt.bgSurface).toFixed(1) + ':1)'
+      );
+      if (opt.textSecondary !== '#8b949e') {
+        adjustments.push(
+          'text-secondary adjusted: #8b949e -> ' + opt.textSecondary +
+          ' (page ' + contrastRatio(opt.textSecondary, opt.bgPage).toFixed(1) + ':1' +
+          ', surface ' + contrastRatio(opt.textSecondary, opt.bgSurface).toFixed(1) + ':1)'
+        );
+      }
+
+      const cssVars = {
+        '--bg-page':        opt.bgPage,
+        '--bg-surface':     opt.bgSurface,
+        '--bg-elevated':    opt.bgElevated,
+        '--terminal-bg':    opt.terminalBg,
+        '--terminal-text':  '#d4d4d4',
+        '--border-default': opt.borderDefault,
+        '--border-strong':  opt.borderStrong,
+        '--text-primary':   opt.textPrimary,
+        '--text-secondary': opt.textSecondary,
+        '--text-muted':     opt.textMuted,
+        '--text-disabled':  opt.textDisabled,
+        '--accent-primary': '#00ff9f',
+        '--accent-secondary': '#ff8c2b',
+        '--status-success': '#34d399',
+        '--status-warning': '#ffcc00',
+        '--status-error':   '#ff3b30',
+        '--status-info':    '#5ac8fa',
+      };
+
+      return {
+        id: opt.id,
+        label: opt.label,
+        description: opt.description,
+        swatches,
+        contrastRows,
+        adjustments,
+        cssVars,
+      };
+    }
+
+    const app = createApp({
+      data() {
+        return {
+          options: [buildOption(optA), buildOption(optB), buildOption(optC)],
+        };
+      },
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080">
+  <defs>
+    <filter id="noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="1" seed="42" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <radialGradient id="vignette" cx="50%" cy="40%" rx="55%" ry="55%">
+      <stop offset="0%" stop-color="black" stop-opacity="0"/>
+      <stop offset="100%" stop-color="black" stop-opacity="0.12"/>
+    </radialGradient>
+  </defs>
+  <!-- Noise: lower baseFrequency = bigger pixels, higher opacity = more visible -->
+  <rect width="1920" height="1080" filter="url(#noise)" opacity="0.35"/>
+  <!-- Vignette -->
+  <rect width="1920" height="1080" fill="url(#vignette)"/>
+</svg>

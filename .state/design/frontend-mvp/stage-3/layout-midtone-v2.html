@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage 3 — Design Tokens (Mid-Tone V2 — Dark Borders)</title>
+  <link rel="stylesheet" href="../shared/layout.css">
+  <style>
+    /* ========================
+       Mid-Tone V2 — Dark Borders
+       Same mid-grey backgrounds as V1, but with dark/black borders
+       and heavier shadows to make UI elements cut through in sunlight.
+       Contrast goes where it matters: card edges, separators, inputs.
+       ======================== */
+    :root {
+      /* --- Backgrounds (same as V1: L*25-33% warm-neutral grey) --- */
+      --bg-page: #3a3a40;
+      --bg-surface: #434349;
+      --bg-elevated: #4c4c53;
+      --bg-overlay: rgba(0, 0, 0, 0.70);
+
+      /* --- Terminal (stays recessed, darker than bg-page, ~L*12%) --- */
+      --terminal-bg: #1e1e22;
+
+      /* --- Borders: DARK — black/near-black to cut through mid-grey --- */
+      --border-default: #1a1a1e;
+      --border-strong: #28282e;
+
+      /* --- Text (primary stays, secondary/muted/disabled lighter for readability) --- */
+      --text-secondary: #b5bac2;
+      --text-muted: #8b9099;
+      --text-disabled: #62666c;
+
+      /* --- Shadows: heavier — dark edges + deep shadows for element definition --- */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.65);
+    }
+
+    /* ========================
+       Stage 3 — Design Tokens Page
+       Tokens imported from ../shared/layout.css
+       This file contains only page-specific styles
+       ======================== */
+
+    /* --- Layout --- */
+    .page {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-12) var(--space-6);
+    }
+
+    .page-header {
+      margin-bottom: var(--space-12);
+    }
+
+    .page-title {
+      font-family: var(--font-body);
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: var(--space-2);
+    }
+
+    .page-subtitle {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-normal);
+      color: var(--text-secondary);
+      max-width: var(--breakpoint-sm);
+    }
+
+    /* --- Section --- */
+    .section {
+      margin-bottom: var(--space-12);
+    }
+
+    .section-header {
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-3);
+      border-bottom: var(--space-px) solid var(--border-default);
+    }
+
+    .section-title {
+      font-family: var(--font-body);
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: var(--space-1);
+    }
+
+    .section-description {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+    }
+
+    /* --- Token Grid --- */
+    .token-grid {
+      display: grid;
+      /* raw value required: var() is invalid inside repeat(auto-fill, ...) per CSS Grid spec */
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-4);
+    }
+
+    .token-grid--wide {
+      /* raw value required: var() is invalid inside repeat(auto-fill, ...) per CSS Grid spec */
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .token-grid--single {
+      grid-template-columns: 1fr;
+    }
+
+    /* --- Token Card --- */
+    .token-card {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .token-card__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+    }
+
+    .token-card__name {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+    }
+
+    .token-card__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    /* --- Color Card (full-bleed swatch) --- */
+    .token-card--color {
+      padding: 0;
+      overflow: hidden;
+      gap: 0;
+    }
+
+    .color-swatch {
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      display: block;
+    }
+
+    .token-card__meta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      min-width: 0;
+      padding: var(--space-3);
+    }
+
+    /* --- Typography Cascade (scale hierarchy) --- */
+    .type-cascade {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .type-cascade__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      padding: var(--space-3) var(--space-5);
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-lg);
+    }
+
+    .type-cascade__specimen {
+      flex: 1;
+      min-width: 0;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+
+    .type-cascade__meta {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-0\.5);
+      text-align: right;
+      min-width: var(--progress-width); /* 200px — holds token name + value */
+    }
+
+    .type-cascade__role {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* --- Leading Specimen --- */
+    .leading-specimen {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* --- Tracking Specimen --- */
+    .tracking-specimen {
+      font-family: var(--font-body);
+      color: var(--text-primary);
+    }
+
+    /* --- Type in Context --- */
+    .type-context {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+
+    .type-context__display {
+      font-family: var(--font-body);
+      font-size: var(--text-3xl);
+      font-weight: var(--weight-bold);
+      line-height: var(--leading-tight);
+      letter-spacing: var(--tracking-tight);
+      color: var(--text-primary);
+    }
+
+    .type-context__heading {
+      font-family: var(--font-body);
+      font-size: var(--text-xl);
+      font-weight: var(--weight-semibold);
+      line-height: var(--leading-snug);
+      letter-spacing: var(--tracking-tight);
+      color: var(--text-secondary);
+    }
+
+    .type-context__body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-normal);
+      line-height: var(--leading-normal);
+      color: var(--text-secondary);
+      max-width: var(--breakpoint-sm);
+    }
+
+    .type-context__code {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+      padding: var(--space-0\.5) var(--space-1);
+      border-radius: var(--radius-sm);
+    }
+
+    .type-context__small {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-normal);
+      line-height: var(--leading-relaxed);
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-muted);
+    }
+
+    .type-context__mono {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--leading-mono);
+      color: var(--terminal-text);
+      background: var(--terminal-bg);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      border: var(--space-px) solid var(--border-default);
+    }
+
+    /* --- Legacy type-specimen (weight/family cards) --- */
+    .type-specimen {
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      line-height: var(--leading-normal);
+      word-break: break-word;
+    }
+
+    .type-specimen--mono {
+      font-family: var(--font-mono);
+    }
+
+    /* --- Grid Demo --- */
+    .grid-demo {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+    }
+
+    .grid-demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      margin-bottom: var(--space-3);
+    }
+
+    /* Grid layout classes (.grid, .grid--auto-fill, etc.) come from shared/layout.css */
+
+    .grid-demo__cell {
+      min-height: var(--input-height-lg);
+      background: var(--accent-primary-subtle);
+      border: var(--space-px) solid var(--accent-primary-dim);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      padding: var(--space-2);
+    }
+
+    .grid-demo__cell--span-2 {
+      grid-column: span 2;
+    }
+
+    .grid-demo__cell--span-3 {
+      grid-column: span 3;
+    }
+
+    .grid-demo__cell--span-full {
+      grid-column: 1 / -1;
+    }
+
+    .grid-demo__cell--tall {
+      min-height: calc(var(--space-8) * 3 + var(--space-6)); /* ~120px from spacing scale */
+    }
+
+    .grid-demo__cell--header {
+      background: color-mix(in srgb, var(--accent-secondary) 10%, transparent);
+      border-color: color-mix(in srgb, var(--accent-secondary) 30%, transparent);
+      color: var(--accent-secondary);
+    }
+
+    .grid-demo__cell--sidebar {
+      background: color-mix(in srgb, var(--status-info) 8%, transparent);
+      border-color: color-mix(in srgb, var(--status-info) 25%, transparent);
+      color: var(--status-info);
+    }
+
+    .grid-demo__cell--content {
+      background: var(--accent-primary-subtle);
+      min-height: calc(var(--space-8) * 3 + var(--space-6)); /* ~120px from spacing scale */
+    }
+
+    .grid-demo__meta {
+      margin-top: var(--space-3);
+      display: flex;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .grid-demo__meta-item {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    .grid-demo__meta-item code {
+      color: var(--accent-primary-dim);
+    }
+
+    .grid-examples {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+
+    .grid-example-title {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent-primary-dim);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      margin-bottom: var(--space-2);
+    }
+
+    .grid-tokens-summary {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-3);
+      margin-bottom: var(--space-5);
+    }
+
+    .grid-token-card {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .grid-token-card__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-primary-dim);
+    }
+
+    .grid-token-card__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+    }
+
+    .grid-token-card__desc {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* --- Height Swatch --- */
+    .height-swatch-row {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .height-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .height-swatch__block {
+      width: var(--space-5);
+      background: var(--accent-primary-subtle);
+      border: var(--space-px) solid var(--accent-primary-dim);
+      border-radius: var(--radius-sm);
+    }
+
+    .height-swatch__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+    }
+
+    .height-swatch__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+    }
+
+    /* --- Breakpoint Scale --- */
+    .breakpoint-scale {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .breakpoint-bar {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .breakpoint-bar__track {
+      height: var(--space-3);
+      background: var(--accent-primary);
+      border-radius: var(--radius-full);
+      opacity: 0.5;
+    }
+
+    .breakpoint-bar__meta {
+      display: flex;
+      gap: var(--space-2);
+      align-items: baseline;
+    }
+
+    .breakpoint-bar__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      font-weight: var(--weight-semibold);
+      min-width: var(--btn-height-sm);
+    }
+
+    .breakpoint-bar__value {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    /* --- Spacing Bar --- */
+    .spacing-bar {
+      height: var(--space-4);
+      background: var(--accent-primary);
+      border-radius: var(--radius-sm);
+      opacity: 0.6;
+      max-width: 100%;
+      flex-shrink: 1;
+    }
+
+    /* --- Shape Preview --- */
+    .shape-preview {
+      width: var(--space-12);     /* 48px — closest spacing token */
+      height: var(--input-height-md);
+      background: var(--bg-elevated);
+      border: var(--space-px) solid var(--accent-primary);
+    }
+
+    /* --- Shadow Preview --- */
+    .shadow-preview {
+      width: 100%;
+      height: var(--header-height);
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      transition: box-shadow var(--duration-normal) var(--easing-default);
+    }
+
+    .shadow-preview--hover-only {
+      cursor: pointer;
+    }
+
+    .shadow-preview--hover-only:hover {
+      box-shadow: var(--glow-accent);
+    }
+
+    /* --- Animation Preview --- */
+    .token-card--anim {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    .anim-preview {
+      width: var(--input-height-md);
+      height: var(--input-height-md);
+      aspect-ratio: 1;
+      flex-shrink: 0;
+      background: var(--accent-primary-subtle);
+      border: var(--space-px) solid var(--accent-primary);
+      border-radius: var(--radius-md);
+      transition-property: transform, background;
+      transition-timing-function: var(--easing-default);
+      cursor: pointer;
+    }
+
+    .anim-preview:hover {
+      transform: scale(1.15);
+      background: var(--accent-primary);
+    }
+
+    /* --- CSS Map Table --- */
+    .css-map {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .css-map th,
+    .css-map td {
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: var(--space-px) solid var(--border-default);
+    }
+
+    .css-map th {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .css-map td {
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+    }
+
+    .css-map__token {
+      font-family: var(--font-mono);
+      color: var(--accent-primary-dim);
+    }
+
+    .css-map__value {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .css-map__usage {
+      color: var(--text-secondary);
+    }
+
+    .css-map tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-wrapper {
+      background: var(--bg-surface);
+      border: var(--space-px) solid var(--border-default);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    /* --- Subsection --- */
+    .subsection {
+      margin-bottom: var(--space-8);
+    }
+
+    .subsection:last-child {
+      margin-bottom: 0;
+    }
+
+    .subsection-title {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      color: var(--text-secondary);
+      margin-bottom: var(--space-4);
+    }
+
+    /* --- Row layout for inline token cards --- */
+    .token-card--row {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-5);
+    }
+
+    .token-card--row .token-card__meta {
+      padding: 0;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 767px) {
+      .page {
+        padding: var(--space-8) var(--space-4);
+      }
+
+      .token-grid,
+      .token-grid--wide {
+        grid-template-columns: 1fr;
+      }
+
+      .page-title {
+        font-size: var(--text-xl);
+      }
+
+      .section-title {
+        font-size: var(--text-lg);
+      }
+
+      .token-card--row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .css-map th,
+      .css-map td {
+        padding: var(--space-2);
+        font-size: var(--text-sm);
+      }
+
+      .grid-tokens-summary {
+        grid-template-columns: 1fr;
+      }
+
+      /* Grid responsive collapse (.grid--2col, etc.) handled by shared/layout.css */
+
+      .grid-demo__cell--span-2,
+      .grid-demo__cell--span-full {
+        grid-column: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="page">
+      <!-- Page Header -->
+      <header class="page-header">
+        <h1 class="page-title">Design Tokens</h1>
+        <p class="page-subtitle">
+          The complete token reference for RAGTS. Every visual value is defined
+          once in :root and referenced by CSS custom properties throughout.
+        </p>
+      </header>
+
+      <!-- 1. Colors -->
+      <token-section title="Color Tokens" description="Neutral surfaces, accent palette, status indicators, and text hierarchy.">
+        <div class="subsection">
+          <h4 class="subsection-title">Backgrounds</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.backgrounds" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Primary Accent</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.primaryAccent" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Secondary Accent</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.secondaryAccent" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Status</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.status" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Text</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.text" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Borders</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.borders" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Terminal</h4>
+          <div class="token-grid">
+            <color-token v-for="c in colors.terminal" :key="c.token"
+              :token="c.token" :value="c.value" :label="c.label" />
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 2. Typography -->
+      <token-section title="Typography Tokens" description="Minor Third (1.2) modular scale from 14px base. Geist for UI, Geist Mono for code.">
+
+        <!-- Type Scale — visual hierarchy cascade -->
+        <div class="subsection">
+          <h4 class="subsection-title">Type Scale</h4>
+          <div class="type-cascade">
+            <div v-for="t in typography.scale" :key="t.token" class="type-cascade__row">
+              <div class="type-cascade__specimen" :style="t.style">{{ t.sample }}</div>
+              <div class="type-cascade__meta">
+                <code class="token-card__label">{{ t.token }}</code>
+                <span class="token-card__value">{{ t.value }}</span>
+                <span class="type-cascade__role">{{ t.label }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Line Height -->
+        <div class="subsection">
+          <h4 class="subsection-title">Line Height</h4>
+          <div class="token-grid token-grid--single">
+            <div v-for="lh in typography.lineHeights" :key="lh.token" class="token-card token-card--row">
+              <div class="leading-specimen" :style="{ lineHeight: lh.numValue }">
+                The quick brown fox jumps over the lazy dog.<br>Agent sessions unfold line by line.<br>Every keystroke is recorded and searchable.
+              </div>
+              <div class="token-card__meta" style="flex-shrink: 0; min-width: var(--progress-width); text-align: right;">
+                <span class="token-card__name">{{ lh.label }}</span>
+                <code class="token-card__label">{{ lh.token }}</code>
+                <span class="token-card__value">{{ lh.value }} — {{ lh.usage }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Letter Spacing -->
+        <div class="subsection">
+          <h4 class="subsection-title">Letter Spacing</h4>
+          <div class="token-grid token-grid--wide">
+            <div v-for="ls in typography.letterSpacing" :key="ls.token" class="token-card">
+              <div class="tracking-specimen" :style="{ letterSpacing: ls.numValue, fontSize: ls.demoSize, fontWeight: ls.demoWeight, textTransform: ls.transform || 'none' }">
+                {{ ls.sample }}
+              </div>
+              <div class="token-card__meta">
+                <span class="token-card__name">{{ ls.label }}</span>
+                <code class="token-card__label">{{ ls.token }}</code>
+                <span class="token-card__value">{{ ls.value }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Font Weights -->
+        <div class="subsection">
+          <h4 class="subsection-title">Font Weights</h4>
+          <div class="token-grid">
+            <weight-token v-for="w in typography.weights" :key="w.token"
+              :token="w.token" :value="w.value" :label="w.label" />
+          </div>
+        </div>
+
+        <!-- Font Families -->
+        <div class="subsection">
+          <h4 class="subsection-title">Font Families</h4>
+          <div class="token-grid token-grid--wide">
+            <family-token v-for="f in typography.families" :key="f.token"
+              :token="f.token" :value="f.value" :label="f.label"
+              :is-mono="f.isMono" />
+          </div>
+        </div>
+
+        <!-- Type in Context -->
+        <div class="subsection">
+          <h4 class="subsection-title">Type in Context</h4>
+          <div class="type-context">
+            <h1 class="type-context__display">Terminal Sessions, Unfolded</h1>
+            <h2 class="type-context__heading">Browse and explore agent recordings</h2>
+            <p class="type-context__body">RAGTS transforms raw terminal sessions into navigable, searchable documents. Upload a <code class="type-context__code">.cast</code> file and the system detects sections, highlights markers, and makes every keystroke findable.</p>
+            <p class="type-context__small">Last updated 2 hours ago · 1,247 events · 23 sections detected</p>
+            <div class="type-context__mono">$ npm test<br>✓ should parse asciicast v3 format <span style="color: var(--text-muted);">(5ms)</span></div>
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 3. Spacing -->
+      <token-section title="Spacing Tokens" description="4px base grid. All spacing values derived from a consistent scale.">
+        <div class="token-grid token-grid--single">
+          <spacing-token v-for="s in spacing" :key="s.token"
+            :token="s.token" :value="s.value" :label="s.label"
+            :width="s.width" />
+        </div>
+      </token-section>
+
+      <!-- 4. Layout / Grid -->
+      <token-section title="Layout Tokens" description="Container sizing, grid gaps, breakpoints, and component height scale.">
+        <div class="subsection">
+          <h4 class="subsection-title">Layout Tokens</h4>
+
+          <!-- Token summary cards -->
+          <div class="grid-tokens-summary">
+            <div class="grid-token-card">
+              <span class="grid-token-card__name">--container-max</span>
+              <span class="grid-token-card__value">960px</span>
+              <span class="grid-token-card__desc">Max content width for centered layouts</span>
+            </div>
+            <div class="grid-token-card">
+              <span class="grid-token-card__name">--container-padding</span>
+              <span class="grid-token-card__value">var(--space-6)</span>
+              <span class="grid-token-card__desc">Side padding for content container</span>
+            </div>
+            <div class="grid-token-card">
+              <span class="grid-token-card__name">--grid-gap</span>
+              <span class="grid-token-card__value">var(--space-4)</span>
+              <span class="grid-token-card__desc">Default gap between grid items</span>
+            </div>
+            <div class="grid-token-card">
+              <span class="grid-token-card__name">--header-height</span>
+              <span class="grid-token-card__value">56px</span>
+              <span class="grid-token-card__desc">Fixed app header height</span>
+            </div>
+          </div>
+
+          <!-- Grid classes (from shared/layout.css) -->
+          <h4 class="subsection-title" style="margin-top: var(--space-8);">Grid Classes</h4>
+          <p style="color: var(--text-secondary); font-size: var(--text-base); line-height: var(--leading-normal); margin-bottom: var(--space-4); max-width: var(--breakpoint-sm);">
+            These utility classes live in <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">shared/layout.css</code> and are available to all stages. Apply <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">.grid</code> as the base class for <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">display: grid</code> and <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">gap</code>, then add a modifier like <code style="color: var(--accent-primary); font-family: var(--font-mono); font-size: var(--text-sm);">.grid--sidebar</code> to set the column template. All multi-column grids collapse to a single column below 768px.
+          </p>
+          <div class="grid-examples">
+
+            <!-- Auto-fill responsive -->
+            <div class="grid-demo">
+              <div class="grid-demo__label">.grid.grid--auto-fill · repeat(auto-fill, minmax(200px, 1fr))</div>
+              <div class="grid grid--auto-fill">
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+                <div class="grid-demo__cell">--grid-gap</div>
+              </div>
+              <div class="grid-demo__meta">
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px gap) · Note: minmax uses raw 200px — var() invalid in repeat(auto-fill)</span>
+              </div>
+            </div>
+
+            <!-- 3-column equal -->
+            <div class="grid-demo">
+              <div class="grid-demo__label">.grid.grid--3col · repeat(3, 1fr)</div>
+              <div class="grid grid--3col">
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell grid-demo__cell--span-2">span 2</div>
+              </div>
+              <div class="grid-demo__meta">
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px), <code>grid-column: span 2</code></span>
+              </div>
+            </div>
+
+            <!-- Sidebar layout -->
+            <div class="grid-demo">
+              <div class="grid-demo__label">.grid.grid--sidebar · var(--progress-width) 1fr</div>
+              <div class="grid grid--sidebar">
+                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">--progress-width (200px)</div>
+                <div class="grid-demo__cell grid-demo__cell--content">1fr content</div>
+              </div>
+              <div class="grid-demo__meta">
+                <span class="grid-demo__meta-item">Tokens: <code>--progress-width</code> (200px sidebar), <code>--grid-gap</code></span>
+              </div>
+            </div>
+
+            <!-- Holy grail with header/footer -->
+            <div class="grid-demo">
+              <div class="grid-demo__label">.grid.grid--holy-grail · var(--progress-width) 1fr var(--progress-width)</div>
+              <div class="grid grid--holy-grail">
+                <div class="grid-demo__cell grid-demo__cell--header grid-demo__cell--span-full">--header-height (56px)</div>
+                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">--progress-width</div>
+                <div class="grid-demo__cell grid-demo__cell--content">1fr content</div>
+                <div class="grid-demo__cell grid-demo__cell--sidebar grid-demo__cell--tall">--progress-width</div>
+              </div>
+              <div class="grid-demo__meta">
+                <span class="grid-demo__meta-item">Tokens: <code>--header-height</code>, <code>--progress-width</code>, <code>--grid-gap</code></span>
+              </div>
+            </div>
+
+            <!-- 2-column with spanning -->
+            <div class="grid-demo">
+              <div class="grid-demo__label">.grid.grid--2col · repeat(2, 1fr)</div>
+              <div class="grid grid--2col">
+                <div class="grid-demo__cell grid-demo__cell--span-full grid-demo__cell--header">grid-column: 1 / -1 (span full)</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+                <div class="grid-demo__cell">1fr</div>
+              </div>
+              <div class="grid-demo__meta">
+                <span class="grid-demo__meta-item">Tokens: <code>--grid-gap</code> (16px), <code>grid-column: 1 / -1</code> (span full width)</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Breakpoints</h4>
+          <div class="breakpoint-scale">
+            <div v-for="bp in layout.breakpoints" :key="bp.token" class="breakpoint-bar">
+              <div class="breakpoint-bar__track" :style="{ width: (parseInt(bp.value) / 1440 * 100) + '%' }"></div>
+              <div class="breakpoint-bar__meta">
+                <span class="breakpoint-bar__name">{{ bp.label }}</span>
+                <span class="breakpoint-bar__value">{{ bp.token }} · {{ bp.value }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Component Heights</h4>
+          <div class="height-swatch-row">
+            <div v-for="h in layout.componentHeights" :key="h.token" class="height-swatch">
+              <div class="height-swatch__block" :style="{ height: h.value }"></div>
+              <span class="height-swatch__label">{{ h.label }}</span>
+              <span class="height-swatch__value">{{ h.value }}</span>
+            </div>
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 5. Shape -->
+      <token-section title="Shape Tokens" description="Border radii from subtle rounding to fully circular, plus elevation shadows.">
+        <div class="subsection">
+          <h4 class="subsection-title">Border Radius</h4>
+          <div class="token-grid">
+            <shape-token v-for="r in shape.radii" :key="r.token"
+              :token="r.token" :value="r.value" :label="r.label" />
+          </div>
+        </div>
+        <div class="subsection">
+          <h4 class="subsection-title">Shadows</h4>
+          <div class="token-grid token-grid--wide">
+            <shadow-token v-for="s in shape.shadows" :key="s.token"
+              :token="s.token" :value="s.value" :label="s.label"
+              :hover-only="s.hoverOnly || false" />
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 5. Animation -->
+      <token-section title="Animation Tokens" description="Timing and easing for transitions. Hover the boxes to preview each duration.">
+        <div class="token-grid">
+          <anim-token v-for="a in animation" :key="a.token"
+            :token="a.token" :value="a.value" :label="a.label" />
+        </div>
+      </token-section>
+
+      <!-- 6. CSS Custom Properties Map -->
+      <token-section title="CSS Custom Properties Map" description="Complete mapping of token names to values and intended usage.">
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table class="css-map">
+              <thead>
+                <tr>
+                  <th>Token</th>
+                  <th>Value</th>
+                  <th>Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in cssMap" :key="row.token">
+                  <td class="css-map__token">{{ row.token }}</td>
+                  <td class="css-map__value">{{ row.value }}</td>
+                  <td class="css-map__usage">{{ row.usage }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </token-section>
+
+      <!-- 7. Layout Utility Classes -->
+      <token-section title="Layout Utility Classes" description="Reusable CSS classes from shared/layout.css. These consume design tokens but are not tokens themselves — use them directly on HTML elements.">
+        <div class="table-wrapper">
+          <div class="table-scroll">
+            <table class="css-map">
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>CSS Output</th>
+                  <th>Usage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in utilityClasses" :key="row.cls">
+                  <td class="css-map__token">{{ row.cls }}</td>
+                  <td class="css-map__value">{{ row.output }}</td>
+                  <td class="css-map__usage">{{ row.usage }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </token-section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, defineComponent } = Vue;
+
+    /* --- Token Section --- */
+    const TokenSection = defineComponent({
+      props: { title: String, description: String },
+      template: `
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">{{ title }}</h2>
+            <p v-if="description" class="section-description">{{ description }}</p>
+          </div>
+          <slot />
+        </section>`
+    });
+
+    /* --- Color Token Card --- */
+    const ColorToken = defineComponent({
+      props: { token: String, value: String, label: String },
+      template: `
+        <div class="token-card token-card--color">
+          <div class="color-swatch" :style="{ background: 'var(' + token + ')' }"></div>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Typography Scale Token --- */
+    const TypeToken = defineComponent({
+      props: { token: String, value: String, label: String, sample: String, styleOverrides: Object },
+      template: `
+        <div class="token-card token-card--row">
+          <div style="flex: 1; min-width: 0;">
+            <span class="type-specimen" :style="styleOverrides">{{ sample }}</span>
+          </div>
+          <div class="token-card__meta" style="flex-shrink: 0; text-align: right;">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Weight Token --- */
+    const WeightToken = defineComponent({
+      props: { token: String, value: String, label: String },
+      template: `
+        <div class="token-card">
+          <span class="type-specimen" :style="{ fontWeight: value, fontSize: 'var(--text-lg)' }">Aa</span>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Family Token --- */
+    const FamilyToken = defineComponent({
+      props: { token: String, value: String, label: String, isMono: Boolean },
+      template: `
+        <div class="token-card">
+          <span class="type-specimen" :class="{ 'type-specimen--mono': isMono }"
+            style="font-size: var(--text-lg);">
+            The quick brown fox jumps over the lazy dog
+          </span>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value" style="word-break: break-all;">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Spacing Token --- */
+    const SpacingToken = defineComponent({
+      props: { token: String, value: String, label: String, width: String },
+      template: `
+        <div class="token-card token-card--row">
+          <div class="spacing-bar" :style="{ width: width }"></div>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Shape Token --- */
+    const ShapeToken = defineComponent({
+      props: { token: String, value: String, label: String },
+      template: `
+        <div class="token-card">
+          <div class="shape-preview" :style="{ borderRadius: value }"></div>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Shadow Token --- */
+    const ShadowToken = defineComponent({
+      props: { token: String, value: String, label: String, hoverOnly: Boolean },
+      template: `
+        <div class="token-card">
+          <div class="shadow-preview"
+            :class="{ 'shadow-preview--hover-only': hoverOnly }"
+            :style="!hoverOnly ? { boxShadow: 'var(' + token + ')' } : {}"></div>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- Animation Token --- */
+    const AnimToken = defineComponent({
+      props: { token: String, value: String, label: String },
+      template: `
+        <div class="token-card token-card--anim">
+          <div class="anim-preview" :style="{ transitionDuration: value }"></div>
+          <div class="token-card__meta">
+            <span class="token-card__name">{{ label }}</span>
+            <span class="token-card__label">{{ token }}</span>
+            <span class="token-card__value">{{ value }}</span>
+          </div>
+        </div>`
+    });
+
+    /* --- App Data --- */
+    const app = createApp({
+      data() {
+        return {
+          colors: {
+            backgrounds: [
+              { token: '--bg-page', value: '#3a3a40', label: 'Page' },
+              { token: '--bg-surface', value: '#434349', label: 'Surface' },
+              { token: '--bg-elevated', value: '#4c4c53', label: 'Elevated' },
+              { token: '--bg-overlay', value: 'rgba(0,0,0,0.65)', label: 'Overlay' },
+            ],
+            primaryAccent: [
+              { token: '--accent-primary', value: '#00ff9f', label: 'Primary' },
+              { token: '--accent-primary-hover', value: 'color-mix(primary 80%, white)', label: 'Hover' },
+              { token: '--accent-primary-dim', value: 'color-mix(primary 65%, bg-page)', label: 'Dim' },
+              { token: '--accent-primary-subtle', value: 'color-mix(primary 7%, transparent)', label: 'Subtle' },
+            ],
+            secondaryAccent: [
+              { token: '--accent-secondary', value: '#ff8c2b', label: 'Secondary' },
+              { token: '--accent-secondary-hover', value: 'color-mix(secondary 80%, white)', label: 'Hover' },
+              { token: '--accent-secondary-dim', value: 'color-mix(secondary 65%, bg-page)', label: 'Dim' },
+              { token: '--accent-secondary-subtle', value: 'color-mix(secondary 7%, transparent)', label: 'Subtle' },
+            ],
+            status: [
+              { token: '--status-success', value: '#34d399', label: 'Success' },
+              { token: '--status-success-subtle', value: 'color-mix(success 7%, transparent)', label: 'Success Subtle' },
+              { token: '--status-warning', value: '#ffcc00', label: 'Warning' },
+              { token: '--status-warning-subtle', value: 'color-mix(warning 7%, transparent)', label: 'Warning Subtle' },
+              { token: '--status-error', value: '#ff3b30', label: 'Error' },
+              { token: '--status-error-subtle', value: 'color-mix(error 7%, transparent)', label: 'Error Subtle' },
+              { token: '--status-info', value: '#5ac8fa', label: 'Info' },
+              { token: '--status-info-subtle', value: 'color-mix(info 7%, transparent)', label: 'Info Subtle' },
+            ],
+            text: [
+              { token: '--text-primary', value: '#e8e8e8', label: 'Primary' },
+              { token: '--text-secondary', value: '#b5bac2', label: 'Secondary' },
+              { token: '--text-muted', value: '#8b9099', label: 'Muted' },
+              { token: '--text-disabled', value: '#62666c', label: 'Disabled' },
+              { token: '--text-inverse', value: 'var(--bg-page)', label: 'Inverse' },
+            ],
+            borders: [
+              { token: '--border-default', value: '#1a1a1e', label: 'Default' },
+              { token: '--border-strong', value: '#28282e', label: 'Strong' },
+              { token: '--border-accent', value: 'var(--accent-primary)', label: 'Accent' },
+            ],
+            terminal: [
+              { token: '--terminal-bg', value: '#1e1e22', label: 'Background' },
+              { token: '--terminal-text', value: '#d4d4d4', label: 'Text' },
+            ],
+          },
+          typography: {
+            scale: [
+              { token: '--text-3xl', value: '1.8125rem (29px)', label: 'Display', sample: 'Terminal Sessions', style: { fontSize: 'var(--text-3xl)', fontWeight: 'var(--weight-bold)', letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-tight)' } },
+              { token: '--text-2xl', value: '1.5rem (24px)', label: 'Page title', sample: 'Agent Sessions', style: { fontSize: 'var(--text-2xl)', fontWeight: 'var(--weight-bold)', letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-tight)' } },
+              { token: '--text-xl', value: '1.25rem (20px)', label: 'Section heading', sample: 'Session Explorer', style: { fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-semibold)', letterSpacing: 'var(--tracking-tight)', lineHeight: 'var(--leading-snug)' } },
+              { token: '--text-lg', value: '1.0625rem (17px)', label: 'Subheading', sample: 'Browse terminal recordings', style: { fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-medium)', lineHeight: 'var(--leading-snug)' } },
+              { token: '--text-base', value: '0.875rem (14px)', label: 'Body text', sample: 'Default body text for paragraphs and descriptions', style: { fontSize: 'var(--text-base)', fontWeight: 'var(--weight-normal)', lineHeight: 'var(--leading-normal)' } },
+              { token: '--text-sm', value: '0.75rem (12px)', label: 'Small / Label', sample: 'TIMESTAMPS AND BADGES', style: { fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', letterSpacing: 'var(--tracking-wider)', textTransform: 'uppercase', lineHeight: 'var(--leading-relaxed)' } },
+              { token: '--text-xs', value: '0.625rem (10px)', label: 'Caption', sample: 'Fine print and annotations', style: { fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-normal)', lineHeight: 'var(--leading-relaxed)' } },
+            ],
+            lineHeights: [
+              { token: '--leading-tight', numValue: '1.2', demoSize: 'var(--text-2xl)', label: 'Tight', value: '1.2', usage: 'Headings 24px+' },
+              { token: '--leading-snug', numValue: '1.35', demoSize: 'var(--text-lg)', label: 'Snug', value: '1.35', usage: 'Large body 17–24px' },
+              { token: '--leading-normal', numValue: '1.5', demoSize: 'var(--text-base)', label: 'Normal', value: '1.5', usage: 'Body text 14px' },
+              { token: '--leading-relaxed', numValue: '1.65', demoSize: 'var(--text-sm)', label: 'Relaxed', value: '1.65', usage: 'Small text 10–12px' },
+              { token: '--leading-mono', numValue: '1.6', demoSize: 'var(--text-base)', label: 'Mono', value: '1.6', usage: 'Monospace at any size' },
+            ],
+            letterSpacing: [
+              { token: '--tracking-tight', numValue: '-0.02em', demoSize: 'var(--text-2xl)', demoWeight: '700', sample: 'Terminal Sessions', label: 'Tight', value: '-0.02em' },
+              { token: '--tracking-normal', numValue: '0', demoSize: 'var(--text-base)', demoWeight: '400', sample: 'Default body text reads naturally', label: 'Normal', value: '0' },
+              { token: '--tracking-wide', numValue: '0.06em', demoSize: 'var(--text-sm)', demoWeight: '600', transform: 'uppercase', sample: 'Small uppercase labels', label: 'Wide', value: '0.06em' },
+              { token: '--tracking-wider', numValue: '0.12em', demoSize: 'var(--text-xs)', demoWeight: '600', transform: 'uppercase', sample: 'Badges & timestamps', label: 'Wider', value: '0.12em' },
+            ],
+            weights: [
+              { token: '--weight-normal', value: '400', label: 'Normal' },
+              { token: '--weight-medium', value: '500', label: 'Medium' },
+              { token: '--weight-semibold', value: '600', label: 'Semibold' },
+              { token: '--weight-bold', value: '700', label: 'Bold' },
+            ],
+            families: [
+              { token: '--font-body', value: "'Geist', -apple-system, BlinkMacSystemFont, sans-serif", label: 'Body / UI', isMono: false },
+              { token: '--font-mono', value: "'Geist Mono', 'JetBrains Mono', monospace", label: 'Code / Terminal', isMono: true },
+            ],
+          },
+          spacing: [
+            { token: '--space-px', value: '1px', label: 'Hairline', width: '1px' },
+            { token: '--space-0.5', value: '2px', label: 'Half', width: '2px' },
+            { token: '--space-1', value: '4px', label: '1x', width: '4px' },
+            { token: '--space-1.5', value: '6px', label: '1.5x', width: '6px' },
+            { token: '--space-2', value: '8px', label: '2x', width: '8px' },
+            { token: '--space-3', value: '12px', label: '3x', width: '12px' },
+            { token: '--space-4', value: '16px', label: '4x', width: '16px' },
+            { token: '--space-5', value: '20px', label: '5x', width: '20px' },
+            { token: '--space-6', value: '24px', label: '6x', width: '24px' },
+            { token: '--space-8', value: '32px', label: '8x', width: '32px' },
+            { token: '--space-12', value: '48px', label: '12x', width: '48px' },
+            { token: '--space-inline', value: 'var(--space-4)', label: 'Inline (horizontal padding)', width: '16px' },
+            { token: '--space-stack', value: 'var(--space-3)', label: 'Stack (vertical gap)', width: '12px' },
+          ],
+          layout: {
+            breakpoints: [
+              { token: '--breakpoint-sm', value: '640px', label: 'sm' },
+              { token: '--breakpoint-md', value: '768px', label: 'md' },
+              { token: '--breakpoint-lg', value: '1024px', label: 'lg' },
+              { token: '--breakpoint-xl', value: '1280px', label: 'xl' },
+              { token: '--breakpoint-2xl', value: '1440px', label: '2xl' },
+            ],
+            componentHeights: [
+              { token: '--btn-height-sm', value: '28px', label: 'btn-sm' },
+              { token: '--btn-height-md', value: '36px', label: 'btn-md' },
+              { token: '--btn-height-lg', value: '44px', label: 'btn-lg' },
+              { token: '--input-height-sm', value: '32px', label: 'input-sm' },
+              { token: '--input-height-md', value: '40px', label: 'input-md' },
+              { token: '--input-height-lg', value: '48px', label: 'input-lg' },
+            ],
+          },
+          shape: {
+            radii: [
+              { token: '--radius-sm', value: '4px', label: 'Small' },
+              { token: '--radius-md', value: '6px', label: 'Medium' },
+              { token: '--radius-lg', value: '8px', label: 'Large' },
+              { token: '--radius-xl', value: '10px', label: 'Extra Large' },
+              { token: '--radius-full', value: '9999px', label: 'Full / Pill' },
+            ],
+            shadows: [
+              { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.35)', label: 'Small (subtle lift)' },
+              { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.50)', label: 'Medium (cards, dropdowns)' },
+              { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.65)', label: 'Large (modals, popovers)' },
+              { token: '--glow-accent', value: 'color-mix(--accent-primary 25%)', label: 'Accent glow (hover)', hoverOnly: true },
+            ],
+          },
+          animation: [
+            { token: '--duration-fast', value: '150ms', label: 'Fast' },
+            { token: '--duration-normal', value: '250ms', label: 'Normal' },
+            { token: '--duration-slow', value: '400ms', label: 'Slow' },
+            { token: '--easing-default', value: 'ease-out', label: 'Default Easing' },
+          ],
+          cssMap: [
+            /* --- Colors: Backgrounds --- */
+            { token: '--bg-page', value: '#3a3a40', usage: 'Main page background' },
+            { token: '--bg-surface', value: '#434349', usage: 'Card and panel backgrounds' },
+            { token: '--bg-elevated', value: '#4c4c53', usage: 'Dropdowns, tooltips, hover states' },
+            { token: '--bg-overlay', value: 'rgba(0,0,0,0.65)', usage: 'Modal backdrop' },
+            /* --- Colors: Primary Accent --- */
+            { token: '--accent-primary', value: '#00ff9f', usage: 'Buttons, links, focus rings, active states' },
+            { token: '--accent-primary-hover', value: 'color-mix(primary 80%, white)', usage: 'Hover state for primary accent elements' },
+            { token: '--accent-primary-dim', value: 'color-mix(primary 65%, bg-page)', usage: 'Dimmed accent for text on dark surfaces' },
+            { token: '--accent-primary-subtle', value: 'color-mix(primary 7%, transparent)', usage: 'Focus ring glow, selected row tint' },
+            /* --- Colors: Secondary Accent --- */
+            { token: '--accent-secondary', value: '#ff8c2b', usage: 'Tags, category markers, secondary CTAs' },
+            { token: '--accent-secondary-hover', value: 'color-mix(secondary 80%, white)', usage: 'Hover state for secondary accent elements' },
+            { token: '--accent-secondary-dim', value: 'color-mix(secondary 65%, bg-page)', usage: 'Dimmed secondary for text on dark surfaces' },
+            { token: '--accent-secondary-subtle', value: 'color-mix(secondary 7%, transparent)', usage: 'Secondary tint for badges and alerts' },
+            /* --- Colors: Status --- */
+            { token: '--status-success', value: '#34d399', usage: 'Completion indicators, positive feedback' },
+            { token: '--status-success-subtle', value: 'color-mix(success 7%, transparent)', usage: 'Success background tint' },
+            { token: '--status-warning', value: '#ffcc00', usage: 'Caution banners, validation hints' },
+            { token: '--status-warning-subtle', value: 'color-mix(warning 7%, transparent)', usage: 'Warning background tint' },
+            { token: '--status-error', value: '#ff3b30', usage: 'Error messages, destructive action highlights' },
+            { token: '--status-error-subtle', value: 'color-mix(error 7%, transparent)', usage: 'Error background tint' },
+            { token: '--status-info', value: '#5ac8fa', usage: 'Informational tooltips, help text accents' },
+            { token: '--status-info-subtle', value: 'color-mix(info 7%, transparent)', usage: 'Info background tint' },
+            /* --- Colors: Text --- */
+            { token: '--text-primary', value: '#e8e8e8', usage: 'Headings, body text, primary labels' },
+            { token: '--text-secondary', value: '#b5bac2', usage: 'Descriptions, secondary labels, metadata' },
+            { token: '--text-muted', value: '#8b9099', usage: 'Placeholders, timestamps, subtle annotations' },
+            { token: '--text-disabled', value: '#62666c', usage: 'Disabled input text, inactive items' },
+            { token: '--text-inverse', value: 'var(--bg-page)', usage: 'Text on accent backgrounds (buttons, filled badges)' },
+            /* --- Colors: Borders --- */
+            { token: '--border-default', value: '#1a1a1e', usage: 'Card borders, dividers, table rules' },
+            { token: '--border-strong', value: '#28282e', usage: 'Emphasized dividers, active card borders' },
+            { token: '--border-accent', value: 'var(--accent-primary)', usage: 'Focus outlines, selected card highlight' },
+            /* --- Colors: Terminal --- */
+            { token: '--terminal-bg', value: '#1e1e22', usage: 'Terminal replay background' },
+            { token: '--terminal-text', value: '#d4d4d4', usage: 'Terminal replay text' },
+            /* --- Typography: Families --- */
+            { token: '--font-body', value: "Geist, -apple-system, sans-serif", usage: 'All UI text: headings, body, labels, buttons' },
+            { token: '--font-mono', value: "Geist Mono, JetBrains Mono, monospace", usage: 'Code blocks, terminal, filenames, tokens' },
+            /* --- Typography: Scale --- */
+            { token: '--text-3xl', value: '1.8125rem (29px)', usage: 'Display text, hero headlines' },
+            { token: '--text-2xl', value: '1.5rem (24px)', usage: 'Page titles' },
+            { token: '--text-xl', value: '1.25rem (20px)', usage: 'Section headings' },
+            { token: '--text-lg', value: '1.0625rem (17px)', usage: 'Subheadings, large body text' },
+            { token: '--text-base', value: '0.875rem (14px)', usage: 'Default body text' },
+            { token: '--text-sm', value: '0.75rem (12px)', usage: 'Badges, timestamps, uppercase labels' },
+            { token: '--text-xs', value: '0.625rem (10px)', usage: 'Fine print, captions' },
+            /* --- Typography: Line Height --- */
+            { token: '--leading-tight', value: '1.2', usage: 'Headings 24px+' },
+            { token: '--leading-snug', value: '1.35', usage: 'Large body 17–24px' },
+            { token: '--leading-normal', value: '1.5', usage: 'Body text 14px' },
+            { token: '--leading-relaxed', value: '1.65', usage: 'Small text 10–12px' },
+            { token: '--leading-mono', value: '1.6', usage: 'Monospace at any size' },
+            /* --- Typography: Letter Spacing --- */
+            { token: '--tracking-tight', value: '-0.02em', usage: 'Display and heading text' },
+            { token: '--tracking-normal', value: '0', usage: 'Body text (default)' },
+            { token: '--tracking-wide', value: '0.06em', usage: 'Small uppercase labels' },
+            { token: '--tracking-wider', value: '0.12em', usage: 'Badges, timestamps' },
+            /* --- Typography: Weights --- */
+            { token: '--weight-normal', value: '400', usage: 'Body text, descriptions' },
+            { token: '--weight-medium', value: '500', usage: 'Labels, buttons, nav items' },
+            { token: '--weight-semibold', value: '600', usage: 'Section headings, emphasis' },
+            { token: '--weight-bold', value: '700', usage: 'Page titles, display text' },
+            /* --- Spacing --- */
+            { token: '--space-px', value: '1px', usage: 'Borders, hairline dividers' },
+            { token: '--space-0.5', value: '2px', usage: 'Tight internal padding' },
+            { token: '--space-1', value: '4px', usage: 'Minimal gap, icon offsets' },
+            { token: '--space-1.5', value: '6px', usage: 'Small badge padding' },
+            { token: '--space-2', value: '8px', usage: 'Compact card padding, small gaps' },
+            { token: '--space-3', value: '12px', usage: 'Default element gap' },
+            { token: '--space-4', value: '16px', usage: 'Card padding, section gaps' },
+            { token: '--space-5', value: '20px', usage: 'Generous card padding' },
+            { token: '--space-6', value: '24px', usage: 'Section separation' },
+            { token: '--space-8', value: '32px', usage: 'Major section gaps' },
+            { token: '--space-12', value: '48px', usage: 'Page-level padding, hero spacing' },
+            { token: '--space-inline', value: 'var(--space-4)', usage: 'Default horizontal padding shortcut' },
+            { token: '--space-stack', value: 'var(--space-3)', usage: 'Default vertical gap shortcut' },
+            /* --- Layout / Grid --- */
+            { token: '--container-max', value: '960px', usage: 'Max content width for centered layouts' },
+            { token: '--container-padding', value: 'var(--space-6)', usage: 'Side padding for content container' },
+            { token: '--grid-gap', value: 'var(--space-4)', usage: 'Default gap between grid items' },
+            { token: '--header-height', value: '56px', usage: 'Fixed app header height' },
+            /* --- Breakpoints (raw values in @media, documented as tokens) --- */
+            { token: '--breakpoint-sm', value: '640px', usage: 'Mobile landscape and up' },
+            { token: '--breakpoint-md', value: '768px', usage: 'Tablet and up' },
+            { token: '--breakpoint-lg', value: '1024px', usage: 'Desktop and up' },
+            { token: '--breakpoint-xl', value: '1280px', usage: 'Wide desktop and up' },
+            { token: '--breakpoint-2xl', value: '1440px', usage: 'Ultrawide and up' },
+            /* --- Component Sizing --- */
+            { token: '--btn-height-sm', value: '28px', usage: 'Small button height (compact UI)' },
+            { token: '--btn-height-md', value: '36px', usage: 'Default button height' },
+            { token: '--btn-height-lg', value: '44px', usage: 'Large button height (touch targets)' },
+            { token: '--input-height-sm', value: '32px', usage: 'Small input height' },
+            { token: '--input-height-md', value: '40px', usage: 'Default input height' },
+            { token: '--input-height-lg', value: '48px', usage: 'Large input height (touch targets)' },
+            /* --- Shape: Radii --- */
+            { token: '--radius-sm', value: '4px', usage: 'Subtle rounding (inputs, small elements)' },
+            { token: '--radius-md', value: '6px', usage: 'Buttons, badges' },
+            { token: '--radius-lg', value: '8px', usage: 'Cards, panels' },
+            { token: '--radius-xl', value: '10px', usage: 'Large cards, modals' },
+            { token: '--radius-full', value: '9999px', usage: 'Pills, avatars, circular elements' },
+            /* --- Shape: Shadows --- */
+            { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.35)', usage: 'Subtle lift for cards, buttons' },
+            { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.50)', usage: 'Dropdowns, elevated panels' },
+            { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.65)', usage: 'Modals, popovers, dialogs' },
+            { token: '--glow-accent', value: 'color-mix(primary 25%) glow', usage: 'Hover glow on interactive cards' },
+            /* --- Animation --- */
+            { token: '--duration-fast', value: '150ms', usage: 'Button hover, focus ring, micro interactions' },
+            { token: '--duration-normal', value: '250ms', usage: 'Card transitions, panel slides' },
+            { token: '--duration-slow', value: '400ms', usage: 'Page transitions, modal enter/exit' },
+            { token: '--easing-default', value: 'ease-out', usage: 'All transitions (decelerating feel)' },
+          ],
+
+          utilityClasses: [
+            { cls: '.container', output: 'max-width: 960px; margin: 0 auto; padding-inline: 24px', usage: 'Centered content wrapper — use on the outermost page content div' },
+            { cls: '.grid', output: 'display: grid; gap: var(--grid-gap)', usage: 'Base grid — always required, add a modifier for column layout' },
+            { cls: '.grid.grid--auto-fill', output: 'grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))', usage: 'Responsive card grids that auto-wrap based on available width' },
+            { cls: '.grid.grid--2col', output: 'grid-template-columns: repeat(2, 1fr)', usage: 'Two equal columns — forms, side-by-side comparisons' },
+            { cls: '.grid.grid--3col', output: 'grid-template-columns: repeat(3, 1fr)', usage: 'Three equal columns — dashboards, feature grids' },
+            { cls: '.grid.grid--sidebar', output: 'grid-template-columns: 200px 1fr', usage: 'Fixed sidebar + fluid content — navigation panels, filters' },
+            { cls: '.grid.grid--holy-grail', output: 'grid-template-columns: 200px 1fr 200px', usage: 'Sidebar + content + sidebar — full page layouts with dual panels' },
+          ],
+        };
+      },
+    });
+
+    app.component('TokenSection', TokenSection);
+    app.component('ColorToken', ColorToken);
+    app.component('TypeToken', TypeToken);
+    app.component('WeightToken', WeightToken);
+    app.component('FamilyToken', FamilyToken);
+    app.component('SpacingToken', SpacingToken);
+    app.component('ShapeToken', ShapeToken);
+    app.component('ShadowToken', ShadowToken);
+    app.component('AnimToken', AnimToken);
+
+    app.mount('#app');
+  </script>
+</body>
+</html>
