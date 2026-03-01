@@ -28,6 +28,7 @@
      - Breadcrumb (.breadcrumb, links, separator)
      - Prev/Next Nav (.nav-arrows, .nav-arrow)
      - Filter Pills (.filter-pills, .filter-pill)
+
    ================================================================ */
 
 /* ======================
@@ -1688,4 +1689,3 @@
   color: var(--accent-primary);
   background: var(--accent-primary-subtle);
 }
-

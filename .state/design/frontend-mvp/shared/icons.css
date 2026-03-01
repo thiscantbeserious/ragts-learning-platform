@@ -1,0 +1,74 @@
+/* ================================================================
+   RAGTS Icons — Icon Utility Classes & Size Scale
+   ================================================================
+   All stage HTML files that use icons import this file via:
+     <link rel="stylesheet" href="../shared/icons.css">
+
+   Requires: shared/layout.css (design tokens)
+
+   Contents:
+     - Base icon wrapper (.icon)
+     - Size classes (.icon--xs, .icon--sm, .icon--md, .icon--lg, .icon--xl)
+
+   Size scale (aligned to typographic baseline):
+     .icon--xs   12px  --space-3   Inline with small text (--text-xs 10px)
+     .icon--sm   16px  --space-4   Badges, small buttons (--text-sm 12px)
+     .icon--md   20px  --space-5   Default, most components (--text-base 14px × --leading-normal 1.5 ≈ 21px)
+     .icon--lg   24px  --space-6   Upload zone, empty state (--text-lg 17px × --leading-snug 1.35 ≈ 23px)
+     .icon--xl   32px  --space-8   Hero, feature, page-level (--text-2xl 24px × --leading-snug 1.35 ≈ 32px)
+
+   Convention:
+     - All SVGs use viewBox="0 0 20 20" (consistent coordinate space)
+     - fill="none" stroke="currentColor" (inherits text color)
+     - stroke-width="1.5" default (2 for xs, 1.5 for sm-lg, 1.25 for xl)
+   ================================================================ */
+
+/* Base icon wrapper — inline-flex container, inherits color */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Size: xs — 12px, inline with small text */
+.icon--xs {
+  width: var(--space-3);
+  height: var(--space-3);
+}
+
+/* Size: sm — 16px, badges, small buttons, inline */
+.icon--sm {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+
+/* Size: md — 20px, default, most components */
+.icon--md {
+  width: var(--space-5);
+  height: var(--space-5);
+}
+
+/* Size: lg — 24px, upload zone, empty state */
+.icon--lg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+/* Size: xl — 32px, hero/feature icons */
+.icon--xl {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+/* Size: 2xl — 48px, splash/loading states */
+.icon--2xl {
+  width: var(--space-12);
+  height: var(--space-12);
+}
