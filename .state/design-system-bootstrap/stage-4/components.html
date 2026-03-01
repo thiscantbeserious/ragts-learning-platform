@@ -1529,6 +1529,140 @@
         </div>
       </section>
 
+      <hr class="divider">
+
+      <!-- ==================== 22. SESSION VIEWER (COMPOSITION) ==================== -->
+      <section class="section">
+        <h2 class="section__title">22. Session Viewer (Composition)</h2>
+        <p class="section__description">Composition of terminal chrome, section headers, badges, and buttons into the session document viewer. Not a new component — orchestrates existing primitives.</p>
+
+        <div class="state-group">
+          <div class="state-group__title">Full Session Document</div>
+
+          <div class="terminal-chrome">
+            <!-- Titlebar: dots + filename + badge + metadata -->
+            <div class="terminal-chrome__titlebar">
+              <div class="terminal-chrome__dots">
+                <div class="terminal-chrome__dot"></div>
+                <div class="terminal-chrome__dot"></div>
+                <div class="terminal-chrome__dot"></div>
+              </div>
+              <span class="terminal-chrome__title">refactor-auth-middleware.cast</span>
+              <span class="badge badge--accent badge--sm">Claude Code</span>
+              <div class="terminal-chrome__spacer"></div>
+              <span class="session-viewer__meta">1,287 events &middot; 23 sections</span>
+            </div>
+
+            <!-- Body: stacked section headers + content blocks -->
+            <div class="session-viewer__sections">
+
+              <!-- Section 1: Session Startup — EXPANDED, Detected -->
+              <div class="section-header section-header--detected">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Session Startup</span>
+                <span class="badge badge--accent badge--sm">Detected</span>
+                <span class="section-header__range">L1-47 (47 lines)</span>
+              </div>
+              <div class="session-viewer__content">
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">1</span>
+                  <span class="session-viewer__line-text">  Claude Code v2.1.42</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">2</span>
+                  <span class="session-viewer__line-text">    Opus 4.6 - Claude Team</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">3</span>
+                  <span class="session-viewer__line-text">    ~/git/simon/ragts-learning-platform</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">4</span>
+                  <span class="session-viewer__line-text"> </span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">5</span>
+                  <span class="session-viewer__line-text"><span class="terminal-chrome__prompt">&#9679;</span> I want to refactor the auth middleware to support</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">6</span>
+                  <span class="session-viewer__line-text">  both built-in authentication and OIDC providers.</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">7</span>
+                  <span class="session-viewer__line-text">  The current implementation is tightly coupled to</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">8</span>
+                  <span class="session-viewer__line-text">  the session store...</span>
+                </div>
+              </div>
+
+              <!-- Section 2: Auth Strategy Pattern — EXPANDED, Marker, with Curate button -->
+              <div class="section-header section-header--marker">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Auth Strategy Pattern</span>
+                <span class="badge badge--secondary badge--sm">Marker</span>
+                <span class="section-header__range">L48-138 (186 lines)</span>
+                <button class="btn btn--secondary btn--sm">Curate</button>
+              </div>
+              <div class="session-viewer__content">
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">48</span>
+                  <span class="session-viewer__line-text"> </span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">49</span>
+                  <span class="session-viewer__line-text"><span class="terminal-chrome__prompt">&#9679;</span> I'll create a strategy pattern for auth providers.</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">50</span>
+                  <span class="session-viewer__line-text">  Let me read the current middleware first.</span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">51</span>
+                  <span class="session-viewer__line-text"> </span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">52</span>
+                  <span class="session-viewer__line-text"><span class="session-viewer__tool-call">&#9670; <span class="session-viewer__tool-name">Read</span>(src/server/middleware/auth.ts)</span></span>
+                </div>
+                <div class="session-viewer__line">
+                  <span class="session-viewer__line-no">53</span>
+                  <span class="session-viewer__line-text"><span class="session-viewer__indent">  ~ 47 lines</span></span>
+                </div>
+              </div>
+
+              <!-- Section 3: Test Execution — COLLAPSED, Detected -->
+              <div class="section-header section-header--detected section-header--collapsed">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Test Execution</span>
+                <span class="badge badge--accent badge--sm">Detected</span>
+                <span class="section-header__range">L1397-1506 (109 lines)</span>
+              </div>
+
+              <!-- Section 4: Error Recovery — COLLAPSED, Detected -->
+              <div class="section-header section-header--detected section-header--collapsed">
+                <div class="section-header__chevron">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l6 5-6 5"/></svg>
+                </div>
+                <span class="section-header__label">Error Recovery</span>
+                <span class="badge badge--accent badge--sm">Detected</span>
+                <span class="section-header__range">L1508-1630 (122 lines)</span>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
 
     </div>
   </div>

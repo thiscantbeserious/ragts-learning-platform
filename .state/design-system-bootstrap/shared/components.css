@@ -33,7 +33,7 @@
      - Terminal Chrome (.terminal-chrome, titlebar, body)
      - Breadcrumb (.breadcrumb, links, separator)
      - Prev/Next Nav (.nav-arrows, .nav-arrow)
-     - Filter Pills (.filter-pills, .filter-pill)
+     - Filter Pills (.filter-pills, .filter-pill)\n     - Session Viewer Composition (.session-viewer, glue styles)
 
    ================================================================ */
 
@@ -1646,6 +1646,7 @@
   background: var(--border-strong);
 }
 
+
 .terminal-chrome__title {
   flex: 1;
   text-align: center;
@@ -1849,4 +1850,90 @@
 .dropdown--static .dropdown__menu {
   position: relative;
   top: var(--space-1);
+}
+
+/* ======================
+   COMPOSITION: SESSION VIEWER
+   ======================
+   Composition-glue styles for combining terminal-chrome, section-header,
+   badge, and button components into the session document viewer.
+   These are NOT standalone component styles — they orchestrate existing components.
+   ====================== */
+
+/* Titlebar metadata — right-aligned info in terminal titlebar */
+.session-viewer__meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  white-space: nowrap;
+}
+
+/* Section stack inside terminal body — removes terminal body padding
+   and stacks section headers flush edge-to-edge */
+.session-viewer__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Section header inside viewer — flush to edges, no border-radius,
+   first/last get terminal-chrome radius inheritance */
+.session-viewer__sections .section-header {
+  border-radius: 0;
+  border-left-width: var(--space-0\.5);
+  border-right: none;
+  border-top: none;
+  border-bottom: var(--space-px) solid var(--border-default);
+}
+
+/* Content block below an expanded section header */
+.session-viewer__content {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: var(--space-px) solid var(--border-default);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--leading-mono);
+  color: var(--terminal-text);
+  background: var(--terminal-bg);
+}
+
+/* Line number + content row inside viewer */
+.session-viewer__line {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.session-viewer__line-no {
+  color: var(--text-disabled);
+  user-select: none;
+  min-width: var(--space-8);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.session-viewer__line-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Tool call highlight inside viewer content */
+.session-viewer__tool-call {
+  color: var(--accent-primary-dim);
+}
+
+.session-viewer__tool-name {
+  color: var(--accent-primary);
+  font-weight: var(--weight-medium);
+}
+
+/* Indented continuation — for wrapped/nested content */
+.session-viewer__indent {
+  padding-left: var(--space-6);
+  color: var(--text-secondary);
 }
