@@ -1020,9 +1020,9 @@
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--bg-elevated) 0%,
-    var(--border-strong) 50%,
-    var(--bg-elevated) 100%
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.06) 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.8s ease-in-out infinite;
@@ -1055,16 +1055,8 @@
   gap: var(--space-3);
 }
 
-.skeleton--card .skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-elevated) 0%,
-    var(--border-default) 50%,
-    var(--bg-elevated) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.8s ease-in-out infinite;
-}
+/* .skeleton--card .skeleton — no override needed.
+   Base .skeleton uses relative rgba overlays that adapt to any parent background. */
 
 .skeleton--card-row {
   display: flex;
