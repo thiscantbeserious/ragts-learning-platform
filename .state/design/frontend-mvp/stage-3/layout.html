@@ -464,6 +464,21 @@
       border-bottom: none;
     }
 
+    .css-map__group-row td {
+      border-bottom: var(--space-px) solid var(--border-default);
+    }
+
+    .css-map__group {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      padding-top: var(--space-4);
+      background: var(--bg-elevated);
+    }
+
     /* .table-wrapper: uses .card.card--flush in markup */
 
     .table-scroll {
@@ -846,11 +861,16 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in cssMap" :key="row.token">
-                  <td class="css-map__token">{{ row.token }}</td>
-                  <td class="css-map__value">{{ row.value }}</td>
-                  <td class="css-map__usage">{{ row.usage }}</td>
-                </tr>
+                <template v-for="row in cssMap" :key="row.group || row.token">
+                  <tr v-if="row.group" class="css-map__group-row">
+                    <td colspan="3" class="css-map__group">{{ row.group }}</td>
+                  </tr>
+                  <tr v-else>
+                    <td class="css-map__token">{{ row.token }}</td>
+                    <td class="css-map__value">{{ row.value }}</td>
+                    <td class="css-map__usage">{{ row.usage }}</td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -858,7 +878,7 @@
       </token-section>
 
       <!-- 7. Layout Utility Classes -->
-      <token-section title="Layout Utility Classes" description="Reusable CSS classes from shared/layout.css. These consume design tokens but are not tokens themselves — use them directly on HTML elements.">
+      <token-section title="CSS Classes" description="Reusable classes from layout.css, components.css, and page.css. These consume design tokens — use them directly on HTML elements.">
         <div class="card card--flush">
           <div class="table-scroll">
             <table class="css-map">
@@ -870,11 +890,16 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="row in utilityClasses" :key="row.cls">
-                  <td class="css-map__token">{{ row.cls }}</td>
-                  <td class="css-map__value">{{ row.output }}</td>
-                  <td class="css-map__usage">{{ row.usage }}</td>
-                </tr>
+                <template v-for="row in utilityClasses" :key="row.group || row.cls">
+                  <tr v-if="row.group" class="css-map__group-row">
+                    <td colspan="3" class="css-map__group">{{ row.group }}</td>
+                  </tr>
+                  <tr v-else>
+                    <td class="css-map__token">{{ row.cls }}</td>
+                    <td class="css-map__value">{{ row.output }}</td>
+                    <td class="css-map__usage">{{ row.usage }}</td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -1154,47 +1179,48 @@
             { token: '--easing-default', value: 'ease-out', label: 'Default Easing' },
           ],
           cssMap: [
-            /* --- Colors: Backgrounds --- */
+            { group: 'Colors: Backgrounds' },
             { token: '--bg-page', value: '#3a3a40', usage: 'Main page background' },
             { token: '--bg-surface', value: '#434349', usage: 'Card and panel backgrounds' },
             { token: '--bg-elevated', value: '#4c4c53', usage: 'Dropdowns, tooltips, hover states' },
-            { token: '--bg-overlay', value: 'rgba(0,0,0,0.70)', usage: 'Modal backdrop' },
-            /* --- Colors: Primary Accent --- */
+            { token: '--bg-overlay', value: 'rgba(0,0,0,0.50)', usage: 'Modal backdrop' },
+            { group: 'Colors: Primary Accent' },
             { token: '--accent-primary', value: '#00ff9f', usage: 'Buttons, links, focus rings, active states' },
             { token: '--accent-primary-hover', value: 'color-mix(primary 80%, white)', usage: 'Hover state for primary accent elements' },
             { token: '--accent-primary-dim', value: 'color-mix(primary 65%, bg-page)', usage: 'Dimmed accent for text on dark surfaces' },
             { token: '--accent-primary-subtle', value: 'color-mix(primary 7%, transparent)', usage: 'Focus ring glow, selected row tint' },
-            /* --- Colors: Secondary Accent --- */
+            { group: 'Colors: Secondary Accent' },
             { token: '--accent-secondary', value: '#ff8c2b', usage: 'Tags, category markers, secondary CTAs' },
             { token: '--accent-secondary-hover', value: 'color-mix(secondary 80%, white)', usage: 'Hover state for secondary accent elements' },
             { token: '--accent-secondary-dim', value: 'color-mix(secondary 65%, bg-page)', usage: 'Dimmed secondary for text on dark surfaces' },
             { token: '--accent-secondary-subtle', value: 'color-mix(secondary 7%, transparent)', usage: 'Secondary tint for badges and alerts' },
-            /* --- Colors: Status --- */
+            { group: 'Colors: Status' },
             { token: '--status-success', value: '#34d399', usage: 'Completion indicators, positive feedback' },
             { token: '--status-success-subtle', value: 'color-mix(success 7%, transparent)', usage: 'Success background tint' },
             { token: '--status-warning', value: '#ffcc00', usage: 'Caution banners, validation hints' },
             { token: '--status-warning-subtle', value: 'color-mix(warning 7%, transparent)', usage: 'Warning background tint' },
             { token: '--status-error', value: '#ff3b30', usage: 'Error messages, destructive action highlights' },
             { token: '--status-error-subtle', value: 'color-mix(error 7%, transparent)', usage: 'Error background tint' },
+            { token: '--status-error-dim', value: 'color-mix(error 65%, bg-page)', usage: 'Dimmed error for text on dark surfaces' },
             { token: '--status-info', value: '#5ac8fa', usage: 'Informational tooltips, help text accents' },
             { token: '--status-info-subtle', value: 'color-mix(info 7%, transparent)', usage: 'Info background tint' },
-            /* --- Colors: Text --- */
+            { group: 'Colors: Text' },
             { token: '--text-primary', value: '#e8e8e8', usage: 'Headings, body text, primary labels' },
             { token: '--text-secondary', value: '#b5bac2', usage: 'Descriptions, secondary labels, metadata' },
             { token: '--text-muted', value: '#8b9099', usage: 'Placeholders, timestamps, subtle annotations' },
             { token: '--text-disabled', value: '#62666c', usage: 'Disabled input text, inactive items' },
             { token: '--text-inverse', value: 'var(--bg-page)', usage: 'Text on accent backgrounds (buttons, filled badges)' },
-            /* --- Colors: Borders --- */
+            { group: 'Colors: Borders' },
             { token: '--border-default', value: '#1a1a1e', usage: 'Card borders, dividers, table rules' },
             { token: '--border-strong', value: '#28282e', usage: 'Emphasized dividers, active card borders' },
             { token: '--border-accent', value: 'var(--accent-primary)', usage: 'Focus outlines, selected card highlight' },
-            /* --- Colors: Terminal --- */
+            { group: 'Colors: Terminal' },
             { token: '--terminal-bg', value: '#1e1e22', usage: 'Terminal replay background' },
             { token: '--terminal-text', value: '#d4d4d4', usage: 'Terminal replay text' },
-            /* --- Typography: Families --- */
+            { group: 'Typography: Families' },
             { token: '--font-body', value: "Geist, -apple-system, sans-serif", usage: 'All UI text: headings, body, labels, buttons' },
             { token: '--font-mono', value: "Geist Mono, JetBrains Mono, monospace", usage: 'Code blocks, terminal, filenames, tokens' },
-            /* --- Typography: Scale --- */
+            { group: 'Typography: Scale' },
             { token: '--text-3xl', value: '1.8125rem (29px)', usage: 'Display text, hero headlines' },
             { token: '--text-2xl', value: '1.5rem (24px)', usage: 'Page titles' },
             { token: '--text-xl', value: '1.25rem (20px)', usage: 'Section headings' },
@@ -1202,23 +1228,23 @@
             { token: '--text-base', value: '0.875rem (14px)', usage: 'Default body text' },
             { token: '--text-sm', value: '0.75rem (12px)', usage: 'Badges, timestamps, uppercase labels' },
             { token: '--text-xs', value: '0.625rem (10px)', usage: 'Fine print, captions' },
-            /* --- Typography: Line Height --- */
+            { group: 'Typography: Line Height' },
             { token: '--leading-tight', value: '1.2', usage: 'Headings 24px+' },
             { token: '--leading-snug', value: '1.35', usage: 'Large body 17–24px' },
             { token: '--leading-normal', value: '1.5', usage: 'Body text 14px' },
             { token: '--leading-relaxed', value: '1.65', usage: 'Small text 10–12px' },
             { token: '--leading-mono', value: '1.6', usage: 'Monospace at any size' },
-            /* --- Typography: Letter Spacing --- */
+            { group: 'Typography: Letter Spacing' },
             { token: '--tracking-tight', value: '-0.02em', usage: 'Display and heading text' },
             { token: '--tracking-normal', value: '0', usage: 'Body text (default)' },
             { token: '--tracking-wide', value: '0.06em', usage: 'Small uppercase labels' },
             { token: '--tracking-wider', value: '0.12em', usage: 'Badges, timestamps' },
-            /* --- Typography: Weights --- */
+            { group: 'Typography: Weights' },
             { token: '--weight-normal', value: '400', usage: 'Body text, descriptions' },
             { token: '--weight-medium', value: '500', usage: 'Labels, buttons, nav items' },
             { token: '--weight-semibold', value: '600', usage: 'Section headings, emphasis' },
             { token: '--weight-bold', value: '700', usage: 'Page titles, display text' },
-            /* --- Spacing --- */
+            { group: 'Spacing' },
             { token: '--space-px', value: '1px', usage: 'Borders, hairline dividers' },
             { token: '--space-0.5', value: '2px', usage: 'Tight internal padding' },
             { token: '--space-1', value: '4px', usage: 'Minimal gap, icon offsets' },
@@ -1232,36 +1258,41 @@
             { token: '--space-12', value: '48px', usage: 'Page-level padding, hero spacing' },
             { token: '--space-inline', value: 'var(--space-4)', usage: 'Default horizontal padding shortcut' },
             { token: '--space-stack', value: 'var(--space-3)', usage: 'Default vertical gap shortcut' },
-            /* --- Layout / Grid --- */
+            { group: 'Layout / Grid' },
             { token: '--container-max', value: '960px', usage: 'Max content width for centered layouts' },
             { token: '--container-padding', value: 'var(--space-6)', usage: 'Side padding for content container' },
             { token: '--grid-gap', value: 'var(--space-4)', usage: 'Default gap between grid items' },
             { token: '--header-height', value: '56px', usage: 'Fixed app header height' },
-            /* --- Breakpoints (raw values in @media, documented as tokens) --- */
+            { group: 'Breakpoints' },
             { token: '--breakpoint-sm', value: '640px', usage: 'Mobile landscape and up' },
             { token: '--breakpoint-md', value: '768px', usage: 'Tablet and up' },
             { token: '--breakpoint-lg', value: '1024px', usage: 'Desktop and up' },
             { token: '--breakpoint-xl', value: '1280px', usage: 'Wide desktop and up' },
             { token: '--breakpoint-2xl', value: '1440px', usage: 'Ultrawide and up' },
-            /* --- Component Sizing --- */
+            { group: 'Component Sizing' },
             { token: '--btn-height-sm', value: '28px', usage: 'Small button height (compact UI)' },
             { token: '--btn-height-md', value: '36px', usage: 'Default button height' },
             { token: '--btn-height-lg', value: '44px', usage: 'Large button height (touch targets)' },
             { token: '--input-height-sm', value: '32px', usage: 'Small input height' },
             { token: '--input-height-md', value: '40px', usage: 'Default input height' },
             { token: '--input-height-lg', value: '48px', usage: 'Large input height (touch targets)' },
-            /* --- Shape: Radii --- */
+            { token: '--toast-min-width', value: '320px', usage: 'Minimum toast notification width' },
+            { token: '--toast-max-width', value: '420px', usage: 'Maximum toast notification width' },
+            { token: '--modal-max-width', value: '480px', usage: 'Maximum modal dialog width' },
+            { token: '--progress-width', value: '200px', usage: 'Sidebar width, progress bar containers' },
+            { group: 'Shape: Radii' },
             { token: '--radius-sm', value: '4px', usage: 'Subtle rounding (inputs, small elements)' },
             { token: '--radius-md', value: '6px', usage: 'Buttons, badges' },
             { token: '--radius-lg', value: '8px', usage: 'Cards, panels' },
             { token: '--radius-xl', value: '10px', usage: 'Large cards, modals' },
             { token: '--radius-full', value: '9999px', usage: 'Pills, avatars, circular elements' },
-            /* --- Shape: Shadows --- */
+            { group: 'Shadows' },
             { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.35)', usage: 'Subtle lift for cards, buttons' },
             { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.50)', usage: 'Dropdowns, elevated panels' },
             { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.65)', usage: 'Modals, popovers, dialogs' },
             { token: '--glow-accent', value: 'color-mix(primary 25%) glow', usage: 'Hover glow on interactive cards' },
-            /* --- Animation --- */
+            { token: '--glow-error', value: 'color-mix(error 25%) glow', usage: 'Error state glow on inputs' },
+            { group: 'Animation' },
             { token: '--duration-fast', value: '150ms', usage: 'Button hover, focus ring, micro interactions' },
             { token: '--duration-normal', value: '250ms', usage: 'Card transitions, panel slides' },
             { token: '--duration-slow', value: '400ms', usage: 'Page transitions, modal enter/exit' },
@@ -1269,13 +1300,36 @@
           ],
 
           utilityClasses: [
+            { group: 'Layout (layout.css)' },
             { cls: '.container', output: 'max-width: 960px; margin: 0 auto; padding-inline: 24px', usage: 'Centered content wrapper — use on the outermost page content div' },
             { cls: '.grid', output: 'display: grid; gap: var(--grid-gap)', usage: 'Base grid — always required, add a modifier for column layout' },
-            { cls: '.grid.grid--auto-fill', output: 'grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))', usage: 'Responsive card grids that auto-wrap based on available width' },
-            { cls: '.grid.grid--2col', output: 'grid-template-columns: repeat(2, 1fr)', usage: 'Two equal columns — forms, side-by-side comparisons' },
-            { cls: '.grid.grid--3col', output: 'grid-template-columns: repeat(3, 1fr)', usage: 'Three equal columns — dashboards, feature grids' },
-            { cls: '.grid.grid--sidebar', output: 'grid-template-columns: 200px 1fr', usage: 'Fixed sidebar + fluid content — navigation panels, filters' },
-            { cls: '.grid.grid--holy-grail', output: 'grid-template-columns: 200px 1fr 200px', usage: 'Sidebar + content + sidebar — full page layouts with dual panels' },
+            { cls: '.grid--auto-fill', output: 'repeat(auto-fill, minmax(200px, 1fr))', usage: 'Responsive card grids that auto-wrap based on available width' },
+            { cls: '.grid--2col', output: 'repeat(2, 1fr)', usage: 'Two equal columns — forms, side-by-side comparisons' },
+            { cls: '.grid--3col', output: 'repeat(3, 1fr)', usage: 'Three equal columns — dashboards, feature grids' },
+            { cls: '.grid--sidebar', output: '200px 1fr', usage: 'Fixed sidebar + fluid content — navigation panels, filters' },
+            { cls: '.grid--holy-grail', output: '200px 1fr 200px', usage: 'Sidebar + content + sidebar — full page layouts with dual panels' },
+            { group: 'Card (components.css)' },
+            { cls: '.card', output: 'flex column, space-5 padding, radius-xl', usage: 'Base card container — surface background with border' },
+            { cls: '.card--compact', output: 'space-3/space-4 padding, radius-lg', usage: 'Dense card for token grids, stat blocks' },
+            { cls: '.card--flush', output: 'padding: 0, overflow: hidden', usage: 'Full-bleed content — media cards, tables' },
+            { cls: '.card--row', output: 'flex-direction: row, center aligned', usage: 'Horizontal card layout — icon + body + action' },
+            { cls: '.card__media', output: 'width: 100%, display: block', usage: 'Full-bleed visual area (images, swatches, gradients)' },
+            { cls: '.card__body', output: 'flex column, gap space-1, padding space-3', usage: 'Padded content container inside flush/row cards' },
+            { cls: '.card__title', output: 'text-base, weight-medium, text-primary', usage: 'Card heading text' },
+            { cls: '.card__label', output: 'text-sm mono, uppercase, text-muted', usage: 'Token name, category label' },
+            { cls: '.card__value', output: 'text-sm mono, text-secondary', usage: 'Token value, metadata' },
+            { cls: '.card__desc', output: 'text-xs, text-muted', usage: 'Short description text' },
+            { group: 'Page Scaffold (page.css)' },
+            { cls: '.page', output: 'max-width container, centered, space-12 padding', usage: 'Top-level page wrapper' },
+            { cls: '.page__title', output: 'text-3xl, bold, tracking-tight', usage: 'Main page heading' },
+            { cls: '.page__subtitle', output: 'text-base, text-secondary', usage: 'Page description below title' },
+            { cls: '.section', output: 'margin-bottom: space-12', usage: 'Major content section wrapper' },
+            { cls: '.section__title', output: 'text-xl, semibold, border-bottom', usage: 'Section heading with divider' },
+            { cls: '.section__description', output: 'text-sm, text-muted', usage: 'Section description text' },
+            { group: 'Utilities (page.css)' },
+            { cls: '.flex-fill', output: 'flex: 1, min-width: 0', usage: 'Fill remaining flex space with overflow protection' },
+            { cls: '.text-muted', output: 'color: var(--text-muted)', usage: 'Override text color to muted' },
+            { cls: '.code-highlight', output: 'accent-primary, font-mono, text-sm', usage: 'Inline code mentions in body text' },
           ],
         };
       },
