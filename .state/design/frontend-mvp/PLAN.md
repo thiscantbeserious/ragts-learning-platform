@@ -30,7 +30,11 @@ Stage 11 can run in parallel with Stages 5-9.
 
 ## Shared CSS Convention
 
-All stage HTML files import shared CSS via `<link rel="stylesheet" href="../shared/layout.css">`.
+All stage HTML files import shared CSS via `<link>` tags:
+```html
+<link rel="stylesheet" href="../shared/layout.css">
+<link rel="stylesheet" href="../shared/components.css">  <!-- Stage 4+ -->
+```
 
 **File structure:**
 
