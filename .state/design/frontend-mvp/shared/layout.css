@@ -33,10 +33,10 @@
      ============================================================ */
 
   /* --- Backgrounds --- */
-  --bg-page: #0c0c0c;
-  --bg-surface: #141414;
-  --bg-elevated: #1c1c1c;
-  --bg-overlay: rgba(0, 0, 0, 0.75);
+  --bg-page: #3a3a40;
+  --bg-surface: #434349;
+  --bg-elevated: #4c4c53;
+  --bg-overlay: rgba(0, 0, 0, 0.70);
 
   /* --- Primary accent — mint green H153 S100% L50% --- */
   --accent-primary: #00ff9f;
@@ -63,18 +63,18 @@
 
   /* --- Text hierarchy --- */
   --text-primary: #e8e8e8;
-  --text-secondary: #8b949e;
-  --text-muted: #484f58;
-  --text-disabled: #30363d;
+  --text-secondary: #b5bac2;
+  --text-muted: #8b9099;
+  --text-disabled: #62666c;
   --text-inverse: var(--bg-page);
 
   /* --- Borders --- */
-  --border-default: #1e1e1e;
-  --border-strong: #2a2a2a;
+  --border-default: #1a1a1e;
+  --border-strong: #28282e;
   --border-accent: var(--accent-primary);
 
   /* --- Terminal --- */
-  --terminal-bg: #0a0a0a;
+  --terminal-bg: #1e1e22;
   --terminal-text: #d4d4d4;
 
   /* ============================================================
@@ -175,9 +175,9 @@
   /* ============================================================
      SHADOWS
      ============================================================ */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.50);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.65);
   --glow-accent: 0 0 20px color-mix(in srgb, var(--accent-primary) 25%, transparent);
   --glow-error: 0 0 20px color-mix(in srgb, var(--status-error) 25%, transparent);
 

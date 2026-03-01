@@ -1176,10 +1176,10 @@
         return {
           colors: {
             backgrounds: [
-              { token: '--bg-page', value: '#0c0c0c', label: 'Page' },
-              { token: '--bg-surface', value: '#141414', label: 'Surface' },
-              { token: '--bg-elevated', value: '#1c1c1c', label: 'Elevated' },
-              { token: '--bg-overlay', value: 'rgba(0,0,0,0.75)', label: 'Overlay' },
+              { token: '--bg-page', value: '#3a3a40', label: 'Page' },
+              { token: '--bg-surface', value: '#434349', label: 'Surface' },
+              { token: '--bg-elevated', value: '#4c4c53', label: 'Elevated' },
+              { token: '--bg-overlay', value: 'rgba(0,0,0,0.70)', label: 'Overlay' },
             ],
             primaryAccent: [
               { token: '--accent-primary', value: '#00ff9f', label: 'Primary' },
@@ -1205,18 +1205,18 @@
             ],
             text: [
               { token: '--text-primary', value: '#e8e8e8', label: 'Primary' },
-              { token: '--text-secondary', value: '#8b949e', label: 'Secondary' },
-              { token: '--text-muted', value: '#484f58', label: 'Muted' },
-              { token: '--text-disabled', value: '#30363d', label: 'Disabled' },
+              { token: '--text-secondary', value: '#b5bac2', label: 'Secondary' },
+              { token: '--text-muted', value: '#8b9099', label: 'Muted' },
+              { token: '--text-disabled', value: '#62666c', label: 'Disabled' },
               { token: '--text-inverse', value: 'var(--bg-page)', label: 'Inverse' },
             ],
             borders: [
-              { token: '--border-default', value: '#1e1e1e', label: 'Default' },
-              { token: '--border-strong', value: '#2a2a2a', label: 'Strong' },
+              { token: '--border-default', value: '#1a1a1e', label: 'Default' },
+              { token: '--border-strong', value: '#28282e', label: 'Strong' },
               { token: '--border-accent', value: 'var(--accent-primary)', label: 'Accent' },
             ],
             terminal: [
-              { token: '--terminal-bg', value: '#0a0a0a', label: 'Background' },
+              { token: '--terminal-bg', value: '#1e1e22', label: 'Background' },
               { token: '--terminal-text', value: '#d4d4d4', label: 'Text' },
             ],
           },
@@ -1295,9 +1295,9 @@
               { token: '--radius-full', value: '9999px', label: 'Full / Pill' },
             ],
             shadows: [
-              { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.3)', label: 'Small (subtle lift)' },
-              { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.5)', label: 'Medium (cards, dropdowns)' },
-              { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.7)', label: 'Large (modals, popovers)' },
+              { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.35)', label: 'Small (subtle lift)' },
+              { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.50)', label: 'Medium (cards, dropdowns)' },
+              { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.65)', label: 'Large (modals, popovers)' },
               { token: '--glow-accent', value: 'color-mix(--accent-primary 25%)', label: 'Accent glow (hover)', hoverOnly: true },
             ],
           },
@@ -1309,10 +1309,10 @@
           ],
           cssMap: [
             /* --- Colors: Backgrounds --- */
-            { token: '--bg-page', value: '#0c0c0c', usage: 'Main page background' },
-            { token: '--bg-surface', value: '#141414', usage: 'Card and panel backgrounds' },
-            { token: '--bg-elevated', value: '#1c1c1c', usage: 'Dropdowns, tooltips, hover states' },
-            { token: '--bg-overlay', value: 'rgba(0,0,0,0.75)', usage: 'Modal backdrop' },
+            { token: '--bg-page', value: '#3a3a40', usage: 'Main page background' },
+            { token: '--bg-surface', value: '#434349', usage: 'Card and panel backgrounds' },
+            { token: '--bg-elevated', value: '#4c4c53', usage: 'Dropdowns, tooltips, hover states' },
+            { token: '--bg-overlay', value: 'rgba(0,0,0,0.70)', usage: 'Modal backdrop' },
             /* --- Colors: Primary Accent --- */
             { token: '--accent-primary', value: '#00ff9f', usage: 'Buttons, links, focus rings, active states' },
             { token: '--accent-primary-hover', value: 'color-mix(primary 80%, white)', usage: 'Hover state for primary accent elements' },
@@ -1334,16 +1334,16 @@
             { token: '--status-info-subtle', value: 'color-mix(info 7%, transparent)', usage: 'Info background tint' },
             /* --- Colors: Text --- */
             { token: '--text-primary', value: '#e8e8e8', usage: 'Headings, body text, primary labels' },
-            { token: '--text-secondary', value: '#8b949e', usage: 'Descriptions, secondary labels, metadata' },
-            { token: '--text-muted', value: '#484f58', usage: 'Placeholders, timestamps, subtle annotations' },
-            { token: '--text-disabled', value: '#30363d', usage: 'Disabled input text, inactive items' },
+            { token: '--text-secondary', value: '#b5bac2', usage: 'Descriptions, secondary labels, metadata' },
+            { token: '--text-muted', value: '#8b9099', usage: 'Placeholders, timestamps, subtle annotations' },
+            { token: '--text-disabled', value: '#62666c', usage: 'Disabled input text, inactive items' },
             { token: '--text-inverse', value: 'var(--bg-page)', usage: 'Text on accent backgrounds (buttons, filled badges)' },
             /* --- Colors: Borders --- */
-            { token: '--border-default', value: '#1e1e1e', usage: 'Card borders, dividers, table rules' },
-            { token: '--border-strong', value: '#2a2a2a', usage: 'Emphasized dividers, active card borders' },
+            { token: '--border-default', value: '#1a1a1e', usage: 'Card borders, dividers, table rules' },
+            { token: '--border-strong', value: '#28282e', usage: 'Emphasized dividers, active card borders' },
             { token: '--border-accent', value: 'var(--accent-primary)', usage: 'Focus outlines, selected card highlight' },
             /* --- Colors: Terminal --- */
-            { token: '--terminal-bg', value: '#0a0a0a', usage: 'Terminal replay background' },
+            { token: '--terminal-bg', value: '#1e1e22', usage: 'Terminal replay background' },
             { token: '--terminal-text', value: '#d4d4d4', usage: 'Terminal replay text' },
             /* --- Typography: Families --- */
             { token: '--font-body', value: "Geist, -apple-system, sans-serif", usage: 'All UI text: headings, body, labels, buttons' },
@@ -1411,9 +1411,9 @@
             { token: '--radius-xl', value: '10px', usage: 'Large cards, modals' },
             { token: '--radius-full', value: '9999px', usage: 'Pills, avatars, circular elements' },
             /* --- Shape: Shadows --- */
-            { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.3)', usage: 'Subtle lift for cards, buttons' },
-            { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.5)', usage: 'Dropdowns, elevated panels' },
-            { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.7)', usage: 'Modals, popovers, dialogs' },
+            { token: '--shadow-sm', value: '0 2px 8px rgba(0,0,0,0.35)', usage: 'Subtle lift for cards, buttons' },
+            { token: '--shadow-md', value: '0 8px 24px rgba(0,0,0,0.50)', usage: 'Dropdowns, elevated panels' },
+            { token: '--shadow-lg', value: '0 16px 48px rgba(0,0,0,0.65)', usage: 'Modals, popovers, dialogs' },
             { token: '--glow-accent', value: 'color-mix(primary 25%) glow', usage: 'Hover glow on interactive cards' },
             /* --- Animation --- */
             { token: '--duration-fast', value: '150ms', usage: 'Button hover, focus ring, micro interactions' },
