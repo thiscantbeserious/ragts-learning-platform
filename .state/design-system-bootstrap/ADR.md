@@ -1,6 +1,6 @@
-# ADR: Frontend MVP Design Sprint
+# ADR: Design System Bootstrap
 
-Branch: design/frontend-mvp
+Branch: design-system-bootstrap
 Date: 2026-02-27
 Status: Accepted
 

@@ -99,4 +99,17 @@ A sample `.cast` file is included at `fixtures/sample.cast` for testing and demo
 
 ## License
 
-AGPL-3.0 - see [LICENSE](LICENSE)
+This project uses **dual licensing**:
+
+| Scope | License | File |
+|-------|---------|------|
+| Application code (`src/`, scripts, config) | **AGPL-3.0** | [LICENSE](LICENSE) |
+| RAGTS Design System (tokens, components, icons, page scaffold) | **Elastic License 2.0 (ELv2)** | [LICENSE (ELv2)](.state/design-system-bootstrap/shared/LICENSE) |
+
+The **RAGTS Design System** includes all design tokens, CSS component styles, icon definitions, and page scaffold classes. Files covered by the ELv2 are marked with a copyright header. The license path will move to its final location once the design system graduates from the bootstrap phase into `src/`.
+
+**What this means:**
+- The **application** is copyleft open-source — you can use, modify, and distribute it, but network use requires sharing your source (AGPL).
+- The **design system** is source-available but **may not be offered as a hosted or managed service**. You can use it freely in your own deployments.
+
+See each LICENSE file for full terms.

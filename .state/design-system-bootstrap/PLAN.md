@@ -1,6 +1,6 @@
-# PLAN: Frontend MVP Design Sprint
+# PLAN: Design System Bootstrap
 
-Branch: design/frontend-mvp
+Branch: design-system-bootstrap
 Date: 2026-02-27
 Status: Approved
 Depends on: ADR.md approval
