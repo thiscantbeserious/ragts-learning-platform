@@ -36,7 +36,7 @@
   --bg-page: #3a3a40;
   --bg-surface: #434349;
   --bg-elevated: #4c4c53;
-  --bg-overlay: rgba(0, 0, 0, 0.70);
+  --bg-overlay: rgba(0, 0, 0, 0.50);
 
   /* --- Primary accent — mint green H153 S100% L50% --- */
   --accent-primary: #00ff9f;
