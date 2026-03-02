@@ -24,19 +24,46 @@ Designs are created as **standalone HTML + CSS files** in `.state/design/<branch
 - Each file should be viewable by opening it directly in a browser
 - One file per design stage or component group
 
-### Visual Verification: Browser MCP
+### Visual Verification: Playwright MCP
 
-Use Playwright MCP (preferred) or Chrome MCP to:
-- Open HTML files in the browser for visual verification
-- Take screenshots for user review and design handoff
-- Compare designs side-by-side with the reference
+Use Playwright MCP (`mcp__playwright__*` tools) for all visual verification:
+- `browser_navigate` to open HTML files (`file:///absolute/path/to/file.html`)
+- `browser_take_screenshot` to capture the design for user review
+- `browser_resize` to test at different viewport widths
+- `browser_snapshot` for accessibility structure checks
 
-**If Playwright MCP is available** (`mcp__playwright__*` tools), use it — it's headless and fully automatable.
+Playwright is headless and fully automatable.
 
-**If only Chrome MCP is available**, use it with these navigation workarounds:
-- `navigate` tool is BLOCKED by org policy — do NOT use it
-- Use `javascript_tool` with `window.location.href = 'file:///path/to/file.html'` instead
-- Or `computer` tool: `cmd+l` → type path → `Return`
+## Step 2: Color Science CLI (MANDATORY for color work)
+
+**Never hand-pick colors or do mental OKLCH math.** Use the color science CLI for all color decisions:
+
+```bash
+node agents/scripts/color-science.mjs <command>
+```
+
+### Commands
+
+| Command | When to use |
+|---|---|
+| `info <hex>` | Inspect any color — get OKLCH, HSL, WCAG luminance |
+| `contrast <fg> <bg>` | Check a single pair against WCAG AA/AAA thresholds |
+| `audit <fg:bg> [...]` | Bulk-check an entire palette's contrast pairs at once |
+| `harmony <base> <type>` | Find harmonious companions (complementary, triadic, analogous, etc.) |
+| `palette <bg> <primary> [secondary]` | Generate a full token set: backgrounds, accents, status colors, text hierarchy, borders — all WCAG-compliant |
+| `scale <base> [steps] [--step pct]` | Generate a lightness ramp (e.g. background hierarchy) |
+| `mix <c1> <c2> [--ratio R] [--space oklch\|srgb]` | Blend two colors in OKLCH (perceptual) or sRGB |
+| `desaturate <hex> [--contrast R] [--on bg]` | Make a vivid color text-safe by reducing chroma + adjusting lightness for target contrast |
+| `test` | Self-test (run once per session to verify tool integrity) |
+
+### Required usage
+
+- **Before proposing any new color**, run `info` on it and `contrast` against its intended background(s)
+- **Before finalizing a palette**, run `audit` on all fg:bg pairs that will appear in the design
+- **When choosing status/semantic colors**, use `palette` to derive them harmoniously from the primary — never hardcode red/yellow/green
+- **When a color fails WCAG**, use `desaturate` to find the closest accessible variant rather than guessing
+
+All output is JSON to stdout. Parse it or read the `summary` field for a human-readable description.
 
 ## Workflow
 
