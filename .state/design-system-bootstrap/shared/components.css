@@ -33,7 +33,8 @@
      - Terminal Chrome (.terminal-chrome, titlebar, body)
      - Breadcrumb (.breadcrumb, links, separator)
      - Prev/Next Nav (.nav-arrows, .nav-arrow)
-     - Filter Pills (.filter-pills, .filter-pill)\n     - Session Viewer Composition (.session-viewer, glue styles)
+     - Filter Pills (.filter-pills, .filter-pill)
+     - Session Viewer Composition (.session-viewer, glue styles)
 
    ================================================================ */
 
@@ -64,7 +65,7 @@
 
 .card--flush {
   padding: 0;
-  gap: 0;
+
   overflow: hidden;
 }
 
@@ -1877,14 +1878,12 @@
 .session-viewer__sections {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 /* Section header inside viewer — flush to edges, no border-radius,
    first/last get terminal-chrome radius inheritance */
 .session-viewer__sections .section-header {
   border-radius: 0;
-  border-left-width: var(--space-0\.5);
   border-right: none;
   border-top: none;
   border-bottom: var(--space-px) solid var(--border-default);
