@@ -30,6 +30,15 @@ Before starting any task, read these files in order:
 2. `README.md` - Project vision and public-facing description
 3. `ARCHITECTURE.md` - System design baseline
 
+## Frontend Work — Role Delegation
+
+Frontend work is split across two specialized roles. **Do not attempt to handle both yourself** — delegate to the correct role:
+
+- **Frontend Designer** (`agents/skills/roles/references/frontend-designer.md`) — Design system, CSS, HTML mockups, visual design, responsive fixes, anything under `design/`. Uses Playwright MCP for visual verification.
+- **Frontend Engineer** (`agents/skills/roles/references/frontend-engineer.md`) — Vue 3 application code, components under `src/client/`, shared types, Vite config. Implements designs produced by the designer.
+
+When a task involves visual/CSS/design work, spawn or defer to the **Frontend Designer**. When it involves application logic/Vue components, spawn or defer to the **Frontend Engineer**.
+
 ## Snapshot Tests
 
 **NEVER run `--update` on snapshot tests without explicit user approval.** Snapshot baselines (`.snap` files, `__screenshots__/`) are locked intentionally. If a snapshot test fails:

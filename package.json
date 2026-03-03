@@ -17,6 +17,7 @@
     "test:all": "vitest run && npx playwright test",
     "test:update-snapshots": "vitest run tests/snapshots --update",
     "migrate:v2": "tsx src/server/scripts/migrate-v2.ts",
+    "dev:design": "serve design -l 3333 --no-clipboard",
     "prepare": "husky"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "happy-dom": "^20.6.1",
     "husky": "^9.1.7",
     "jsdom": "^28.1.0",
+    "serve": "^14.2.5",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^6.0.7",

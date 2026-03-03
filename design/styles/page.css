@@ -222,4 +222,17 @@
   .component-grid--3col {
     grid-template-columns: 1fr;
   }
+
+  .state-row {
+    flex-wrap: wrap;
+  }
+
+  .state-label {
+    min-width: 60px;
+  }
+
+  .input-demo {
+    width: 100%;
+    max-width: 100%;
+  }
 }

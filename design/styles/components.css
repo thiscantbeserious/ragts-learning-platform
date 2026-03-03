@@ -650,10 +650,16 @@
   height: var(--header-height);
 }
 
+/* Fixed positioning applied only via inline style or JS injection,
+   NOT on the base class — demo headers in the component guide also
+   use .app-header and must remain in normal flow. */
+
 .app-header__left {
   display: flex;
   align-items: center;
   gap: var(--space-6);
+  min-width: 0;
+  flex: 1;
 }
 
 .app-header__brand {
@@ -796,7 +802,64 @@
 
 .app-header__search {
   width: var(--progress-width);
+  min-width: 0;
+  flex-shrink: 1;
   margin-left: var(--space-4);
+}
+
+/* --- App Header: responsive --- */
+@media (max-width: 767px) {
+  .app-header {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .app-header__left {
+    gap: var(--space-2);
+  }
+
+  .app-header__name {
+    font-size: var(--text-base);
+  }
+
+  .app-header__right {
+    display: none;
+  }
+
+  .app-header__search {
+    width: 0;
+    flex: 1 1 80px;
+    margin-left: var(--space-2);
+  }
+
+  .app-header__search .search-bar__input {
+    font-size: var(--text-sm);
+    height: var(--btn-height-sm);
+    padding-left: var(--space-6);
+    padding-right: var(--space-2);
+  }
+
+  .app-header__search .search-bar__icon {
+    left: var(--space-2);
+  }
+
+  .app-header__search .search-bar__icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .app-header__nav .dropdown__trigger {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    max-width: 120px;
+  }
+
+  .app-header__nav .dropdown__trigger > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
 }
 
 /* ======================
@@ -2076,4 +2139,33 @@ html:has(.modal-backdrop) body {
 .session-viewer__indent {
   padding-left: var(--space-6);
   color: var(--text-secondary);
+}
+
+/* ================================================================
+   RESPONSIVE — COMPONENT OVERRIDES
+   ================================================================
+   Must appear AFTER all base component styles so media-query rules
+   win at equal specificity.
+   ================================================================ */
+@media (max-width: 767px) {
+  /* Cards: prevent flex-item overflow */
+  .card {
+    min-width: 0;
+  }
+
+  /* Section header: allow range text to wrap */
+  .section-header {
+    flex-wrap: wrap;
+  }
+
+  .section-header__range {
+    flex-basis: 100%;
+    padding-left: var(--space-8);
+  }
+
+  /* Session viewer meta: allow wrapping */
+  .session-viewer__meta {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
 }

@@ -150,6 +150,19 @@
       line-height: var(--leading-tight);
       color: var(--text-primary);
     }
+
+    /* --- Responsive --- */
+    @media (max-width: 767px) {
+      /* Wrap icon tables in horizontal scroll */
+      .section:has(.icon-table) {
+        overflow-x: auto;
+      }
+
+      .icon-table th:first-child,
+      .icon-table td:first-child {
+        min-width: 120px;
+      }
+    }
   </style>
 </head>
 <body>

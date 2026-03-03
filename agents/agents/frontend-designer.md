@@ -43,4 +43,6 @@ Load and follow `agents/skills/roles/references/frontend-designer.md`.
 
 ## Available Scripts
 
+- **Design Dev Server** — `npm run dev:design` — Serves the `design/` directory on `http://localhost:3333`. Start this before using Playwright MCP to preview HTML files.
 - **Color Science CLI** — `node agents/scripts/color-science.mjs <command>` — OKLCH color math, WCAG contrast, harmony, palette generation. Run with `help` for usage. Use this instead of manual color calculations.
+- **Overflow Audit** — `node agents/scripts/overflow-audit.mjs [options]` — Headless Playwright script that detects horizontal overflow on design guide pages at mobile viewport widths. Run with `--help` for options. Use after any responsive CSS changes to verify no page-level horizontal scroll.
