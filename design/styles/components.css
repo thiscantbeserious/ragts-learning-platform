@@ -826,6 +826,7 @@
   }
 
   .app-header__search {
+    position: static !important;
     width: 0;
     flex: 1 1 80px;
     margin-left: var(--space-2);
