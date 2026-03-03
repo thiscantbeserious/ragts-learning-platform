@@ -97,6 +97,10 @@ npx vitest run --coverage  # With coverage report
 
 A sample `.cast` file is included at `fixtures/sample.cast` for testing and demo purposes.
 
+## Design Guide
+
+Browse the live design system at **[thiscantbeserious.github.io/ragts-learning-platform](https://thiscantbeserious.github.io/ragts-learning-platform/)** — tokens, components, and page mockups rendered as static HTML+CSS.
+
 ## License
 
 This project uses **dual licensing**:
