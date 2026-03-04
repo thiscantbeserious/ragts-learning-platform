@@ -63,31 +63,25 @@ Then it works — sometimes with the human watching and approving, sometimes on 
 
 ```mermaid
 graph TD
-    Human([Human]) -->|writes prompt| Agent
-
     subgraph Session["Synchronous · Blocking"]
-        Agent([Agent]) --> Work([Works])
-        Work -->|approve?| Human2([Human waits])
-        Human2 -->|correct| Agent
+        Human([Human]) -->|writes prompt| Agent([Agent])
+        Agent --> Work([Works])
+        Work -->|maybe approve?| Human
+        Human -->|correct| Agent
         Work --> Done([Session ends])
     end
 
-    subgraph Static["Always Injected · No Choice"]
-        Memory[(Memory files)]
-        Instructions[(Instructions / Rules)]
+    subgraph Static["Context"]
+        direction LR
+        Memory[(Memory files)] ~~~ RAG[(RAG)]
+        Instructions[(AGENTS.md)] ~~~ FS[(Filesystem)]
     end
 
-    subgraph Runtime["Runtime · Agent Decides"]
-        Grep([Grep / Glob codebase])
-        Embeddings([Embedding search])
-    end
-
-    Static -.->|dumped into prompt| Agent
-    Agent -.->|searches when it wants| Runtime
-    Done -.->|sometimes overwrites| Memory
+    Static -.->|uncurated| Agent
+    Done -.->|sometimes stores| Memory
 ```
 
-The context the agent works with comes from two places — neither chosen by the human. **Static files** (memory, instructions, rules) are dumped into the prompt wholesale at session start, every time, regardless of relevance. **Runtime search** (grep, embeddings) happens when the agent decides to look — matching by keywords or token similarity, not by intent. A critical architectural decision gets the same weight as a stale TODO.
+The context the agent works with is **not chosen by the human**. Memory files, RAG, instructions, filesystem — the agent decides what to load, matched by surface-level relevance, not by intent. A critical architectural decision gets the same weight as a stale TODO.
 
 The session itself is a **synchronous, blocking loop**. If the human is involved, they sit and wait. If they're not, the agent runs unsupervised. Either way, corrections stay trapped in the session. Next time, the agent loads the same unchosen context, maybe overwrites its own memory, and the cycle repeats.
 
