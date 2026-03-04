@@ -14,6 +14,7 @@ graph LR
     Fail --> Reflect([Reflect])
     Reflect --> Adjust([Adjust])
     Adjust --> Try
+    Try --> Success([Success])
 ```
 
 This loop is slow, expensive, and irreplaceable. It's how we build intuition.
