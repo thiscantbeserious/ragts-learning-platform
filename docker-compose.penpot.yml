@@ -1,11 +1,10 @@
-## Development stack for RAGTS designers
-## Provides Penpot (design tool) with all dependencies.
-## RAGTS itself runs via `npm run dev` (not containerized in dev mode).
+## Penpot design tool stack (optional, for design sessions only)
+## Provides Penpot with all dependencies.
 ##
 ## Usage:
-##   docker compose up -d          # Start Penpot stack
-##   docker compose down            # Stop
-##   docker compose down -v         # Stop and remove volumes
+##   docker compose -f docker-compose.penpot.yml up -d     # Start Penpot stack
+##   docker compose -f docker-compose.penpot.yml down       # Stop
+##   docker compose -f docker-compose.penpot.yml down -v    # Stop and remove volumes
 ##
 ## Penpot UI:      http://localhost:9001
 ## Penpot MCP:     http://localhost:4401/mcp
