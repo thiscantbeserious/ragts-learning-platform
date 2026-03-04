@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * overflow-audit.mjs — Detect horizontal overflow on design guide pages
+ * overflow-audit.mjs — Detect horizontal overflow
  *
  * Launches a headless Chromium browser via Playwright, visits each page at
  * a given viewport width, and reports every DOM element whose bounding rect
