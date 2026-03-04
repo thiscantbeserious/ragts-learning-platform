@@ -12,7 +12,7 @@ window.GUIDE_SEARCH_INDEX = [
       {
         "section": "Browse and explore agent recordings",
         "sectionId": "browse-and-explore-agent-recordings",
-        "text": "Minor Third (1.2) modular scale from 14px base. Geist for UI, Geist Mono for code. Browse and explore agent recordings Type Scale {{ t.token }} {{ t.value }} Line Height {{ lh.label }} {{ lh.token }} {{ lh.value }} — {{ lh.usage }} Letter Spacing {{ ls.label }} {{ ls.token }} {{ ls.value }} Font Weights Font Families Type in Context Terminal Sessions, Unfolded Browse and explore agent recordings RAGTS transforms raw terminal sessions into navigable, searchable documents. Upload a .cast file and the system detects sections, highlights markers, and makes every keystroke findable. Last updated 2 hours ago · 1,247 events · 23 sections detected"
+        "text": "Minor Third (1.2) modular scale from 14px base. Geist for UI, Geist Mono for code. Browse and explore agent recordings Type Scale {{ t.token }} {{ t.value }} Line Height {{ lh.label }} {{ lh.token }} {{ lh.value }} — {{ lh.usage }} Letter Spacing {{ ls.label }} {{ ls.token }} {{ ls.value }} Font Weights Font Families Type in Context Terminal Sessions, Unfolded Browse and explore agent recordings Erika transforms raw terminal sessions into navigable, searchable documents. Upload a .cast file and the system detects sections, highlights markers, and makes every keystroke findable. Last updated 2 hours ago · 1,247 events · 23 sections detected"
       },
       {
         "section": "Spacing Tokens",

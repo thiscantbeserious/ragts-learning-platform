@@ -85,7 +85,7 @@ graph TD
 ```
 
 ## Current Service-Layer
-The is currently largely powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/agent-session-recorder) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval. Later on this should be independent, not just tie to that, but add many sources of logs, and transportation layers to grasp the raw session output.s
+The is currently largely powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/erika) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval. Later on this should be independent, not just tie to that, but add many sources of logs, and transportation layers to grasp the raw session output.s
 
 ## Getting Started
 
