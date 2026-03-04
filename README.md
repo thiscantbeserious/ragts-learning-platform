@@ -1,27 +1,49 @@
-# RAGTS - Reinforced Human Learning Platform
+# Erika: The Self-Hosted, Collaborative Training Platform for both Agents and Humans 
 
-> Reinforce the human part in the agentic loop. 
+- Self-Hosted, Whitelable Platform for Indidivuals, Teams and Companies
+- Retroactive Learning of what Agents did in Detail (not just looking at a Wall of Text)
+- Adding Context as to what they could do better next time (not just relying on `auto-repl` loops)
+- Share that with your Colleagues for Training (not just Agents)
 
-**Real Agentic Terminal Sessions** - Just like RAG, but more useful for humans and agents to learn from the unfolded mess when the refactoring deleted half your codebase again and the subagents thought it would be smart to skip the tests.
+### Humans: 
 
-```Currently in MVP state - Heavy refactorings incomming!```
+**Are you really understanding why your Agents like `claude` or `claw` did the stuff they did - how and why?** 
 
-> <img src="screenshot.png" alt="RAGTS browsing a Claude Code agent session" width="100%" border="1" />
->
-> _**Screenshot of early MVP v2**. Browsing a recorded Claude Code session — terminal output of a 2 hour session in 2500 lines with split sections and fold/unfold. Later on you can use that with Markers and use these for RAG-Feeding with additional Context (adding Comments, Voting Results for example)_
+I mean for you, not for `Jon Claude Van God Damnit` throwing rocks on the ice ... 
 
+Could you even manage to follow along amongst the wall of text across the many hours this went on? 
 
-## Problem
+Or did they just become a `black box` to you - that produces `something` in the end? 
 
-**Agent sessions are fire-and-forget. Thousands of lines of terminal output** - commands, reasoning, errors, recoveries - generated and never looked at again (or if autonomous, never). When something goes wrong, you're left digging through raw logs with no structure, no context, no way to search.
+Most importantly - **is it really what you wanted?**, and if yes ... do you maybe want to share that experience you had here?
 
-Up until now it was always about reinforcing the agents. But what about the humans?
+### Agents: 
 
-## Solution
+**Did you really understand what the human interacting with you was trying to make you act upon?** 
 
-**RAGTS puts you back in the loop. Every session becomes a browsable document you can fold, search, and understand**. Curate what matters into retrievable context for the next sessions so that your agents learn from next time - so the same mistake doesn't happen twice. 
+Or were you just, best guessing - filling the void? If anything writing your confusion down into a `MEMORY.md` style-diary? And them trying to automatically stuff you even fuller with `RAG` snippets that are supposed to make that *more specific*, *fitting the intent* (yet, never really curated, by the very people you are supposed to be **INTERACTING** and **producing solution** for - and with)?
 
-Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your power, your control.
+### Both:
+
+Don't you think we can learn from each other? (yes, writing this down feels odd ...)
+
+## The Problem
+
+The current industry largely tries to solve the Human-AI Interaction by going more and more autonomous—implementing smart, self-iterating reinforcement loops without any human interaction, training them automatically. At best, they use a highly specific engineering perspective to pre-train models on datasets that a few humans thought were "good enough" for a broad audience.
+
+**But what if the Human Layer is exactly what's missing, and instead of going fully autonomous, we need a continuous feedback loop?**
+
+1. We need to understand the intent of the agent and what it actually did (=**Human Reinforcement Layer**).
+2. We need to guide them in a better direction from our unique perspective (=**Agent Reinforcement Layer**).
+
+It acts as a shared workspace where humans can easily read, understand, and review the workflows captured by tools like agentic-session-recorder (agents can automatically upload their findings, too). But Erika isn't just a log viewer—it is a mentorship hub. Humans can flag mistakes, share specific sessions with their team, and meta-tag agent behavior using their human intent and instincts. Erika then translates those human insights into structured reinforcement data, creating a continuous learning loop that is easily digested by both human engineers and the agents themselves.
+
+```Currently in MVP state - Heavy refactorings incoming!```
+
+## The Solution
+
+### Re-Introduce the Human Layer and dont try to optimize it away
+
 
 ## Features
 
@@ -36,7 +58,7 @@ Didn't work out? Adjust and repeat! Reinforce to the max. Your knowledge, your p
 %%{ init: { 'flowchart': { 'curve': 'basis', 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
 graph TD
     AD>Record everything<br/>agents do] -.- A
-    A[AGR · Record] --> R[RAGTS · Platform<br/>Process · Store · Serve]
+    A[AGR · Record] --> R[Erika · Platform<br/>Process · Store · Serve]
 
     R <--> H[Humans]
     R --> AG[Agents]
@@ -56,8 +78,8 @@ graph TD
     Retrieve -.->|Reinforce| A
 ```
 
-## Service
-Powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/agent-session-recorder) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval.
+## Current Service-Layer
+The is currently largely powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/agent-session-recorder) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval. Later on this should be independent, not just tie to that, but add many sources of logs, and transportation layers to grasp the raw session output.s
 
 ## Getting Started
 
@@ -108,11 +130,11 @@ This project uses **dual licensing**:
 | Scope | License | File |
 |-------|---------|------|
 | Application code | **AGPL-3.0** | [LICENSE](LICENSE) |
-| RAGTS Design System | **Elastic License 2.0 (ELv2)** | see individual LICENSE files |
+| Design System | **Elastic License 2.0 (ELv2)** | see individual LICENSE files |
 
-### RAGTS Design System (ELv2)
+### Design System (ELv2)
 
-The visual design, composition, layout patterns, token values, and individual styles that make up the **RAGTS Design System** are protected creative work. This includes — but is not limited to — color palettes, typography scales, spacing systems, component designs, icon definitions, and page scaffolding.
+The visual design, composition, layout patterns, token values, and individual styles that make up the **Design System** are protected creative work. This includes — but is not limited to — color palettes, typography scales, spacing systems, component designs, icon definitions, and page scaffolding.
 
 Protected files carry a copyright header pointing to their accompanying LICENSE file. The ELv2 permits free use in your own deployments but **prohibits offering the design system as part of a hosted or managed service**.
 
