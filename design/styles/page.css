@@ -1,10 +1,10 @@
-/* RAGTS Design System — Copyright (c) 2026 Simon Sanladerer
+/* Erika Design System — Copyright (c) 2026 Simon Sanladerer
    The visual design, composition, layout patterns, token values, and
    individual styles in this file are protected creative work.
    Licensed under the Elastic License 2.0 — see LICENSE in this directory. */
 
 /* ================================================================
-   RAGTS Page Scaffold — Shared Page-Level Layout Classes
+   Erika Page Scaffold — Shared Page-Level Layout Classes
    ================================================================
    All stage HTML files import this file via:
      <link rel="stylesheet" href="../styles/page.css">

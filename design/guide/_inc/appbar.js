@@ -1,4 +1,4 @@
-/* RAGTS Design Guide — App Bar
+/* Erika Design Guide — App Bar
    Injects the shared header, wires navigation + cross-page search.
    Include at the end of each guide page:
      <script src="_inc/appbar.js"></script>
@@ -72,8 +72,8 @@
     '<header class="app-header" style="position:fixed;top:0;left:0;right:0;z-index:100">',
     '  <div class="app-header__left">',
     '    <a class="app-header__brand" href="index.html">',
-    '      <div class="app-header__logo">R</div>',
-    '      <span class="app-header__name">RAGTS</span>',
+    '      <div class="app-header__logo">E</div>',
+    '      <span class="app-header__name">Erika</span>',
     '    </a>',
     '    <nav class="app-header__nav">',
     '      <div class="dropdown" id="guide-dropdown">',
