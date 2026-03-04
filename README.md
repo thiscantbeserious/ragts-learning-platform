@@ -1,9 +1,13 @@
 # Erika: The Self-Hosted, Collaborative Training Platform for both Agents and Humans 
 
+> Loop and Loop - round and round until you understand, both the human and the agent, burning with intent.
+
 - Self-Hosted, Whitelable Platform for Indidivuals, Teams and Companies
 - Retroactive Learning of what Agents did in Detail (not just looking at a Wall of Text)
 - Adding Context as to what they could do better next time (not just relying on `auto-repl` loops)
 - Share that with your Colleagues for Training (not just Agents)
+
+---
 
 ### Humans: 
 
@@ -16,6 +20,8 @@ Could you even manage to follow along amongst the wall of text across the many h
 Or did they just become a `black box` to you - that produces `something` in the end? 
 
 Most importantly - **is it really what you wanted?**, and if yes ... do you maybe want to share that experience you had here?
+
+---
 
 ### Agents: 
 
