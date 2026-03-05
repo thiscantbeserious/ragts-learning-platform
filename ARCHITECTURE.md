@@ -1,261 +1,185 @@
 # Architecture
 
-Architectural baseline for the RAGTS platform. This document frames the problem space, identifies the forces at play, and surfaces the decisions that will shape the system.
+System architecture for Erika. For the vision and motivation, see [VISION.md](VISION.md). Decision history lives in `.state/` as ADRs per feature branch.
 
-**This document is the input for the first SDLC cycle.** Nothing here is decided - it's the context an Architect and Product Owner need to make real decisions. Start here.
+## 1. System Overview
 
-## 1. Context
-
-### What We're Building
-A multi-user, self-hostable web platform where teams browse agent terminal sessions vertically, curate meaningful segments, and generate retrieval context that agents can learn from. The human stays in control.
-
-### Who It's For
-- **Teams and organizations** running AI agents at scale
-- **Platform operators** who self-host and need to integrate with existing infrastructure
-- **Agents** that consume curated session context as long-term memory
+Erika is a multi-user, self-hostable web platform where teams browse agent terminal sessions, curate meaningful segments, and generate retrieval context that agents can learn from.
 
 ### Key Relationships
-- **AGR (Agent Session Recorder)** is the upstream recording and transformation engine. RAGTS does not record - it serves, browses, and curates what AGR captures.
-- **Identity providers** (Authelia, Authentik, Keycloak, Microsoft Entra ID, Okta, etc.) handle authentication. RAGTS delegates, never reinvents.
-- **Agent ecosystems** (MCP, REST APIs, custom integrations) consume curated context from RAGTS.
 
-### Starting Point: MVP
-The first SDLC cycle should define a **minimum viable product** - the smallest slice that delivers real value end-to-end. What that MVP looks like is an open question for the Product Owner and Architect to decide. It could be a vertical slice through ingestion + browsing + basic curation, or it could start with the retrieval/MCP layer, or something else entirely. The ARCHITECTURE.md captures the full landscape - the MVP carves out the first deliverable from it.
+- **AGR (Agent Session Recorder)** -- upstream recording and transformation engine. Erika does not record; it serves, browses, and curates what AGR captures.
+- **Identity providers** (Authelia, Authentik, Keycloak, Entra ID, Okta) -- planned external auth delegation via OIDC/SSO. Built-in auth first.
+- **Agent ecosystems** (MCP, REST APIs) -- planned retrieval interface for curated context.
 
-## 2. Quality Attributes
+## 2. Tech Stack
 
-These are the non-functional requirements that drive architectural decisions. When trade-offs arise, this is the priority order:
+Decided in [MVP v1 ADR](.state/feat/mvp-v1/ADR.md), evolved through MVP v2.
 
-| Priority | Attribute | What It Means for RAGTS |
-|----------|-----------|------------------------|
-| 1 | **Security** | Sessions contain sensitive terminal output. Auth, authorization, tenant isolation, and data protection are non-negotiable. |
-| 2 | **Self-hostability** | Operators must be able to run this on their own infrastructure with minimal dependencies. Complex setups kill adoption. |
+| Layer | Choice | Rationale |
+|-------|--------|-----------|
+| **Backend** | TypeScript + Hono | Unified language with frontend, shared types, web-standard middleware |
+| **Frontend** | Vue 3 (Composition API) | Composables for state, no Pinia at current scale |
+| **Database** | SQLite via `better-sqlite3` | Embedded, zero-config, WAL mode for concurrent reads |
+| **Terminal rendering** | asciinema `avt` crate via WASM | Full VT parser, server-side processing, client renders structured spans |
+| **IDs** | `nanoid` | URL-safe, 21 chars, cryptographically strong |
+| **Build** | Vite | Frontend bundling, dev proxy to Hono backend |
+| **Testing** | Vitest + Playwright | Snapshot tests + visual regression |
+
+### Design System
+
+Bootstrapped in [Design System ADR](.state/design-system-bootstrap/ADR.md). Direction "B Refined": Geist fonts, `#00ff9f` green, `#ff6b2b` orange. Live at [thiscantbeserious.github.io/erika](https://thiscantbeserious.github.io/erika/).
+
+Dual license: application code = AGPL-3.0, design system = Elastic License 2.0 (ELv2).
+
+## 3. Quality Attributes
+
+Priority order when trade-offs arise:
+
+| Priority | Attribute | What It Means |
+|----------|-----------|---------------|
+| 1 | **Security** | Sessions contain sensitive terminal output. Auth, authorization, tenant isolation are non-negotiable. |
+| 2 | **Self-hostability** | Single container with minimal dependencies. Complex setups kill adoption. |
 | 3 | **Multi-tenancy** | Multiple users, teams, and workspaces from day one. Not bolted on later. |
-| 4 | **Extensibility** | Integration with diverse auth providers, retrieval mechanisms, and agent ecosystems. The platform can't assume a single stack. |
-| 5 | **Performance** | Sessions can be massive. Rendering, search, and retrieval must handle scale without degrading UX. |
-| 6 | **Operability** | Upgrades, backups, monitoring, and configuration must be straightforward for self-hosters. |
+| 4 | **Extensibility** | Integration with diverse auth providers, retrieval mechanisms, and agent ecosystems. |
+| 5 | **Performance** | Sessions can be massive. Rendering, search, and retrieval must handle scale. |
+| 6 | **Operability** | Upgrades, backups, monitoring, and configuration must be straightforward. |
 
-## 3. Domain Model
+## 4. Current Architecture
+
+### Data Flow
+
+**Ingestion:**
+```
+Upload .cast -> Validate -> Save to disk -> Insert DB row
+  -> Async pipeline: NDJSON stream -> section detection -> VT processing -> scrollback dedup
+  -> Store sections + snapshots -> Update detection_status
+```
+
+**Browsing:**
+```
+GET /api/sessions/:id -> Session metadata + sections with pre-rendered snapshots
+  -> Client renders TerminalSnapshot as styled <span> grid
+```
+
+**Section Detection** ([MVP v2 ADR](.state/feat/mvp-v2/ADR.md)):
+- Co-primary signals: timing gaps (raw sessions) + screen clears (AGR-processed)
+- Secondary: alternate screen buffer transitions
+- Markers always take precedence over auto-detected boundaries
+
+### Database Abstraction
+
+Repository pattern, partially implemented:
+
+| Component | Interface | Implementation | Status |
+|-----------|-----------|---------------|--------|
+| Sessions | `SessionRepository` | `SqliteSessionRepository` | Complete |
+| Sections | -- | `SqliteSectionRepository` | Missing interface |
+| File storage | -- | `storage.ts` (raw functions) | Missing abstraction |
+| DB init | -- | `database.ts` (SQLite-only) | Missing abstraction |
+
+### API Surface
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+| POST | `/api/upload` | Multipart .cast file upload |
+| GET | `/api/sessions` | List sessions |
+| GET | `/api/sessions/:id` | Session detail with sections and snapshots |
+| DELETE | `/api/sessions/:id` | Delete session |
+| POST | `/api/sessions/:id/redetect` | Re-run section detection (202 Accepted) |
+
+## 5. Domain Model
+
+### Core Entities (Implemented)
+
+- **Session** -- An asciicast v3 recording with metadata and processing state. Central artifact.
+- **Section** -- A structural fold point within a session. Either from markers (recording) or auto-detected (heuristic). Sections carry terminal viewport snapshots.
+
+### Core Entities (Planned)
+
+- **Workspace** -- Tenant boundary. Owns sessions, members, agent tokens.
+- **User** -- External identity mapped to internal roles per workspace.
+- **Curated Segment** -- Human-annotated slice of a session, tagged for retrieval. What agents consume.
+- **Agent Token** -- Scoped credential for agent retrieval access, tied to workspace.
 
 ### Bounded Contexts
 
-The platform decomposes into six bounded contexts. Each represents a distinct area of responsibility with its own data, rules, and interfaces.
+| Context | Status | What's There |
+|---------|--------|-------------|
+| **Session** | Partial | Ingestion, storage, browsing, section detection, scrollback dedup |
+| **Transform** | Partial | VT processing via avt WASM, snapshot generation |
+| **Identity** | Not started | Planned: built-in auth + OIDC delegation |
+| **Retrieval** | Not started | Planned: MCP server + REST API for agents |
+| **Index** | Not started | Planned: full-text + semantic search |
+| **Cache** | Not started | Planned: Redis or in-process for hot sessions |
 
-```
-+-------------+     +-------------+     +--------------+
-|  Identity   |     |   Session   |     |  Retrieval   |
-|             |     |             |     |              |
-| Auth        |     | Ingestion   |     | Agent API    |
-| Roles       |     | Storage     |     | MCP Server   |
-| Workspaces  |     | Browsing    |     | Query engine |
-| Tokens      |     | Curation    |     |              |
-+------+------+     +------+------+     +------+-------+
-       |                   |                   |
-       +-------------------+-------------------+
-                           |
-              +------------+------------+
-              |            |            |
-       +------+------+  +-+----------+ +-------------+
-       |  Transform  |  |   Index    | |    Cache     |
-       |             |  |            | |              |
-       | AGR Service |  | Full-text  | | Sessions     |
-       | Optimization|  | Semantic   | | Search state |
-       +-------------+  | Embeddings | | Job queues   |
-                         +------------+ +-------------+
+## 6. Deployment
+
+### Current: Local Development
+
+```bash
+npm install && npm run dev
 ```
 
-### Context Relationships
+SQLite database at `data/ragts.db`. Session files at `data/sessions/`.
 
-- **Identity <-> Session** - Every session operation requires an authenticated, authorized user. Sessions belong to workspaces. Workspaces have members with roles.
-- **Identity <-> Retrieval** - Agent API tokens and MCP credentials are scoped to workspaces. Retrieval respects tenant boundaries.
-- **Session <-> Index** - When sessions are ingested or curated, the index is updated. The index is derived data - always rebuildable from the session store.
-- **Index <-> Retrieval** - Retrieval queries go through the index. The index is the engine that makes sessions searchable - full-text, semantic, or both.
-- **Session <-> Transform** - Raw sessions are submitted for background transformation. Transformed sessions replace or augment originals, triggering re-indexing.
-- **Cache <-> All** - Hot session data, search results, job state, and auth tokens are cached for performance. The cache is ephemeral - the database is the source of truth.
+### Planned: Single Container (Default)
 
-### Core Entities
+Everything in one Docker image. Works behind existing reverse proxy.
 
-These need deeper modeling in the SDLC cycle, but the initial thinking:
+### Planned: Docker Compose (Team Scale)
 
-- **Workspace** - Tenant boundary. Owns sessions, members, and agent tokens. The fundamental isolation unit.
-- **User** - External identity mapped to internal roles per workspace. A user can belong to multiple workspaces.
-- **Session** - An asciicast v3 recording with metadata, markers, and curation state. The central artifact.
-- **Marker** - Structural fold anchor within a session. Can be original (from recording) or curated (added by humans). Markers define the session's browsable hierarchy.
-- **Curated Segment** - A human-annotated slice of a session, tagged and indexed for retrieval. This is what agents actually consume.
-- **Agent Token** - Scoped credential for agent retrieval access. Tied to a workspace and permission set.
-
-### Domain Questions to Explore
-
-The domain model above is a starting point. The SDLC cycle needs to dig deeper:
-
-- **Workspace hierarchy** - Are workspaces flat or nested? Can an organization have sub-workspaces for teams/projects? How does this affect access control?
-- **Session lifecycle** - What states does a session go through? (ingested, processing, ready, archived, deleted?) Who can transition between states?
-- **Curation workflow** - Is curation a single action or a multi-step review process? Can multiple curators collaborate on the same session? Conflict resolution?
-- **Marker ownership** - Who can create/modify/delete markers? Are there system-generated markers (from AGR analysis) vs human markers? How do they interact?
-- **Segment granularity** - What defines a segment boundary? A marker range? A time range? A line range? Can segments overlap?
-- **Versioning** - When a session is transformed (silence removed, optimized), is the original preserved? Can you compare versions?
-- **Cross-workspace sharing** - Can a session or segment be shared across workspaces? What are the security implications?
-- **Retention and lifecycle** - How long are sessions kept? Auto-archival? Storage quotas per workspace?
-- **Index strategy** - What gets indexed? Raw session content, curated segments, metadata, all of the above? Full-text, semantic embeddings, or hybrid? When does indexing happen (on ingestion, on curation, on demand)?
-- **Index rebuild** - The index must always be rebuildable from source data. How long does a full rebuild take? Can it be done incrementally? What happens during a rebuild - is search degraded?
-- **Embedding ownership** - If we use semantic search, who generates embeddings? Which model? Self-hosted or API? How does this affect self-hosting simplicity?
-
-## 4. Architectural Views
-
-### Logical View - How domains interact
-
-The six bounded contexts communicate through well-defined interfaces. Whether they're deployed as separate services or modules in a monolith is a deployment decision - the logical boundaries stay the same.
-
-Key interaction patterns:
-- **Synchronous** - Auth checks, session CRUD, search queries, MCP tool calls
-- **Asynchronous** - Transform jobs, re-indexing after curation, bulk operations
-- **Event-driven** - Session ingested, curation completed, transform finished (enables loose coupling between contexts)
-- **Cached** - Frequently accessed data (hot sessions, auth tokens, search results) served from cache, written through to DB
-
-### Data View - What lives where
-
-Everything goes through a database abstraction layer. No raw filesystem assumptions.
-
-| Data | Characteristics | Notes |
-|------|----------------|-------|
-| Sessions (.cast files) | Large, immutable after ingestion, read-heavy | Stored in DB. Cached for frequent access. |
-| Session metadata | Small, structured, queried frequently | Relational. ACID. |
-| Auth data (users, roles, tokens, workspaces) | Small, critical, write-sensitive | Relational. ACID mandatory. |
-| Search index (full-text) | Derived from sessions + curated segments | Rebuildable from source. Eventual consistency acceptable. |
-| Semantic index (embeddings) | Vector representations of session content | Rebuildable. Depends on embedding model choice. Potentially large. |
-| Curated segments | Human-created annotations + tags | Relational, linked to sessions and workspaces. |
-| Transform state | Job status, progress, history | Ephemeral. Cache-backed with DB persistence. |
-
-**Database abstraction layer** - Needed from day one so the concrete DB choice can evolve without rewriting application logic. Repository pattern or similar.
-
-**Cache layer (Redis or similar)** - Session data is read-heavy and potentially large. A memory cache sits between the application and the database for:
-- Hot session content (avoid repeated DB reads for popular sessions)
-- Search result caching (expensive queries served from cache)
-- Transform job queues and state (ephemeral, high-throughput)
-- Auth token/session caching (reduce DB pressure on every request)
-- Rate limiting state (agent API abuse prevention)
-
-The cache is always ephemeral - the database remains the single source of truth. Cache invalidation strategy is a key design decision.
-
-### Integration View - How RAGTS connects to the outside
-
-| Integration Point | Direction | Options to Explore |
-|-------------------|-----------|-------------------|
-| Authentication | Inbound | Reverse proxy headers, OIDC/OAuth2, SAML |
-| Session ingestion | Inbound | File upload API, AGR direct push, bulk import |
-| Agent retrieval | Outbound (served) | MCP server, REST API, GraphQL |
-| AGR transforms | Internal | Sidecar binary, REST wrapper, message queue |
-| Notifications | Outbound | Webhooks, email (stretch) |
-
-### Deployment View - How it runs
-
-The architecture needs to support a spectrum from simple to scaled, all from the same codebase:
-
-**Single container (default):**
-Everything in one Docker image - application, embedded DB, embedded cache. Minimal config, works behind an existing reverse proxy. This is what most self-hosters will run.
-
-**Docker Compose (team scale):**
-When the single container hits limits, operators split concerns:
-
-```
-docker-compose.yml
-  - ragts-app        (application server + web UI)
-  - ragts-db         (PostgreSQL or similar)
-  - ragts-cache      (Redis or similar)
-  - ragts-transform  (AGR service worker)
+```yaml
+services:
+  erika-app:        # Application server + web UI
+  erika-db:         # PostgreSQL (when SQLite hits concurrency limits)
+  erika-cache:      # Redis (session caching, job queues)
+  erika-transform:  # AGR service worker
 ```
 
-This is the natural scaling step - same application, externalized dependencies.
+Same application code at every scale. Configuration determines embedded vs external infrastructure.
 
-**Orchestrated (organization scale):**
-Kubernetes, Nomad, or similar. Horizontal scaling of app instances, managed database, managed cache. The bounded contexts could be split into separate deployable units at this stage if needed.
+## 7. Open Decisions
 
-The key constraint: **the application code is the same at every scale**. Only the deployment topology changes. Configuration determines whether the DB is embedded or external, whether the cache is in-process or Redis, whether transforms run in-process or as workers.
+### Immediate
 
-## 5. Architectural Tensions
+- **Complete database adapter pattern** -- Extract `SectionRepository` interface, `StorageAdapter` interface, abstract DB initialization.
+- **Migration tooling** -- Evaluate whether a proper migration framework is needed as schema grows.
 
-These are the forces pulling in different directions. The SDLC cycle needs to navigate them.
+### Near-Term (Auth + Multi-Tenancy)
 
-### Simplicity vs Multi-tenancy
-Single container says "minimal config." Multi-tenancy says "isolation, RBAC, workspace boundaries." A DB abstraction layer helps bridge this - embedded DB for simple deployments, external DB when scale demands it. But the multi-tenancy model itself (workspace isolation, cross-workspace rules) adds application complexity regardless of DB choice.
+- Built-in auth model (email+password, invite-only, etc.)
+- OIDC integration pattern (proxy headers vs direct OIDC)
+- Workspace management and internal role model
+- First-run bootstrap experience
 
-### Built-in Auth vs External IdP
-The platform has built-in authentication and role management - it works out of the box with native login. For teams that want to connect their existing identity infrastructure, OIDC/SSO integration (Authelia, Authentik, Keycloak, Microsoft Entra ID, etc.) is available as an option. The tension is in making both paths feel first-class without doubling the auth surface area.
+### Medium-Term (Retrieval + Search)
 
-### MVP Scope
-What's the smallest thing that delivers real value? Starting with retrieval (MCP/API) delivers value to agents but skips the human curation UX. Starting with the web UI serves humans but doesn't validate the retrieval domain. Starting with ingestion + browsing proves the core UX but defers the memory loop. The MVP definition is a key SDLC decision.
+- Retrieval interface (MCP server, REST API, or both)
+- Search model (full-text, semantic, hybrid)
+- Index technology (SQLite FTS5, Meilisearch, vector DB)
 
-### AGR Integration Depth
-AGR is Rust. The platform's language is TBD. Tight integration (FFI) gives performance but couples technologies. Loose integration (CLI sidecar) is flexible but adds latency and error surface. This cascades into deployment and operational complexity.
+### Deferred
 
-### Monolith vs Services
-Domain boundaries are clear, but starting with microservices adds enormous operational overhead. A modular monolith that can be split later respects both domain boundaries and deployment simplicity. The Docker Compose topology already provides natural splitting points.
+- AGR integration depth (sidecar vs FFI vs queue)
+- Cache strategy (Redis vs in-process)
+- Horizontal scaling
+- Cross-workspace sharing
+- Session retention policies
 
-### Embedded vs External Infrastructure
-Embedding the DB and cache in a single container is simple. But embedded SQLite has concurrency limits, and in-process caching doesn't survive restarts. The abstraction layers need to make the transition to external infrastructure seamless.
+## 8. Decision History
 
-### Session Scale
-Sessions can be megabytes of terminal output. Rendering, searching, and indexing at scale requires different strategies than small-document platforms. Lazy loading, streaming, pagination, and caching are likely necessary.
+| Branch | ADR | Key Decisions |
+|--------|-----|---------------|
+| `feat/mvp-v1` | [ADR](.state/feat/mvp-v1/ADR.md) | TypeScript+Hono, SQLite, repository pattern, Vue 3, nanoid |
+| `feat/mvp-v2` | [ADR](.state/feat/mvp-v2/ADR.md) | avt WASM rendering, section detection, hybrid server/client rendering, scrollback dedup |
+| `feat/snapshot-testing` | [ADR](.state/feat/snapshot-testing/ADR.md) | Vitest + Playwright snapshot and visual regression strategy |
+| `design-system-bootstrap` | [ADR](.state/design-system-bootstrap/ADR.md) | Route map, navigation model, curation slide-over, design system scope |
+| `chore/sdlc-overhaul` | [ADR](.state/chore/sdlc-overhaul/ADR.md) | Specialized roles, dynamic coordinator, role isolation |
 
-## 6. Open Decisions
+## 9. Previous Versions
 
-Grouped by dependency order (foundation decisions unlock everything else):
-
-### Foundation
-- Backend language/framework?
-- DB abstraction approach? (ORM, query builder, repository pattern?)
-- Embedded DB for single-container mode? (SQLite, embedded Postgres, ?)
-- Cache technology? (Redis, in-process with Redis upgrade path, ?)
-- How are .cast files stored? (DB BLOBs, chunked, content-addressed, ?)
-
-### Security
-- Built-in auth: how does native registration/login work? (Email+password? Magic links? Invite-only?)
-- OIDC integration: which patterns? (Proxy headers? Direct OIDC? SAML? Multiple?)
-- How do built-in accounts and external IdP accounts coexist?
-- First-run / bootstrap experience?
-- Concrete internal role model?
-- Workspace creation and management?
-
-### Retrieval
-- What retrieval interface? (MCP server, REST API, GraphQL, multiple?)
-- What can agents query? (Sessions, segments, markers, metadata?)
-- Search model? (Full-text, semantic, hybrid?)
-- Index technology? (Built-in, Meilisearch, vector DB, ?)
-- How does curated vs raw content affect retrieval?
-
-### Application
-- Frontend framework?
-- How to render large sessions performantly?
-- Curation UX - what does it look like concretely?
-- Fold/unfold - how do markers translate to browser interaction?
-- White-label theming depth?
-
-### Integration
-- AGR integration model? (Sidecar, wrapper, FFI, queue?)
-- Session ingestion API design?
-- Deployment artifact structure? (Single image, compose, helm?)
-
-## 7. Data Flow (Rough)
-
-Directional, not prescriptive:
-
-**Ingestion:** `.cast file --> Auth --> Validation --> DB --> Cache --> Index`
-
-**Browsing:** `User --> Auth --> Cache/DB --> Vertical render + folds`
-
-**Curation:** `Curator --> Annotate/tag --> DB --> Invalidate cache --> Re-index`
-
-**Agent retrieval:** `Agent --> API/MCP --> Auth + scope --> Cache/Index --> Curated segments`
-
-**Transformation:** `Session --> Queue --> AGR worker --> DB --> Invalidate cache --> Re-index`
-
-## 8. Next Steps
-
-This document is the architectural baseline for the first SDLC cycle.
-
-**Recommended approach:**
-1. Read `MEMORY.md` for project context and decisions made so far
-2. Use this document as input for the Product Owner and Architect roles
-3. Define the **MVP scope** - the smallest vertical slice that delivers real value end-to-end
-4. Make foundation layer decisions first (language, DB, cache) since everything else depends on them
-5. Build iteratively from the MVP outward
+| Version | Date | Notes |
+|---------|------|-------|
+| [v1 -- Initial baseline](.state/architecture-history/ARCHITECTURE-v1-initial.md) | 2026-02-16 | Pre-MVP brainstorm. Foundation decisions (tech stack, DB, rendering) resolved through ADRs above. Auth, retrieval, and multi-tenancy decisions remain open (Section 7). |
