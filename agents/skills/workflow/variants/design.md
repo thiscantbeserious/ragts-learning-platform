@@ -4,10 +4,10 @@ For visual design work only — no implementation.
 
 ```mermaid
 graph TD
-    PO1[Product Owner] --> FD[Frontend Designer]
+    PO1[product-owner] --> FD[frontend-designer]
     FD -->|iterate| FD
-    FD -->|approved| PO2[Product Owner]
-    PO2 --> M[Maintainer]
+    FD -->|approved| PO2[product-owner]
+    PO2 --> M[maintainer]
 ```
 
 ## Phases

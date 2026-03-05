@@ -4,18 +4,14 @@ For tasks scoped to server-side code.
 
 ```mermaid
 graph TD
-    PO1[Product Owner] --> Arch[Architect]
-    Arch --> BE[BE: implement stage]
-    BE --> PR[Pair Review]
-    PR -->|blocking| BE
-    PR -->|next stage| BE
-    PR -->|all stages done| IR[Internal Review]
+    PO1[product-owner] --> Arch[architect]
+    Arch --> BE[backend-engineer + reviewer-pair]
+    BE -->|all stages done| IR[reviewer-internal]
+    IR -->|pass| CR[reviewer-coderabbit]
     IR -->|blocking| BE
-    IR -->|pass| Ready[PR Ready]
-    Ready --> CR[CodeRabbit]
+    CR -->|pass| PO2[product-owner]
     CR -->|fixes needed| BE
-    CR -->|pass| PO2[Product Owner]
-    PO2 --> M[Maintainer]
+    PO2 --> M[maintainer]
 ```
 
 ## Phases
