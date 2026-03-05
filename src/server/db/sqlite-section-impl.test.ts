@@ -1,27 +1,27 @@
 /**
- * Unit tests for SqliteSectionRepository.
+ * Unit tests for SqliteSectionImpl.
  * Uses in-memory SQLite to avoid filesystem side effects.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { initDatabase } from './database.js';
-import { SqliteSectionRepository } from './sqlite-section-repository.js';
-import { SqliteSessionRepository } from './sqlite-session-repository.js';
-import type { CreateSectionInput } from './sqlite-section-repository.js';
+import { SqliteSectionImpl } from './sqlite-section-impl.js';
+import { SqliteSessionImpl } from './sqlite-session-impl.js';
+import type { CreateSectionInput } from './sqlite-section-impl.js';
 import type { SessionCreate } from '../../shared/types.js';
 import type Database from 'better-sqlite3';
 
-describe('SqliteSectionRepository', () => {
+describe('SqliteSectionImpl', () => {
   let db: Database.Database;
-  let sectionRepo: SqliteSectionRepository;
-  let sessionRepo: SqliteSessionRepository;
+  let sectionRepo: SqliteSectionImpl;
+  let sessionRepo: SqliteSessionImpl;
   let testSessionId: string;
 
   beforeEach(() => {
     // Use in-memory database for each test
     db = initDatabase(':memory:');
-    sectionRepo = new SqliteSectionRepository(db);
-    sessionRepo = new SqliteSessionRepository(db);
+    sectionRepo = new SqliteSectionImpl(db);
+    sessionRepo = new SqliteSessionImpl(db);
 
     // Create a test session for use in tests
     const sessionData: SessionCreate = {

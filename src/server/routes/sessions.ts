@@ -4,8 +4,8 @@
 
 import type { Context } from 'hono';
 import { parseAsciicast } from '../../shared/asciicast.js';
-import type { SessionRepository } from '../db/session-repository.js';
-import type { SectionRepository } from '../db/section-repository.js';
+import type { SessionAdapter } from '../db/session-adapter.js';
+import type { SectionAdapter } from '../db/section-adapter.js';
 import type { StorageAdapter } from '../storage/storage-adapter.js';
 import { processSessionPipeline } from '../processing/index.js';
 
@@ -15,7 +15,7 @@ import { processSessionPipeline } from '../processing/index.js';
  */
 export function handleListSessions(
   c: Context,
-  repository: SessionRepository
+  repository: SessionAdapter
 ): Response {
   try {
     const sessions = repository.findAll();
@@ -38,8 +38,8 @@ export function handleListSessions(
  */
 export function handleGetSession(
   c: Context,
-  repository: SessionRepository,
-  sectionRepository: SectionRepository,
+  repository: SessionAdapter,
+  sectionRepository: SectionAdapter,
   storageAdapter: StorageAdapter
 ): Response {
   try {
@@ -128,7 +128,7 @@ export function handleGetSession(
  */
 export function handleDeleteSession(
   c: Context,
-  repository: SessionRepository,
+  repository: SessionAdapter,
   storageAdapter: StorageAdapter
 ): Response {
   try {
@@ -175,8 +175,8 @@ export function handleDeleteSession(
  */
 export function handleRedetect(
   c: Context,
-  sessionRepository: SessionRepository,
-  sectionRepository: SectionRepository,
+  sessionRepository: SessionAdapter,
+  sectionRepository: SectionAdapter,
   storageAdapter: StorageAdapter
 ): Response {
   try {

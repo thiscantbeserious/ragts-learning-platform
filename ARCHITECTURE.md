@@ -73,10 +73,10 @@ Repository pattern, fully implemented:
 
 | Component | Interface | Implementation | Status |
 |-----------|-----------|---------------|--------|
-| Sessions | `SessionRepository` | `SqliteSessionRepository` | Complete |
-| Sections | `SectionRepository` | `SqliteSectionRepository` | Complete |
-| File storage | `StorageAdapter` | `FsStorageAdapter` | Complete |
-| DB init | `DatabaseProvider` | `SqliteDatabaseProvider` | Complete |
+| Sessions | `SessionAdapter` | `SqliteSessionImpl` | Complete |
+| Sections | `SectionAdapter` | `SqliteSectionImpl` | Complete |
+| File storage | `StorageAdapter` | `FsStorageImpl` | Complete |
+| DB init | `DatabaseAdapter` | `SqliteDatabaseImpl` | Complete |
 
 ### API Surface
 
@@ -176,7 +176,7 @@ Same application code at every scale. Configuration determines embedded vs exter
 | `feat/snapshot-testing` | [ADR](.state/feat/snapshot-testing/ADR.md) | Vitest + Playwright snapshot and visual regression strategy |
 | `design-system-bootstrap` | [ADR](.state/design-system-bootstrap/ADR.md) | Route map, navigation model, curation slide-over, design system scope |
 | `chore/sdlc-overhaul` | [ADR](.state/chore/sdlc-overhaul/ADR.md) | Specialized roles, dynamic coordinator, role isolation |
-| `refactor/db-adapter-pattern` | [ADR](.state/refactor/db-adapter-pattern/ADR.md) | DatabaseProvider pattern, SectionRepository interface, StorageAdapter/FsStorageAdapter |
+| `refactor/db-adapter-pattern` | [ADR](.state/refactor/db-adapter-pattern/ADR.md) | DatabaseAdapter pattern, SectionAdapter interface, StorageAdapter/FsStorageImpl |
 
 ## 9. Previous Versions
 

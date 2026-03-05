@@ -1,22 +1,22 @@
 /**
- * Unit tests for SqliteSessionRepository.
+ * Unit tests for SqliteSessionImpl.
  * Uses in-memory SQLite to avoid filesystem side effects.
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { initDatabase } from './database.js';
-import { SqliteSessionRepository } from './sqlite-session-repository.js';
+import { SqliteSessionImpl } from './sqlite-session-impl.js';
 import type { SessionCreate } from '../../shared/types.js';
 import type Database from 'better-sqlite3';
 
-describe('SqliteSessionRepository', () => {
+describe('SqliteSessionImpl', () => {
   let db: Database.Database;
-  let repository: SqliteSessionRepository;
+  let repository: SqliteSessionImpl;
 
   beforeEach(() => {
     // Use in-memory database for each test
     db = initDatabase(':memory:');
-    repository = new SqliteSessionRepository(db);
+    repository = new SqliteSessionImpl(db);
   });
 
   describe('create', () => {

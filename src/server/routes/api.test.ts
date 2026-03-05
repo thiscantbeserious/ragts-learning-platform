@@ -10,9 +10,9 @@ import { join } from 'path';
 import { Hono } from 'hono';
 import type Database from 'better-sqlite3';
 import { initDatabase } from '../db/database.js';
-import { SqliteSessionRepository } from '../db/sqlite-session-repository.js';
-import { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
-import { FsStorageAdapter } from '../storage/fs-storage-adapter.js';
+import { SqliteSessionImpl } from '../db/sqlite-session-impl.js';
+import { SqliteSectionImpl } from '../db/sqlite-section-impl.js';
+import { FsStorageImpl } from '../storage/fs-storage-impl.js';
 import { handleUpload } from './upload.js';
 import {
   handleListSessions,
@@ -26,9 +26,9 @@ describe('API Routes', () => {
   let testDir: string;
   let app: Hono;
   let db: ReturnType<typeof initDatabase>;
-  let sessionRepository: SqliteSessionRepository;
-  let sectionRepository: SqliteSectionRepository;
-  let storageAdapter: FsStorageAdapter;
+  let sessionRepository: SqliteSessionImpl;
+  let sectionRepository: SqliteSectionImpl;
+  let storageAdapter: FsStorageImpl;
 
   const validFixture = readFileSync(
     join(__dirname, '../../..', 'tests', 'fixtures', 'valid-with-markers.cast'),
@@ -50,9 +50,9 @@ describe('API Routes', () => {
     // Initialize database and repositories
     const dbPath = join(testDir, 'test.db');
     db = initDatabase(dbPath);
-    sessionRepository = new SqliteSessionRepository(db);
-    sectionRepository = new SqliteSectionRepository(db);
-    storageAdapter = new FsStorageAdapter(testDir);
+    sessionRepository = new SqliteSessionImpl(db);
+    sectionRepository = new SqliteSectionImpl(db);
+    storageAdapter = new FsStorageImpl(testDir);
 
     // Setup Hono app with routes
     app = new Hono();

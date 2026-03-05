@@ -1,18 +1,18 @@
 /**
- * SQLite implementation of SessionRepository.
+ * SQLite implementation of SessionAdapter.
  * Uses prepared statements for performance and safety.
  */
 
 import type Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
 import type { Session, SessionCreate } from '../../shared/types.js';
-import type { SessionRepository } from './session-repository.js';
+import type { SessionAdapter } from './session-adapter.js';
 
 /**
- * SQLite-backed session repository.
+ * SQLite-backed session implementation.
  * All methods use prepared statements.
  */
-export class SqliteSessionRepository implements SessionRepository {
+export class SqliteSessionImpl implements SessionAdapter {
   private insertStmt: Database.Statement;
   private findAllStmt: Database.Statement;
   private findByIdStmt: Database.Statement;
@@ -20,7 +20,7 @@ export class SqliteSessionRepository implements SessionRepository {
   private updateDetectionStatusStmt: Database.Statement;
   private updateSnapshotStmt: Database.Statement;
 
-  constructor(private db: Database.Database) {
+  constructor(db: Database.Database) {
     // Prepare statements once at construction
     this.insertStmt = db.prepare(`
       INSERT INTO sessions (id, filename, filepath, size_bytes, marker_count, uploaded_at)

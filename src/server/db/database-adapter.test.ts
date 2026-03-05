@@ -1,5 +1,5 @@
 /**
- * Tests for SqliteDatabaseProvider.
+ * Tests for SqliteDatabaseImpl.
  * Verifies initialize() returns working repositories and storage adapter.
  */
 
@@ -7,17 +7,17 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, existsSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { SqliteDatabaseProvider } from './sqlite-database-provider.js';
-import type { DatabaseContext } from './database-provider.js';
+import { SqliteDatabaseImpl } from './sqlite-database-impl.js';
+import type { DatabaseContext } from './database-adapter.js';
 
-describe('SqliteDatabaseProvider', () => {
+describe('SqliteDatabaseImpl', () => {
   let testDir: string;
   let ctx: DatabaseContext;
 
   beforeEach(async () => {
     testDir = mkdtempSync(join(tmpdir(), 'ragts-provider-test-'));
-    const provider = new SqliteDatabaseProvider();
-    ctx = await provider.initialize({ dataDir: testDir });
+    const impl = new SqliteDatabaseImpl();
+    ctx = await impl.initialize({ dataDir: testDir });
   });
 
   afterEach(() => {

@@ -8,10 +8,10 @@ import { resolve, dirname } from 'path';
 import type { StorageAdapter } from './storage-adapter.js';
 
 /**
- * Filesystem-backed storage adapter.
+ * Filesystem-backed storage implementation.
  * Resolves all paths relative to the data directory given at construction.
  */
-export class FsStorageAdapter implements StorageAdapter {
+export class FsStorageImpl implements StorageAdapter {
   constructor(private readonly dataDir: string) {}
 
   /**

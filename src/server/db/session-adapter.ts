@@ -1,15 +1,15 @@
 /**
- * Repository interface for session persistence.
- * This is the abstraction boundary - implementations can swap SQLite for PostgreSQL.
+ * Adapter interface for session persistence.
+ * This is the abstraction boundary — implementations can swap SQLite for PostgreSQL.
  */
 
 import type { Session, SessionCreate } from '../../shared/types.js';
 
 /**
- * Repository for managing session entities.
+ * Adapter for managing session entities.
  * Defines the contract for session data access.
  */
-export interface SessionRepository {
+export interface SessionAdapter {
   /**
    * Create a new session.
    * Returns the created session with generated fields (id, created_at).

@@ -9,16 +9,16 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import Database from 'better-sqlite3';
 import { initDatabase } from '../db/database.js';
-import { SqliteSessionRepository } from '../db/sqlite-session-repository.js';
-import { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
+import { SqliteSessionImpl } from '../db/sqlite-session-impl.js';
+import { SqliteSectionImpl } from '../db/sqlite-section-impl.js';
 import { migrateV2 } from './migrate-v2.js';
 import { initVt } from '../../../packages/vt-wasm/index.js';
 
 describe('migrateV2', () => {
   let tmpDir: string;
   let db: Database.Database;
-  let sessionRepo: SqliteSessionRepository;
-  let sectionRepo: SqliteSectionRepository;
+  let sessionRepo: SqliteSessionImpl;
+  let sectionRepo: SqliteSectionImpl;
 
   beforeEach(async () => {
     // Initialize WASM module once before tests
@@ -28,8 +28,8 @@ describe('migrateV2', () => {
     tmpDir = mkdtempSync(join(tmpdir(), 'ragts-migrate-v2-test-'));
     const dbPath = join(tmpDir, 'test.db');
     db = initDatabase(dbPath);
-    sessionRepo = new SqliteSessionRepository(db);
-    sectionRepo = new SqliteSectionRepository(db);
+    sessionRepo = new SqliteSessionImpl(db);
+    sectionRepo = new SqliteSectionImpl(db);
   });
 
   afterEach(() => {

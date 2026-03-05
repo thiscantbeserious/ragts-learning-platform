@@ -1,20 +1,20 @@
 /**
- * SQLite implementation of SectionRepository.
+ * SQLite implementation of SectionAdapter.
  * Manages sections (marker-based and detected) within sessions.
  * Uses prepared statements for performance and safety.
  */
 
 import type Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
-import type { SectionRepository, SectionRow, CreateSectionInput } from './section-repository.js';
+import type { SectionAdapter, SectionRow, CreateSectionInput } from './section-adapter.js';
 
-export type { SectionRow, CreateSectionInput } from './section-repository.js';
+export type { SectionRow, CreateSectionInput } from './section-adapter.js';
 
 /**
- * SQLite-backed section repository.
+ * SQLite-backed section implementation.
  * All methods use prepared statements.
  */
-export class SqliteSectionRepository implements SectionRepository {
+export class SqliteSectionImpl implements SectionAdapter {
   private insertStmt: Database.Statement;
   private findBySessionIdStmt: Database.Statement;
   private deleteBySessionIdStmt: Database.Statement;

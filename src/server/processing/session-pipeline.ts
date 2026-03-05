@@ -16,8 +16,8 @@
  * 8. On error: set detection_status to 'failed'
  */
 
-import type { SectionRepository } from '../db/section-repository.js';
-import type { SessionRepository } from '../db/session-repository.js';
+import type { SectionAdapter } from '../db/section-adapter.js';
+import type { SessionAdapter } from '../db/session-adapter.js';
 import type { Marker, AsciicastEvent, AsciicastHeader } from '../../shared/asciicast-types.js';
 import { normalizeHeader } from '../../shared/asciicast.js';
 import { NdjsonStream } from './ndjson-stream.js';
@@ -41,8 +41,8 @@ export async function processSessionPipeline(
   filePath: string,
   sessionId: string,
   markers: Marker[],
-  sectionRepo: SectionRepository,
-  sessionRepo: SessionRepository
+  sectionRepo: SectionAdapter,
+  sessionRepo: SessionAdapter
 ): Promise<void> {
   try {
     // Initialize WASM module (safe to call multiple times)

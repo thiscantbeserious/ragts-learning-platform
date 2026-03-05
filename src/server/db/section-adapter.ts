@@ -1,5 +1,5 @@
 /**
- * Repository interface for section persistence.
+ * Adapter interface for section persistence.
  * This is the abstraction boundary — implementations can swap SQLite for PostgreSQL.
  */
 
@@ -36,10 +36,10 @@ export interface CreateSectionInput {
 }
 
 /**
- * Repository for managing section entities.
+ * Adapter for managing section entities.
  * Defines the contract for section data access within a session.
  */
-export interface SectionRepository {
+export interface SectionAdapter {
   /**
    * Create a new section.
    * Returns the created section with generated fields (id, created_at).

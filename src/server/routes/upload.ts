@@ -7,8 +7,8 @@
 import type { Context } from 'hono';
 import { nanoid } from 'nanoid';
 import { parseAsciicast, validateAsciicast } from '../../shared/asciicast.js';
-import type { SessionRepository } from '../db/session-repository.js';
-import type { SectionRepository } from '../db/section-repository.js';
+import type { SessionAdapter } from '../db/session-adapter.js';
+import type { SectionAdapter } from '../db/section-adapter.js';
 import type { StorageAdapter } from '../storage/storage-adapter.js';
 import { processSessionPipeline } from '../processing/index.js';
 
@@ -18,8 +18,8 @@ import { processSessionPipeline } from '../processing/index.js';
  */
 export async function handleUpload(
   c: Context,
-  repository: SessionRepository,
-  sectionRepository: SectionRepository,
+  repository: SessionAdapter,
+  sectionRepository: SectionAdapter,
   storageAdapter: StorageAdapter,
   maxFileSizeMB: number
 ): Promise<Response> {

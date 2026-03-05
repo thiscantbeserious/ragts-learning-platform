@@ -1,5 +1,5 @@
 /**
- * Tests for FsStorageAdapter.
+ * Tests for FsStorageImpl.
  * Uses temporary directories to avoid filesystem side effects.
  */
 
@@ -7,15 +7,15 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, isAbsolute } from 'path';
-import { FsStorageAdapter } from './fs-storage-adapter.js';
+import { FsStorageImpl } from './fs-storage-impl.js';
 
-describe('FsStorageAdapter', () => {
+describe('FsStorageImpl', () => {
   let testDir: string;
-  let adapter: FsStorageAdapter;
+  let adapter: FsStorageImpl;
 
   beforeEach(() => {
     testDir = mkdtempSync(join(tmpdir(), 'ragts-adapter-test-'));
-    adapter = new FsStorageAdapter(testDir);
+    adapter = new FsStorageImpl(testDir);
   });
 
   afterEach(() => {

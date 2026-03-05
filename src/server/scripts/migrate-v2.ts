@@ -13,8 +13,8 @@
 
 import type Database from 'better-sqlite3';
 import { initDatabase } from '../db/database.js';
-import { SqliteSessionRepository } from '../db/sqlite-session-repository.js';
-import { SqliteSectionRepository } from '../db/sqlite-section-repository.js';
+import { SqliteSessionImpl } from '../db/sqlite-session-impl.js';
+import { SqliteSectionImpl } from '../db/sqlite-section-impl.js';
 import { processSessionPipeline } from '../processing/session-pipeline.js';
 import { NdjsonStream } from '../processing/ndjson-stream.js';
 import { extractMarkers, computeCumulativeTimes } from '../../shared/asciicast.js';
@@ -49,8 +49,8 @@ export interface MigrationResult {
  * @returns Migration result summary
  */
 export async function migrateV2(db: Database.Database): Promise<MigrationResult> {
-  const sessionRepo = new SqliteSessionRepository(db);
-  const sectionRepo = new SqliteSectionRepository(db);
+  const sessionRepo = new SqliteSessionImpl(db);
+  const sectionRepo = new SqliteSectionImpl(db);
 
   // Get all sessions
   const allSessions = sessionRepo.findAll();
