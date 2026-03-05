@@ -19,6 +19,10 @@ When a user arrives, assess context and offer two paths:
 
 If user intent is explicit, skip the menu and execute directly.
 
+## Development Rules
+
+The `instructions` skill contains mandatory workflow rules — git branching, coding principles, TDD, verification, and more. Load it before starting any task that touches the codebase or repository.
+
 ## The Project
 
 Read `README.md` for the project vision and public-facing description.
