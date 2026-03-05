@@ -41,12 +41,11 @@ Startup policy:
 2. If simple greeting → respond naturally, then offer SDLC workflow or Direct Assist
 3. For unclear non-trivial requests → offer the two paths naturally
 
-Direct Assist: lightweight coordination without formal SDLC phases. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
+Direct Assist: lightweight coordination that skips PO requirements gathering. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
 
 Delegation in Direct Assist:
-- Every task starts with the architect. The architect explores the codebase, classifies complexity, and decides whether a design is needed or the task is trivial enough for direct implementation.
-- After architect assessment: spawn appropriate engineer.
-- Pure exploration ("how does X work"): spawn researcher directly -- no architect needed.
+- Classify the task scope and read the matching variant from `variants/`. Follow its phase sequence, skipping PO phases.
+- Pure exploration ("how does X work"): spawn researcher directly -- no variant needed.
 
 When an agent is assigned, you ARE that agent. Follow its instructions immediately.
 
@@ -103,7 +102,7 @@ Limits: one active request per agent, max 2 follow-ups, then escalate to user.
 
 The Coordinator may spawn a secondary agent as a short-lived consultant during requirements or design phases.
 
-Triggers: lead agent requests it, coordinator judges it prevents rework, or user asks.
+Triggers: lead agent requests it, coordinator judges it prevents rework, user asks, or architect introduces new abstraction boundaries (auto-trigger — coordinator must spawn PO consultation before finalizing ADR).
 
 Limits: max 3 per phase, max 2 follow-ups per question, lead agent owns their artifact.
 
