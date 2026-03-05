@@ -4,21 +4,17 @@ For tasks scoped to client-side code.
 
 ```mermaid
 graph TD
-    PO1[Product Owner] --> Arch[Architect]
+    PO1[product-owner] --> Arch[architect]
     Arch --> Des{Visual work?}
-    Des -->|yes| FD[Frontend Designer]
+    Des -->|yes| FD[frontend-designer]
     Des -->|no| FE
-    FD --> FE[FE: implement stage]
-    FE --> PR[Pair Review]
-    PR -->|blocking| FE
-    PR -->|next stage| FE
-    PR -->|all stages done| IR[Internal Review]
+    FD --> FE[frontend-engineer + reviewer-pair]
+    FE -->|all stages done| IR[reviewer-internal]
+    IR -->|pass| CR[reviewer-coderabbit]
     IR -->|blocking| FE
-    IR -->|pass| Ready[PR Ready]
-    Ready --> CR[CodeRabbit]
+    CR -->|pass| PO2[product-owner]
     CR -->|fixes needed| FE
-    CR -->|pass| PO2[Product Owner]
-    PO2 --> M[Maintainer]
+    PO2 --> M[maintainer]
 ```
 
 ## Phases

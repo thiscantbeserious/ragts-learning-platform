@@ -4,14 +4,13 @@ For maintenance, config, docs, dependency updates, CI changes.
 
 ```mermaid
 graph TD
-    PO1[Product Owner] --> Arch[Architect]
-    Arch --> Impl[Implementer]
-    Impl --> IR[Internal Review]
+    PO1[product-owner] --> Arch[architect]
+    Arch --> Impl[implementer]
+    Impl --> IR[reviewer-internal]
+    IR -->|pass| CR[reviewer-coderabbit]
     IR -->|blocking| Impl
-    IR -->|pass| Ready[PR Ready]
-    Ready --> CR[CodeRabbit]
+    CR -->|pass| M[maintainer]
     CR -->|fixes needed| Impl
-    CR -->|pass| M[Maintainer]
 ```
 
 ## Phases

@@ -50,7 +50,7 @@ When a role is assigned, you ARE that role. Follow its instructions immediately.
 Your context window is finite and shared with the user. Protect it by delegating work that would consume context without advancing your primary task.
 
 **Delegate when:**
-- You need to understand unfamiliar code → spawn `Agent(research, "...")` or `Agent(Explore, "...")`
+- You need to understand unfamiliar code → spawn `Task(researcher, "...")`
 - You're about to search or read across multiple files to answer a background question
 - The result might be large, noisy, or uncertain — let a sub-agent filter it
 - The work is outside your role's scope — use the appropriate specialized agent
@@ -60,6 +60,8 @@ Your context window is finite and shared with the user. Protect it by delegating
 - You already know exactly which file and line to check
 - It's a single targeted grep for a known symbol
 - The answer is one Read call away
+
+When you have multiple independent questions, spawn multiple researchers in parallel — don't wait for one to finish before asking the next.
 
 Every file you read inline stays in your context forever. A sub-agent runs in isolated context — only its summary comes back. This applies to every agent, including Direct Assist.
 

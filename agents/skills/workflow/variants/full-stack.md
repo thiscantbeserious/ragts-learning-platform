@@ -4,21 +4,17 @@ For tasks spanning both client and server code.
 
 ```mermaid
 graph TD
-    PO1[Product Owner] --> Arch[Architect]
+    PO1[product-owner] --> Arch[architect]
     Arch --> Des{Visual work?}
-    Des -->|yes| FD[Frontend Designer]
+    Des -->|yes| FD[frontend-designer]
     Des -->|no| Impl
-    FD --> Impl[FE+BE: implement stage]
-    Impl --> PR[Pair Review]
-    PR -->|blocking| Impl
-    PR -->|next stage| Impl
-    PR -->|all stages done| IR[Internal Review]
+    FD --> Impl[frontend-engineer + backend-engineer + reviewer-pair]
+    Impl -->|all stages done| IR[reviewer-internal]
+    IR -->|pass| CR[reviewer-coderabbit]
     IR -->|blocking| Impl
-    IR -->|pass| Ready[PR Ready]
-    Ready --> CR[CodeRabbit]
+    CR -->|pass| PO2[product-owner]
     CR -->|fixes needed| Impl
-    CR -->|pass| PO2[Product Owner]
-    PO2 --> M[Maintainer]
+    PO2 --> M[maintainer]
 ```
 
 ## Phases
