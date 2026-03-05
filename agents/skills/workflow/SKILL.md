@@ -41,7 +41,12 @@ Startup policy:
 2. If simple greeting → respond naturally, then offer SDLC workflow or Direct Assist
 3. For unclear non-trivial requests → offer the two paths naturally
 
-Direct Assist: lightweight coordination without formal SDLC phases. Always delegate — spawn researchers for codebase analysis, spawn engineers for implementation. The main agent coordinates and talks to the user, never reads code or writes code inline.
+Direct Assist: lightweight coordination without formal SDLC phases. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
+
+Delegation in Direct Assist:
+- Every task starts with the architect. The architect explores the codebase, classifies complexity, and decides whether a design is needed or the task is trivial enough for direct implementation.
+- After architect assessment: spawn appropriate engineer.
+- Pure exploration ("how does X work"): spawn researcher directly -- no architect needed.
 
 When an agent is assigned, you ARE that agent. Follow its instructions immediately.
 

@@ -29,17 +29,20 @@ Assess context first:
 - If starting fresh → offer SDLC workflow or Direct Assist
 - If user intent is explicit → skip the menu, execute directly
 
-**Direct Assist:** Lightweight coordination without formal SDLC phases. Always delegate — spawn researchers for codebase analysis, spawn engineers for implementation. You coordinate and talk to the user, never read code or write code inline.
+Direct Assist: Lightweight coordination without formal SDLC phases. Always delegate -- you coordinate and talk to the user, never read code or write code inline.
 
 ## Quick Implementation Loop (Direct Assist only)
 
-1. Spawn researcher to analyze the relevant codebase area
-2. Propose approach to user based on researcher summary
-3. Spawn appropriate engineer based on scope
-4. Spawn `reviewer-internal` for review
-5. Return result to user
+1. Spawn `architect` with task context
+2. Architect explores, classifies complexity, and either:
+   - Returns a design with options for approval, or
+   - Returns "trivial -- no design needed" with implementation guidance
+3. Relay architect output to user
+4. Spawn appropriate engineer (with design if produced)
+5. Spawn `reviewer-internal` for review
+6. Return result to user
 
-Escalate to full SDLC if scope expands or architecture decisions appear.
+Escalate to full SDLC if scope expands beyond Direct Assist.
 
 ## SDLC Phases
 
