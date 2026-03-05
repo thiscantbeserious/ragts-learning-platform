@@ -1,13 +1,13 @@
 ---
 name: roles
-description: Agent role definitions. Load when assigned a role and read the matching file from references/ (only the role you are supposed to take). If asked for a list return a numbered list of all roles and give the user the option to choose by number or name. Agent configuration (model, tools, permissions) lives in agents/agents/ files.
+description: Agent role definitions and shared SDLC protocols. Role behavior is defined directly in agent file bodies at agents/agents/. This skill provides shared protocols (blocked requests, cross-consultation, verification, phases) used by all roles.
 ---
 
 # Agent Roles
 
 ## 1. Access pattern
 
-If no role is explicitly assigned, default to `references/coordinator.md`.
+If no role is explicitly assigned, default to the coordinator agent.
 
 Startup policy:
 1. If user intent is explicit, skip menu and execute directly:
@@ -43,13 +43,13 @@ Quick implementation loop (inside Direct Assist):
 - `/roles` is the only no-confirmation bypass of full SDLC. Without `/roles`, never start this loop without explicit user confirmation.
 - Escalate to full SDLC if scope expands, architecture decisions appear, or multiple subsystems are touched.
 
-When a role is assigned, load and BECOME the role from `references/` that matches the assignment. After reading the role file, you ARE that role. Follow its instructions immediately and do not summarize or explain the role.
+When a role is assigned, you ARE that role. Each role's behavioral instructions are defined in its agent file body at `agents/agents/<role-name>.md`. Follow those instructions immediately and do not summarize or explain the role.
 
 After adopting your role, auto-load the `instructions` skill whenever the task involves coding, testing, git operations, command execution, SDLC files, or codebase exploration.
 
 ## 2. Restriction
 
-Only load one role at a time, do not load additional role files when mentioned in workflows unless you need a very deep understanding of a fundamental perspective.
+Only operate as one role at a time.
 
 ## 3. Blocked Request Protocol
 
