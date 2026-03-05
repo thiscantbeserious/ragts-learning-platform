@@ -7,11 +7,12 @@ graph TD
     PO1[Product Owner] --> Arch[Architect]
     Arch --> Des{Visual work?}
     Des -->|yes| FD[Frontend Designer]
-    Des -->|no| FE[Frontend Engineer]
-    FD --> FE
+    Des -->|no| FE
+    FD --> FE[FE: implement stage]
     FE --> PR[Pair Review]
     PR -->|blocking| FE
-    PR -->|pass| IR[Internal Review]
+    PR -->|next stage| FE
+    PR -->|all stages done| IR[Internal Review]
     IR -->|blocking| FE
     IR -->|pass| Ready[PR Ready]
     Ready --> CR[CodeRabbit]
@@ -27,12 +28,11 @@ graph TD
 | 1 | `product-owner` | REQUIREMENTS.md signed off |
 | 2 | `architect` | ADR.md + PLAN.md approved |
 | 3 | `frontend-designer` | Mockups approved (if visual work) |
-| 4 | `frontend-engineer` | All PLAN stages complete |
-| 5 | `reviewer-pair` | Per stage, blocking findings resolved |
-| 6 | `reviewer-internal` | No blocking findings |
-| 7 | `reviewer-coderabbit` | Valid findings fixed |
-| 8 | `product-owner` | Validates against REQUIREMENTS.md |
-| 9 | `maintainer` | CI green, all approvals |
+| 4 | `frontend-engineer` + `reviewer-pair` | Per stage: implement → pair review → fix blocking → next stage. All stages complete. |
+| 5 | `reviewer-internal` | No blocking findings |
+| 6 | `reviewer-coderabbit` | Valid findings fixed |
+| 7 | `product-owner` | Validates against REQUIREMENTS.md |
+| 8 | `maintainer` | CI green, all approvals |
 
 Phase 3 is skipped when the task has no visual/UX changes.
 

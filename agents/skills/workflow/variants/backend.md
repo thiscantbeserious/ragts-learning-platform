@@ -5,10 +5,11 @@ For tasks scoped to server-side code.
 ```mermaid
 graph TD
     PO1[Product Owner] --> Arch[Architect]
-    Arch --> BE[Backend Engineer]
+    Arch --> BE[BE: implement stage]
     BE --> PR[Pair Review]
     PR -->|blocking| BE
-    PR -->|pass| IR[Internal Review]
+    PR -->|next stage| BE
+    PR -->|all stages done| IR[Internal Review]
     IR -->|blocking| BE
     IR -->|pass| Ready[PR Ready]
     Ready --> CR[CodeRabbit]
@@ -23,12 +24,11 @@ graph TD
 |---|-------|------|
 | 1 | `product-owner` | REQUIREMENTS.md signed off |
 | 2 | `architect` | ADR.md + PLAN.md approved |
-| 3 | `backend-engineer` | All PLAN stages complete |
-| 4 | `reviewer-pair` | Per stage, blocking findings resolved |
-| 5 | `reviewer-internal` | No blocking findings |
-| 6 | `reviewer-coderabbit` | Valid findings fixed |
-| 7 | `product-owner` | Validates against REQUIREMENTS.md |
-| 8 | `maintainer` | CI green, all approvals |
+| 3 | `backend-engineer` + `reviewer-pair` | Per stage: implement → pair review → fix blocking → next stage. All stages complete. |
+| 4 | `reviewer-internal` | No blocking findings |
+| 5 | `reviewer-coderabbit` | Valid findings fixed |
+| 6 | `product-owner` | Validates against REQUIREMENTS.md |
+| 7 | `maintainer` | CI green, all approvals |
 
 ## Git Contract
 
