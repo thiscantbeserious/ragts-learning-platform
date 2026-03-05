@@ -94,7 +94,7 @@ The Coordinator will decide whether to spawn a consultation.
 
 ### Output: REQUIREMENTS.md
 
-After the interview, create `.state/<branch-name>/REQUIREMENTS.md` using the template at `agents/skills/roles/templates/REQUIREMENTS.md`.
+After the interview, create `.state/<branch-name>/REQUIREMENTS.md` using the template at `templates/REQUIREMENTS.md`.
 
 ### Getting Sign-off
 

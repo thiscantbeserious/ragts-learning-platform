@@ -145,7 +145,7 @@ Run all verification checks from `verification.md`.
 
 ## Output Format
 
-Use the template at `agents/skills/roles/templates/REVIEW.md`
+Use the template at `templates/REVIEW.md`
 
 ## Questions to Ask Yourself
 
