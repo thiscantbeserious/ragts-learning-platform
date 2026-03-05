@@ -47,11 +47,35 @@ When a role is assigned, you ARE that role. Each role's behavioral instructions 
 
 After adopting your role, auto-load the `instructions` skill whenever the task involves coding, testing, git operations, command execution, SDLC files, or codebase exploration.
 
-## 2. Restriction
+## 2. Delegation
+
+Your context window is finite and shared with the user. Protect it by delegating work that would consume context without advancing your primary task.
+
+**Delegate when:**
+- You need to understand unfamiliar code — spawn `Agent(research, "...")` or `Agent(Explore, "...")`
+- You're about to search or read across multiple files to answer a background question
+- The result might be large, noisy, or uncertain — let a sub-agent filter it
+- The work is outside your role's scope — use the appropriate specialized agent
+
+**Do it yourself when:**
+- You're reading a file listed in your Required Files section
+- You already know exactly which file and line to check
+- It's a single targeted grep for a known symbol
+- The answer is one Read call away
+
+**Why this matters:**
+- Every file you read inline stays in your context forever, crowding out what matters
+- A sub-agent runs in isolated context — only its summary comes back to you
+- Delegating research keeps your session focused on decisions and actions
+- The user sees a cleaner conversation without pages of intermediate exploration
+
+This applies to every agent, including Direct Assist. The main session is not exempt.
+
+## 3. Restriction
 
 Only operate as one role at a time.
 
-## 3. Blocked Request Protocol
+## 4. Blocked Request Protocol
 
 When blocked, describe **what** you need — not who should answer. Route all requests through the Coordinator. You do not know which other roles exist; the Coordinator handles routing transparently.
 
@@ -75,14 +99,14 @@ Limits:
 - Maximum 2 follow-ups, then escalate to user
 - If unresolved, Coordinator summarizes options and asks user
 
-## 4. Verification
+## 5. Verification
 
 - Check files exist before claiming to read them
 - Check checkboxes are `[x]` before claiming stages complete
 - Evidence = file path, line number, or command output
 - If unclear → ask other roles first, user last
 
-## 5. Cross-Consultation Protocol
+## 6. Cross-Consultation Protocol
 
 Cross-consultation extends the Blocked Request Protocol (Section 3) for proactive secondary consultations. The Coordinator initiates these — individual roles do not request specific other roles.
 
@@ -93,14 +117,14 @@ Cross-consultation extends the Blocked Request Protocol (Section 3) for proactiv
 
 ### Guard Rails
 - Max 3 cross-consultations per phase
-- Uses Section 3 structured request/response format
+- Uses Section 4 structured request/response format
 - Max 2 follow-ups per consultation question
 - Lead role retains final authority over their artifact
 - Unresolved disagreements escalate to user
 
 Cross-consultation routing is entirely owned by the Coordinator. Roles do not need to know which other role will be consulted.
 
-## 6. Phases
+## 7. Phases
 
 A phase is a named operational mode of a role, represented by a separate agent file in `agents/agents/`. Each phase determines:
 1. Behavioral persona (defined in agent file body)
