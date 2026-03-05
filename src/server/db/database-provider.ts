@@ -17,7 +17,7 @@ export interface DatabaseContext {
   sectionRepository: SectionRepository;
   storageAdapter: StorageAdapter;
   /** Release all underlying resources (DB connection, file handles, etc.). */
-  close(): void;
+  close(): void | Promise<void>;
 }
 
 /**

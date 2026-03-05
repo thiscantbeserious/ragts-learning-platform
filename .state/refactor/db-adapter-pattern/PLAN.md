@@ -41,7 +41,7 @@ Considerations:
 - `SectionRow` and `CreateSectionInput` are part of the contract (used by consumers), not implementation details
 - Re-export types from `sqlite-section-repository.ts` if needed for backward compatibility during transition
 
-### Stage 2: Create StorageAdapter interface and SqliteStorageAdapter
+### Stage 2: Create StorageAdapter interface and FsStorageAdapter
 
 Goal: Abstract file storage behind an interface. The adapter owns path resolution (constructor receives `dataDir`).
 
@@ -52,7 +52,7 @@ Owner: backend-engineer
 - [x] Write tests for the new adapter: `src/server/storage/storage-adapter.test.ts`
 - [x] Verify existing `src/server/storage.test.ts` still passes (old functions remain for now)
 
-Files: `src/server/storage-adapter.ts` (new), `src/server/fs-storage-adapter.ts` (new), `src/server/storage-adapter.test.ts` (new)
+Files: `src/server/storage/storage-adapter.ts` (new), `src/server/storage/fs-storage-adapter.ts` (new), `src/server/storage/storage-adapter.test.ts` (new)
 Depends on: none (parallel with Stage 1)
 
 Considerations:

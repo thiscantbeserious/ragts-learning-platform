@@ -6,7 +6,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, isAbsolute } from 'path';
 import { FsStorageAdapter } from './fs-storage-adapter.js';
 
 describe('FsStorageAdapter', () => {
@@ -48,7 +48,7 @@ describe('FsStorageAdapter', () => {
     it('should return an absolute path', () => {
       const filepath = adapter.save('abc123', 'content');
 
-      expect(filepath.startsWith('/')).toBe(true);
+      expect(isAbsolute(filepath)).toBe(true);
     });
   });
 

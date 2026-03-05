@@ -4,7 +4,7 @@
  */
 
 import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { resolve, dirname } from 'path';
 import type { StorageAdapter } from './storage-adapter.js';
 
 /**
@@ -22,7 +22,7 @@ export class FsStorageAdapter implements StorageAdapter {
     if (id.includes('/') || id.includes('\\') || id.includes('..')) {
       throw new Error(`Invalid session ID: "${id}" contains disallowed characters`);
     }
-    return join(this.dataDir, 'sessions', `${id}.cast`);
+    return resolve(this.dataDir, 'sessions', `${id}.cast`);
   }
 
   /**

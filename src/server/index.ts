@@ -16,8 +16,11 @@ const config = loadConfig();
 
 // Initialize database and repositories through the provider
 const provider = new SqliteDatabaseProvider();
-const { sessionRepository, sectionRepository, storageAdapter } =
+const { sessionRepository, sectionRepository, storageAdapter, close } =
   await provider.initialize({ dataDir: config.dataDir });
+
+process.on('SIGTERM', () => { Promise.resolve(close()).finally(() => process.exit(0)); });
+process.on('SIGINT', () => { Promise.resolve(close()).finally(() => process.exit(0)); });
 
 // Health check
 app.get('/api/health', (c) => {

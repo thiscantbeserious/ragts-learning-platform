@@ -98,8 +98,12 @@ export async function handleUpload(
       const { filepath: _fp, ...sessionData } = session;
       return c.json(sessionData, 201);
     } catch (err) {
-      // DB insert failed - clean up file
-      storageAdapter.delete(id);
+      // DB insert failed — clean up file (best effort, don't mask original error)
+      try {
+        storageAdapter.delete(id);
+      } catch (cleanupErr) {
+        console.warn('Failed to clean up file after DB error:', cleanupErr);
+      }
       throw err;
     }
   } catch (err) {
