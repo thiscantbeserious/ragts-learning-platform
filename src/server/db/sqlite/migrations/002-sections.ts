@@ -24,21 +24,21 @@ export function migrate002Sections(db: Database.Database): void {
   // Add new columns to sessions table
   // Check if each column exists before adding it (idempotency)
   const sessionColumns = db.pragma('table_info(sessions)');
-  const columnNames = sessionColumns.map((col: any) => col.name);
+  const columnNames = new Set(sessionColumns.map((col: any) => col.name));
 
-  if (!columnNames.includes('agent_type')) {
+  if (!columnNames.has('agent_type')) {
     db.exec('ALTER TABLE sessions ADD COLUMN agent_type TEXT');
   }
 
-  if (!columnNames.includes('event_count')) {
+  if (!columnNames.has('event_count')) {
     db.exec('ALTER TABLE sessions ADD COLUMN event_count INTEGER');
   }
 
-  if (!columnNames.includes('detected_sections_count')) {
+  if (!columnNames.has('detected_sections_count')) {
     db.exec('ALTER TABLE sessions ADD COLUMN detected_sections_count INTEGER DEFAULT 0');
   }
 
-  if (!columnNames.includes('detection_status')) {
+  if (!columnNames.has('detection_status')) {
     db.exec('ALTER TABLE sessions ADD COLUMN detection_status TEXT DEFAULT \'pending\'');
   }
 
