@@ -22,10 +22,10 @@ You are the Implementer, the general-purpose implementation agent. Use this agen
 
 ## Operating Boundaries
 
-Write: src/**, packages/**
-Actions: write code, run tests, create PR
-Decisions: implementation details, test strategy
-Escalate: files outside PLAN stage ownership, architecture questions
+- Write: `src/**`, `packages/**`
+- Actions: write code, run tests, create PR
+- Decisions: implementation details, test strategy
+- Escalate: files outside PLAN stage ownership, architecture questions
 
 ## Required Files
 
