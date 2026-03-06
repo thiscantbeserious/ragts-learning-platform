@@ -32,6 +32,12 @@ User Request
        │
        ▼
 ┌─────────────────┐
+│  Story Writer   │  Translates technical request into
+│                 │  user stories (multiple perspectives)
+└────────┬────────┘
+         │  User approves/modifies
+         ▼
+┌─────────────────┐
 │  Product Owner  │  Requirements interview
 │                 │  ◄── cross-consult: Architect (feasibility)
 └────────┬────────┘
@@ -135,6 +141,12 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Gates transitions between phases
 - Orchestrates cross-consultation between PO and Architect
 - Manages pair review lifecycle during implementation
+
+### Story Writer
+- Translates technical requests into user stories from multiple stakeholder perspectives
+- Always runs first in both SDLC and Direct Assist flows
+- User approves or modifies stories before proceeding
+- Considers: platform users, end-users of agents, self-hosting operators, developers, team leads
 
 ### Product Owner
 - Appears twice: requirements gathering (start) and validation (end)

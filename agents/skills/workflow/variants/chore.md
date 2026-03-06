@@ -4,7 +4,8 @@ For maintenance, config, docs, dependency updates, CI changes.
 
 ```mermaid
 graph TD
-    PO1[product-owner] --> Arch[architect]
+    SW[story-writer] --> PO1[product-owner]
+    PO1 --> Arch[architect]
     Arch --> Impl[implementer]
     Impl --> Rev[reviewer]
     Rev -->|pass| M[maintainer]
@@ -15,6 +16,7 @@ graph TD
 
 | # | Agent | Gate |
 |---|-------|------|
+| 0 | `story-writer` | User approves or modifies stories |
 | 1 | `product-owner` | REQUIREMENTS.md signed off (can be lightweight) |
 | 2 | `architect` | ADR.md + PLAN.md approved (can be minimal) |
 | 3 | `implementer` | All PLAN stages complete |

@@ -4,7 +4,8 @@ For tasks scoped to server-side code.
 
 ```mermaid
 graph TD
-    PO1[product-owner] --> Arch[architect]
+    SW[story-writer] --> PO1[product-owner]
+    PO1 --> Arch[architect]
     Arch --> BE[backend-engineer + pair-reviewer]
     BE -->|all stages done| Rev[reviewer]
     Rev -->|pass| PO2[product-owner]
@@ -16,6 +17,7 @@ graph TD
 
 | # | Agent | Gate |
 |---|-------|------|
+| 0 | `story-writer` | User approves or modifies stories |
 | 1 | `product-owner` | REQUIREMENTS.md signed off |
 | 2 | `architect` | ADR.md + PLAN.md approved |
 | 3 | `backend-engineer` + `pair-reviewer` | Per stage: implement → pair review → fix blocking → next stage. All stages complete. |

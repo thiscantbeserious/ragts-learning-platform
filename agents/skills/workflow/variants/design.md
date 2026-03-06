@@ -4,7 +4,8 @@ For visual design work only — no implementation.
 
 ```mermaid
 graph TD
-    PO1[product-owner] --> FD[frontend-designer]
+    SW[story-writer] --> PO1[product-owner]
+    PO1 --> FD[frontend-designer]
     FD -->|iterate| FD
     FD -->|approved| PO2[product-owner]
     PO2 --> M[maintainer]
@@ -14,6 +15,7 @@ graph TD
 
 | # | Agent | Gate |
 |---|-------|------|
+| 0 | `story-writer` | User approves or modifies stories |
 | 1 | `product-owner` | REQUIREMENTS.md signed off |
 | 2 | `frontend-designer` | Mockups approved by user |
 | 3 | `product-owner` | Validates designs match REQUIREMENTS.md |
