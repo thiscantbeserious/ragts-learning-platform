@@ -143,10 +143,16 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Manages pair review lifecycle during implementation
 
 ### Story Writer
-- Translates technical requests into user stories from multiple stakeholder perspectives
+- Translates requests into user stories from multiple stakeholder perspectives
 - Always runs first in both SDLC and Direct Assist flows
+- Consults `platform-user` for end-user reaction, `researcher` for codebase context, and optionally other agents
 - User approves or modifies stories before proceeding
-- Considers: platform users, end-users of agents, self-hosting operators, developers, team leads
+
+### Platform User
+- Role-plays as an end-user of the platform (non-technical)
+- Consulted by the story-writer to surface user-facing impact
+- Reacts to proposed changes from a daily-workflow perspective
+- Does NOT read code or access the codebase
 
 ### Product Owner
 - Appears twice: requirements gathering (start) and validation (end)

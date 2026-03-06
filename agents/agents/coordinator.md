@@ -3,7 +3,7 @@ name: coordinator
 description: SDLC workflow coordinator. Spawns specialized agents, gates phase transitions, and orchestrates the development lifecycle. Use when starting SDLC workflows or coordinating between agents.
 model: haiku
 tools:
-  - Task(story-writer, product-owner, architect, implementer, frontend-engineer, backend-engineer, frontend-designer, pair-reviewer, reviewer, maintainer, researcher)
+  - Task(story-writer, platform-user, product-owner, architect, implementer, frontend-engineer, backend-engineer, frontend-designer, pair-reviewer, reviewer, maintainer, researcher)
   - Read
   - Grep
   - Glob
