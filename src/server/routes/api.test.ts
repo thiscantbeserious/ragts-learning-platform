@@ -12,7 +12,7 @@ import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../db/database_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
-import { FsStorageImpl } from '../storage/fs_storage_impl.js';
+import type { StorageAdapter } from '../storage/storage_adapter.js';
 import { handleUpload } from './upload.js';
 import {
   handleListSessions,
@@ -20,6 +20,7 @@ import {
   handleDeleteSession,
   handleRedetect,
 } from './sessions.js';
+import { waitForPipelines } from '../processing/index.js';
 import { initVt } from '../../../packages/vt-wasm/index.js';
 
 describe('API Routes', () => {
@@ -28,7 +29,7 @@ describe('API Routes', () => {
   let ctx: DatabaseContext;
   let sessionRepository: SessionAdapter;
   let sectionRepository: SectionAdapter;
-  let storageAdapter: FsStorageImpl;
+  let storageAdapter: StorageAdapter;
 
   const validFixture = readFileSync(
     join(__dirname, '../../..', 'tests', 'fixtures', 'valid-with-markers.cast'),
@@ -52,7 +53,7 @@ describe('API Routes', () => {
     ctx = await impl.initialize({ dataDir: testDir });
     sessionRepository = ctx.sessionRepository;
     sectionRepository = ctx.sectionRepository;
-    storageAdapter = new FsStorageImpl(testDir);
+    storageAdapter = ctx.storageAdapter;
 
     // Setup Hono app with routes
     app = new Hono();
@@ -71,7 +72,9 @@ describe('API Routes', () => {
     );
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    // Wait for all in-flight pipelines to complete before teardown
+    await waitForPipelines();
     // Close database before removing files
     ctx.close();
     // Clean up temporary directory
@@ -244,6 +247,9 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
+      // Wait for upload pipeline to finish before deleting the file
+      await waitForPipelines();
+
       // Delete session
       const deleteReq = new Request(
         `http://localhost/api/sessions/${uploadData.id}`,
@@ -311,6 +317,9 @@ describe('API Routes', () => {
       expect(retrieved.id).toBe(session.id);
       expect(retrieved.content).toBeDefined();
 
+      // Wait for upload pipeline to finish before deleting the file
+      await waitForPipelines();
+
       // 4. Delete
       const deleteRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${session.id}`, {
@@ -346,8 +355,8 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
-      // Wait a bit for initial processing to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for initial processing to complete
+      await waitForPipelines();
 
       // Trigger re-detection
       const req = new Request(
@@ -391,7 +400,7 @@ describe('API Routes', () => {
       const uploadData = await uploadRes.json();
 
       // Wait for async processing to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await waitForPipelines();
 
       // Get session - should include sections
       const getRes = await app.fetch(
@@ -422,7 +431,7 @@ describe('API Routes', () => {
       const uploadData = await uploadRes.json();
 
       // Wait for async processing to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await waitForPipelines();
 
       // Get session - check status
       const getRes = await app.fetch(

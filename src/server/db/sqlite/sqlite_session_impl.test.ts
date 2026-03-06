@@ -9,7 +9,7 @@ import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from './sqlite_database_impl.js';
 import type { SessionAdapter } from '../session_adapter.js';
 import type { DatabaseContext } from '../database_adapter.js';
-import type { SessionCreate } from '../../../shared/types.js';
+import { createTestSession } from './test_fixtures.js';
 
 describe('SqliteSessionImpl', () => {
   let ctx: DatabaseContext;
@@ -27,13 +27,7 @@ describe('SqliteSessionImpl', () => {
 
   describe('create', () => {
     it('should create a session with generated id and created_at', () => {
-      const data: SessionCreate = {
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 3,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
+      const data = createTestSession({ marker_count: 3, uploaded_at: '2026-02-16T10:30:00Z' });
 
       const session = repository.create(data);
 
@@ -48,13 +42,7 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should generate unique IDs for multiple sessions', () => {
-      const data: SessionCreate = {
-        filename: 'test.cast',
-        filepath: 'sessions/test1.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
+      const data = createTestSession({ filepath: 'sessions/test1.cast' });
 
       const session1 = repository.create(data);
       const session2 = repository.create({ ...data, filepath: 'sessions/test2.cast' });
@@ -63,13 +51,7 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should default marker_count to 0 if not provided', () => {
-      const data: SessionCreate = {
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
+      const data = createTestSession();
 
       const session = repository.create(data);
 
@@ -85,20 +67,8 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should return all sessions', () => {
-      const data1: SessionCreate = {
-        filename: 'test1.cast',
-        filepath: 'sessions/test1.cast',
-        size_bytes: 1024,
-        marker_count: 3,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
-      const data2: SessionCreate = {
-        filename: 'test2.cast',
-        filepath: 'sessions/test2.cast',
-        size_bytes: 2048,
-        marker_count: 5,
-        uploaded_at: '2026-02-16T11:00:00Z',
-      };
+      const data1 = createTestSession({ filename: 'test1.cast', filepath: 'sessions/test1.cast', marker_count: 3, uploaded_at: '2026-02-16T10:30:00Z' });
+      const data2 = createTestSession({ filename: 'test2.cast', filepath: 'sessions/test2.cast', size_bytes: 2048, marker_count: 5, uploaded_at: '2026-02-16T11:00:00Z' });
 
       const session1 = repository.create(data1);
       const session2 = repository.create(data2);
@@ -111,20 +81,8 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should return sessions ordered by uploaded_at DESC (newest first)', () => {
-      const older: SessionCreate = {
-        filename: 'older.cast',
-        filepath: 'sessions/older.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-02-15T10:00:00Z',
-      };
-      const newer: SessionCreate = {
-        filename: 'newer.cast',
-        filepath: 'sessions/newer.cast',
-        size_bytes: 2048,
-        marker_count: 0,
-        uploaded_at: '2026-02-16T10:00:00Z',
-      };
+      const older = createTestSession({ filename: 'older.cast', filepath: 'sessions/older.cast', uploaded_at: '2026-02-15T10:00:00Z' });
+      const newer = createTestSession({ filename: 'newer.cast', filepath: 'sessions/newer.cast', size_bytes: 2048, uploaded_at: '2026-02-16T10:00:00Z' });
 
       repository.create(older);
       const newerSession = repository.create(newer);
@@ -144,13 +102,7 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should return session when it exists', () => {
-      const data: SessionCreate = {
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 3,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
+      const data = createTestSession({ marker_count: 3, uploaded_at: '2026-02-16T10:30:00Z' });
 
       const created = repository.create(data);
       const found = repository.findById(created.id);
@@ -173,13 +125,7 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should return true and delete session when it exists', () => {
-      const data: SessionCreate = {
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 3,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
+      const data = createTestSession({ marker_count: 3, uploaded_at: '2026-02-16T10:30:00Z' });
 
       const created = repository.create(data);
       const deleted = repository.deleteById(created.id);
@@ -191,20 +137,8 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should not affect other sessions', () => {
-      const data1: SessionCreate = {
-        filename: 'test1.cast',
-        filepath: 'sessions/test1.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
-      const data2: SessionCreate = {
-        filename: 'test2.cast',
-        filepath: 'sessions/test2.cast',
-        size_bytes: 2048,
-        marker_count: 0,
-        uploaded_at: '2026-02-16T11:00:00Z',
-      };
+      const data1 = createTestSession({ filename: 'test1.cast', filepath: 'sessions/test1.cast', uploaded_at: '2026-02-16T10:30:00Z' });
+      const data2 = createTestSession({ filename: 'test2.cast', filepath: 'sessions/test2.cast', size_bytes: 2048, uploaded_at: '2026-02-16T11:00:00Z' });
 
       const session1 = repository.create(data1);
       const session2 = repository.create(data2);
@@ -219,13 +153,7 @@ describe('SqliteSessionImpl', () => {
 
   describe('filepath uniqueness constraint', () => {
     it('should enforce unique filepath constraint', () => {
-      const data: SessionCreate = {
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-02-16T10:30:00Z',
-      };
+      const data = createTestSession();
 
       repository.create(data);
 

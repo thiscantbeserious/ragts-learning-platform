@@ -12,6 +12,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { DatabaseFactory } from './database_factory.js';
 import type { DatabaseContext } from './database_adapter.js';
+import { createTestSession, createTestSection } from './sqlite/test_fixtures.js';
 
 describe('DatabaseFactory', () => {
   describe('create("sqlite")', () => {
@@ -22,7 +23,7 @@ describe('DatabaseFactory', () => {
       testDir = mkdtempSync(join(tmpdir(), 'ragts-factory-test-'));
       const factory = new DatabaseFactory();
       const adapter = await factory.create('sqlite');
-      ctx = await adapter.initialize({ dataDir: testDir, dbPath: ':memory:' } as any);
+      ctx = await adapter.initialize({ dataDir: testDir, dbPath: ':memory:' });
     });
 
     afterEach(() => {
@@ -44,13 +45,9 @@ describe('DatabaseFactory', () => {
     });
 
     it('should return a working sessionRepository (insert + query round-trip)', () => {
-      const session = ctx.sessionRepository.create({
-        filename: 'factory-test.cast',
-        filepath: 'sessions/factory-test.cast',
-        size_bytes: 2048,
-        marker_count: 0,
-        uploaded_at: '2026-03-06T10:00:00Z',
-      });
+      const session = ctx.sessionRepository.create(
+        createTestSession({ filename: 'factory-test.cast', filepath: 'sessions/factory-test.cast', size_bytes: 2048 })
+      );
 
       expect(session.id).toBeTruthy();
 
@@ -60,24 +57,13 @@ describe('DatabaseFactory', () => {
     });
 
     it('should return a working sectionRepository (insert + query round-trip)', () => {
-      const session = ctx.sessionRepository.create({
-        filename: 'section-factory.cast',
-        filepath: 'sessions/section-factory.cast',
-        size_bytes: 512,
-        marker_count: 0,
-        uploaded_at: '2026-03-06T10:00:00Z',
-      });
+      const session = ctx.sessionRepository.create(
+        createTestSession({ filename: 'section-factory.cast', filepath: 'sessions/section-factory.cast', size_bytes: 512 })
+      );
 
-      const section = ctx.sectionRepository.create({
-        sessionId: session.id,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 5,
-        label: 'Intro',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      });
+      const section = ctx.sectionRepository.create(
+        createTestSection(session.id, { endEvent: 5, label: 'Intro' })
+      );
 
       expect(section.id).toBeTruthy();
 
@@ -117,7 +103,7 @@ describe('DatabaseFactory', () => {
       try {
         const factory = new DatabaseFactory();
         const adapter = await factory.create('sqlite');
-        const localCtx = await adapter.initialize({ dataDir: testDir, dbPath: ':memory:' } as any);
+        const localCtx = await adapter.initialize({ dataDir: testDir, dbPath: ':memory:' });
 
         localCtx.close();
 

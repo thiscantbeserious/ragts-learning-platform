@@ -11,6 +11,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { SqliteDatabaseImpl } from './sqlite_database_impl.js';
 import type { DatabaseContext } from '../database_adapter.js';
+import { createTestSession, createTestSection } from './test_fixtures.js';
 
 describe('SqliteDatabaseImpl', () => {
   let testDir: string;
@@ -36,13 +37,7 @@ describe('SqliteDatabaseImpl', () => {
     });
 
     it('should return working sessionRepository (insert + query round-trip)', () => {
-      const session = ctx.sessionRepository.create({
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = ctx.sessionRepository.create(createTestSession());
 
       expect(session.id).toBeTruthy();
 
@@ -52,24 +47,11 @@ describe('SqliteDatabaseImpl', () => {
     });
 
     it('should return working sectionRepository (insert + query round-trip)', () => {
-      const session = ctx.sessionRepository.create({
-        filename: 'test.cast',
-        filepath: 'sessions/test.cast',
-        size_bytes: 1024,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = ctx.sessionRepository.create(createTestSession());
 
-      const section = ctx.sectionRepository.create({
-        sessionId: session.id,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Setup',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      });
+      const section = ctx.sectionRepository.create(
+        createTestSection(session.id, { label: 'Setup' })
+      );
 
       expect(section.id).toBeTruthy();
 
@@ -97,13 +79,9 @@ describe('SqliteDatabaseImpl', () => {
         dbPath: ':memory:',
       });
 
-      const session = inMemoryCtx.sessionRepository.create({
-        filename: 'mem.cast',
-        filepath: 'sessions/mem.cast',
-        size_bytes: 512,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = inMemoryCtx.sessionRepository.create(
+        createTestSession({ filename: 'mem.cast', filepath: 'sessions/mem.cast', size_bytes: 512 })
+      );
 
       expect(session.id).toBeTruthy();
       inMemoryCtx.close();
@@ -138,13 +116,9 @@ describe('SqliteDatabaseImpl', () => {
 
     it('should have sessions table with required columns', () => {
       // Verify schema by inserting and querying a session
-      const session = memCtx.sessionRepository.create({
-        filename: 'schema-test.cast',
-        filepath: 'sessions/schema-test.cast',
-        size_bytes: 100,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = memCtx.sessionRepository.create(
+        createTestSession({ filename: 'schema-test.cast', filepath: 'sessions/schema-test.cast', size_bytes: 100 })
+      );
 
       expect(session.id).toBeTruthy();
       expect(session.filename).toBe('schema-test.cast');
@@ -153,24 +127,13 @@ describe('SqliteDatabaseImpl', () => {
     });
 
     it('should have sections table with required columns (migration 002)', () => {
-      const session = memCtx.sessionRepository.create({
-        filename: 'section-test.cast',
-        filepath: 'sessions/section-test.cast',
-        size_bytes: 100,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = memCtx.sessionRepository.create(
+        createTestSession({ filename: 'section-test.cast', filepath: 'sessions/section-test.cast', size_bytes: 100 })
+      );
 
-      const section = memCtx.sectionRepository.create({
-        sessionId: session.id,
-        type: 'detected',
-        startEvent: 0,
-        endEvent: null,
-        label: null,
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      });
+      const section = memCtx.sectionRepository.create(
+        createTestSection(session.id, { type: 'detected', endEvent: null, label: null })
+      );
 
       expect(section.id).toBeTruthy();
       expect(section.start_line).toBeNull();
@@ -178,13 +141,9 @@ describe('SqliteDatabaseImpl', () => {
     });
 
     it('should support snapshot column (migration 003)', () => {
-      const session = memCtx.sessionRepository.create({
-        filename: 'snap-test.cast',
-        filepath: 'sessions/snap-test.cast',
-        size_bytes: 100,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = memCtx.sessionRepository.create(
+        createTestSession({ filename: 'snap-test.cast', filepath: 'sessions/snap-test.cast', size_bytes: 100 })
+      );
 
       const snapshot = JSON.stringify({ cursor: { x: 0, y: 0 } });
       memCtx.sessionRepository.updateSnapshot(session.id, snapshot);
@@ -196,24 +155,13 @@ describe('SqliteDatabaseImpl', () => {
 
     it('should enforce foreign key constraints on sections', () => {
       // Deleting a session should cascade-delete its sections
-      const session = memCtx.sessionRepository.create({
-        filename: 'fk-test.cast',
-        filepath: 'sessions/fk-test.cast',
-        size_bytes: 100,
-        marker_count: 0,
-        uploaded_at: '2026-03-05T10:00:00Z',
-      });
+      const session = memCtx.sessionRepository.create(
+        createTestSession({ filename: 'fk-test.cast', filepath: 'sessions/fk-test.cast', size_bytes: 100 })
+      );
 
-      memCtx.sectionRepository.create({
-        sessionId: session.id,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 5,
-        label: 'test',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      });
+      memCtx.sectionRepository.create(
+        createTestSection(session.id, { endEvent: 5, label: 'test' })
+      );
 
       memCtx.sessionRepository.deleteById(session.id);
 

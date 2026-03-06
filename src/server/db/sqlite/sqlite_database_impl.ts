@@ -35,28 +35,36 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
   async initialize(config: { dataDir: string; dbPath?: string }): Promise<DatabaseContext> {
     const dbPath = config.dbPath ?? join(config.dataDir, 'ragts.db');
 
-    // Create parent directory if it doesn't exist (skip for :memory:)
+    // Always create dataDir (needed by FsStorageImpl for session files)
+    mkdirSync(config.dataDir, { recursive: true });
+
+    // Create parent directory for custom dbPath if needed (skip for :memory:)
     if (dbPath !== ':memory:') {
-      mkdirSync(config.dataDir, { recursive: true });
+      mkdirSync(dirname(dbPath), { recursive: true });
     }
 
     // Open database connection
     const db = new Database(dbPath);
 
-    // Enable WAL mode for better concurrent read performance
-    db.pragma('journal_mode = WAL');
+    try {
+      // Enable WAL mode for better concurrent read performance
+      db.pragma('journal_mode = WAL');
 
-    // Enable foreign key constraints
-    db.pragma('foreign_keys = ON');
+      // Enable foreign key constraints
+      db.pragma('foreign_keys = ON');
 
-    // Apply base schema from sql/schema.sql
-    const schemaPath = join(__dirname, 'sql', 'schema.sql');
-    const schema = readFileSync(schemaPath, 'utf-8');
-    db.exec(schema);
+      // Apply base schema from sql/schema.sql
+      const schemaPath = join(__dirname, 'sql', 'schema.sql');
+      const schema = readFileSync(schemaPath, 'utf-8');
+      db.exec(schema);
 
-    // Run migrations
-    migrate002Sections(db);
-    migrate003UnifiedSnapshot(db);
+      // Run migrations
+      migrate002Sections(db);
+      migrate003UnifiedSnapshot(db);
+    } catch (err) {
+      db.close();
+      throw err;
+    }
 
     const sessionRepository = new SqliteSessionImpl(db);
     const sectionRepository = new SqliteSectionImpl(db);

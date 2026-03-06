@@ -69,7 +69,7 @@ GET /api/sessions/:id -> Session metadata + sections with pre-rendered snapshots
 
 ### Database Abstraction
 
-Repository pattern, fully implemented:
+Adapter pattern, fully implemented:
 
 | Component | Interface | Implementation | Status |
 |-----------|-----------|---------------|--------|

@@ -31,5 +31,5 @@ export interface DatabaseAdapter {
    * Creates the database, runs migrations, constructs repositories and storage.
    * Returns a DatabaseContext with all live objects.
    */
-  initialize(config: { dataDir: string }): Promise<DatabaseContext>;
+  initialize(config: { dataDir: string; dbPath?: string }): Promise<DatabaseContext>;
 }

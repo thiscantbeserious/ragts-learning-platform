@@ -10,7 +10,7 @@ import { parseAsciicast, validateAsciicast } from '../../shared/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
-import { processSessionPipeline } from '../processing/index.js';
+import { processSessionPipeline, trackPipeline } from '../processing/index.js';
 
 /**
  * Handle POST /api/upload
@@ -89,11 +89,10 @@ export async function handleUpload(
         uploaded_at: new Date().toISOString(),
       });
 
-      // Trigger async processing (fire and forget)
-      setImmediate(() => {
-        processSessionPipeline(filepath, id, parsed.markers, sectionRepository, repository)
-          .catch(err => console.error('Session processing failed:', err));
-      });
+      // Trigger async processing (tracked, non-blocking)
+      const pipeline = processSessionPipeline(filepath, id, parsed.markers, sectionRepository, repository)
+        .catch(err => console.error('Session processing failed:', err));
+      trackPipeline(pipeline);
 
       const { filepath: _fp, ...sessionData } = session;
       return c.json(sessionData, 201);

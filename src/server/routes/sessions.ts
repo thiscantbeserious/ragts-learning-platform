@@ -7,7 +7,7 @@ import { parseAsciicast } from '../../shared/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
-import { processSessionPipeline } from '../processing/index.js';
+import { processSessionPipeline, trackPipeline } from '../processing/index.js';
 
 /**
  * Handle GET /api/sessions
@@ -192,16 +192,15 @@ export function handleRedetect(
     const content = storageAdapter.read(id);
     const parsed = parseAsciicast(content);
 
-    // Trigger async processing (fire and forget)
-    setImmediate(() => {
-      processSessionPipeline(
-        session.filepath,
-        id,
-        parsed.markers,
-        sectionRepository,
-        sessionRepository
-      ).catch(err => console.error('Re-detection failed:', err));
-    });
+    // Trigger async processing (tracked, non-blocking)
+    const pipeline = processSessionPipeline(
+      session.filepath,
+      id,
+      parsed.markers,
+      sectionRepository,
+      sessionRepository
+    ).catch(err => console.error('Re-detection failed:', err));
+    trackPipeline(pipeline);
 
     // Return 202 Accepted
     return c.json(

@@ -10,8 +10,8 @@ import { SqliteDatabaseImpl } from './sqlite_database_impl.js';
 import type { SectionAdapter } from '../section_adapter.js';
 import type { SessionAdapter } from '../session_adapter.js';
 import type { DatabaseContext } from '../database_adapter.js';
-import type { CreateSectionInput } from './sqlite_section_impl.js';
-import type { SessionCreate } from '../../../shared/types.js';
+import type { CreateSectionInput } from '../section_adapter.js';
+import { createTestSession, createTestSection } from './test_fixtures.js';
 
 describe('SqliteSectionImpl', () => {
   let ctx: DatabaseContext;
@@ -26,14 +26,7 @@ describe('SqliteSectionImpl', () => {
     sessionRepo = ctx.sessionRepository;
 
     // Create a test session for use in tests
-    const sessionData: SessionCreate = {
-      filename: 'test.cast',
-      filepath: 'sessions/test.cast',
-      size_bytes: 1024,
-      marker_count: 3,
-      uploaded_at: '2026-02-17T10:00:00Z',
-    };
-    const session = sessionRepo.create(sessionData);
+    const session = sessionRepo.create(createTestSession({ marker_count: 3, uploaded_at: '2026-02-17T10:00:00Z' }));
     testSessionId = session.id;
   });
 
@@ -43,16 +36,10 @@ describe('SqliteSectionImpl', () => {
 
   describe('create', () => {
     it('should create a section with generated id and created_at', () => {
-      const input: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
+      const input: CreateSectionInput = createTestSection(testSessionId, {
         label: 'Setup',
         snapshot: JSON.stringify({ cursor: { x: 0, y: 0 } }),
-        startLine: null,
-        endLine: null,
-      };
+      });
 
       const section = sectionRepo.create(input);
 
@@ -68,16 +55,12 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should accept null values for optional fields', () => {
-      const input: CreateSectionInput = {
-        sessionId: testSessionId,
+      const input: CreateSectionInput = createTestSection(testSessionId, {
         type: 'detected',
         startEvent: 5,
         endEvent: null,
         label: null,
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      });
 
       const section = sectionRepo.create(input);
 
@@ -87,16 +70,7 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should generate unique IDs for multiple sections', () => {
-      const input: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input: CreateSectionInput = createTestSection(testSessionId, { label: 'Section 1' });
 
       const section1 = sectionRepo.create(input);
       const section2 = sectionRepo.create({ ...input, startEvent: 11, endEvent: 20, label: 'Section 2' });
@@ -113,26 +87,8 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should return all sections for a session', () => {
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'detected',
-        startEvent: 11,
-        endEvent: 20,
-        label: 'Section 2',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input1: CreateSectionInput = createTestSection(testSessionId, { label: 'Section 1' });
+      const input2: CreateSectionInput = createTestSection(testSessionId, { type: 'detected', startEvent: 11, endEvent: 20, label: 'Section 2' });
 
       const section1 = sectionRepo.create(input1);
       const section2 = sectionRepo.create(input2);
@@ -145,36 +101,9 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should return sections ordered by start_event ASC', () => {
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 20,
-        endEvent: 30,
-        label: 'Later section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Earlier section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input3: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 10,
-        endEvent: 20,
-        label: 'Middle section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input1: CreateSectionInput = createTestSection(testSessionId, { startEvent: 20, endEvent: 30, label: 'Later section' });
+      const input2: CreateSectionInput = createTestSection(testSessionId, { label: 'Earlier section' });
+      const input3: CreateSectionInput = createTestSection(testSessionId, { startEvent: 10, endEvent: 20, label: 'Middle section' });
 
       sectionRepo.create(input1);
       sectionRepo.create(input2);
@@ -192,38 +121,12 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should not return sections from other sessions', () => {
-      const otherSessionData: SessionCreate = {
-        filename: 'other.cast',
-        filepath: 'sessions/other.cast',
-        size_bytes: 2048,
-        marker_count: 0,
-        uploaded_at: '2026-02-17T11:00:00Z',
-      };
-      const otherSession = sessionRepo.create(otherSessionData);
+      const otherSession = sessionRepo.create(
+        createTestSession({ filename: 'other.cast', filepath: 'sessions/other.cast', size_bytes: 2048, uploaded_at: '2026-02-17T11:00:00Z' })
+      );
 
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Test session section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      sectionRepo.create(input1);
-
-      const input2: CreateSectionInput = {
-        sessionId: otherSession.id,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Other session section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      sectionRepo.create(input2);
+      sectionRepo.create(createTestSection(testSessionId, { label: 'Test session section' }));
+      sectionRepo.create(createTestSection(otherSession.id, { label: 'Other session section' }));
 
       const sections = sectionRepo.findBySessionId(testSessionId);
 
@@ -241,26 +144,8 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should delete all sections for a session', () => {
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'detected',
-        startEvent: 11,
-        endEvent: 20,
-        label: 'Section 2',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input1: CreateSectionInput = createTestSection(testSessionId, { label: 'Section 1' });
+      const input2: CreateSectionInput = createTestSection(testSessionId, { type: 'detected', startEvent: 11, endEvent: 20, label: 'Section 2' });
 
       sectionRepo.create(input1);
       sectionRepo.create(input2);
@@ -274,36 +159,9 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should delete only detected sections when type is specified', () => {
-      const markerInput: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Marker section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const detectedInput1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'detected',
-        startEvent: 11,
-        endEvent: 20,
-        label: 'Detected section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const detectedInput2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'detected',
-        startEvent: 21,
-        endEvent: 30,
-        label: 'Detected section 2',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const markerInput: CreateSectionInput = createTestSection(testSessionId, { label: 'Marker section' });
+      const detectedInput1: CreateSectionInput = createTestSection(testSessionId, { type: 'detected', startEvent: 11, endEvent: 20, label: 'Detected section 1' });
+      const detectedInput2: CreateSectionInput = createTestSection(testSessionId, { type: 'detected', startEvent: 21, endEvent: 30, label: 'Detected section 2' });
 
       sectionRepo.create(markerInput);
       sectionRepo.create(detectedInput1);
@@ -320,36 +178,9 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should delete only marker sections when type is specified', () => {
-      const markerInput1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Marker section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const markerInput2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 11,
-        endEvent: 20,
-        label: 'Marker section 2',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const detectedInput: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'detected',
-        startEvent: 21,
-        endEvent: 30,
-        label: 'Detected section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const markerInput1: CreateSectionInput = createTestSection(testSessionId, { label: 'Marker section 1' });
+      const markerInput2: CreateSectionInput = createTestSection(testSessionId, { startEvent: 11, endEvent: 20, label: 'Marker section 2' });
+      const detectedInput: CreateSectionInput = createTestSection(testSessionId, { type: 'detected', startEvent: 21, endEvent: 30, label: 'Detected section' });
 
       sectionRepo.create(markerInput1);
       sectionRepo.create(markerInput2);
@@ -366,35 +197,12 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should not affect sections from other sessions', () => {
-      const otherSessionData: SessionCreate = {
-        filename: 'other.cast',
-        filepath: 'sessions/other.cast',
-        size_bytes: 2048,
-        marker_count: 0,
-        uploaded_at: '2026-02-17T11:00:00Z',
-      };
-      const otherSession = sessionRepo.create(otherSessionData);
+      const otherSession = sessionRepo.create(
+        createTestSession({ filename: 'other.cast', filepath: 'sessions/other.cast', size_bytes: 2048, uploaded_at: '2026-02-17T11:00:00Z' })
+      );
 
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Test session section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input2: CreateSectionInput = {
-        sessionId: otherSession.id,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Other session section',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input1: CreateSectionInput = createTestSection(testSessionId, { label: 'Test session section' });
+      const input2: CreateSectionInput = createTestSection(otherSession.id, { label: 'Other session section' });
 
       sectionRepo.create(input1);
       sectionRepo.create(input2);
@@ -417,16 +225,7 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should return true and delete section when it exists', () => {
-      const input: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Section to delete',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input: CreateSectionInput = createTestSection(testSessionId, { label: 'Section to delete' });
 
       const section = sectionRepo.create(input);
       const deleted = sectionRepo.deleteById(section.id);
@@ -438,26 +237,8 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should not affect other sections', () => {
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 11,
-        endEvent: 20,
-        label: 'Section 2',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input1: CreateSectionInput = createTestSection(testSessionId, { label: 'Section 1' });
+      const input2: CreateSectionInput = createTestSection(testSessionId, { startEvent: 11, endEvent: 20, label: 'Section 2' });
 
       const section1 = sectionRepo.create(input1);
       const section2 = sectionRepo.create(input2);
@@ -473,26 +254,8 @@ describe('SqliteSectionImpl', () => {
 
   describe('foreign key cascade', () => {
     it('should delete sections when parent session is deleted', () => {
-      const input1: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Section 1',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
-      const input2: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'detected',
-        startEvent: 11,
-        endEvent: 20,
-        label: 'Section 2',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input1: CreateSectionInput = createTestSection(testSessionId, { label: 'Section 1' });
+      const input2: CreateSectionInput = createTestSection(testSessionId, { type: 'detected', startEvent: 11, endEvent: 20, label: 'Section 2' });
 
       sectionRepo.create(input1);
       sectionRepo.create(input2);
@@ -514,16 +277,10 @@ describe('SqliteSectionImpl', () => {
         screen: [[{ char: 'a', attr: 0 }]],
       };
 
-      const input: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
+      const input: CreateSectionInput = createTestSection(testSessionId, {
         label: 'With snapshot',
         snapshot: JSON.stringify(snapshot),
-        startLine: null,
-        endLine: null,
-      };
+      });
 
       const section = sectionRepo.create(input);
 
@@ -532,16 +289,7 @@ describe('SqliteSectionImpl', () => {
     });
 
     it('should accept null snapshot', () => {
-      const input: CreateSectionInput = {
-        sessionId: testSessionId,
-        type: 'marker',
-        startEvent: 0,
-        endEvent: 10,
-        label: 'Without snapshot',
-        snapshot: null,
-        startLine: null,
-        endLine: null,
-      };
+      const input: CreateSectionInput = createTestSection(testSessionId, { label: 'Without snapshot' });
 
       const section = sectionRepo.create(input);
 

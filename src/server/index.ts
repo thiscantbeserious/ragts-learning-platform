@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { loadConfig } from './config.js';
 import { DatabaseFactory } from './db/database_factory.js';
+import { waitForPipelines } from './processing/index.js';
 import { handleUpload } from './routes/upload.js';
 import {
   handleListSessions,
@@ -20,8 +21,16 @@ const db = await factory.create();
 const { sessionRepository, sectionRepository, storageAdapter, close } =
   await db.initialize({ dataDir: config.dataDir });
 
-process.on('SIGTERM', () => { Promise.resolve(close()).finally(() => process.exit(0)); });
-process.on('SIGINT', () => { Promise.resolve(close()).finally(() => process.exit(0)); });
+process.on('SIGTERM', async () => {
+  await waitForPipelines();
+  await Promise.resolve(close());
+  process.exit(0);
+});
+process.on('SIGINT', async () => {
+  await waitForPipelines();
+  await Promise.resolve(close());
+  process.exit(0);
+});
 
 // Health check
 app.get('/api/health', (c) => {
