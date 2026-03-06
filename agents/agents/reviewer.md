@@ -7,7 +7,7 @@ tools:
   - Grep
   - Glob
   - Bash
-  - Task(researcher)
+  - Task(researcher, ui-explorer)
 disallowedTools:
   - Edit
   - Write

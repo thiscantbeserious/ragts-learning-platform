@@ -32,6 +32,12 @@ User Request
        │
        ▼
 ┌─────────────────┐
+│  Story Writer   │  Translates technical request into
+│                 │  user stories (multiple perspectives)
+└────────┬────────┘
+         │  User approves/modifies
+         ▼
+┌─────────────────┐
 │  Product Owner  │  Requirements interview
 │                 │  ◄── cross-consult: Architect (feasibility)
 └────────┬────────┘
@@ -135,6 +141,24 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Gates transitions between phases
 - Orchestrates cross-consultation between PO and Architect
 - Manages pair review lifecycle during implementation
+
+### Story Writer
+- Translates requests into user stories from multiple stakeholder perspectives
+- Always runs first in both SDLC and Direct Assist flows
+- Consults `platform-user` for end-user reaction, `researcher` for codebase context, and optionally other agents
+- User approves or modifies stories before proceeding
+
+### Platform User
+- Role-plays as an end-user of the platform (non-technical)
+- Consulted by the story-writer to surface user-facing impact
+- Reacts to proposed changes from a daily-workflow perspective
+- Can spawn `ui-explorer` to look at the actual platform UI
+- Does NOT read code or access the codebase
+
+### UI Explorer
+- Navigates the running platform UI via Playwright, captures screenshots, describes what it sees
+- Read-only — observes and reports, never modifies
+- Spawnable by any agent that needs visual context (`platform-user`, `story-writer`, `reviewer`, etc.)
 
 ### Product Owner
 - Appears twice: requirements gathering (start) and validation (end)

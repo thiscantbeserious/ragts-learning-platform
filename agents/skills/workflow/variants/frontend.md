@@ -4,7 +4,8 @@ For tasks scoped to client-side code.
 
 ```mermaid
 graph TD
-    PO1[product-owner] --> Arch[architect]
+    SW[story-writer] --> PO1[product-owner]
+    PO1 --> Arch[architect]
     Arch --> Des{Visual work?}
     Des -->|yes| FD[frontend-designer]
     Des -->|no| FE
@@ -19,6 +20,7 @@ graph TD
 
 | # | Agent | Gate |
 |---|-------|------|
+| 0 | `story-writer` | User approves or modifies stories |
 | 1 | `product-owner` | REQUIREMENTS.md signed off |
 | 2 | `architect` | ADR.md + PLAN.md approved |
 | 3 | `frontend-designer` | Mockups approved (if visual work) |
