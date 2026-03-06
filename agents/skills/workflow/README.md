@@ -76,22 +76,13 @@ User Request
                          │                              │
                          ▼                              │
                 ┌─────────────────┐                     │
-                │ Reviewer        │ Internal:           │
-                │ (adversarial)   │ full ADR+PLAN       │
-                └────────┬────────┘ check               │
+                │ Reviewer        │ Adversarial review  │
+                │                 │ + triage external   │
+                └────────┬────────┘ findings if any     │
                          │                              │
                     ┌────┴────┐                         │
                     │  Gate   │ Mark PR ready only      │
-                    └────┬────┘ after internal pass     │
-                         │                              │
-                         ▼                              │
-                  [CodeRabbit]  External review         │
-                         │                              │
-                         ▼                              │
-                ┌─────────────────┐                     │
-                │ Reviewer        │ Address CodeRabbit  │
-                │ (coderabbit)    │ findings            │
-                └────────┬────────┘                     │
+                    └────┬────┘ after review pass       │
                          │                              │
                          ▼                              │
                 ┌─────────────────┐  Validates ─────────┘
@@ -183,10 +174,11 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Works from PLAN.md stages
 - Creates PR when done
 
-### Reviewer (Three Phases)
-- **Pair (reviewer-pair):** Collaborative incremental review during implementation. Asks questions, makes observations, flags potential issues per PLAN stage.
-- **Internal (reviewer-internal):** Adversarial post-implementation review. Performs thorough code analysis, security review, and ADR compliance check before PR is marked ready.
-- **CodeRabbit (reviewer-coderabbit):** Addresses external CodeRabbit findings. Implements fixes or documents clear rationale for dismissal.
+### Pair Reviewer
+- Collaborative incremental review during implementation (per PLAN stage). Asks questions, makes observations, flags potential issues. Not adversarial.
+
+### Reviewer
+- Adversarial post-implementation review. Performs thorough code analysis, security review, and ADR compliance check. Optionally triages external findings (CodeRabbit, SonarCloud, pair review observations) when provided by the coordinator.
 
 ### Maintainer
 - Merges PR after approvals
@@ -220,17 +212,9 @@ echo 'feat(invalid): test' | bash .husky/commit-msg /dev/stdin
 8. Dynamic agent selection - Coordinator picks only the agents needed per task
 9. Agent isolation - each agent is a standalone black box with defined inputs and outputs; agents never address other agents directly; the Coordinator is the only component aware of the full topology and acts as a transparent routing layer
 
-## Phases
+## Reviewer Agents
 
-A **phase** is a named operational mode of an agent, represented by a separate agent file in `agents/agents/`. Each phase determines:
-1. **Behavioral persona** (defined in agent file body)
-2. **Agent configuration** (model, tools, permissions in frontmatter)
-3. **Trigger context** (when in the SDLC the Coordinator spawns it)
+Two reviewer agents with distinct roles, each a standalone agent file in `agents/agents/`.
 
-An agent without phases has a single agent file. An agent with phases has one agent file per phase, named `<agent>-<phase>.md`.
-
-### Current Phase Definitions
-
-- **reviewer-pair:** Collaborative review during implementation (per stage). Uses questions/observations/flags format. Spawned by Coordinator after each PLAN stage completion.
-- **reviewer-internal:** Adversarial review after full implementation. Uses severity-classified findings. Spawned before PR is marked ready for external review.
-- **reviewer-coderabbit:** Focused review for addressing external CodeRabbit findings. Implements fixes or documents dismissal rationale. Spawned after CodeRabbit completes its review.
+- **pair-reviewer:** Collaborative review during implementation (per stage). Uses questions/observations/flags format. Spawned by Coordinator after each PLAN stage completion.
+- **reviewer:** Adversarial review after full implementation. Uses severity-classified findings. Optionally triages external inputs (pair review observations, CodeRabbit, SonarCloud) when coordinator provides them. Spawned before PR is marked ready.

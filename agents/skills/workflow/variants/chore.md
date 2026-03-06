@@ -6,11 +6,9 @@ For maintenance, config, docs, dependency updates, CI changes.
 graph TD
     PO1[product-owner] --> Arch[architect]
     Arch --> Impl[implementer]
-    Impl --> IR[reviewer-internal]
-    IR -->|pass| CR[reviewer-coderabbit]
-    IR -->|blocking| Impl
-    CR -->|pass| M[maintainer]
-    CR -->|fixes needed| Impl
+    Impl --> Rev[reviewer]
+    Rev -->|pass| M[maintainer]
+    Rev -->|blocking| Impl
 ```
 
 ## Phases
@@ -20,9 +18,8 @@ graph TD
 | 1 | `product-owner` | REQUIREMENTS.md signed off (can be lightweight) |
 | 2 | `architect` | ADR.md + PLAN.md approved (can be minimal) |
 | 3 | `implementer` | All PLAN stages complete |
-| 4 | `reviewer-internal` | No blocking findings |
-| 5 | `reviewer-coderabbit` | Valid findings fixed |
-| 6 | `maintainer` | CI green, all approvals |
+| 4 | `reviewer` | No blocking findings (includes triage of CodeRabbit/external findings when available) |
+| 5 | `maintainer` | CI green, all approvals |
 
 No pair review — chore tasks are typically small and don't benefit from incremental stage review.
 

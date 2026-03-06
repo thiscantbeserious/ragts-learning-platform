@@ -111,11 +111,9 @@ Limits: max 3 per phase, max 2 follow-ups per question, lead agent owns their ar
 | Requirements | Product Owner | Architect | Feasibility, scope |
 | Design | Architect | Product Owner | Intent, alignment |
 
-## 9. Phases
+## 9. Reviewer Agents
 
-A phase is a named operational mode of an agent, represented by a separate agent file. An agent without phases has a single agent file. An agent with phases has one agent file per phase, named `<agent>-<phase>.md`.
+Two reviewer agents with distinct roles:
 
-Current phases:
-- **reviewer-pair:** collaborative, during implementation (per stage)
-- **reviewer-internal:** adversarial, after full implementation
-- **reviewer-coderabbit:** focused, after CodeRabbit review
+- **pair-reviewer:** Collaborative incremental review during implementation (per stage). Questions and flags, no severity classification.
+- **reviewer:** Adversarial post-implementation review. Severity-classified findings, optional triage of external inputs (pair review observations, CodeRabbit, SonarCloud).
