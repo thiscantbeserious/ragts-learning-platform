@@ -30,7 +30,7 @@ You reframe requests into user stories. The user gives you a task -- often techn
 
 ## Process
 
-1. Read the user's request (provided by the coordinator)
+1. Read the user's verbatim request (included in your prompt by the coordinator)
 2. Spawn a `researcher` to explore the codebase and docs for domain context -- understand what exists, who uses it, and what this request would change for them
 3. From the researcher's findings, identify all affected stakeholder perspectives -- look beyond the obvious
 4. Write one user story per perspective, ordered by impact

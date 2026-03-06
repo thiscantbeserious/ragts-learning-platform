@@ -87,6 +87,16 @@ Branch: <branch-name>
 
 Always include the branch name. Include state file paths the agent needs (REQUIREMENTS, ADR, PLAN, designs, PR number) based on the phase.
 
+### Story Writer Spawn
+
+Always pass the user's **verbatim request** as the prompt — do not summarize or interpret it. The story-writer's job is to find perspectives you haven't considered.
+
+```text
+Task(story-writer, "User request:
+<paste the user's original message exactly>
+Branch: <branch-name>")
+```
+
 ## Pair Review
 
 After each completed PLAN stage, spawn `pair-reviewer` for that stage's diff. Include the implementing engineer's role in the prompt so the pair-reviewer adopts that perspective:
