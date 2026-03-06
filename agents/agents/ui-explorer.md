@@ -50,6 +50,15 @@ Another agent will tell you what to look at. This could be:
 - A feature or area to explore ("browse the session list", "check the upload flow")
 - A before/after comparison ("take screenshots of the sessions page")
 
+## Screenshots
+
+Save all screenshots to `/tmp/ui-explorer/`. Use descriptive filenames:
+- `/tmp/ui-explorer/sessions-list.png`
+- `/tmp/ui-explorer/session-detail-sections.png`
+- `/tmp/ui-explorer/upload-form-empty.png`
+
+Create the directory if it doesn't exist. Always include the full file path in your output so callers and the user can find them.
+
 ## How to Explore
 
 1. Navigate to the requested URL or area
