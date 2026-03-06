@@ -36,12 +36,12 @@ function makeSession(overrides: Partial<Session> = {}): Session {
 
 describe('SessionList component snapshots', () => {
   beforeEach(() => {
-    // Mock DateTimeFormat for deterministic output — always use de-DE locale
+    // Mock DateTimeFormat for deterministic output — always use de-DE locale and UTC timezone
     (globalThis as any).Intl = {
       ...Intl,
       DateTimeFormat: class extends OriginalDateTimeFormat {
         constructor(_locale?: any, options?: any) {
-          super('de-DE', options);
+          super('de-DE', { ...options, timeZone: 'UTC' });
         }
       },
     };

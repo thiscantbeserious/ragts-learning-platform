@@ -54,7 +54,7 @@ describe('API Routes', () => {
     // Setup Hono app with routes
     app = new Hono();
     app.post('/api/upload', (c) =>
-      handleUpload(c, sessionRepository, sectionRepository, testDir, 50)
+      handleUpload(c, sessionRepository, sectionRepository, testDir, 2)
     );
     app.get('/api/sessions', (c) => handleListSessions(c, sessionRepository));
     app.get('/api/sessions/:id', (c) => handleGetSession(c, sessionRepository, sectionRepository));
@@ -124,8 +124,8 @@ describe('API Routes', () => {
     });
 
     it('should reject file exceeding size limit', async () => {
-      // Create file larger than 50MB limit
-      const largeContent = 'x'.repeat(51 * 1024 * 1024);
+      // Create file just over the 2MB limit configured below
+      const largeContent = 'x'.repeat(2.1 * 1024 * 1024);
       const formData = new FormData();
       const file = new File([largeContent], 'large.cast', { type: 'text/plain' });
       formData.append('file', file);
