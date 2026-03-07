@@ -39,9 +39,14 @@ From `VISION.md`:
 
 The claimed loop:
 
-```
-Agent works → Session captured → Human reviews → Human curates
-  → Curated context feeds back → Agent works better → repeat
+```mermaid
+flowchart LR
+    A([Agent works]) --> B([Session captured])
+    B --> C([Human reviews])
+    C --> D([Human curates])
+    D --> E([Curated context feeds back])
+    E --> F([Agent works better])
+    F --> A
 ```
 
 ### 1.2 Where the Vision Is Strong
@@ -255,21 +260,32 @@ These variants are not about fixing bugs — they're about **where the product g
 
 #### What Changes
 
-```
-Current roadmap                       Curation-First roadmap
-────────────────────────────────────────────────────────────────
-v3: snapshot tests                    v3: curation UX spike
-v3: improved dedup                       (section-level annotation,
-v3: virtual scrolling                     tags, retrieval intent)
-v3: pagination                        v3: MCP retrieval server
-v3: search/filter                        (curated segments as resources)
-v3: metadata editing                   v3: critical fixes (C1-C3, H1-H3)
-then auth...                           v4: AI-assisted curation
-then curation...                          (auto-detect patterns,
-then retrieval...                          suggest annotations)
-                                       v4: auth + teams
-                                       v5: viewer polish
-                                          (virtual scrolling, search)
+```mermaid
+%%{ init: { 'flowchart': { 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
+flowchart TB
+    subgraph current["Current Roadmap"]
+        direction TB
+        CV3A["v3: snapshot tests"]
+        CV3B["v3: improved dedup"]
+        CV3C["v3: virtual scrolling"]
+        CV3D["v3: pagination"]
+        CV3E["v3: search/filter"]
+        CV3F["v3: metadata editing"]
+        CAUTH["then auth..."]
+        CCUR["then curation..."]
+        CRET["then retrieval..."]
+        CV3A --> CV3B --> CV3C --> CV3D --> CV3E --> CV3F --> CAUTH --> CCUR --> CRET
+    end
+    subgraph curation["Curation-First Roadmap"]
+        direction TB
+        NV3A["v3: curation UX spike\n(section-level annotation,\ntags, retrieval intent)"]
+        NV3B["v3: MCP retrieval server\n(curated segments as resources)"]
+        NV3C["v3: critical fixes\n(C1-C3, H1-H3)"]
+        NV4A["v4: AI-assisted curation\n(auto-detect patterns,\nsuggest annotations)"]
+        NV4B["v4: auth + teams"]
+        NV5["v5: viewer polish\n(virtual scrolling, search)"]
+        NV3A --> NV3B --> NV3C --> NV4A --> NV4B --> NV5
+    end
 ```
 
 #### Curation Data Model (Proposed)
@@ -356,23 +372,26 @@ Choose Variant A if you believe the vision is right but needs validation, and yo
 
 #### What Changes
 
-```
-Current state                         Target state
-────────────────────────────────────────────────────────────────
-asciicast v3 only                     Unified internal model
-                                      + asciicast adapter (v2, v3)
-                                      + OTel trace adapter
-                                      + structured log adapter
-
-Terminal-specific processing          Format-agnostic segments
-  (VT rendering, dedup, sections)       with format-specific renderers
-
-Single viewer                         Multi-format viewer
-                                        (terminal, structured trace,
-                                         diff view, timeline)
-
-No curation, no retrieval             Format-agnostic curation
-                                      + MCP retrieval on unified model
+```mermaid
+flowchart LR
+    subgraph before["Current State"]
+        direction TB
+        B1["asciicast v3 only"]
+        B2["Terminal-specific processing\n(VT rendering, dedup, sections)"]
+        B3["Single viewer"]
+        B4["No curation, no retrieval"]
+    end
+    subgraph after["Target State"]
+        direction TB
+        A1["Unified internal model\n+ asciicast adapter (v2, v3)\n+ OTel trace adapter\n+ structured log adapter"]
+        A2["Format-agnostic segments\nwith format-specific renderers"]
+        A3["Multi-format viewer\n(terminal, structured trace,\ndiff view, timeline)"]
+        A4["Format-agnostic curation\n+ MCP retrieval on unified model"]
+    end
+    B1 -->|evolves to| A1
+    B2 -->|evolves to| A2
+    B3 -->|evolves to| A3
+    B4 -->|evolves to| A4
 ```
 
 #### Unified Internal Model (Proposed)
@@ -412,28 +431,23 @@ type SegmentContent =
 
 #### Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Ingest Layer                             │
-│                                                                   │
-│  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────┐ │
-│  │ asciicast   │ │ OTel Trace │ │ LangSmith  │ │ Structured   │ │
-│  │ Adapter     │ │ Adapter    │ │ Adapter    │ │ Log Adapter  │ │
-│  └──────┬─────┘ └──────┬─────┘ └──────┬─────┘ └──────┬───────┘ │
-│         └──────────┬───────────────┬───────────────┘            │
-│                    ▼               ▼                              │
-│            ┌───────────────────────────┐                         │
-│            │  Unified Internal Model   │                         │
-│            │  (AgentSession + Segments) │                         │
-│            └───────────┬───────────────┘                         │
-└────────────────────────┼────────────────────────────────────────┘
-                         │
-            ┌────────────┼────────────┐
-            ▼            ▼            ▼
-     ┌───────────┐ ┌──────────┐ ┌──────────┐
-     │  Browse   │ │  Curate  │ │ Retrieve │
-     │  (viewer) │ │  (human) │ │  (agent) │
-     └───────────┘ └──────────┘ └──────────┘
+```mermaid
+flowchart TB
+    subgraph ingest["Ingest Layer"]
+        direction TB
+        AA["asciicast\nAdapter"]
+        OA["OTel Trace\nAdapter"]
+        LA["LangSmith\nAdapter"]
+        SA["Structured\nLog Adapter"]
+        UM["Unified Internal Model\n(AgentSession + Segments)"]
+        AA --> UM
+        OA --> UM
+        LA --> UM
+        SA --> UM
+    end
+    UM --> Browse["Browse\n(viewer)"]
+    UM --> Curate["Curate\n(human)"]
+    UM --> Retrieve["Retrieve\n(agent)"]
 ```
 
 #### Stages
@@ -477,44 +491,53 @@ Choose Variant B if you believe the future is multi-format agent observability a
 
 #### What Changes
 
-```
-Current state                         Target state
-────────────────────────────────────────────────────────────────
-Passive viewer                        Active refinement engine
-No curation                           AI-assisted curation
-                                        (auto-detect, suggest, validate)
-No retrieval                          Intelligent MCP retrieval
-                                        with quality signals
-No outcome tracking                   Retrieval → outcome → learning loop
-                                        (did the curated context help?)
-No patterns                           Cross-session pattern detection
-                                        (recurring mistakes, team playbooks)
-No team knowledge                     Emergent team playbooks
-                                        from aggregated curations
-asciicast only (for now)              asciicast optimized (deepen, not broaden)
-                                        + Claude Code specific detection
+```mermaid
+flowchart LR
+    subgraph before["Current State"]
+        direction TB
+        B1["Passive viewer"]
+        B2["No curation"]
+        B3["No retrieval"]
+        B4["No outcome tracking"]
+        B5["No patterns"]
+        B6["No team knowledge"]
+        B7["asciicast only (for now)"]
+    end
+    subgraph after["Target State"]
+        direction TB
+        A1["Active refinement engine"]
+        A2["AI-assisted curation\n(auto-detect, suggest, validate)"]
+        A3["Intelligent MCP retrieval\nwith quality signals"]
+        A4["Retrieval → outcome → learning loop\n(did the curated context help?)"]
+        A5["Cross-session pattern detection\n(recurring mistakes, team playbooks)"]
+        A6["Emergent team playbooks\nfrom aggregated curations"]
+        A7["asciicast optimized (deepen, not broaden)\n+ Claude Code specific detection"]
+    end
+    B1 -->|evolves to| A1
+    B2 -->|evolves to| A2
+    B3 -->|evolves to| A3
+    B4 -->|evolves to| A4
+    B5 -->|evolves to| A5
+    B6 -->|evolves to| A6
+    B7 -->|evolves to| A7
 ```
 
 #### The Learning Loop
 
-```
-     ┌─────────────────────────────────────────────────────┐
-     │                                                       │
-     │  Session → AI Auto-Detect → Suggest Annotation        │
-     │     ↓                            ↓                    │
-     │  Human Validates              Human Corrects          │
-     │     ↓                            ↓                    │
-     │  Curated Segment stored with quality signals          │
-     │     ↓                                                 │
-     │  Agent retrieves via MCP (relevance-ranked)           │
-     │     ↓                                                 │
-     │  Agent reports: helpful | not helpful                 │
-     │     ↓                                                 │
-     │  Retrieval ranking adjusts (quality signal feedback)  │
-     │     ↓                                                 │
-     │  Next session → better retrieval → better agent       │
-     │     ↓                                                 │
-     └─────────── loop ────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Session([Session ingested]) --> AutoDetect["AI Auto-Detect\ninteresting segments"]
+    AutoDetect --> Suggest["Suggest Annotation"]
+    Suggest --> Validate{Human reviews}
+    Validate -->|accepts| Store["Curated Segment stored\nwith quality signals"]
+    Validate -->|corrects| Correct["Human Corrects annotation"] --> Store
+    Store --> Retrieve["Agent retrieves via MCP\n(relevance-ranked)"]
+    Retrieve --> Report{Agent reports outcome}
+    Report -->|helpful| Boost["Retrieval ranking boosted\n(quality signal feedback)"]
+    Report -->|not helpful| Demote["Retrieval ranking lowered\n(quality signal feedback)"]
+    Boost --> Next["Next session →\nbetter retrieval →\nbetter agent"]
+    Demote --> Next
+    Next -->|loop| Session
 ```
 
 #### Pattern Detection (Proposed)
@@ -637,16 +660,16 @@ The engineering is ahead of the product thinking. Two full MVP cycles produced a
 
 ### Proposed Sequence
 
-```
-Cycle 1:  Critical fixes (C1-C3, H1-H3) + curation schema + CRUD API
-Cycle 2:  Curation UX (section-level annotation slide-over)
-          + MCP retrieval server (curated segments as resources)
-Cycle 3:  AI-assisted curation (auto-detect patterns in sessions)
-          + outcome tracking (agent reports usage)
-Cycle 4:  Auth + workspaces + shared curations
-Cycle 5:  Viewer polish (virtual scrolling, search, pagination)
-Cycle 6:  Pattern detection + team playbooks
-Cycle 7+: Multi-format adapters (Variant B's internal model) — when needed
+```mermaid
+flowchart TB
+    C1["Cycle 1\nCritical fixes (C1-C3, H1-H3)\n+ curation schema + CRUD API"]
+    C2["Cycle 2\nCuration UX (section-level annotation slide-over)\n+ MCP retrieval server (curated segments as resources)"]
+    C3["Cycle 3\nAI-assisted curation (auto-detect patterns)\n+ outcome tracking (agent reports usage)"]
+    C4["Cycle 4\nAuth + workspaces + shared curations"]
+    C5["Cycle 5\nViewer polish (virtual scrolling, search, pagination)"]
+    C6["Cycle 6\nPattern detection + team playbooks"]
+    C7["Cycle 7+\nMulti-format adapters\n(Variant B's internal model — when needed)"]
+    C1 --> C2 --> C3 --> C4 --> C5 --> C6 --> C7
 ```
 
 ### Honest Assessment
