@@ -62,32 +62,6 @@ It acts as a shared workspace where humans can easily read, understand, and revi
 - **Fold/unfold with markers.** Collapse noise, expand what matters - powered by asciicast v3.
 - **Self-hostable & white-label.** Your sessions, your infrastructure.
 
-## How It Works
-
-```mermaid
-%%{ init: { 'flowchart': { 'curve': 'basis', 'nodeSpacing': 30, 'rankSpacing': 40 } } }%%
-graph TD
-    AD>Record everything<br/>agents do] -.- A
-    A[AGR · Record] --> R[Erika · Platform<br/>Process · Store · Serve]
-
-    R <--> H[Humans]
-    R --> AG[Agents]
-
-    subgraph " "
-        direction LR
-        H --> Browse
-        H --> Curate
-        H --> Share
-    end
-
-    subgraph "  "
-        AG --> Retrieve
-        Retrieve -.- RD>Curated context<br/>for smarter agents]
-    end
-
-    Retrieve -.->|Reinforce| A
-```
-
 ## Current Service-Layer
 The is currently largely powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/erika) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval. Later on this should be independent, not just tie to that, but add many sources of logs, and transportation layers to grasp the raw session output.s
 
