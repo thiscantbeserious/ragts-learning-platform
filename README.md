@@ -82,7 +82,7 @@ The is currently largely powered by [Agent Session Recorder (AGR)](https://githu
 
 ### Prerequisites
 
-- Node.js 22+ (LTS)
+- Node.js 24 LTS (recommended) or 22.12+ LTS
 - npm
 
 ### Development
