@@ -8,6 +8,9 @@ import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import { processSessionPipeline, trackPipeline } from '../processing/index.js';
+import { logger } from '../logger.js';
+
+const log = logger.child({ module: 'routes' });
 
 /**
  * Handle GET /api/sessions
@@ -21,7 +24,7 @@ export async function handleListSessions(
     const sessions = await repository.findAll();
     return c.json(sessions.map(({ filepath: _filepath, ...rest }) => rest));
   } catch (err) {
-    console.error('List sessions error:', err);
+    log.error({ err }, 'List sessions error');
     return c.json(
       {
         error: 'Failed to list sessions',
@@ -64,7 +67,7 @@ export async function handleGetSession(
       try {
         snapshot = JSON.parse(session.snapshot);
       } catch (err) {
-        console.warn('Failed to parse session snapshot JSON:', err);
+        log.warn({ err }, 'Failed to parse session snapshot JSON');
         // Continue without snapshot rather than failing the entire request
       }
     }
@@ -82,7 +85,7 @@ export async function handleGetSession(
         try {
           return JSON.parse(section.snapshot);
         } catch (err) {
-          console.warn(`Failed to parse snapshot for section ${section.id}:`, err);
+          log.warn({ err, sectionId: section.id }, 'Failed to parse section snapshot');
           return null;
         }
       })() : null,
@@ -101,7 +104,7 @@ export async function handleGetSession(
       sections: transformedSections,
     });
   } catch (err) {
-    console.error('Get session error:', err);
+    log.error({ err }, 'Get session error');
 
     // Handle file not found specifically
     if (err instanceof Error && err.message.includes('not found')) {
@@ -151,12 +154,12 @@ export async function handleDeleteSession(
       await storageAdapter.delete(id);
     } catch (err) {
       // Log but don't fail - DB deletion succeeded
-      console.warn('Failed to delete session file:', err);
+      log.warn({ err }, 'Failed to delete session file');
     }
 
     return c.json({ success: true });
   } catch (err) {
-    console.error('Delete session error:', err);
+    log.error({ err }, 'Delete session error');
     return c.json(
       {
         error: 'Failed to delete session',
@@ -199,7 +202,7 @@ export async function handleRedetect(
       parsed.markers,
       sectionRepository,
       sessionRepository
-    ).catch(err => console.error('Re-detection failed:', err));
+    ).catch(err => log.error({ err }, 'Re-detection failed'));
     trackPipeline(pipeline);
 
     // Return 202 Accepted
@@ -211,7 +214,7 @@ export async function handleRedetect(
       202
     );
   } catch (err) {
-    console.error('Redetect error:', err);
+    log.error({ err }, 'Redetect error');
     return c.json(
       {
         error: 'Failed to start re-detection',

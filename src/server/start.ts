@@ -1,13 +1,14 @@
 import { serve } from '@hono/node-server';
 import app from './index.js';
+import { logger } from './logger.js';
 
 const port = Number(process.env.PORT) || 3000;
 
-console.log(`Starting RAGTS server on port ${port}...`);
+logger.info({ port }, 'Starting RAGTS server');
 
 serve({
   fetch: app.fetch,
   port,
 });
 
-console.log(`Server running at http://localhost:${port}`);
+logger.info({ port }, `Server running at http://localhost:${port}`);

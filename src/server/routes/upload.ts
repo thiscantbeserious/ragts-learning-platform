@@ -11,6 +11,9 @@ import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import { processSessionPipeline, trackPipeline } from '../processing/index.js';
+import { logger } from '../logger.js';
+
+const log = logger.child({ module: 'upload' });
 
 /**
  * Handle POST /api/upload
@@ -91,7 +94,7 @@ export async function handleUpload(
 
       // Trigger async processing (tracked, non-blocking)
       const pipeline = processSessionPipeline(filepath, id, parsed.markers, sectionRepository, repository)
-        .catch(err => console.error('Session processing failed:', err));
+        .catch(err => log.error({ err, sessionId: id }, 'Session processing failed'));
       trackPipeline(pipeline);
 
       const { filepath: _fp, ...sessionData } = session;
@@ -101,12 +104,12 @@ export async function handleUpload(
       try {
         await storageAdapter.delete(id);
       } catch (cleanupErr) {
-        console.warn('Failed to clean up file after DB error:', cleanupErr);
+        log.warn({ err: cleanupErr }, 'Failed to clean up file after DB error');
       }
       throw err;
     }
   } catch (err) {
-    console.error('Upload error:', err);
+    log.error({ err }, 'Upload error');
     return c.json(
       {
         error: 'Internal server error',

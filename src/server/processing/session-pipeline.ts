@@ -19,6 +19,9 @@
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { Marker, AsciicastEvent, AsciicastHeader } from '../../shared/asciicast-types.js';
+import { logger } from '../logger.js';
+
+const log = logger.child({ module: 'pipeline' });
 import { normalizeHeader } from '../../shared/asciicast.js';
 import { NdjsonStream } from './ndjson-stream.js';
 import { SectionDetector } from './section-detector.js';
@@ -261,7 +264,7 @@ export async function processSessionPipeline(
     );
   } catch (error) {
     // On error: set detection_status to 'failed'
-    console.error(`Session processing failed for ${sessionId}:`, error);
+    log.error({ err: error, sessionId }, 'Session processing failed');
     await sessionRepo.updateDetectionStatus(sessionId, 'failed');
   }
 }
