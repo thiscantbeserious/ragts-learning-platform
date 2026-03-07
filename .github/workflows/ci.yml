@@ -42,9 +42,13 @@ jobs:
           node-version: 25
 
       - uses: actions/cache/restore@v4
+        id: node-modules
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
 
       - run: npm run build
 
@@ -66,9 +70,13 @@ jobs:
           node-version: 25
 
       - uses: actions/cache/restore@v4
+        id: node-modules
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
 
       - run: npm run lint
 
@@ -84,9 +92,13 @@ jobs:
           node-version: 25
 
       - uses: actions/cache/restore@v4
+        id: node-modules
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
 
       - run: npm run test:unit
 
@@ -102,9 +114,13 @@ jobs:
           node-version: 25
 
       - uses: actions/cache/restore@v4
+        id: node-modules
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
 
       - run: npm run test:snapshot
 
@@ -123,9 +139,13 @@ jobs:
           node-version: 25
 
       - uses: actions/cache/restore@v4
+        id: node-modules
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
 
       - run: npx playwright install --with-deps chromium
 
