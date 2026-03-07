@@ -66,7 +66,7 @@ This project is licensed under AGPL-3.0. Be aware of its implications when contr
 | Frontend (Vite + Vue 3) | `npm run dev:client` | 5173 | Proxies `/api` to backend on port 3000 |
 | Both (combined) | `npm run dev` | 3000 + 5173 | Uses `concurrently` |
 
-No external databases, Redis, or Docker containers are needed for development.
+No external databases, Redis, or Docker containers are needed for development. The project targets Node 25 (see `.nvmrc`); the update script runs `nvm install` to match.
 
 ### Testing
 
