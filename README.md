@@ -2,6 +2,10 @@
 
 > Loop and Loop - round and round until you understand, both the human and the agent, burning with intent.
 
+<img src="VISION.svg" alt="The Asynchronous Refinement Loop" />
+
+*See [VISION.md](VISION.md) for a full vision walkthrough.*
+
 - Self-Hosted, Whitelable Platform for Individuals, Teams and Companies
 - Retroactive Learning of what Agents did in Detail (not just looking at a Wall of Text)
 - Adding Context as to what they could do better next time (not just relying on `auto-repl` loops)

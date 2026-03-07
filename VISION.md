@@ -112,8 +112,8 @@ flowchart TD
         Agent -->|works| Human([Human])
     end
 
-    Session-->Logs
-    Logs[(Full Session Logs)] --> Platform
+    Session -->|raw output| Adapter{{"🔌 Adapter"}}
+    Adapter -->|normalized sessions| Platform
 
     subgraph Platform["Erika Platform"]
         direction LR
