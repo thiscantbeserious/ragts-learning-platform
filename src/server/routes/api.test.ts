@@ -552,6 +552,20 @@ describe('API Routes', () => {
       expect(corruptSection.snapshot).toBeNull();
     });
 
+    it('should return 500 when list sessions fails', async () => {
+      // Create a separate app with a failing repository
+      const failApp = new Hono();
+      const failingRepo = {
+        findAll: () => { throw new Error('DB connection lost'); },
+      } as unknown as SessionAdapter;
+      failApp.get('/api/sessions', (c) => handleListSessions(c, failingRepo));
+
+      const res = await failApp.fetch(new Request('http://localhost/api/sessions'));
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to list sessions');
+    });
+
     it('should handle delete when file is already removed', async () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -569,6 +583,29 @@ describe('API Routes', () => {
         new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
       );
       expect(deleteRes.status).toBe(200);
+    });
+
+    it('should return 500 when upload storage fails', async () => {
+      // Create app with a storage adapter that fails on save
+      const failApp = new Hono();
+      const failStorage = {
+        save: () => { throw new Error('Disk full'); },
+        read: storageAdapter.read.bind(storageAdapter),
+        delete: storageAdapter.delete.bind(storageAdapter),
+        exists: storageAdapter.exists.bind(storageAdapter),
+      } as unknown as StorageAdapter;
+      failApp.post('/api/upload', (c) =>
+        handleUpload(c, sessionRepository, sectionRepository, failStorage, 250)
+      );
+
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to save file');
     });
   });
 });
