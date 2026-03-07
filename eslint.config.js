@@ -39,6 +39,14 @@ export default tseslint.config(
   },
 
   {
+    files: ['src/server/**/*.ts'],
+    ignores: ['**/*.test.ts', 'src/server/scripts/**'],
+    rules: {
+      'no-console': 'error',
+    },
+  },
+
+  {
     files: ['**/*.vue'],
     languageOptions: {
       parserOptions: {
@@ -81,6 +89,7 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-console': 'off',
     },
   },
 
@@ -88,7 +97,6 @@ export default tseslint.config(
     files: [
       'scripts/**/*.ts',
       'src/server/scripts/**/*.ts',
-      'src/server/start.ts',
     ],
     rules: {
       'no-console': 'off',
