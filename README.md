@@ -1,5 +1,17 @@
 # Erika: The Self-Hosted, Collaborative Training Platform for both Agents and Humans 
 
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=bugs)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=coverage)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+
 > Loop and Loop - round and round until you understand, both the human and the agent, burning with intent.
 
 <img src="VISION.svg" alt="The Asynchronous Refinement Loop" />
