@@ -6,6 +6,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -136,3 +140,23 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
+
+      - name: Notify snapshot mismatch
+        if: failure() && github.event_name == 'pull_request'
+        run: |
+          EXISTING=$(gh pr view ${{ github.event.pull_request.number }} --comments --json comments \
+            --jq '[.comments[] | select(.body | contains("Visual snapshot mismatch"))] | length')
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Snapshot mismatch comment already posted, skipping"
+            exit 0
+          fi
+          gh pr comment ${{ github.event.pull_request.number }} --body \
+            "**Visual snapshot mismatch detected**
+
+          E2E visual tests failed because screenshots differ from the committed baselines.
+
+          **To review:** download the \`playwright-report\` artifact from this workflow run.
+
+          **To update baselines:** comment \`/update-snapshots\` on this PR. This will regenerate all visual baselines on the CI runner and commit them to your branch."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
