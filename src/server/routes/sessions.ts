@@ -19,7 +19,7 @@ export async function handleListSessions(
 ): Promise<Response> {
   try {
     const sessions = await repository.findAll();
-    return c.json(sessions.map(({ filepath, ...rest }) => rest));
+    return c.json(sessions.map(({ filepath: _filepath, ...rest }) => rest));
   } catch (err) {
     console.error('List sessions error:', err);
     return c.json(

@@ -4,7 +4,7 @@
  *
  * Uses in-memory repository mocks to isolate the pipeline logic.
  */
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { processSessionPipeline } from '../../../src/server/processing/session-pipeline.js';
@@ -16,8 +16,8 @@ beforeAll(async () => {
 
 const TEST_DATA_DIR = join(__dirname, '../../.test-data');
 
-/** Create a temp .cast file and return its path. */
-function writeTempCast(content: string, name: string): string {
+/** Create a temp .cast file and return its path (kept for future use). */
+function _writeTempCast(content: string, name: string): string {
   mkdirSync(TEST_DATA_DIR, { recursive: true });
   const filePath = join(TEST_DATA_DIR, name);
   writeFileSync(filePath, content, 'utf-8');

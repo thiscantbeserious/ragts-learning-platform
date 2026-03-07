@@ -52,7 +52,7 @@ export class NdjsonStream {
           }
           // Invalid event format: skip silently
         }
-      } catch (error) {
+      } catch {
         // Malformed JSON: skip silently
         continue;
       }

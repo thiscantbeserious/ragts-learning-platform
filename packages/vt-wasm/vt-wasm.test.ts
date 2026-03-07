@@ -8,7 +8,6 @@
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { initVt, createVt } from './index.js';
-import type { VtInstance } from './index.js';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -210,7 +209,7 @@ describe('vt-wasm', () => {
       // Write to primary screen
       vt.feed('Primary screen content');
       const primaryView = vt.getView();
-      const primaryText = primaryView.lines[0].spans
+      const _primaryText = primaryView.lines[0].spans
         .map(span => span.text)
         .join('');
 
