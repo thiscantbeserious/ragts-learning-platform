@@ -585,6 +585,31 @@ describe('API Routes', () => {
       expect(deleteRes.status).toBe(200);
     });
 
+    it('should handle delete when storage throws', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Create app with storage that throws on delete
+      const failApp = new Hono();
+      const failStorage = {
+        delete: () => { throw new Error('Permission denied'); },
+      } as unknown as StorageAdapter;
+      failApp.delete('/api/sessions/:id', (c) =>
+        handleDeleteSession(c, sessionRepository, failStorage)
+      );
+
+      // Should still succeed — DB is source of truth, file delete is best-effort
+      const res = await failApp.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+      );
+      expect(res.status).toBe(200);
+    });
+
     it('should return 500 when upload storage fails', async () => {
       // Create app with a storage adapter that fails on save
       const failApp = new Hono();
