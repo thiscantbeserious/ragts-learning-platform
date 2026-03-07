@@ -50,13 +50,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 25
+          node-version-file: '.nvmrc'
 
       - uses: actions/cache@v4
         id: node-modules
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+          key: node-modules-${{ runner.os }}-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
 
       - if: steps.node-modules.outputs.cache-hit != 'true'
         run: npm ci
