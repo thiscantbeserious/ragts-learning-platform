@@ -12,6 +12,7 @@
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D22.12%20%7C%7C%20%3E%3D24%20LTS-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 > Loop and Loop - round and round until you understand, both the human and the agent, burning with intent.
 
@@ -82,7 +83,7 @@ The is currently largely powered by [Agent Session Recorder (AGR)](https://githu
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24 LTS (recommended) or 22.12+ LTS
 - npm
 
 ### Development
