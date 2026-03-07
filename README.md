@@ -1,5 +1,6 @@
 # Erika: The Self-Hosted, Collaborative Training Platform for both Agents and Humans 
 
+[![CI](https://github.com/thiscantbeserious/erika/actions/workflows/ci.yml/badge.svg)](https://github.com/thiscantbeserious/erika/actions/workflows/ci.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)

@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install:
+    name: Install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+  build:
+    name: Build
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache/restore@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  lint:
+    name: Lint
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache/restore@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npm run lint
+
+  test-unit:
+    name: Unit Tests
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache/restore@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npm run test:unit
+
+  test-snapshot:
+    name: Snapshot Tests
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache/restore@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npm run test:snapshot
+
+  test-e2e:
+    name: E2E Tests
+    needs: install
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache/restore@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run test:visual
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: Notify snapshot mismatch
+        if: failure() && github.event_name == 'pull_request'
+        run: |
+          EXISTING=$(gh pr view ${{ github.event.pull_request.number }} --comments --json comments \
+            --jq '[.comments[] | select(.body | contains("Visual snapshot mismatch"))] | length')
+          if [ "$EXISTING" -gt 0 ]; then
+            echo "Snapshot mismatch comment already posted, skipping"
+            exit 0
+          fi
+          gh pr comment ${{ github.event.pull_request.number }} --body \
+            "**Visual snapshot mismatch detected**
+
+          E2E visual tests failed because screenshots differ from the committed baselines.
+
+          **To review:** download the \`playwright-report\` artifact from this workflow run.
+
+          **To update baselines:** comment \`/update-snapshots\` on this PR. This will regenerate all visual baselines on the CI runner and commit them to your branch."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

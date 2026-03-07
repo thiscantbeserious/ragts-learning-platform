@@ -1,0 +1,93 @@
+name: Update Visual Snapshots
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update Snapshots
+    if: >-
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-snapshots') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: React to comment
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions \
+            -f content=rocket --silent
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR branch
+        id: pr
+        run: |
+          PR_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.issue.number }})
+          REF=$(echo "$PR_JSON" | jq -r .head.ref)
+          REPO=$(echo "$PR_JSON" | jq -r .head.repo.full_name)
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "repo=$REPO" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reject fork PRs
+        if: steps.pr.outputs.repo != github.repository
+        run: |
+          gh pr comment ${{ github.event.issue.number }} \
+            --body "Cannot update snapshots on fork PRs. Please update baselines from the upstream repository."
+          exit 1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25
+
+      - uses: actions/cache@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-25-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npx playwright test --update-snapshots
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/visual/__screenshots__/
+          if git diff --cached --quiet; then
+            echo "No snapshot changes detected"
+            echo "updated=false" >> "$GITHUB_ENV"
+          else
+            CHANGED=$(git diff --cached --name-only | wc -l)
+            git commit --no-verify -m "test(ci): update ${CHANGED} visual baselines from CI [snapshot-update]"
+            git push
+            echo "updated=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Comment result
+        run: |
+          if [ "$updated" = "true" ]; then
+            gh pr comment ${{ github.event.issue.number }} \
+              --body "Visual baselines regenerated on \`ubuntu-latest\` and committed to this branch. CI will re-run to verify."
+          else
+            gh pr comment ${{ github.event.issue.number }} \
+              --body "No snapshot changes detected — baselines already match the CI runner."
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
