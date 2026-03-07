@@ -443,4 +443,35 @@ describe('API Routes', () => {
       expect(sessionData.event_count).toBeGreaterThan(0);
     });
   });
+
+  describe('Error paths', () => {
+    it('should return 500 when session file is missing from filesystem', async () => {
+      // Upload a session first
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Delete the file from filesystem but keep DB record
+      await storageAdapter.delete(uploadData.id);
+
+      // GET should fail because file is gone
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      expect(getRes.status).toBe(404);
+      const body = await getRes.json();
+      expect(body.error).toContain('not found');
+    });
+
+    it('should return 404 when deleting non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/does-not-exist', { method: 'DELETE' })
+      );
+      expect(res.status).toBe(404);
+    });
+  });
 });
