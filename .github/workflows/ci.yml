@@ -6,10 +6,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: read
-  pull-requests: write
-
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -116,6 +112,9 @@ jobs:
     name: E2E Tests
     needs: install
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 

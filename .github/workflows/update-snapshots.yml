@@ -13,7 +13,8 @@ jobs:
     name: Update Snapshots
     if: >-
       github.event.issue.pull_request &&
-      contains(github.event.comment.body, '/update-snapshots')
+      contains(github.event.comment.body, '/update-snapshots') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     steps:
       - name: React to comment
@@ -27,7 +28,19 @@ jobs:
         id: pr
         run: |
           PR_JSON=$(gh api repos/${{ github.repository }}/pulls/${{ github.event.issue.number }})
-          echo "ref=$(echo "$PR_JSON" | jq -r .head.ref)" >> "$GITHUB_OUTPUT"
+          REF=$(echo "$PR_JSON" | jq -r .head.ref)
+          REPO=$(echo "$PR_JSON" | jq -r .head.repo.full_name)
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "repo=$REPO" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Reject fork PRs
+        if: steps.pr.outputs.repo != github.repository
+        run: |
+          gh pr comment ${{ github.event.issue.number }} \
+            --body "Cannot update snapshots on fork PRs. Please update baselines from the upstream repository."
+          exit 1
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
