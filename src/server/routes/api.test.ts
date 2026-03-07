@@ -473,5 +473,53 @@ describe('API Routes', () => {
       );
       expect(res.status).toBe(404);
     });
+
+    it('should return 404 when redetecting non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/nonexistent/redetect', { method: 'POST' })
+      );
+      expect(res.status).toBe(404);
+    });
+
+    it('should handle redetect on session with missing file', async () => {
+      // Upload then delete the file (keep DB record)
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      await storageAdapter.delete(uploadData.id);
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}/redetect`, { method: 'POST' })
+      );
+      // Redetect reads file — should fail since file is gone
+      expect([404, 500]).toContain(res.status);
+    });
+
+    it('should handle session with corrupt snapshot JSON', async () => {
+      // Upload a valid session
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Corrupt the snapshot in the DB directly
+      await sessionRepository.updateSnapshot(uploadData.id, '{invalid json');
+
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      // Should still return session, just with null snapshot
+      expect(getRes.status).toBe(200);
+      const body = await getRes.json();
+      expect(body.snapshot).toBeNull();
+    });
   });
 });
