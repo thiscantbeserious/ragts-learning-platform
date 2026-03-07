@@ -443,4 +443,215 @@ describe('API Routes', () => {
       expect(sessionData.event_count).toBeGreaterThan(0);
     });
   });
+
+  describe('Error paths', () => {
+    it('should return 404 when session file is missing from filesystem', async () => {
+      // Upload a session first
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Delete the file from filesystem but keep DB record
+      await storageAdapter.delete(uploadData.id);
+
+      // GET should fail because file is gone
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      expect(getRes.status).toBe(404);
+      const body = await getRes.json();
+      expect(body.error).toContain('not found');
+    });
+
+    it('should return 404 when deleting non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/does-not-exist', { method: 'DELETE' })
+      );
+      expect(res.status).toBe(404);
+    });
+
+    it('should return 404 when redetecting non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/nonexistent/redetect', { method: 'POST' })
+      );
+      expect(res.status).toBe(404);
+    });
+
+    it('should handle redetect on session with missing file', async () => {
+      // Upload then delete the file (keep DB record)
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      await storageAdapter.delete(uploadData.id);
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}/redetect`, { method: 'POST' })
+      );
+      // Redetect treats storage read failures as an internal error
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toContain('Failed to start re-detection');
+    });
+
+    it('should handle session with corrupt snapshot JSON', async () => {
+      // Upload a valid session
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Corrupt the snapshot in the DB directly
+      await sessionRepository.updateSnapshot(uploadData.id, '{invalid json');
+
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      // Should still return session, just with null snapshot
+      expect(getRes.status).toBe(200);
+      const body = await getRes.json();
+      expect(body.snapshot).toBeNull();
+    });
+
+    it('should handle session with corrupt section snapshot', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Insert a section with corrupt snapshot directly
+      await sectionRepository.create({
+        sessionId: uploadData.id,
+        type: 'detected',
+        startEvent: 0,
+        endEvent: 1,
+        label: 'corrupt',
+        snapshot: '{bad json!',
+        startLine: null,
+        endLine: null,
+      });
+
+      const getRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      expect(getRes.status).toBe(200);
+      const body = await getRes.json();
+      const corruptSection = body.sections.find((s: any) => s.label === 'corrupt');
+      expect(corruptSection.snapshot).toBeNull();
+    });
+
+    it('should return 500 when list sessions fails', async () => {
+      // Create a separate app with a failing repository
+      const failApp = new Hono();
+      const failingRepo = {
+        findAll: () => { throw new Error('DB connection lost'); },
+      } as unknown as SessionAdapter;
+      failApp.get('/api/sessions', (c) => handleListSessions(c, failingRepo));
+
+      const res = await failApp.fetch(new Request('http://localhost/api/sessions'));
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to list sessions');
+    });
+
+    it('should handle delete when file is already removed', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Remove file first (simulates filesystem issue)
+      await storageAdapter.delete(uploadData.id);
+
+      // Delete should still succeed (DB is source of truth)
+      const deleteRes = await app.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+      );
+      expect(deleteRes.status).toBe(200);
+    });
+
+    it('should handle delete when storage throws', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Create app with storage that throws on delete
+      const failApp = new Hono();
+      const failStorage = {
+        delete: () => { throw new Error('Permission denied'); },
+      } as unknown as StorageAdapter;
+      failApp.delete('/api/sessions/:id', (c) =>
+        handleDeleteSession(c, sessionRepository, failStorage)
+      );
+
+      // Should still succeed — DB is source of truth, file delete is best-effort
+      const res = await failApp.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+      );
+      expect(res.status).toBe(200);
+    });
+
+    it('should return 500 when upload storage fails', async () => {
+      // Create app with a storage adapter that fails on save
+      const failApp = new Hono();
+      const failStorage = {
+        save: () => { throw new Error('Disk full'); },
+        read: storageAdapter.read.bind(storageAdapter),
+        delete: storageAdapter.delete.bind(storageAdapter),
+        exists: storageAdapter.exists.bind(storageAdapter),
+      } as unknown as StorageAdapter;
+      failApp.post('/api/upload', (c) =>
+        handleUpload(c, sessionRepository, sectionRepository, failStorage, 250)
+      );
+
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to save file');
+    });
+
+    it('should return 500 when DB insert fails during upload', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        createWithId: () => { throw new Error('UNIQUE constraint failed'); },
+      } as unknown as SessionAdapter;
+      failApp.post('/api/upload', (c) =>
+        handleUpload(c, failRepo, sectionRepository, storageAdapter, 250)
+      );
+
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Internal server error');
+    });
+  });
 });

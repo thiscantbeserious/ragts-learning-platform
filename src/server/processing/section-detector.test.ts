@@ -135,10 +135,10 @@ describe('SectionDetector', () => {
       // Small gap (below threshold) + volume burst
       const events: AsciicastEvent[] = [
         // Quiet period: small outputs
-        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', 'x'] as AsciicastEvent),
+        ...Array.from({ length: 100 }, () => [0.1, 'o', 'x'] as AsciicastEvent),
         // Small timing gap + volume burst
         [3.0, 'o', 'x'.repeat(1000)] as AsciicastEvent, // event 100: 3s gap + large output
-        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', 'x'.repeat(500)] as AsciicastEvent),
+        ...Array.from({ length: 100 }, () => [0.1, 'o', 'x'.repeat(500)] as AsciicastEvent),
       ];
 
       const detector = new SectionDetector(events);
@@ -155,9 +155,9 @@ describe('SectionDetector', () => {
     it('does not activate when timing is unreliable', () => {
       // Compressed timestamps (median < 0.1s) - volume burst should be ignored
       const events: AsciicastEvent[] = [
-        ...Array.from({ length: 100 }, (_, i) => [0.01, 'o', 'x'] as AsciicastEvent),
+        ...Array.from({ length: 100 }, () => [0.01, 'o', 'x'] as AsciicastEvent),
         [0.01, 'o', 'x'.repeat(1000)] as AsciicastEvent, // volume burst but compressed timing
-        ...Array.from({ length: 100 }, (_, i) => [0.01, 'o', 'x'] as AsciicastEvent),
+        ...Array.from({ length: 100 }, () => [0.01, 'o', 'x'] as AsciicastEvent),
       ];
 
       const detector = new SectionDetector(events);

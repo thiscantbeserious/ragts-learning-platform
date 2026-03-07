@@ -65,7 +65,7 @@ export function validateAsciicast(content: string): ValidationResult {
       };
     }
     header = normalizeHeader(raw);
-  } catch (err) {
+  } catch {
     return {
       valid: false,
       error: 'Invalid JSON in header',

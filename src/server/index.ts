@@ -1,5 +1,7 @@
 import { Hono } from 'hono';
+import { pinoLogger } from 'hono-pino';
 import { loadConfig } from './config.js';
+import { logger } from './logger.js';
 import { DatabaseFactory } from './db/database_factory.js';
 import { waitForPipelines } from './processing/index.js';
 import { handleUpload } from './routes/upload.js';
@@ -11,6 +13,19 @@ import {
 } from './routes/sessions.js';
 
 const app = new Hono();
+
+app.use(pinoLogger({
+  pino: logger,
+  http: {
+    onReqBindings: (c) => ({
+      method: c.req.method,
+      url: c.req.path,
+    }),
+    onResBindings: (c) => ({
+      status: c.res.status,
+    }),
+  },
+}));
 
 // Load configuration
 const config = loadConfig();
