@@ -55,3 +55,28 @@ When a task involves visual/CSS/design work, spawn or defer to the **Frontend De
 ## License
 
 This project is licensed under AGPL-3.0. Be aware of its implications when contributing or integrating.
+
+## Cursor Cloud specific instructions
+
+### Services
+
+| Service | Command | Port | Notes |
+|---------|---------|------|-------|
+| Backend (Hono + SQLite) | `npm run dev:server` | 3000 | Auto-creates `data/ragts.db` and `data/sessions/` |
+| Frontend (Vite + Vue 3) | `npm run dev:client` | 5173 | Proxies `/api` to backend on port 3000 |
+| Both (combined) | `npm run dev` | 3000 + 5173 | Uses `concurrently` |
+
+No external databases, Redis, or Docker containers are needed for development.
+
+### Testing
+
+- `npx vitest run` — full unit/snapshot test suite (323 tests across 29 files)
+- `npx playwright test` — visual regression tests (requires Playwright browsers: `npx playwright install`)
+- See `README.md` "Testing" section for additional commands
+
+### Gotchas
+
+- No ESLint is configured; the project has no `lint` script. Use `npx tsc --noEmit` for type checking, but note pre-existing TS errors in test files (strict null checks on test assertions, Vue SFC imports).
+- The commit-msg hook (`.husky/commit-msg`) validates commit scopes against `agents/skills/workflow/variants/*.md` and blocks snapshot file changes without `[snapshot-update]` in the message.
+- The WASM package (`packages/vt-wasm/pkg/`) is pre-built and committed; no Rust toolchain needed for development.
+- Upload endpoint is `POST /api/upload` (not `/api/sessions`). A sample `.cast` file is at `fixtures/sample.cast`.
