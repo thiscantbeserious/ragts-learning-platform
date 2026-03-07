@@ -632,5 +632,24 @@ describe('API Routes', () => {
       const body = await res.json();
       expect(body.error).toBe('Failed to save file');
     });
+
+    it('should return 500 when DB insert fails during upload', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        createWithId: () => { throw new Error('UNIQUE constraint failed'); },
+      } as unknown as SessionAdapter;
+      failApp.post('/api/upload', (c) =>
+        handleUpload(c, failRepo, sectionRepository, storageAdapter, 250)
+      );
+
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Internal server error');
+    });
   });
 });
