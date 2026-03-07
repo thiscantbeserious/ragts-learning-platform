@@ -10,10 +10,8 @@
  */
 
 import pino from 'pino';
-import { loadConfig } from './config.js';
 
-const config = loadConfig();
-const isDev = config.nodeEnv !== 'production';
+const isDev = process.env.NODE_ENV !== 'production';
 
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? (isDev ? 'debug' : 'info'),
