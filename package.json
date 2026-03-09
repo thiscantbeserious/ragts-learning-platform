@@ -7,20 +7,25 @@
   "engines": {
     "node": ">=22.12.0 || >=24"
   },
+  "imports": {
+    "#vt-wasm": "./packages/vt-wasm/index.js",
+    "#vt-wasm/types": "./packages/vt-wasm/types.js"
+  },
   "scripts": {
     "dev:client": "vite",
     "dev:server": "tsx watch src/server/start.ts",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "build": "vite build",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "build:server": "tsc -p tsconfig.build.json",
     "build:wasm": "cd packages/vt-wasm && ./build.sh",
-    "start": "NODE_ENV=production node dist/server/start.js",
+    "start": "NODE_ENV=production node dist/server/src/server/start.js",
     "test": "vitest",
     "test:unit": "vitest run --exclude tests/snapshots",
     "test:snapshot": "vitest run tests/snapshots",
     "test:visual": "npx playwright test",
     "test:all": "vitest run && npx playwright test",
     "test:update-snapshots": "vitest run tests/snapshots --update",
-    "migrate:v2": "tsx src/server/scripts/migrate-v2.ts",
+    "migrate:v2": "tsx src/server/scripts/migrate_v2.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "dev:design": "serve design -l 3333 --no-clipboard",
