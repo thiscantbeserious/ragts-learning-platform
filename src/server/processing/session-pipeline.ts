@@ -68,6 +68,10 @@ export async function processSessionPipeline(
       }
     }
 
+    if (stream.malformedLineCount > 0) {
+      log.warn({ sessionId, malformedLines: stream.malformedLineCount }, 'Skipped malformed lines in .cast file');
+    }
+
     if (!header) {
       throw new Error('No header found in .cast file');
     }

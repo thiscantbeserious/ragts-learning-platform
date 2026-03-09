@@ -18,8 +18,12 @@ export type NdjsonItem =
 /**
  * Streaming parser for .cast files.
  * Yields header first, then events one at a time.
+ * Tracks malformed lines (invalid JSON or non-array events) via malformedLineCount.
  */
 export class NdjsonStream {
+  /** Count of lines that were skipped due to malformed JSON or invalid event format. */
+  public malformedLineCount = 0;
+
   constructor(private filePath: string) {}
 
   async *[Symbol.asyncIterator](): AsyncIterator<NdjsonItem> {
@@ -49,11 +53,14 @@ export class NdjsonStream {
           // Skip if not an array (invalid event format)
           if (Array.isArray(parsed)) {
             yield { event: parsed };
+          } else {
+            // Invalid event format: count and skip
+            this.malformedLineCount++;
           }
-          // Invalid event format: skip silently
         }
       } catch {
-        // Malformed JSON: skip silently
+        // Malformed JSON: count and skip
+        this.malformedLineCount++;
         continue;
       }
     }
