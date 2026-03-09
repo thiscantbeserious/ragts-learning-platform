@@ -90,13 +90,15 @@ async function load_migration_fn(
 // Schema logging
 // ---------------------------------------------------------------------------
 
-/** Logs a human-readable summary of the schema state after each step. */
+/** Logs the full schema DDL after each migration step. */
 function log_schema_summary(label: string, schema: SchemaSnapshot): void {
   const tables = schema.entries.filter((e) => e.type === 'table');
   const indexes = schema.entries.filter((e) => e.type === 'index');
-  console.log(`  ${label}: ${tables.length} tables, ${indexes.length} indexes`);
-  for (const t of tables) {
-    console.log(`    ${t.name}`);
+  console.log(`\n  ${label}: ${tables.length} tables, ${indexes.length} indexes\n`);
+  for (const entry of schema.entries) {
+    if (entry.sql) {
+      console.log(`    [${entry.type}] ${entry.sql};\n`);
+    }
   }
 }
 
