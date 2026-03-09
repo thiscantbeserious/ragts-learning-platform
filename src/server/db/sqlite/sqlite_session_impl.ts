@@ -7,6 +7,7 @@ import type Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
 import type { Session, SessionCreate } from '../../../shared/types.js';
 import type { SessionAdapter } from '../session_adapter.js';
+import type { DetectionStatus } from '../../../shared/pipeline_events.js';
 import type { ProcessedSession } from '../../processing/types.js';
 
 /**
@@ -144,7 +145,7 @@ export class SqliteSessionImpl implements SessionAdapter {
    */
   async updateDetectionStatus(
     id: string,
-    status: 'pending' | 'processing' | 'completed' | 'failed',
+    status: DetectionStatus,
     eventCount?: number,
     detectedSectionsCount?: number
   ): Promise<void> {

@@ -14,7 +14,7 @@ import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
-import { PipelineStage, type PipelineEvent } from '../../shared/pipeline_events.js';
+import { PipelineStage, type PipelineEvent, type DetectionStatus } from '../../shared/pipeline_events.js';
 import { validate } from './stages/validate.js';
 import { detect } from './stages/detect.js';
 import { replay } from './stages/replay.js';
@@ -28,7 +28,7 @@ const log = logger.child({ module: 'orchestrator' });
 const MAX_CONCURRENT = 3;
 
 /** Maps each pipeline stage to the intermediate detection_status value. */
-const STAGE_STATUS: Record<PipelineStage, string> = {
+const STAGE_STATUS: Record<PipelineStage, DetectionStatus> = {
   [PipelineStage.Validate]: 'validating',
   [PipelineStage.Detect]: 'detecting',
   [PipelineStage.Replay]: 'replaying',
