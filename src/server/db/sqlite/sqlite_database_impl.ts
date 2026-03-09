@@ -35,7 +35,8 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
   async initialize(config: { dataDir: string; dbPath?: string }): Promise<DatabaseContext> {
     const dbPath = config.dbPath ?? join(config.dataDir, 'ragts.db');
 
-    // Always create dataDir (needed by FsStorageImpl for session files)
+    // Accepted exception: sync I/O at startup only -- runs before the HTTP server starts,
+    // so it does not block request handling. See ADR: Harden the Foundation, Decision #4.
     mkdirSync(config.dataDir, { recursive: true });
 
     // Create parent directory for custom dbPath if needed (skip for :memory:)
@@ -53,7 +54,9 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       // Enable foreign key constraints
       db.pragma('foreign_keys = ON');
 
-      // Apply base schema from sql/schema.sql
+      // Apply base schema from sql/schema.sql.
+      // Accepted exception: sync file read at startup only -- runs before the HTTP server starts.
+      // See ADR: Harden the Foundation, Decision #4.
       const schemaPath = join(__dirname, 'sql', 'schema.sql');
       const schema = readFileSync(schemaPath, 'utf-8');
       db.exec(schema);

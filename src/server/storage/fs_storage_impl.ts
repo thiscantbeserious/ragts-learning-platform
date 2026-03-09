@@ -3,7 +3,7 @@
  * Stores session files under `<dataDir>/sessions/<id>.cast`.
  */
 
-import { readFileSync, writeFileSync, unlinkSync, existsSync, mkdirSync } from 'node:fs';
+import { access, readFile, writeFile, unlink, mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import type { StorageAdapter } from './storage_adapter.js';
 
@@ -32,8 +32,8 @@ export class FsStorageImpl implements StorageAdapter {
    */
   async save(id: string, content: string): Promise<string> {
     const filepath = this.resolvePath(id);
-    mkdirSync(dirname(filepath), { recursive: true });
-    writeFileSync(filepath, content, 'utf-8');
+    await mkdir(dirname(filepath), { recursive: true });
+    await writeFile(filepath, content, 'utf-8');
     return filepath;
   }
 
@@ -43,10 +43,10 @@ export class FsStorageImpl implements StorageAdapter {
    */
   async read(id: string): Promise<string> {
     const filepath = this.resolvePath(id);
-    if (!existsSync(filepath)) {
+    if (!await this.fileExists(filepath)) {
       throw new Error(`Session file not found: ${filepath}`);
     }
-    return readFileSync(filepath, 'utf-8');
+    return readFile(filepath, 'utf-8');
   }
 
   /**
@@ -55,10 +55,10 @@ export class FsStorageImpl implements StorageAdapter {
    */
   async delete(id: string): Promise<boolean> {
     const filepath = this.resolvePath(id);
-    if (!existsSync(filepath)) {
+    if (!await this.fileExists(filepath)) {
       return false;
     }
-    unlinkSync(filepath);
+    await unlink(filepath);
     return true;
   }
 
@@ -66,6 +66,18 @@ export class FsStorageImpl implements StorageAdapter {
    * Check whether a session file exists on filesystem.
    */
   async exists(id: string): Promise<boolean> {
-    return existsSync(this.resolvePath(id));
+    return this.fileExists(this.resolvePath(id));
+  }
+
+  /**
+   * Check if a file exists using fs.access, returning false on any error.
+   */
+  private async fileExists(filepath: string): Promise<boolean> {
+    try {
+      await access(filepath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
