@@ -107,10 +107,10 @@ Instead of requiring humans to supervise agents in real-time, Erika captures eve
 Those curated insights feed back to agents as structured context. Not raw logs. Not keyword-matched snippets. Not files the agent wrote to itself. Human-validated, intent-aware context that tells agents not just what happened, but what *should* have happened — delivered however the agent can consume it.
 
 ```mermaid
-%%{ init: { 'flowchart': { 'nodeSpacing': 50, 'rankSpacing': 50 } } }%%
+%%{ init: { 'flowchart': { 'nodeSpacing': 50, 'rankSpacing': 60 } } }%%
 flowchart TD
     subgraph Session["Synchronous · Sessions"]
-        Human(["👤 Human"]) -->|prompt| Agent([Agent])
+        Human(["👤 Human"]) -->|prompt| Agent(["🤖 Agent"])
         Agent -->|works| Human
     end
 
