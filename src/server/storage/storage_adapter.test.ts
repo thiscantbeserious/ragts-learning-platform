@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * Tests for FsStorageImpl.
  * Uses temporary directories to avoid filesystem side effects.
