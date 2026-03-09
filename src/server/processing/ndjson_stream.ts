@@ -8,8 +8,8 @@
  * Handles malformed lines gracefully by skipping them.
  */
 
-import { createReadStream } from 'fs';
-import { createInterface } from 'readline';
+import { createReadStream } from 'node:fs';
+import { createInterface } from 'node:readline';
 
 export type NdjsonItem =
   | { header: any; event?: never }
@@ -24,7 +24,7 @@ export class NdjsonStream {
   /** Count of lines that were skipped due to malformed JSON or invalid event format. */
   public malformedLineCount = 0;
 
-  constructor(private filePath: string) {}
+  constructor(private readonly filePath: string) {}
 
   async *[Symbol.asyncIterator](): AsyncIterator<NdjsonItem> {
     const fileStream = createReadStream(this.filePath, { encoding: 'utf-8' });
@@ -48,15 +48,12 @@ export class NdjsonStream {
           // First non-empty line is always the header
           isFirstLine = false;
           yield { header: parsed };
-        } else {
+        } else if (Array.isArray(parsed)) {
           // Subsequent lines are events
-          // Skip if not an array (invalid event format)
-          if (Array.isArray(parsed)) {
-            yield { event: parsed };
-          } else {
-            // Invalid event format: count and skip
-            this.malformedLineCount++;
-          }
+          yield { event: parsed };
+        } else {
+          // Invalid event format: count and skip
+          this.malformedLineCount++;
         }
       } catch {
         // Malformed JSON: count and skip

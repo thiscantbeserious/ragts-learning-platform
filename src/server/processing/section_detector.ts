@@ -36,10 +36,10 @@ export class SectionDetector {
   private readonly MIN_SECTION_SIZE = 100;
   private readonly MAX_SECTIONS = 50;
   private readonly MERGE_WINDOW = 50;
-  private readonly TIMING_GAP_THRESHOLD = 5.0; // seconds
+  private readonly TIMING_GAP_THRESHOLD = 5; // seconds
   private readonly TIMING_RELIABILITY_THRESHOLD = 0.1; // median gap threshold
 
-  constructor(private events: AsciicastEvent[]) {}
+  constructor(private readonly events: AsciicastEvent[]) {}
 
   /**
    * Detect section boundaries using all available signals.
@@ -61,8 +61,7 @@ export class SectionDetector {
       candidates.push(...this.detectTimingGaps());
     }
 
-    candidates.push(...this.detectScreenClears());
-    candidates.push(...this.detectAltScreenExits());
+    candidates.push(...this.detectScreenClears(), ...this.detectAltScreenExits());
 
     if (timingReliable) {
       candidates.push(...this.detectVolumeBursts());
@@ -122,7 +121,7 @@ export class SectionDetector {
     }
 
     // After last marker
-    const lastMarkerIndex = sortedMarkers[sortedMarkers.length - 1].index;
+    const lastMarkerIndex = sortedMarkers.at(-1)!.index;
     if (this.events.length - lastMarkerIndex - 1 >= this.MIN_SECTION_SIZE) {
       const segmentEvents = this.events.slice(lastMarkerIndex + 1);
       const segmentBoundaries = new SectionDetector(segmentEvents).detect(false);
@@ -224,7 +223,7 @@ export class SectionDetector {
         if (data.includes('\x1b[2J')) {
           candidates.push({
             eventIndex: i,
-            score: 1.0,
+            score: 1,
             signals: ['screen_clear'],
           });
         }
@@ -287,7 +286,7 @@ export class SectionDetector {
       if (precedingAvg > 0 && currentVolume > precedingAvg * BURST_THRESHOLD) {
         // Check if there's also a timing gap (even if small)
         const gap = this.events[i][0];
-        if (gap > 1.0) {
+        if (gap > 1) {
           // Small bonus for volume burst
           candidates.push({
             eventIndex: i,

@@ -65,6 +65,31 @@ function lineKey(line: SnapshotLine): string {
 }
 
 /**
+ * Check if all lines between index `from` (exclusive) and `to` (exclusive) are trivial.
+ * Trivial means blank or whitespace-only (character count <= TRIVIAL_THRESHOLD).
+ */
+function allLinesBetweenTrivial(rawLines: SnapshotLine[], from: number, to: number): boolean {
+  for (let k = from + 1; k < to; k++) {
+    if (lineKey(rawLines[k]).length > TRIVIAL_THRESHOLD) return false;
+  }
+  return true;
+}
+
+/**
+ * Find the stutter partner for line at index `i`: the nearest following index j
+ * within STUTTER_WINDOW where the text matches and all lines in between are trivial.
+ * Returns -1 if no partner found.
+ */
+function findStutterPartner(rawLines: SnapshotLine[], i: number, key: string): number {
+  const limit = Math.min(i + STUTTER_WINDOW, rawLines.length - 1);
+  for (let j = i + 1; j <= limit; j++) {
+    if (lineKey(rawLines[j]) !== key) continue;
+    if (allLinesBetweenTrivial(rawLines, i, j)) return j;
+  }
+  return -1;
+}
+
+/**
  * Pre-scan raw lines for "stutters" — short partial renders immediately
  * followed by a more complete render of the same content.
  *
@@ -79,25 +104,150 @@ function detectStutters(rawLines: SnapshotLine[]): Set<number> {
     const key = lineKey(rawLines[i]);
     if (key.length <= TRIVIAL_THRESHOLD) continue;
 
-    for (let j = i + 1; j <= Math.min(i + STUTTER_WINDOW, rawLines.length - 1); j++) {
-      if (lineKey(rawLines[j]) !== key) continue;
+    const partner = findStutterPartner(rawLines, i, key);
+    if (partner === -1) continue;
 
-      // Check all lines between i and j are trivial
-      let allTrivial = true;
-      for (let k = i + 1; k < j; k++) {
-        if (lineKey(rawLines[k]).length > TRIVIAL_THRESHOLD) {
-          allTrivial = false;
-          break;
-        }
-      }
-      if (!allTrivial) continue;
-
-      // Mark i through j-1 for removal (keep j onward)
-      for (let k = i; k < j; k++) skip.add(k);
-      break;
-    }
+    // Mark i through partner-1 for removal (keep partner onward)
+    for (let k = i; k < partner; k++) skip.add(k);
   }
   return skip;
+}
+
+/** State shared across epoch processing helpers. */
+interface DeduplicationState {
+  rawLines: SnapshotLine[];
+  cleanLines: SnapshotLine[];
+  rawToCleanMap: Map<number, number>;
+  cleanIndex: Map<string, number[]>;
+  stutterSkip: Set<number>;
+}
+
+/**
+ * Add a line to the clean document and update the hash index.
+ * Returns the clean position assigned to this line.
+ */
+function addToClean(state: DeduplicationState, rawIdx: number, line: SnapshotLine): number {
+  const cleanPos = state.cleanLines.length;
+  state.cleanLines.push(line);
+  state.rawToCleanMap.set(rawIdx, cleanPos);
+  const key = lineKey(line);
+  let positions = state.cleanIndex.get(key);
+  if (!positions) {
+    positions = [];
+    state.cleanIndex.set(key, positions);
+  }
+  positions.push(cleanPos);
+  return cleanPos;
+}
+
+/**
+ * Find the longest contiguous block starting at epoch offset `i` that matches
+ * consecutive lines already in the clean document.
+ * Returns { bestLen, bestCleanStart } — bestLen=0 means no match >= MIN_MATCH.
+ */
+function findBestBlock(
+  state: DeduplicationState,
+  epochStart: number,
+  epochLen: number,
+  i: number
+): { bestLen: number; bestCleanStart: number } {
+  const key = lineKey(state.rawLines[epochStart + i]);
+  const candidates = state.cleanIndex.get(key);
+  let bestLen = 0;
+  let bestCleanStart = -1;
+
+  if (!candidates) return { bestLen, bestCleanStart };
+
+  for (const cleanPos of candidates) {
+    let len = 0;
+    while (
+      i + len < epochLen &&
+      cleanPos + len < state.cleanLines.length &&
+      lineKey(state.rawLines[epochStart + i + len]) === lineKey(state.cleanLines[cleanPos + len])
+    ) {
+      len++;
+    }
+    if (len > bestLen) {
+      bestLen = len;
+      bestCleanStart = cleanPos;
+    }
+  }
+
+  return { bestLen, bestCleanStart };
+}
+
+/**
+ * Process a single epoch range against the accumulated clean document.
+ * Re-rendered blocks (>= MIN_MATCH consecutive matches) are mapped to existing positions.
+ * Genuinely new lines are appended and immediately indexed for future epochs.
+ */
+function processEpoch(
+  state: DeduplicationState,
+  epochStart: number,
+  epochEnd: number
+): void {
+  const epochLen = epochEnd - epochStart;
+  if (epochLen === 0) return;
+
+  let i = 0;
+  while (i < epochLen) {
+    const rawIdx = epochStart + i;
+
+    // Skip stuttered lines (transient partial renders)
+    if (state.stutterSkip.has(rawIdx)) {
+      i++;
+      continue;
+    }
+
+    const { bestLen, bestCleanStart } = findBestBlock(state, epochStart, epochLen, i);
+
+    if (bestLen >= MIN_MATCH) {
+      // Map block lines to existing clean positions
+      for (let j = 0; j < bestLen; j++) {
+        state.rawToCleanMap.set(epochStart + i + j, bestCleanStart + j);
+      }
+      i += bestLen;
+    } else {
+      // New content: append to clean doc (immediately available for future matches)
+      addToClean(state, epochStart + i, state.rawLines[epochStart + i]);
+      i++;
+    }
+  }
+}
+
+/**
+ * Slice epoch boundaries into { start, end } ranges covering the full raw line array.
+ */
+function buildEpochRanges(
+  epochBoundaries: EpochBoundary[],
+  totalLines: number
+): { start: number; end: number }[] {
+  const ranges: { start: number; end: number }[] = [];
+  let prevEnd = 0;
+  for (const boundary of epochBoundaries) {
+    ranges.push({ start: prevEnd, end: boundary.rawLineCount });
+    prevEnd = boundary.rawLineCount;
+  }
+  ranges.push({ start: prevEnd, end: totalLines });
+  return ranges;
+}
+
+/**
+ * Precompute rawLineCount → cleanLineCount mapping array.
+ * Entry [i+1] holds the max clean position seen across raw lines 0..i.
+ */
+function buildRawToCleanCountArray(
+  rawToCleanMap: Map<number, number>,
+  rawLineCount: number
+): number[] {
+  const maxCleanAtRaw = new Array(rawLineCount + 1).fill(0);
+  let runningMax = 0;
+  for (let i = 0; i < rawLineCount; i++) {
+    const c = rawToCleanMap.get(i);
+    if (c !== undefined) runningMax = Math.max(runningMax, c + 1);
+    maxCleanAtRaw[i + 1] = runningMax;
+  }
+  return maxCleanAtRaw;
 }
 
 /**
@@ -134,107 +284,30 @@ export function buildCleanDocument(
   }
 
   const rawLines = rawSnapshot.lines;
-  const cleanLines: SnapshotLine[] = [];
-  const rawToCleanMap = new Map<number, number>();
-
-  // Pre-scan for stutters (partial TUI renders quickly superseded by full renders).
-  // Marked lines are skipped during dedup — they represent transient animation frames.
-  const stutterSkip = detectStutters(rawLines);
-
-  // Hash index: lineText → sorted array of clean positions with that text.
-  // Used for O(1) candidate lookups when scanning epoch lines.
-  const cleanIndex = new Map<string, number[]>();
-
-  /** Add a line to the clean document and update the hash index. */
-  function addToClean(rawIdx: number, line: SnapshotLine): number {
-    const cleanPos = cleanLines.length;
-    cleanLines.push(line);
-    rawToCleanMap.set(rawIdx, cleanPos);
-    const key = lineKey(line);
-    let positions = cleanIndex.get(key);
-    if (!positions) {
-      positions = [];
-      cleanIndex.set(key, positions);
-    }
-    positions.push(cleanPos);
-    return cleanPos;
-  }
-
-  // Extract epoch ranges from raw lines
-  const epochRanges: { start: number; end: number }[] = [];
-  let prevEnd = 0;
-  for (const boundary of epochBoundaries) {
-    epochRanges.push({ start: prevEnd, end: boundary.rawLineCount });
-    prevEnd = boundary.rawLineCount;
-  }
-  epochRanges.push({ start: prevEnd, end: rawLines.length });
+  const state: DeduplicationState = {
+    rawLines,
+    cleanLines: [],
+    rawToCleanMap: new Map(),
+    // Hash index: lineText → sorted array of clean positions with that text.
+    // Used for O(1) candidate lookups when scanning epoch lines.
+    cleanIndex: new Map(),
+    // Pre-scan for stutters (partial TUI renders quickly superseded by full renders).
+    // Marked lines are skipped during dedup — they represent transient animation frames.
+    stutterSkip: detectStutters(rawLines),
+  };
 
   // Process all epochs (including epoch 0).
   // For each line, find the longest contiguous block starting at that position
   // that matches consecutive lines in the clean doc. Blocks >= MIN_MATCH are
   // treated as re-renders. Non-matching lines are appended as new content
   // and immediately indexed — so within-epoch AND cross-epoch duplicates are caught.
-  for (let epochIdx = 0; epochIdx < epochRanges.length; epochIdx++) {
-    const curr = epochRanges[epochIdx];
-    const currLen = curr.end - curr.start;
-    if (currLen === 0) continue;
-
-    let i = 0;
-    while (i < currLen) {
-      const rawIdx = curr.start + i;
-
-      // Skip stuttered lines (transient partial renders)
-      if (stutterSkip.has(rawIdx)) {
-        i++;
-        continue;
-      }
-
-      // Find longest contiguous block starting at position i
-      const key = lineKey(rawLines[rawIdx]);
-      const candidates = cleanIndex.get(key);
-
-      let bestLen = 0;
-      let bestCleanStart = -1;
-
-      if (candidates) {
-        for (const cleanPos of candidates) {
-          let len = 0;
-          while (
-            i + len < currLen &&
-            cleanPos + len < cleanLines.length &&
-            lineKey(rawLines[curr.start + i + len]) === lineKey(cleanLines[cleanPos + len])
-          ) {
-            len++;
-          }
-          if (len > bestLen) {
-            bestLen = len;
-            bestCleanStart = cleanPos;
-          }
-        }
-      }
-
-      if (bestLen >= MIN_MATCH) {
-        // Map block lines to existing clean positions
-        for (let j = 0; j < bestLen; j++) {
-          rawToCleanMap.set(curr.start + i + j, bestCleanStart + j);
-        }
-        i += bestLen;
-      } else {
-        // New content: append to clean doc (immediately available for future matches)
-        addToClean(curr.start + i, rawLines[curr.start + i]);
-        i++;
-      }
-    }
+  const epochRanges = buildEpochRanges(epochBoundaries, rawLines.length);
+  for (const { start, end } of epochRanges) {
+    processEpoch(state, start, end);
   }
 
-  // Precompute rawLineCount → cleanLineCount mapping.
-  const maxCleanAtRaw = new Array(rawLines.length + 1).fill(0);
-  let runningMax = 0;
-  for (let i = 0; i < rawLines.length; i++) {
-    const c = rawToCleanMap.get(i);
-    if (c !== undefined) runningMax = Math.max(runningMax, c + 1);
-    maxCleanAtRaw[i + 1] = runningMax;
-  }
+  const { cleanLines, rawToCleanMap } = state;
+  const maxCleanAtRaw = buildRawToCleanCountArray(rawToCleanMap, rawLines.length);
 
   return {
     cleanSnapshot: {

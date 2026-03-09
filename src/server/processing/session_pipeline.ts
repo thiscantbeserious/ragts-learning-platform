@@ -143,9 +143,9 @@ function buildSectionEndMap(boundaries: SectionBoundary[], eventCount: number): 
 /** Handles a resize event ('r'): parses COLSxROWS and calls vt.resize(). */
 function handleResizeEvent(vt: ReturnType<typeof createVt>, data: unknown): void {
   const sizeStr = String(data);
-  const match = sizeStr.match(/^(\d+)x(\d+)$/);
+  const match = /^(\d+)x(\d+)$/.exec(sizeStr);
   if (match?.[1] !== undefined && match?.[2] !== undefined) {
-    vt.resize(parseInt(match[1], 10), parseInt(match[2], 10));
+    vt.resize(Number.parseInt(match[1], 10), Number.parseInt(match[2], 10));
   }
 }
 

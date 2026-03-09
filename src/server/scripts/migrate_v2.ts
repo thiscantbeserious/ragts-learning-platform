@@ -196,8 +196,10 @@ async function main() {
 
 // Run if executed directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((error) => {
+  try {
+    await main();
+  } catch (error) {
     console.error('Migration failed:', error);
     process.exit(1);
-  });
+  }
 }
