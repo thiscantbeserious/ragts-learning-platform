@@ -86,7 +86,7 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       sessionRepository,
       sectionRepository,
       storageAdapter,
-      ping: async () => { db.prepare('SELECT 1').run(); },
+      ping: async () => { db.prepare('SELECT 1').get(); },
       close: async () => { db.close(); },
     };
   }

@@ -79,6 +79,8 @@ app.post('/api/sessions/:id/redetect', (c) =>
 // Serve frontend in production — single-container deployment
 if (config.nodeEnv === 'production') {
   app.use('/*', serveStatic({ root: './dist/client' }));
+  // SPA fallback: serve index.html for Vue Router history mode routes
+  app.get('*', serveStatic({ root: './dist/client', path: 'index.html' }));
 }
 
 export default app;
