@@ -16,100 +16,41 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
 import type { Database as DatabaseType } from 'better-sqlite3';
+import { BASE_SCHEMA } from '../../src/server/db/sqlite/migrations/base_schema.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '../..');
 const MIGRATIONS_DIR = join(PROJECT_ROOT, 'src/server/db/sqlite/migrations');
 
-const BASE_SCHEMA = `
-CREATE TABLE IF NOT EXISTS sessions (
-  id TEXT PRIMARY KEY,
-  filename TEXT NOT NULL,
-  filepath TEXT NOT NULL UNIQUE,
-  size_bytes INTEGER NOT NULL,
-  marker_count INTEGER DEFAULT 0,
-  uploaded_at TEXT NOT NULL,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_sessions_uploaded_at ON sessions(uploaded_at DESC);
-`.trim();
-
 // ---------------------------------------------------------------------------
 // Schema capture
 // ---------------------------------------------------------------------------
 
-interface ColumnInfo {
-  name: string;
+interface SchemaEntry {
   type: string;
-  notnull: number;
-  dflt_value: string | null;
-  pk: number;
-}
-
-interface TableSchema {
-  columns: ColumnInfo[];
-  indexes: string[];
+  name: string;
+  table_name: string;
+  sql: string | null;
 }
 
 interface SchemaSnapshot {
-  tables: Record<string, TableSchema>;
-}
-
-/** Returns all table names in the database, sorted alphabetically. */
-function get_table_names(db: DatabaseType): string[] {
-  const rows = db
-    .prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
-    .all() as Array<{ name: string }>;
-  return rows.map((r) => r.name).sort();
-}
-
-/** Returns all index names for a given table, sorted alphabetically. */
-function get_index_names(db: DatabaseType, table_name: string): string[] {
-  const rows = db
-    .prepare(
-      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=? ORDER BY name",
-    )
-    .all(table_name) as Array<{ name: string }>;
-  return rows.map((r) => r.name).sort();
-}
-
-/** Returns column metadata for a table, sorted by column id. */
-function get_columns(db: DatabaseType, table_name: string): ColumnInfo[] {
-  const rows = db.pragma(`table_info(${table_name})`) as Array<{
-    cid: number;
-    name: string;
-    type: string;
-    notnull: number;
-    dflt_value: string | null;
-    pk: number;
-  }>;
-  return rows
-    .sort((a, b) => a.cid - b.cid)
-    .map(({ name, type, notnull, dflt_value, pk }) => ({
-      name,
-      type,
-      notnull,
-      dflt_value,
-      pk,
-    }));
+  entries: SchemaEntry[];
 }
 
 /**
- * Captures the full schema state of the database.
- * Returns a deterministic object suitable for snapshot testing.
+ * Captures the full schema from sqlite_master.
+ * Includes complete DDL for tables, indexes, triggers, and views.
  */
 function capture_schema(db: DatabaseType): SchemaSnapshot {
-  const table_names = get_table_names(db);
-  const tables: Record<string, TableSchema> = {};
-
-  for (const table_name of table_names) {
-    tables[table_name] = {
-      columns: get_columns(db, table_name),
-      indexes: get_index_names(db, table_name),
-    };
-  }
-
-  return { tables };
+  const entries = db
+    .prepare(
+      `SELECT type, name, tbl_name AS table_name, sql
+       FROM sqlite_master
+       WHERE name NOT LIKE 'sqlite_%'
+       ORDER BY type, name`,
+    )
+    .all() as SchemaEntry[];
+  return { entries };
 }
 
 // ---------------------------------------------------------------------------
@@ -151,15 +92,11 @@ async function load_migration_fn(
 
 /** Logs a human-readable summary of the schema state after each step. */
 function log_schema_summary(label: string, schema: SchemaSnapshot): void {
-  const table_names = Object.keys(schema.tables).sort();
-  const total_indexes = table_names.reduce(
-    (sum, t) => sum + (schema.tables[t]?.indexes.length ?? 0),
-    0,
-  );
-  console.log(`  ${label}: ${table_names.length} tables, ${total_indexes} indexes`);
-  for (const t of table_names) {
-    const cols = schema.tables[t]?.columns.map((c) => c.name).join(', ') ?? '';
-    console.log(`    ${t}: [${cols}]`);
+  const tables = schema.entries.filter((e) => e.type === 'table');
+  const indexes = schema.entries.filter((e) => e.type === 'index');
+  console.log(`  ${label}: ${tables.length} tables, ${indexes.length} indexes`);
+  for (const t of tables) {
+    console.log(`    ${t.name}`);
   }
 }
 
