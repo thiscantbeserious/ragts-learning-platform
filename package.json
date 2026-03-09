@@ -25,7 +25,7 @@
     "test:visual": "npx playwright test",
     "test:all": "vitest run && npx playwright test",
     "test:update-snapshots": "vitest run tests/snapshots --update",
-    "test:migrations": "vitest run --config scripts/vitest.config.ts",
+    "test:migrations": "vitest run --config scripts/migrations/vitest.config.ts",
     "migrate:v2": "tsx src/server/scripts/migrate_v2.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

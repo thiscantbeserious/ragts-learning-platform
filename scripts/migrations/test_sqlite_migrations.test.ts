@@ -17,7 +17,7 @@ import Database from 'better-sqlite3';
 import type { Database as DatabaseType } from 'better-sqlite3';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = join(__dirname, '..');
+const PROJECT_ROOT = join(__dirname, '../..');
 const MIGRATIONS_DIR = join(PROJECT_ROOT, 'src/server/db/sqlite/migrations');
 
 const BASE_SCHEMA = `
