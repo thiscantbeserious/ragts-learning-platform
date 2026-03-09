@@ -14,8 +14,7 @@ import { FsStorageImpl } from '../../storage/fs_storage_impl.js';
 import type { DatabaseAdapter, DatabaseContext } from '../database_adapter.js';
 
 // Schema source: src/server/db/sqlite/sql/schema.sql (kept for documentation)
-const BASE_SCHEMA = `
--- Sessions table: metadata for uploaded asciicast v3 recordings
+export const BASE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
   filename TEXT NOT NULL,
@@ -25,8 +24,6 @@ CREATE TABLE IF NOT EXISTS sessions (
   uploaded_at TEXT NOT NULL,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
-
--- Index for efficient newest-first listing
 CREATE INDEX IF NOT EXISTS idx_sessions_uploaded_at ON sessions(uploaded_at DESC);
 `.trim();
 

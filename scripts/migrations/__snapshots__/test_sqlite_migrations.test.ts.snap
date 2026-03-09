@@ -1,0 +1,150 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SQLite schema migrations > step 0: base schema 1`] = `
+{
+  "entries": [
+    {
+      "name": "idx_sessions_uploaded_at",
+      "sql": "CREATE INDEX idx_sessions_uploaded_at ON sessions(uploaded_at DESC)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "sessions",
+      "sql": "CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  filepath TEXT NOT NULL UNIQUE,
+  size_bytes INTEGER NOT NULL,
+  marker_count INTEGER DEFAULT 0,
+  uploaded_at TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+)",
+      "table_name": "sessions",
+      "type": "table",
+    },
+  ],
+}
+`;
+
+exports[`SQLite schema migrations > step 1: 002_sections.ts 1`] = `
+{
+  "entries": [
+    {
+      "name": "idx_sections_session_id",
+      "sql": "CREATE INDEX idx_sections_session_id ON sections(session_id)",
+      "table_name": "sections",
+      "type": "index",
+    },
+    {
+      "name": "idx_sections_start_event",
+      "sql": "CREATE INDEX idx_sections_start_event ON sections(session_id, start_event)",
+      "table_name": "sections",
+      "type": "index",
+    },
+    {
+      "name": "idx_sessions_agent_type",
+      "sql": "CREATE INDEX idx_sessions_agent_type ON sessions(agent_type)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "idx_sessions_uploaded_at",
+      "sql": "CREATE INDEX idx_sessions_uploaded_at ON sessions(uploaded_at DESC)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "sections",
+      "sql": "CREATE TABLE sections (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      start_event INTEGER NOT NULL,
+      end_event INTEGER,
+      label TEXT,
+      snapshot TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    )",
+      "table_name": "sections",
+      "type": "table",
+    },
+    {
+      "name": "sessions",
+      "sql": "CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  filepath TEXT NOT NULL UNIQUE,
+  size_bytes INTEGER NOT NULL,
+  marker_count INTEGER DEFAULT 0,
+  uploaded_at TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+, agent_type TEXT, event_count INTEGER, detected_sections_count INTEGER DEFAULT 0, detection_status TEXT DEFAULT 'pending')",
+      "table_name": "sessions",
+      "type": "table",
+    },
+  ],
+}
+`;
+
+exports[`SQLite schema migrations > step 2: 003_unified_snapshot.ts 1`] = `
+{
+  "entries": [
+    {
+      "name": "idx_sections_session_id",
+      "sql": "CREATE INDEX idx_sections_session_id ON sections(session_id)",
+      "table_name": "sections",
+      "type": "index",
+    },
+    {
+      "name": "idx_sections_start_event",
+      "sql": "CREATE INDEX idx_sections_start_event ON sections(session_id, start_event)",
+      "table_name": "sections",
+      "type": "index",
+    },
+    {
+      "name": "idx_sessions_agent_type",
+      "sql": "CREATE INDEX idx_sessions_agent_type ON sessions(agent_type)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "idx_sessions_uploaded_at",
+      "sql": "CREATE INDEX idx_sessions_uploaded_at ON sessions(uploaded_at DESC)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "sections",
+      "sql": "CREATE TABLE sections (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      start_event INTEGER NOT NULL,
+      end_event INTEGER,
+      label TEXT,
+      snapshot TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP, start_line INTEGER, end_line INTEGER,
+      FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    )",
+      "table_name": "sections",
+      "type": "table",
+    },
+    {
+      "name": "sessions",
+      "sql": "CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  filepath TEXT NOT NULL UNIQUE,
+  size_bytes INTEGER NOT NULL,
+  marker_count INTEGER DEFAULT 0,
+  uploaded_at TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+, agent_type TEXT, event_count INTEGER, detected_sections_count INTEGER DEFAULT 0, detection_status TEXT DEFAULT 'pending', snapshot TEXT)",
+      "table_name": "sessions",
+      "type": "table",
+    },
+  ],
+}
+`;
