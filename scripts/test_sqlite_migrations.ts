@@ -7,7 +7,7 @@
  *
  * New migrations are picked up automatically — no edits to this file needed.
  *
- * Run with: npx tsx scripts/test_migrations.ts
+ * Run with: npx tsx scripts/test_sqlite_migrations.ts
  */
 
 import Database from 'better-sqlite3';

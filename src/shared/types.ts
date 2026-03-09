@@ -18,7 +18,7 @@ export interface Session {
   agent_type?: string | null;
   event_count?: number | null;
   detected_sections_count?: number | null;
-  detection_status?: 'queued' | 'validating' | 'detecting' | 'replaying' | 'deduplicating' | 'storing' | 'completed' | 'failed' | 'interrupted';
+  detection_status?: 'pending' | 'processing' | 'queued' | 'validating' | 'detecting' | 'replaying' | 'deduplicating' | 'storing' | 'completed' | 'failed' | 'interrupted';
   snapshot?: string | null;  // Full getAllLines() JSON from VT terminal
 }
 
