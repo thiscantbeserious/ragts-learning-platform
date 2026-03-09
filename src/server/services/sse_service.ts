@@ -10,19 +10,13 @@
 import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.js';
 import type { EventLogAdapter, EventLogEntry } from '../events/event_log_adapter.js';
 import type { PipelineEvent, PipelineEventType } from '../../shared/types/pipeline.js';
+import { ALL_PIPELINE_EVENT_TYPES } from '../../shared/types/pipeline.js';
 
 /** A buffered live event paired with its persisted event log row ID for SSE `id` field. */
 export interface PendingEvent {
   event: PipelineEvent;
   logId: number;
 }
-
-/** All pipeline event types to subscribe to. */
-export const ALL_PIPELINE_EVENT_TYPES: PipelineEventType[] = [
-  'session.uploaded', 'session.validated', 'session.detected',
-  'session.replayed', 'session.deduped', 'session.ready',
-  'session.failed', 'session.retrying',
-];
 
 export interface SseServiceDeps {
   eventBus: EventBusAdapter;

@@ -11,7 +11,7 @@ export type {
   PipelineEventType,
   PipelineEventPayload,
 } from './pipeline.js';
-export { PipelineStage } from './pipeline.js';
+export { PipelineStage, ALL_PIPELINE_EVENT_TYPES } from './pipeline.js';
 
 export type {
   AsciicastHeader,

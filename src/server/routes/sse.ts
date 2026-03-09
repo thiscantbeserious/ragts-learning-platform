@@ -24,12 +24,10 @@ import {
   getMissedEvents,
   type PendingEvent,
 } from '../services/index.js';
+import { startKeepalive } from '../utils/sse_keepalive.js';
 
 /** Terminal event types that close the SSE stream. */
 const TERMINAL_TYPES = new Set<PipelineEventType>(['session.ready', 'session.failed']);
-
-/** Keepalive interval in milliseconds. */
-const KEEPALIVE_INTERVAL_MS = 30_000;
 
 /** Minimal SSE message shape accepted by streamSSE. */
 interface SseMessage {
@@ -109,19 +107,7 @@ async function drainAndListen(
   pending: PendingEvent[],
   cleanup: () => void
 ): Promise<void> {
-  const keepaliveTimer = setInterval(async () => {
-    if (stream.closed) {
-      clearInterval(keepaliveTimer);
-      cleanup();
-      return;
-    }
-    try {
-      await stream.writeSSE({ event: 'keepalive', data: '' });
-    } catch {
-      clearInterval(keepaliveTimer);
-      cleanup();
-    }
-  }, KEEPALIVE_INTERVAL_MS);
+  const stopKeepalive = startKeepalive(stream, cleanup);
 
   try {
     while (true) {
@@ -138,7 +124,7 @@ async function drainAndListen(
       await waitForNextEvent(pending, stream);
     }
   } finally {
-    clearInterval(keepaliveTimer);
+    stopKeepalive();
     cleanup();
   }
 }

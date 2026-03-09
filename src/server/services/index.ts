@@ -13,9 +13,10 @@ export {
   registerSessionHandlers,
   unregisterSessionHandlers,
   getMissedEvents,
-  ALL_PIPELINE_EVENT_TYPES,
 } from './sse_service.js';
 export type { SseServiceDeps, PendingEvent } from './sse_service.js';
+
+export { ALL_PIPELINE_EVENT_TYPES } from '../../shared/types/pipeline.js';
 
 export { StatusService } from './status_service.js';
 export type { StatusServiceDeps, StatusResult, SessionStatusResult } from './status_service.js';

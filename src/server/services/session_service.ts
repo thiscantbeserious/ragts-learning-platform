@@ -10,7 +10,7 @@
 
 import { parseAsciicast } from '../../shared/parsers/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { SectionAdapter } from '../db/section_adapter.js';
+import type { SectionAdapter, SectionRow } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { EventBusAdapter } from '../events/event_bus_adapter.js';
@@ -170,20 +170,8 @@ function parseSnapshotJson(value: string | null | undefined, context: string, id
   }
 }
 
-/** Raw DB section row shape. */
-type DbSectionRow = {
-  id: string;
-  type: string;
-  label: string | null;
-  start_event: number;
-  end_event: number | null;
-  start_line: number | null;
-  end_line: number | null;
-  snapshot: string | null;
-};
-
 /** Transform a DB section row into the shared API response shape. */
-function transformSection(section: DbSectionRow): Section {
+function transformSection(section: SectionRow): Section {
   return {
     id: section.id,
     type: section.type as Section['type'],
