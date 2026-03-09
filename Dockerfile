@@ -13,8 +13,10 @@ RUN npm run build && \
       --module NodeNext --moduleResolution NodeNext \
       --target ES2022 --declaration --skipLibCheck
 
-# Production dependencies only (--ignore-scripts skips husky prepare hook)
-RUN rm -rf node_modules && npm ci --omit=dev --ignore-scripts
+# Production dependencies only
+# --ignore-scripts skips husky prepare hook, then rebuild native addons
+RUN rm -rf node_modules && npm ci --omit=dev --ignore-scripts && \
+    npm rebuild better-sqlite3
 
 FROM node:24-alpine AS runtime
 WORKDIR /app
