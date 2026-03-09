@@ -509,12 +509,14 @@ describe('processSessionPipeline', () => {
 
     // Verify section line ranges correctly slice the session snapshot
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
-    for (const section of sections) {
-      if (section.start_line !== null && section.end_line !== null) {
-        const sectionLines = fullSnapshot.lines.slice(section.start_line, section.end_line);
-        expect(sectionLines).toBeDefined();
-        expect(Array.isArray(sectionLines)).toBe(true);
-      }
+    const rangedSections = sections.filter(
+      (s) => s.start_line !== null && s.end_line !== null
+    );
+    expect(rangedSections.length).toBeGreaterThan(0);
+    for (const section of rangedSections) {
+      const sectionLines = fullSnapshot.lines.slice(section.start_line!, section.end_line!);
+      expect(sectionLines).toBeDefined();
+      expect(Array.isArray(sectionLines)).toBe(true);
     }
   });
 
@@ -729,15 +731,13 @@ describe('processSessionPipeline', () => {
       expect(updatedSession?.detection_status).toBe('completed');
       expect(updatedSession?.event_count).toBe(200);
 
-      // If sections were created, verify snapshots don't error
+      // If sections with snapshots exist, verify they parse correctly
       const sections = await ctx.sectionRepository.findBySessionId(session.id);
-      sections.forEach((section) => {
-        if (section.snapshot) {
-          // Should parse without error
-          const snapshot = JSON.parse(section.snapshot);
-          expect(snapshot.lines).toBeDefined();
-        }
-      });
+      const snapshotSections = sections.filter((s) => s.snapshot !== null);
+      // Not all sessions produce TUI snapshot sections — CLI sessions use line ranges
+      for (const section of snapshotSections) {
+        expect(JSON.parse(section.snapshot!).lines).toBeDefined();
+      }
     });
   });
 });

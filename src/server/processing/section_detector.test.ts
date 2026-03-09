@@ -146,10 +146,8 @@ describe('SectionDetector', () => {
 
       // The 3s gap alone might not be enough, but with volume burst it should be detected
       expect(boundaries.length).toBeGreaterThan(0);
-      if (boundaries.length > 0) {
-        expect(boundaries[0].eventIndex).toBe(100);
-        expect(boundaries[0].signals).toContain('volume_burst');
-      }
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('volume_burst');
     });
 
     it('does not activate when timing is unreliable', () => {
