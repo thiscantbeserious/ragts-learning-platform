@@ -4,6 +4,7 @@
  */
 
 import type { Session, SessionCreate } from '../../shared/types.js';
+import type { ProcessedSession } from '../processing/types.js';
 
 /**
  * Adapter for managing session entities.
@@ -56,4 +57,12 @@ export interface SessionAdapter {
    * Stores the full getAllLines() JSON from the VT terminal.
    */
   updateSnapshot(id: string, snapshot: string): Promise<void>;
+
+  /**
+   * Complete session processing. Atomically replaces all sections, stores the snapshot,
+   * and marks the session as completed. The implementation owns the transaction boundary.
+   * This is the counterpart to `updateDetectionStatus('processing')` — it transitions
+   * the session to its final processed state.
+   */
+  completeProcessing(session: ProcessedSession): Promise<void>;
 }

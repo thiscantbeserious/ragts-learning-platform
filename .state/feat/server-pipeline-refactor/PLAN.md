@@ -177,9 +177,9 @@ Considerations:
 - `readCastFile` includes the malformed line warning added in Stage 2. The warning log call moves from the pipeline coordinator into `readCastFile` since that function owns the NdjsonStream lifecycle.
 - `replaySession` must call `await initVt()` before `createVt()`, or the caller must ensure it. Since `initVt()` is safe to call multiple times, the cleanest approach is for the pipeline coordinator to call `initVt()` once before `replaySession()`.
 
-### Stage 4: Production Build Chain + Subpath Imports + CI Type Checking + Health Check + File Renames
+### Stage 4: Production Build Chain + Subpath Imports + CI Type Checking + Health Check
 
-Goal: Make `npm run start` work. Replace fragile relative paths with Node subpath imports. Inline the SQL schema. Add type checking to CI. Deepen health check with DB ping. Rename all hyphenated server files to underscore convention.
+Goal: Make `npm run start` work. Replace fragile relative paths with Node subpath imports. Inline the SQL schema. Add type checking to CI. Deepen health check with DB ping.
 
 Owner: implementer (chore variant)
 Branch: `chore/production-build`
@@ -240,11 +240,6 @@ Branch: `chore/production-build`
   - Add a `typecheck` job to `.github/workflows/ci.yml`
   - Runs `npx tsc --noEmit` after install
   - Parallel with lint, test-unit, test-snapshot jobs
-- [ ] Rename all hyphenated server files to underscore convention
-  - Rename all `src/server/**` files using hyphens to underscores (e.g., `session-pipeline.ts` → `session_pipeline.ts`)
-  - Update all import paths across the codebase to match new filenames
-  - This is done alongside the `#vt-wasm` subpath import migration to minimize churn (both touch the same import lines)
-  - The DB layer already uses underscores (`session_adapter.ts`, `sqlite_session_impl.ts`) — this brings the rest of the server code into alignment
 - [ ] Write/update tests
   - Health check: test that endpoint returns db status (integration test with in-memory SQLite)
   - Build: verify `npm run build` succeeds and `node dist/server/start.js` starts (can be manual verification)
@@ -370,8 +365,8 @@ Updated by implementer as work progresses.
 
 | Stage | Status | Branch | PR | Notes |
 |-------|--------|--------|----|-------|
-| 1 | merged | `feat/server-async-io-cleanup` | #47 | |
-| 2 | merged | `feat/server-pipeline-concurrency` | #48 | |
-| 3 | in-review | `feat/server-pipeline-refactor` | #49 | |
+| 1 | pending | `feat/server-async-io-cleanup` | | |
+| 2 | pending | `feat/server-pipeline-concurrency` | | |
+| 3 | pending | `feat/server-pipeline-refactor` | | |
 | 4 | pending | `chore/production-build` | | |
 | 5 | pending | `chore/container-ci-hardening` | | |

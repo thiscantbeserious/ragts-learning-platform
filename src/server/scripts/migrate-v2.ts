@@ -13,7 +13,6 @@
 
 import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { SectionAdapter } from '../db/section_adapter.js';
 import { processSessionPipeline } from '../processing/session-pipeline.js';
 import { NdjsonStream } from '../processing/ndjson-stream.js';
 import { extractMarkers, computeCumulativeTimes } from '../../shared/asciicast.js';
@@ -44,12 +43,10 @@ export interface MigrationResult {
  * - Returns summary of processed/skipped/failed sessions
  *
  * @param sessionRepo - Session adapter
- * @param sectionRepo - Section adapter
  * @returns Migration result summary
  */
 export async function migrateV2(
-  sessionRepo: SessionAdapter,
-  sectionRepo: SectionAdapter
+  sessionRepo: SessionAdapter
 ): Promise<MigrationResult> {
   const allSessions = await sessionRepo.findAll();
   const sessionsToProcess = allSessions.filter(
@@ -59,15 +56,13 @@ export async function migrateV2(
   console.log(`Migration v2: Found ${sessionsToProcess.length} sessions to process`);
 
   const { processed, failed } = await processPendingSessions(
-    sessionsToProcess, sectionRepo, sessionRepo
+    sessionsToProcess, sessionRepo
   );
 
   console.log('');
   console.log('Checking for sessions without unified snapshot...');
 
-  const reprocessed = await reprocessMissingSnapshots(
-    sessionRepo, sectionRepo
-  );
+  const reprocessed = await reprocessMissingSnapshots(sessionRepo);
 
   const result: MigrationResult = {
     processed,
@@ -87,7 +82,6 @@ export async function migrateV2(
 
 async function processPendingSessions(
   sessions: import('../../shared/types.js').Session[],
-  sectionRepo: SectionAdapter,
   sessionRepo: SessionAdapter
 ): Promise<{ processed: number; failed: number }> {
   let processed = 0;
@@ -100,7 +94,7 @@ async function processPendingSessions(
     try {
       console.log(`${progress} Processing session: ${session.filename} (${session.id})`);
       const markers = await extractMarkersFromFile(session.filepath);
-      await processSessionPipeline(session.filepath, session.id, markers, sectionRepo, sessionRepo);
+      await processSessionPipeline(session.filepath, session.id, markers, sessionRepo);
       processed++;
       console.log(`${progress} Success: ${session.filename}`);
     } catch (error) {
@@ -118,8 +112,7 @@ async function processPendingSessions(
 }
 
 async function reprocessMissingSnapshots(
-  sessionRepo: SessionAdapter,
-  sectionRepo: SectionAdapter
+  sessionRepo: SessionAdapter
 ): Promise<number> {
   const allSessions = await sessionRepo.findAll();
   let reprocessed = 0;
@@ -133,7 +126,7 @@ async function reprocessMissingSnapshots(
 
     try {
       const markers = await extractMarkersFromFile(fullSession.filepath);
-      await processSessionPipeline(fullSession.filepath, fullSession.id, markers, sectionRepo, sessionRepo);
+      await processSessionPipeline(fullSession.filepath, fullSession.id, markers, sessionRepo);
       reprocessed++;
       console.log(`${progress} Reprocessed: ${fullSession.filename}`);
     } catch (error) {
@@ -192,7 +185,7 @@ async function main() {
   const ctx = await impl.initialize({ dataDir: config.dataDir });
 
   try {
-    await migrateV2(ctx.sessionRepository, ctx.sectionRepository);
+    await migrateV2(ctx.sessionRepository);
   } finally {
     await ctx.close();
   }

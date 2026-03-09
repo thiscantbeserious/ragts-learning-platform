@@ -12,3 +12,4 @@ export { NdjsonStream, type NdjsonItem } from './ndjson-stream.js';
 export { SectionDetector, type SectionBoundary } from './section-detector.js';
 export { processSessionPipeline } from './session-pipeline.js';
 export { runPipeline, waitForPipelines } from './pipeline-tracker.js';
+export type { ProcessedSession } from './types.js';

@@ -7,6 +7,7 @@ import type Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
 import type { Session, SessionCreate } from '../../../shared/types.js';
 import type { SessionAdapter } from '../session_adapter.js';
+import type { ProcessedSession } from '../../processing/types.js';
 
 /**
  * SQLite-backed session implementation.
@@ -19,6 +20,9 @@ export class SqliteSessionImpl implements SessionAdapter {
   private readonly deleteByIdStmt: Database.Statement;
   private readonly updateDetectionStatusStmt: Database.Statement;
   private readonly updateSnapshotStmt: Database.Statement;
+  private readonly deleteSectionsStmt: Database.Statement;
+  private readonly insertSectionStmt: Database.Statement;
+  private readonly completeProcessingTxn: (session: ProcessedSession) => void;
 
   constructor(db: Database.Database) {
     // Prepare statements once at construction
@@ -60,6 +64,44 @@ export class SqliteSessionImpl implements SessionAdapter {
       SET snapshot = ?
       WHERE id = ?
     `);
+
+    // Section statements for completeProcessing — duplicated from SqliteSectionImpl
+    // to keep adapter implementations decoupled. This is intentional (see ADR decision #7).
+    this.deleteSectionsStmt = db.prepare(`
+      DELETE FROM sections WHERE session_id = ?
+    `);
+
+    this.insertSectionStmt = db.prepare(`
+      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    // Synchronous transaction: atomically replaces sections and marks session completed.
+    // Using db.transaction() ensures all writes succeed or none do, even if insert loop
+    // partially completes. Called from the async completeProcessing method.
+    this.completeProcessingTxn = db.transaction((session: ProcessedSession) => {
+      this.deleteSectionsStmt.run(session.sessionId);
+      for (const section of session.sections) {
+        this.insertSectionStmt.run(
+          nanoid(),
+          section.sessionId,
+          section.type,
+          section.startEvent,
+          section.endEvent,
+          section.label,
+          section.snapshot,
+          section.startLine,
+          section.endLine
+        );
+      }
+      this.updateSnapshotStmt.run(session.snapshot, session.sessionId);
+      this.updateDetectionStatusStmt.run(
+        'completed',
+        session.eventCount,
+        session.detectedSectionsCount,
+        session.sessionId
+      );
+    });
   }
 
   async create(data: SessionCreate): Promise<Session> {
@@ -120,5 +162,14 @@ export class SqliteSessionImpl implements SessionAdapter {
    */
   async updateSnapshot(id: string, snapshot: string): Promise<void> {
     this.updateSnapshotStmt.run(snapshot, id);
+  }
+
+  /**
+   * Complete session processing atomically.
+   * Replaces all sections, stores the snapshot, and marks the session as completed
+   * in a single synchronous db.transaction() — no partial state possible.
+   */
+  async completeProcessing(session: ProcessedSession): Promise<void> {
+    this.completeProcessingTxn(session);
   }
 }

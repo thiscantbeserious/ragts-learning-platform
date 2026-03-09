@@ -179,7 +179,6 @@ export async function handleDeleteSession(
 export async function handleRedetect(
   c: Context,
   sessionRepository: SessionAdapter,
-  sectionRepository: SectionAdapter,
   storageAdapter: StorageAdapter
 ): Promise<Response> {
   try {
@@ -201,9 +200,8 @@ export async function handleRedetect(
         session.filepath,
         id,
         parsed.markers,
-        sectionRepository,
         sessionRepository
-      ).catch(err => log.error({ err }, 'Re-detection failed'))
+      )
     );
 
     // Return 202 Accepted

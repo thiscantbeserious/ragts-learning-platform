@@ -10,7 +10,6 @@ import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../db/database_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { SectionAdapter } from '../db/section_adapter.js';
 import { migrateV2 } from './migrate-v2.js';
 import { initVt } from '../../../packages/vt-wasm/index.js';
 
@@ -18,7 +17,6 @@ describe('migrateV2', () => {
   let tmpDir: string;
   let ctx: DatabaseContext;
   let sessionRepo: SessionAdapter;
-  let sectionRepo: SectionAdapter;
 
   beforeEach(async () => {
     // Initialize WASM module once before tests
@@ -29,7 +27,6 @@ describe('migrateV2', () => {
     const impl = new SqliteDatabaseImpl();
     ctx = await impl.initialize({ dataDir: tmpDir });
     sessionRepo = ctx.sessionRepository;
-    sectionRepo = ctx.sectionRepository;
   });
 
   afterEach(async () => {
@@ -53,7 +50,7 @@ describe('migrateV2', () => {
     });
 
     // Run migration
-    const result = await migrateV2(sessionRepo, sectionRepo);
+    const result = await migrateV2(sessionRepo);
 
     expect(result.processed).toBe(1);
     expect(result.skipped).toBe(0);
@@ -65,7 +62,7 @@ describe('migrateV2', () => {
     expect(updatedSession?.event_count).toBe(150);
 
     // Verify marker sections were created with line ranges (CLI session)
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const markerSections = sections.filter((s) => s.type === 'marker');
 
     expect(markerSections.length).toBe(2);
@@ -111,7 +108,7 @@ describe('migrateV2', () => {
     }));
 
     // Create a marker section manually to verify no duplicates are created
-    await sectionRepo.create({
+    await ctx.sectionRepository.create({
       sessionId: session.id,
       type: 'marker',
       startEvent: 0,
@@ -123,14 +120,14 @@ describe('migrateV2', () => {
     });
 
     // Run migration
-    const result = await migrateV2(sessionRepo, sectionRepo);
+    const result = await migrateV2(sessionRepo);
 
     expect(result.processed).toBe(0);
     expect(result.skipped).toBe(1);
     expect(result.failed).toBe(0);
 
     // Verify no new sections were created
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     expect(sections.length).toBe(1);
     expect(sections[0].label).toBe('Existing Section');
   });
@@ -159,7 +156,7 @@ describe('migrateV2', () => {
     });
 
     // Run migration
-    const result = await migrateV2(sessionRepo, sectionRepo);
+    const result = await migrateV2(sessionRepo);
 
     expect(result.processed).toBe(1);
     expect(result.skipped).toBe(0);
@@ -190,19 +187,19 @@ describe('migrateV2', () => {
     });
 
     // Run migration first time
-    const result1 = await migrateV2(sessionRepo, sectionRepo);
+    const result1 = await migrateV2(sessionRepo);
     expect(result1.processed).toBe(1);
 
-    const sectionsAfterFirst = await sectionRepo.findBySessionId(session.id);
+    const sectionsAfterFirst = await ctx.sectionRepository.findBySessionId(session.id);
     const firstCount = sectionsAfterFirst.length;
 
     // Run migration second time
-    const result2 = await migrateV2(sessionRepo, sectionRepo);
+    const result2 = await migrateV2(sessionRepo);
     expect(result2.processed).toBe(0);
     expect(result2.skipped).toBe(1);
 
     // Verify no duplicate sections were created
-    const sectionsAfterSecond = await sectionRepo.findBySessionId(session.id);
+    const sectionsAfterSecond = await ctx.sectionRepository.findBySessionId(session.id);
     expect(sectionsAfterSecond.length).toBe(firstCount);
   });
 
@@ -221,7 +218,7 @@ describe('migrateV2', () => {
     });
 
     // Run migration
-    await migrateV2(sessionRepo, sectionRepo);
+    await migrateV2(sessionRepo);
 
     // Verify session metadata was updated
     const updatedSession = await sessionRepo.findById(session.id);
@@ -249,7 +246,7 @@ describe('migrateV2', () => {
     }
 
     // Run migration
-    const result = await migrateV2(sessionRepo, sectionRepo);
+    const result = await migrateV2(sessionRepo);
 
     expect(result.processed).toBe(3);
     expect(result.skipped).toBe(0);

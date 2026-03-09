@@ -54,7 +54,7 @@ app.get('/api/health', (c) => {
 
 // Upload endpoint
 app.post('/api/upload', (c) =>
-  handleUpload(c, sessionRepository, sectionRepository, storageAdapter, config.maxFileSizeMB)
+  handleUpload(c, sessionRepository, storageAdapter, config.maxFileSizeMB)
 );
 
 // Session endpoints
@@ -66,7 +66,7 @@ app.delete('/api/sessions/:id', (c) =>
   handleDeleteSession(c, sessionRepository, storageAdapter)
 );
 app.post('/api/sessions/:id/redetect', (c) =>
-  handleRedetect(c, sessionRepository, sectionRepository, storageAdapter)
+  handleRedetect(c, sessionRepository, storageAdapter)
 );
 
 export default app;
