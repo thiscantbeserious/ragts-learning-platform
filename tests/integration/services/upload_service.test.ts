@@ -8,13 +8,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import type { SessionAdapter } from '../db/session_adapter.js';
-import type { StorageAdapter } from '../storage/storage_adapter.js';
-import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
-import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
-import { UploadService } from './upload_service.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { SessionAdapter } from '../../../src/server/db/session_adapter.js';
+import type { StorageAdapter } from '../../../src/server/storage/storage_adapter.js';
+import type { JobQueueAdapter } from '../../../src/server/jobs/job_queue_adapter.js';
+import { EmitterEventBusImpl } from '../../../src/server/events/emitter_event_bus_impl.js';
+import { UploadService } from '../../../src/server/services/upload_service.js';
 
 const FIXTURES_DIR = join(new URL('.', import.meta.url).pathname, '../../../tests/fixtures');
 

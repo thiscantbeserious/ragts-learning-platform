@@ -8,10 +8,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import { PipelineStage } from '../../shared/types/pipeline.js';
-import { StatusService } from './status_service.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import { PipelineStage } from '../../../src/shared/types/pipeline.js';
+import { StatusService } from '../../../src/server/services/status_service.js';
 
 describe('StatusService.getStatus', () => {
   let testDir: string;

@@ -9,10 +9,10 @@ import { mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import Database from 'better-sqlite3';
-import { SqliteDatabaseImpl } from './sqlite_database_impl.js';
-import type { DatabaseContext } from '../database_adapter.js';
-import type { SessionAdapter } from '../session_adapter.js';
-import type { ProcessedSession } from '../../processing/types.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { SessionAdapter } from '../../../src/server/db/session_adapter.js';
+import type { ProcessedSession } from '../../../src/server/processing/types.js';
 
 describe('SqliteSessionImpl.completeProcessing', () => {
   let tmpDir: string;

@@ -8,11 +8,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
-import { PipelineStage } from '../../shared/types/pipeline.js';
-import { RetryService } from './retry_service.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import { EmitterEventBusImpl } from '../../../src/server/events/emitter_event_bus_impl.js';
+import { PipelineStage } from '../../../src/shared/types/pipeline.js';
+import { RetryService } from '../../../src/server/services/retry_service.js';
 
 describe('RetryService.retry', () => {
   let testDir: string;

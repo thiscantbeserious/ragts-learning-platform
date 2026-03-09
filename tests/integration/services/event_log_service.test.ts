@@ -8,11 +8,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import type { PipelineEvent } from '../../shared/types/pipeline.js';
-import { PipelineStage } from '../../shared/types/pipeline.js';
-import { EventLogService } from './event_log_service.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { PipelineEvent } from '../../../src/shared/types/pipeline.js';
+import { PipelineStage } from '../../../src/shared/types/pipeline.js';
+import { EventLogService } from '../../../src/server/services/event_log_service.js';
 
 describe('EventLogService.getEvents', () => {
   let testDir: string;

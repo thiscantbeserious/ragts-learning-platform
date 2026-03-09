@@ -8,10 +8,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
-import { SessionService } from './session_service.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import { EmitterEventBusImpl } from '../../../src/server/events/emitter_event_bus_impl.js';
+import { SessionService } from '../../../src/server/services/session_service.js';
 
 /** Minimal valid asciicast content for storage. */
 function buildShortCast(): string {

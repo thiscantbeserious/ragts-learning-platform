@@ -7,10 +7,10 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import type { SessionAdapter } from '../db/session_adapter.js';
-import { processSessionPipeline } from './session_pipeline.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { SessionAdapter } from '../../../src/server/db/session_adapter.js';
+import { processSessionPipeline } from '../../../src/server/processing/session_pipeline.js';
 import { initVt } from '#vt-wasm';
 
 describe('processSessionPipeline', () => {

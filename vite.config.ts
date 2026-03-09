@@ -41,6 +41,7 @@ export default defineConfig({
       ['packages/**', 'node'],
       ['src/server/**', 'node'],
       ['tests/snapshots/backend/**', 'node'],
+      ['tests/integration/**', 'node'],
     ],
     coverage: {
       reporter: ['text', 'lcov'],

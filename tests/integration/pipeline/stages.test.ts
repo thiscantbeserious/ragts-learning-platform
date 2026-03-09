@@ -9,15 +9,15 @@ import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { initVt } from '#vt-wasm';
-import { validate } from './validate.js';
-import { detect } from './detect.js';
-import { replay } from './replay.js';
-import { dedup } from './dedup.js';
-import { store } from './store.js';
-import { SqliteDatabaseImpl } from '../../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../../db/database_adapter.js';
-import type { AsciicastEvent, AsciicastHeader } from '../../../shared/types/asciicast.js';
-import type { SectionBoundary } from '../section_detector.js';
+import { validate } from '../../../src/server/processing/stages/validate.js';
+import { detect } from '../../../src/server/processing/stages/detect.js';
+import { replay } from '../../../src/server/processing/stages/replay.js';
+import { dedup } from '../../../src/server/processing/stages/dedup.js';
+import { store } from '../../../src/server/processing/stages/store.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { AsciicastEvent, AsciicastHeader } from '../../../src/shared/types/asciicast.js';
+import type { SectionBoundary } from '../../../src/server/processing/section_detector.js';
 
 // --- Helpers ---
 
