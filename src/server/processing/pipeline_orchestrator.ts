@@ -139,7 +139,16 @@ export class PipelineOrchestrator {
     }
 
     try {
-      await this.jobQueue.start(job.id);
+      try {
+        await this.jobQueue.start(job.id);
+      } catch (err) {
+        // Job was already claimed by another runner — not an error
+        if (err instanceof Error && err.message.includes('not in pending state')) {
+          log.info({ sessionId }, 'Job already claimed — skipping duplicate');
+          return;
+        }
+        throw err; // Re-throw real errors to be caught by the outer try/catch
+      }
 
       const session = await this.deps.sessionRepository.findById(sessionId);
       if (!session) throw new Error(`Session not found: ${sessionId}`);

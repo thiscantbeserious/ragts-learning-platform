@@ -12,9 +12,11 @@
  */
 export type DetectionStatus =
   | 'pending'
+  | 'queued'
   | 'processing'
   | 'completed'
   | 'failed'
+  | 'interrupted'
   | 'validating'
   | 'detecting'
   | 'replaying'

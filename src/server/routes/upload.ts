@@ -88,8 +88,15 @@ export async function handleUpload(
       });
 
       // Create job and emit session.uploaded — orchestrator picks this up
-      await jobQueue.create(id);
-      eventBus.emit({ type: 'session.uploaded', sessionId: id, filename: file.name });
+      try {
+        await jobQueue.create(id);
+        eventBus.emit({ type: 'session.uploaded', sessionId: id, filename: file.name });
+      } catch (err) {
+        try {
+          await repository.updateDetectionStatus(id, 'failed');
+        } catch { /* best-effort — don't mask the original error */ }
+        throw err;
+      }
 
       const { filepath: _fp, ...sessionData } = session;
       return c.json(sessionData, 201);

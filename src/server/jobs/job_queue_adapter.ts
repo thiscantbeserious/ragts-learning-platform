@@ -35,7 +35,7 @@ export interface JobQueueAdapter {
   findBySessionId(sessionId: string): Promise<Job | null>;
 
   /**
-   * Transition a job to the next stage and set status to running.
+   * Update the job's current_stage.
    * Used by the orchestrator when advancing through the pipeline.
    */
   advance(jobId: string, nextStage: PipelineStage): Promise<void>;
@@ -55,11 +55,11 @@ export interface JobQueueAdapter {
    */
   retry(jobId: string, fromStage: PipelineStage): Promise<void>;
 
-  /** Return all jobs in pending or running status. */
+  /** Find all jobs with status 'pending'. */
   findPending(): Promise<Job[]>;
 
   /**
-   * Mark all running jobs as failed with an 'interrupted' error.
+   * Mark running jobs as pending for re-processing.
    * Called on boot to recover jobs that were mid-flight when the server stopped.
    * Returns the count of jobs that were recovered.
    */
