@@ -1,7 +1,7 @@
 # ADR: Harden the Foundation (A1 Runtime Safety + A2 Build & Deploy)
 
 ## Status
-Accepted — implementation in progress (Stages 1-3 merged: #47, #48, #49; Stage 4: #51)
+Accepted — **COMPLETE** (All 5 stages merged: #47, #48, #49, #51, #52, #53, #54)
 
 ## Context
 
