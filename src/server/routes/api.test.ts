@@ -622,7 +622,7 @@ describe('API Routes', () => {
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, sectionRepository, failStorage, 250)
+        handleUpload(c, sessionRepository, failStorage, 250)
       );
 
       const formData = new FormData();
