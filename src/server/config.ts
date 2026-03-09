@@ -8,6 +8,8 @@ export interface Config {
   dataDir: string;
   maxFileSizeMB: number;
   nodeEnv: string;
+  /** Allowed CORS origin. Defaults to '*' for development; set CORS_ORIGIN in production. */
+  corsOrigin: string | undefined;
 }
 
 /**
@@ -31,5 +33,6 @@ export function loadConfig(): Config {
     dataDir: process.env.DATA_DIR || './data',
     maxFileSizeMB,
     nodeEnv: process.env.NODE_ENV || 'development',
+    corsOrigin: process.env.CORS_ORIGIN ?? undefined,
   };
 }

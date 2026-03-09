@@ -11,6 +11,7 @@ import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.
 import type { EventLogAdapter, EventLogEntry } from '../events/event_log_adapter.js';
 import type { PipelineEvent, PipelineEventType } from '../../shared/types/pipeline.js';
 import { ALL_PIPELINE_EVENT_TYPES } from '../../shared/types/pipeline.js';
+import { eventLogIds } from '../event_log_ids.js';
 
 /** A buffered live event paired with its persisted event log row ID for SSE `id` field. */
 export interface PendingEvent {
@@ -78,8 +79,8 @@ export function registerSessionHandlers(
   for (const type of ALL_PIPELINE_EVENT_TYPES) {
     const handler = (event: PipelineEvent) => {
       if (event.sessionId === sessionId) {
-        const logId = (event as Record<string, unknown>)['logId'];
-        pending.push({ event, logId: typeof logId === 'number' ? logId : 0 });
+        const logId = eventLogIds.get(event as object) ?? 0;
+        pending.push({ event, logId });
         notify();
       }
     };

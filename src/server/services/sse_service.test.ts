@@ -15,6 +15,7 @@ import {
 import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
 import type { EventLogAdapter, EventLogEntry } from '../events/event_log_adapter.js';
 import type { PipelineEvent } from '../../shared/types/pipeline.js';
+import { eventLogIds } from '../event_log_ids.js';
 
 /** Build a minimal mock EventLogAdapter. */
 function makeEventLog(entries: EventLogEntry[] = []): EventLogAdapter {
@@ -66,18 +67,20 @@ describe('registerSessionHandlers', () => {
     expect(pending[0]!.logId).toBe(0);
   });
 
-  it('uses the numeric logId when present on the event', () => {
+  it('uses the numeric logId from the eventLogIds Map when present', () => {
     const eventBus = new EmitterEventBusImpl();
     const pending: PendingEvent[] = [];
     const notify = vi.fn();
 
     registerSessionHandlers(eventBus, 'session-A', pending, notify);
 
-    // Attach a logId to the emitted event (as the index.ts middleware does)
-    const event = { type: 'session.ready', sessionId: 'session-A', logId: 42 } as unknown as PipelineEvent;
+    // Register the event in the side-channel Map (as index.ts middleware does)
+    const event: PipelineEvent = { type: 'session.ready', sessionId: 'session-A' };
+    eventLogIds.set(event as object, 42);
     eventBus.emit(event);
 
     expect(pending[0]!.logId).toBe(42);
+    eventLogIds.delete(event as object);
   });
 
   it('calls notify when an event matching the sessionId is pushed', () => {

@@ -26,7 +26,7 @@ export interface RetryResult {
 
 export type RetryServiceResult =
   | { ok: true; data: RetryResult }
-  | { ok: false; status: 400 | 404 | 409; error: string };
+  | { ok: false; status: 400 | 404 | 409 | 429; error: string };
 
 /**
  * RetryService validates state and restarts a failed pipeline job from the validate stage.
@@ -56,6 +56,10 @@ export class RetryService {
     const job = await this.jobQueue.findBySessionId(sessionId);
     if (!job) {
       return { ok: false, status: 400, error: 'No job found for this session — nothing to retry' };
+    }
+
+    if (job.attempts >= job.maxAttempts) {
+      return { ok: false, status: 400, error: `Maximum retry attempts (${job.maxAttempts}) exceeded` };
     }
 
     if (job.status === 'running') {

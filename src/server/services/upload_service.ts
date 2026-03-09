@@ -72,6 +72,7 @@ export class UploadService {
     }
 
     const id = nanoid();
+    const safeFilename = sanitizeFilename(file.name);
 
     let filepath: string;
     try {
@@ -89,14 +90,14 @@ export class UploadService {
     try {
       const markerCount = countMarkers(content);
       const session = await this.sessionRepository.createWithId(id, {
-        filename: file.name,
+        filename: safeFilename,
         filepath,
         size_bytes: file.size,
         marker_count: markerCount,
         uploaded_at: new Date().toISOString(),
       });
 
-      await this.triggerPipeline(id, file.name);
+      await this.triggerPipeline(id, safeFilename);
 
       const { filepath: _fp, ...sessionData } = session;
       return { ok: true, session: sessionData as Record<string, unknown> };
@@ -132,6 +133,14 @@ export class UploadService {
       log.warn({ err: cleanupErr }, 'Failed to clean up file after DB error');
     }
   }
+}
+
+/** Sanitize an uploaded filename: keep only safe characters, enforce max length. */
+function sanitizeFilename(name: string): string {
+  const base = name.split(/[/\\]/).pop() ?? 'unnamed.cast';
+  const clean = base.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const trimmed = clean.slice(0, 255);
+  return trimmed || 'unnamed.cast';
 }
 
 /** Count the number of marker events in a raw .cast file (NDJSON lines with type 'm'). */

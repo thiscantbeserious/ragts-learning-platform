@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { pinoLogger } from 'hono-pino';
 import { loadConfig } from './config.js';
@@ -7,6 +8,7 @@ import { DatabaseFactory } from './db/database_factory.js';
 import { EmitterEventBusImpl } from './events/emitter_event_bus_impl.js';
 import { PipelineOrchestrator } from './processing/pipeline_orchestrator.js';
 import type { PipelineEvent } from '../shared/types/pipeline.js';
+import { eventLogIds } from './event_log_ids.js';
 import {
   UploadService,
   SessionService,
@@ -46,6 +48,14 @@ app.use(pinoLogger({
 // Load configuration
 const config = loadConfig();
 
+app.use(cors({
+  origin: config.corsOrigin ?? '*',
+  allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Last-Event-ID'],
+  exposeHeaders: ['Content-Type'],
+  maxAge: 86400,
+}));
+
 // Initialize database and repositories through the factory
 const factory = new DatabaseFactory();
 const db = await factory.create();
@@ -67,7 +77,7 @@ for (const type of ALL_PIPELINE_EVENT_TYPES) {
   eventBus.on(type, (event) => {
     try {
       const logId = eventLog.logSync(event as PipelineEvent);
-      Object.assign(event, { logId });
+      eventLogIds.set(event as object, logId);
     } catch (err) {
       log.warn({ err, eventType: type }, 'Failed to persist event to event log');
     }
@@ -114,8 +124,8 @@ app.get('/api/health', async (c) => {
     await ping();
     return c.json({ status: 'ok', db: 'ok' });
   } catch (err) {
-    const detail = err instanceof Error ? err.message : String(err);
-    return c.json({ status: 'degraded', db: 'error', detail }, 503);
+    log.error({ err }, 'Health check failed');
+    return c.json({ status: 'degraded', db: 'error' }, 503);
   }
 });
 

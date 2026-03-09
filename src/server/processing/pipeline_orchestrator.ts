@@ -201,17 +201,25 @@ export class PipelineOrchestrator {
 
   /** Mark the job as failed, update session status, and emit session.failed. */
   private async handleStageError(jobId: string, sessionId: string, error: unknown): Promise<void> {
-    const message = error instanceof Error ? error.message : String(error);
+    const rawMessage = error instanceof Error ? error.message : String(error);
     log.error({ sessionId, err: error }, 'Pipeline stage failed');
 
     try {
       const job = await this.jobQueue.findBySessionId(sessionId);
       const stage = job?.currentStage ?? PipelineStage.Validate;
-      await this.jobQueue.fail(jobId, message);
+      await this.jobQueue.fail(jobId, rawMessage);
       await this.deps.sessionRepository.updateDetectionStatus(sessionId, 'failed');
-      this.eventBus.emit({ type: 'session.failed', sessionId, stage, error: message });
+      this.eventBus.emit({ type: 'session.failed', sessionId, stage, error: sanitizeErrorMessage(error) });
     } catch (innerErr) {
       log.error({ sessionId, err: innerErr }, 'Failed to record stage error');
     }
   }
+}
+
+/** Produce a client-safe error message, stripping file paths and stack traces. */
+function sanitizeErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return 'Processing failed';
+  const msg = error.message;
+  const cleaned = msg.replace(/\/[\w/.\\-]+/g, '<path>');
+  return cleaned.slice(0, 200);
 }
