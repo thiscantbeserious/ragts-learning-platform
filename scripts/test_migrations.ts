@@ -55,6 +55,7 @@ function discoverMigrationFiles(): string[] {
 // ---------------------------------------------------------------------------
 
 type SqliteMasterRow = { name: string; tbl_name: string };
+type PragmaTableInfoRow = { cid: number; name: string; type: string };
 
 /** Returns all user table names from sqlite_master, sorted. */
 function listTables(db: Database.Database): string[] {
@@ -70,6 +71,12 @@ function listIndexes(db: Database.Database): string[] {
     .prepare("SELECT name FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%' ORDER BY name")
     .all() as SqliteMasterRow[];
   return rows.map((r) => r.name);
+}
+
+/** Returns column definitions for a table as "name TYPE" strings, ordered by cid. */
+function listColumns(db: Database.Database, tableName: string): string[] {
+  const rows = db.prepare(`PRAGMA table_info(${tableName})`).all() as PragmaTableInfoRow[];
+  return rows.map((r) => `${r.name} ${r.type}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -123,6 +130,13 @@ function reportSchema(db: Database.Database): { tableCount: number; indexCount: 
   console.log('\nSchema after all migrations:');
   console.log(`  Tables:  ${tables.join(', ')}`);
   console.log(`  Indexes: ${indexes.join(', ')}`);
+
+  console.log('\nColumn schemas:');
+  for (const table of tables) {
+    const cols = listColumns(db, table);
+    console.log(`  Table '${table}':`);
+    console.log(`    ${cols.join(', ')}`);
+  }
 
   return { tableCount: tables.length, indexCount: indexes.length };
 }
