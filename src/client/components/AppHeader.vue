@@ -3,7 +3,12 @@
 
 <template>
   <header class="app-header">
-    <router-link to="/" class="app-header__brand">RAGTS</router-link>
+    <router-link
+      to="/"
+      class="app-header__brand"
+    >
+      RAGTS
+    </router-link>
   </header>
 </template>
 

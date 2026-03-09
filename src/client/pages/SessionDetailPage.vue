@@ -12,16 +12,44 @@ const { sections, snapshot, loading, error, filename } = useSession(sessionId);
 <template>
   <div class="session-detail-page">
     <header class="session-detail-page__header">
-      <router-link to="/" class="session-detail-page__back">&larr; Back</router-link>
-      <h1 v-if="filename" class="session-detail-page__title">{{ filename }}</h1>
+      <router-link
+        to="/"
+        class="session-detail-page__back"
+      >
+        &larr; Back
+      </router-link>
+      <h1
+        v-if="filename"
+        class="session-detail-page__title"
+      >
+        {{ filename }}
+      </h1>
     </header>
 
-    <div v-if="loading" class="session-detail-page__loading">Loading session...</div>
-    <div v-else-if="error" class="session-detail-page__error">{{ error }}</div>
-    <div v-else-if="sections.length === 0 && !snapshot" class="session-detail-page__empty">
+    <div
+      v-if="loading"
+      class="session-detail-page__loading"
+    >
+      Loading session...
+    </div>
+    <div
+      v-else-if="error"
+      class="session-detail-page__error"
+    >
+      {{ error }}
+    </div>
+    <div
+      v-else-if="sections.length === 0 && !snapshot"
+      class="session-detail-page__empty"
+    >
       This session has no content.
     </div>
-    <SessionContent v-else :snapshot="snapshot" :sections="sections" :default-collapsed="false" />
+    <SessionContent
+      v-else
+      :snapshot="snapshot"
+      :sections="sections"
+      :default-collapsed="false"
+    />
   </div>
 </template>
 

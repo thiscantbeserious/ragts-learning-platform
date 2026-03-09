@@ -21,10 +21,16 @@ defineEmits<{
     <span class="section-header__chevron">{{ collapsed ? '▸' : '▾' }}</span>
     <span class="section-header__label">{{ section.label }}</span>
     <span class="section-header__badge">{{ section.type === 'marker' ? 'Marker' : 'Detected' }}</span>
-    <span class="section-header__meta" v-if="section.startLine != null && section.endLine != null">
+    <span
+      v-if="section.startLine != null && section.endLine != null"
+      class="section-header__meta"
+    >
       L{{ section.startLine + 1 }}&ndash;L{{ section.endLine }} ({{ lineCount }} lines)
     </span>
-    <span class="section-header__meta" v-else-if="lineCount > 0">{{ lineCount }} lines (viewport)</span>
+    <span
+      v-else-if="lineCount > 0"
+      class="section-header__meta"
+    >{{ lineCount }} lines (viewport)</span>
   </button>
 </template>
 

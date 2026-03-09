@@ -88,6 +88,12 @@ describe('SqliteDatabaseImpl', () => {
     });
   });
 
+  describe('ping', () => {
+    it('should resolve without throwing when database is open', async () => {
+      await expect(ctx.ping()).resolves.not.toThrow();
+    });
+  });
+
   describe('close', () => {
     it('should allow calling close without throwing', async () => {
       await expect(ctx.close()).resolves.not.toThrow();

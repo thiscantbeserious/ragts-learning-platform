@@ -201,3 +201,34 @@ jobs:
           **To update baselines:** comment \`/update-snapshots\` on this PR. This will regenerate all visual baselines on the CI runner and commit them to your branch."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker:
+    name: Docker Build & Smoke Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t erika:ci .
+
+      - name: Smoke test
+        run: |
+          docker run -d --name erika-ci -p 3000:3000 \
+            --health-cmd="wget -q --spider http://localhost:3000/api/health || exit 1" \
+            --health-interval=2s --health-timeout=3s --health-retries=15 \
+            --health-start-period=5s erika:ci
+
+          # Wait until Docker reports healthy
+          timeout 60 sh -c 'until [ "$(docker inspect -f "{{.State.Health.Status}}" erika-ci)" = "healthy" ]; do sleep 2; done'
+
+          RESPONSE=$(curl -sf http://localhost:3000/api/health)
+          echo "$RESPONSE" | grep -q '"status":"ok"'
+          echo "Health response OK: $RESPONSE"
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker logs erika-ci
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f erika-ci || true

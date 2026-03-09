@@ -184,6 +184,25 @@ describe('SectionDetector', () => {
       expect(boundaries.length).toBe(1);
     });
 
+    it('merges candidates within 50 events, keeping first when scores are equal', () => {
+      // Two screen clears close together (same signal type = same score)
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'o', '\x1b[2J'] as AsciicastEvent, // screen clear at 100
+        ...Array.from({ length: 10 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'o', '\x1b[2J'] as AsciicastEvent, // screen clear at 111 (within 50 events of 100)
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // Should merge into one boundary (scores are equal, first wins, signals merged)
+      expect(boundaries.length).toBe(1);
+      // Both screen_clear signals should be merged
+      expect(boundaries[0]!.signals.filter(s => s === 'screen_clear').length).toBe(1);
+    });
+
     it('keeps separate boundaries when > 50 events apart', () => {
       const events: AsciicastEvent[] = [
         ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
@@ -230,6 +249,21 @@ describe('SectionDetector', () => {
 
       expect(boundaries.length).toBe(1);
       expect(boundaries[0]!.eventIndex).toBe(120);
+    });
+
+    it('drops last boundary when it creates too-small trailing section', () => {
+      // Boundary at 120, total 160 events: trailing section is 40 events (< 100 MIN_SECTION_SIZE)
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 120 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [10.0, 'o', 'gap\n'] as AsciicastEvent, // boundary at 120
+        ...Array.from({ length: 39 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // Should drop the boundary because trailing section (39 events) is < 100
+      expect(boundaries).toEqual([]);
     });
   });
 

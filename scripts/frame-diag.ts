@@ -24,7 +24,7 @@ async function main() {
   let clearScreen2J = 0;
   let clearScrollback3J = 0;
   let cursorHome = 0;
-  let eraseDisplay = 0;
+  const eraseDisplay = 0;
 
   // Find first 5 events that contain 2J or 3J and show their context
   let clearExamples = 0;

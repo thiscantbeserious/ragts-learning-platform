@@ -41,13 +41,22 @@ function onFileInput(e: Event): void {
     @drop="onDrop"
   >
     <div class="upload-zone__content">
-      <div v-if="uploading" class="upload-zone__spinner">Uploading...</div>
+      <div
+        v-if="uploading"
+        class="upload-zone__spinner"
+      >
+        Uploading...
+      </div>
       <template v-else>
-        <div class="upload-zone__icon">&#8593;</div>
+        <div class="upload-zone__icon">
+          &#8593;
+        </div>
         <p class="upload-zone__text">
           Drag & drop a <code>.cast</code> file here
         </p>
-        <p class="upload-zone__subtext">or</p>
+        <p class="upload-zone__subtext">
+          or
+        </p>
         <label class="upload-zone__button">
           Browse files
           <input
@@ -59,9 +68,17 @@ function onFileInput(e: Event): void {
         </label>
       </template>
     </div>
-    <div v-if="error" class="upload-zone__error">
+    <div
+      v-if="error"
+      class="upload-zone__error"
+    >
       <span>{{ error }}</span>
-      <button class="upload-zone__error-dismiss" @click="emit('clearError')">×</button>
+      <button
+        class="upload-zone__error-dismiss"
+        @click="emit('clearError')"
+      >
+        ×
+      </button>
     </div>
   </div>
 </template>

@@ -139,6 +139,7 @@ APPROVE, REQUEST CHANGES (list blocking items), or BLOCK.
 4. Minimum 2-3 findings -- or explain why code is exceptionally clean
 5. Never merge -- report to coordinator
 6. Code quality over process compliance -- ADR matching is secondary to correctness
+7. **NEVER modify the working tree.** No `git checkout`, `git stash`, `git reset`, `git switch`, `git restore`, `git clean`, `git apply`, or any git command that changes files or branches. You are a read-only reviewer. Use `Read`, `Grep`, `Glob` for code inspection. Use `Bash` only for running tests (`npx vitest run`, `npm run lint`) or read-only git commands (`git log`, `git diff`, `git show`). Violating this rule corrupts the implementer's working tree.
 
 ## When Blocked
 

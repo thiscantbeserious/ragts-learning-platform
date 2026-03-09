@@ -64,6 +64,14 @@ describe('validateAsciicast', () => {
     expect(result.error).toContain('empty');
   });
 
+  it('rejects whitespace-only content (treated as empty)', () => {
+    // Content with only whitespace and newlines → content.trim().length === 0 → 'File is empty'
+    const result = validateAsciicast('   \n  \n   ');
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('empty');
+    expect(result.line).toBe(0);
+  });
+
   it('rejects missing header', () => {
     const result = validateAsciicast('[0.5,"o","test"]');
     expect(result.valid).toBe(false);
@@ -82,6 +90,42 @@ describe('validateAsciicast', () => {
     expect(result.valid).toBe(false);
     expect(result.error).toContain('term.cols/term.rows');
   });
+
+  it('rejects invalid JSON in header line', () => {
+    const result = validateAsciicast('{not valid json}\n[0.1,"o","hello"]');
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('Invalid JSON in header');
+    expect(result.line).toBe(1);
+  });
+
+  it('rejects non-object header JSON', () => {
+    const result = validateAsciicast('"just a string"\n[0.1,"o","hello"]');
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('Header must be a JSON object');
+    expect(result.line).toBe(1);
+  });
+
+  it('rejects event that is not an array', () => {
+    const result = validateAsciicast('{"version":3,"width":80,"height":24}\n{"not":"an array"}');
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('Event must be an array');
+    expect(result.line).toBe(2);
+  });
+
+  it('rejects event with non-numeric timestamp', () => {
+    const result = validateAsciicast('{"version":3,"width":80,"height":24}\n["notanumber","o","data"]');
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('timestamp must be a number');
+    expect(result.line).toBe(2);
+  });
+
+  it('rejects event with non-string type', () => {
+    const result = validateAsciicast('{"version":3,"width":80,"height":24}\n[0.1,42,"data"]');
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('type must be a string');
+    expect(result.line).toBe(2);
+  });
+
 });
 
 describe('parseAsciicast', () => {
@@ -277,6 +321,15 @@ describe('Integration: full parsing flow', () => {
     const content = '{"version":3,"width":80,"height":24}\n[0.1,"o","hello\\n"]';
     const file = parseAsciicast(content);
 
+    expect(file.header.width).toBe(80);
+    expect(file.header.height).toBe(24);
+  });
+
+  it('does not overwrite existing width/height when term also has cols/rows', () => {
+    const content = '{"version":3,"width":80,"height":24,"term":{"cols":100,"rows":50}}\n[0.1,"o","hello\\n"]';
+    const file = parseAsciicast(content);
+
+    // width/height already present, should not be overwritten by term.cols/rows
     expect(file.header.width).toBe(80);
     expect(file.header.height).toBe(24);
   });

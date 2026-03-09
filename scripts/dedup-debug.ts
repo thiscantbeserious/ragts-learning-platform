@@ -61,7 +61,7 @@ async function main() {
   const HEADER_TEXT = '╭─── Claude Code v2.1.34';
   const cleanLines: SnapshotLine[] = [];
   const cleanIndex = new Map<string, number[]>();
-  let headerCleanPositions: number[] = [];
+  const headerCleanPositions: number[] = [];
   let headersDeduped = 0;
   let headersNew = 0;
 

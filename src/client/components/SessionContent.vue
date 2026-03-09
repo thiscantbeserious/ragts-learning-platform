@@ -46,7 +46,10 @@ const preambleLines = computed(() => {
 
 <template>
   <div class="terminal-chrome">
-    <div class="terminal-scroll" v-if="snapshot || sections.length > 0">
+    <div
+      v-if="snapshot || sections.length > 0"
+      class="terminal-scroll"
+    >
       <!-- Lines before first section -->
       <TerminalSnapshotComponent
         v-if="preambleLines.length > 0"
@@ -55,14 +58,20 @@ const preambleLines = computed(() => {
       />
 
       <!-- Each section: sticky header + content -->
-      <template v-for="section in sections" :key="section.id">
+      <template
+        v-for="section in sections"
+        :key="section.id"
+      >
         <SectionHeader
           :section="section"
           :collapsed="isCollapsed(section.id)"
           :line-count="getSectionLineCount(section)"
           @toggle="toggleFold(section.id)"
         />
-        <div v-if="!isCollapsed(section.id)" class="section-content">
+        <div
+          v-if="!isCollapsed(section.id)"
+          class="section-content"
+        >
           <!-- CLI section: slice from session snapshot -->
           <TerminalSnapshotComponent
             v-if="section.startLine != null && section.endLine != null && snapshot"
@@ -76,13 +85,21 @@ const preambleLines = computed(() => {
             :start-line-number="1"
           />
           <!-- Empty section -->
-          <div v-else class="section-empty">No content captured</div>
+          <div
+            v-else
+            class="section-empty"
+          >
+            No content captured
+          </div>
         </div>
       </template>
     </div>
 
     <!-- Loading / empty states -->
-    <div v-else class="terminal-empty">
+    <div
+      v-else
+      class="terminal-empty"
+    >
       No content available
     </div>
   </div>

@@ -23,6 +23,19 @@ function makeSnapshot(texts: string[]): TerminalSnapshot {
 }
 
 describe('buildCleanDocument', () => {
+  describe('edge cases', () => {
+    it('rawToClean returns 0 when clean snapshot is empty (all lines deduplicated)', () => {
+      // Empty raw snapshot with epoch boundaries — cleanLines will be empty.
+      // rawToClean should return 0 (the fallback for the empty-clean case).
+      const raw = makeSnapshot([]);
+      const epochs = [{ eventIndex: 5, rawLineCount: 0 }];
+      const result = buildCleanDocument(raw, epochs);
+
+      expect(result.rawToClean(0)).toBe(0);
+      expect(result.cleanSnapshot.lines.length).toBe(0);
+    });
+  });
+
   describe('zero epochs (identity transform)', () => {
     it('returns unchanged snapshot when no epoch boundaries', () => {
       const raw = makeSnapshot(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']);
@@ -342,7 +355,7 @@ describe('buildCleanDocument', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describe('buildCleanDocument edge cases', () => {
     it('handles empty snapshot', () => {
       const raw = makeSnapshot([]);
       const result = buildCleanDocument(raw, []);

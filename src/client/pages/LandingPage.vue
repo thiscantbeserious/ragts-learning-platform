@@ -58,7 +58,10 @@ async function onDelete(id: string): Promise<void> {
       </section>
     </main>
 
-    <ToastContainer :toasts="toasts" @dismiss="removeToast" />
+    <ToastContainer
+      :toasts="toasts"
+      @dismiss="removeToast"
+    />
   </div>
 </template>
 

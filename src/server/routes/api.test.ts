@@ -568,6 +568,166 @@ describe('API Routes', () => {
       expect(body.error).toBe('Failed to list sessions');
     });
 
+    it('should return 500 when get session fails with non-filesystem error', async () => {
+      // Upload a session first
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Create app with repository that throws a generic (non-"not found") error on findById
+      const failApp = new Hono();
+      const failRepo = {
+        findById: () => { throw new Error('DB connection failed'); },
+      } as unknown as SessionAdapter;
+      failApp.get('/api/sessions/:id', (c) =>
+        handleGetSession(c, failRepo, sectionRepository, storageAdapter)
+      );
+
+      const res = await failApp.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to retrieve session');
+    });
+
+    it('should return 500 when deleteById returns false', async () => {
+      // Upload a session first
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const uploadData = await uploadRes.json();
+      await waitForPipelines();
+
+      // Create app with repository that returns false from deleteById
+      const failApp = new Hono();
+      const failRepo = {
+        findById: sessionRepository.findById.bind(sessionRepository),
+        deleteById: async () => false,
+      } as unknown as SessionAdapter;
+      failApp.delete('/api/sessions/:id', (c) =>
+        handleDeleteSession(c, failRepo, storageAdapter)
+      );
+
+      const res = await failApp.fetch(
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to delete session from database');
+    });
+
+    it('should return 500 when delete session throws from findById', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        findById: () => { throw new Error('DB crashed'); },
+      } as unknown as SessionAdapter;
+      failApp.delete('/api/sessions/:id', (c) =>
+        handleDeleteSession(c, failRepo, storageAdapter)
+      );
+
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to delete session');
+    });
+
+    it('should use String(err) when non-Error is thrown from list sessions', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        // Throw a non-Error value (string) to cover the String(err) branch
+        findAll: () => { throw 'string error code'; },
+      } as unknown as SessionAdapter;
+      failApp.get('/api/sessions', (c) => handleListSessions(c, failRepo));
+
+      const res = await failApp.fetch(new Request('http://localhost/api/sessions'));
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.details).toBe('string error code');
+    });
+
+    it('should use String(err) when non-Error is thrown from get session', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        findById: () => { throw 'non-error-value'; },
+      } as unknown as SessionAdapter;
+      failApp.get('/api/sessions/:id', (c) =>
+        handleGetSession(c, failRepo, sectionRepository, storageAdapter)
+      );
+
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/sessions/some-id')
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.details).toBe('non-error-value');
+    });
+
+    it('should use String(err) when non-Error is thrown from delete session', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        findById: () => { throw 42; },
+      } as unknown as SessionAdapter;
+      failApp.delete('/api/sessions/:id', (c) =>
+        handleDeleteSession(c, failRepo, storageAdapter)
+      );
+
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.details).toBe('42');
+    });
+
+    it('should use String(err) when non-Error is thrown from redetect', async () => {
+      const failApp = new Hono();
+      const failRepo = {
+        findById: () => { throw 'redetect-error'; },
+      } as unknown as SessionAdapter;
+      failApp.post('/api/sessions/:id/redetect', (c) =>
+        handleRedetect(c, failRepo, storageAdapter)
+      );
+
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/sessions/any-id/redetect', { method: 'POST' })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.details).toBe('redetect-error');
+    });
+
+    it('should use String(err) when non-Error is thrown from storage save during upload', async () => {
+      const failApp = new Hono();
+      const failStorage = {
+        save: () => { throw 'disk-quota-exceeded'; },
+        read: storageAdapter.read.bind(storageAdapter),
+        delete: storageAdapter.delete.bind(storageAdapter),
+        exists: storageAdapter.exists.bind(storageAdapter),
+      } as unknown as StorageAdapter;
+      failApp.post('/api/upload', (c) =>
+        handleUpload(c, sessionRepository, failStorage, 250)
+      );
+
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Failed to save file');
+      expect(body.details).toBe('disk-quota-exceeded');
+    });
+
     it('should handle delete when file is already removed', async () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -649,6 +809,33 @@ describe('API Routes', () => {
       const res = await failApp.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
+      expect(res.status).toBe(500);
+      const body = await res.json();
+      expect(body.error).toBe('Internal server error');
+    });
+
+    it('should return 500 when DB insert fails and cleanup delete also fails', async () => {
+      // Both DB insert and file cleanup fail — the cleanup error is swallowed, DB error is returned
+      const failApp = new Hono();
+      const failRepo = {
+        createWithId: () => { throw new Error('UNIQUE constraint failed'); },
+      } as unknown as SessionAdapter;
+      const failStorage = {
+        save: storageAdapter.save.bind(storageAdapter),
+        read: storageAdapter.read.bind(storageAdapter),
+        delete: () => { throw new Error('Permission denied on cleanup'); },
+        exists: storageAdapter.exists.bind(storageAdapter),
+      } as unknown as StorageAdapter;
+      failApp.post('/api/upload', (c) =>
+        handleUpload(c, failRepo, failStorage, 250)
+      );
+
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const res = await failApp.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      // Should still return 500 with the original DB error (cleanup error is swallowed)
       expect(res.status).toBe(500);
       const body = await res.json();
       expect(body.error).toBe('Internal server error');

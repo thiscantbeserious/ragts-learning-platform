@@ -19,7 +19,12 @@ const emit = defineEmits<{
       :class="`toast--${toast.type}`"
     >
       <span class="toast__message">{{ toast.message }}</span>
-      <button class="toast__dismiss" @click="emit('dismiss', toast.id)">×</button>
+      <button
+        class="toast__dismiss"
+        @click="emit('dismiss', toast.id)"
+      >
+        ×
+      </button>
     </div>
   </div>
 </template>

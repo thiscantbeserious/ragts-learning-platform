@@ -617,6 +617,63 @@ describe('processSessionPipeline', () => {
   });
 
   describe('Edge Cases', () => {
+    it('sets detection_status to failed when .cast file has no header', async () => {
+      // Completely empty file: NdjsonStream yields nothing, header stays null, throws 'No header found'
+      const castContent = '';
+      const filePath = join(tmpDir, 'no-header.cast');
+      writeFileSync(filePath, castContent);
+
+      const session = await sessionRepo.create({
+        filename: 'no-header.cast',
+        filepath: filePath,
+        size_bytes: castContent.length,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      await processSessionPipeline(filePath, session.id, [], sessionRepo);
+
+      const updatedSession = await sessionRepo.findById(session.id);
+      expect(updatedSession?.detection_status).toBe('failed');
+    });
+
+    it('processes session with resize events', async () => {
+      // Include resize event ('r') in the .cast file to exercise handleResizeEvent
+      const header = JSON.stringify({
+        version: 3,
+        term: { cols: 80, rows: 24 },
+      });
+
+      const events: string[] = [];
+      for (let i = 0; i < 50; i++) {
+        events.push(JSON.stringify([0.1, 'o', `Line ${i}\r\n`]));
+      }
+      // Insert resize event
+      events.push(JSON.stringify([0.1, 'r', '120x40']));
+      for (let i = 50; i < 150; i++) {
+        events.push(JSON.stringify([0.1, 'o', `Line ${i}\r\n`]));
+      }
+
+      const castContent = [header, ...events].join('\n');
+      const filePath = join(tmpDir, 'resize-session.cast');
+      writeFileSync(filePath, castContent);
+
+      const session = await sessionRepo.create({
+        filename: 'resize-session.cast',
+        filepath: filePath,
+        size_bytes: castContent.length,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      await processSessionPipeline(filePath, session.id, [], sessionRepo);
+
+      const updatedSession = await sessionRepo.findById(session.id);
+      expect(updatedSession?.detection_status).toBe('completed');
+      // 151 total events (150 output + 1 resize)
+      expect(updatedSession?.event_count).toBe(151);
+    });
+
     it('handles empty session (header only)', async () => {
       // Create .cast file with only header, no events
       const castContent = JSON.stringify({

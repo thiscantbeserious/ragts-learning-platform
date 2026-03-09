@@ -65,7 +65,7 @@ async function main() {
 
   const cleanLines: SnapshotLine[] = [];
   const cleanIndex = new Map<string, number[]>();
-  let traceEpoch = -1; // first epoch that has a header at pos >0 and there's already a header in clean
+  const traceEpoch = -1; // first epoch that has a header at pos >0 and there's already a header in clean
 
   function addToClean(line: SnapshotLine): number {
     const cleanPos = cleanLines.length;
