@@ -127,6 +127,82 @@ function detectBoundaries(events: AsciicastEvent[], markers: Marker[]): SectionB
   return boundaries;
 }
 
+/** Builds a map of (section end event index) → boundary index for O(1) lookup during replay. */
+function buildSectionEndMap(boundaries: SectionBoundary[], eventCount: number): Map<number, number> {
+  const sectionEndEvents: Map<number, number> = new Map();
+  for (let i = 0; i < boundaries.length; i++) {
+    const nextBoundary = boundaries[i + 1];
+    const endEvent = i < boundaries.length - 1 && nextBoundary !== undefined
+      ? nextBoundary.eventIndex
+      : eventCount;
+    sectionEndEvents.set(endEvent, i);
+  }
+  return sectionEndEvents;
+}
+
+/** Handles a resize event ('r'): parses COLSxROWS and calls vt.resize(). */
+function handleResizeEvent(vt: ReturnType<typeof createVt>, data: unknown): void {
+  const sizeStr = String(data);
+  const match = sizeStr.match(/^(\d+)x(\d+)$/);
+  if (match?.[1] !== undefined && match?.[2] !== undefined) {
+    vt.resize(parseInt(match[1], 10), parseInt(match[2], 10));
+  }
+}
+
+/**
+ * Tracks clear-screen events for epoch-based scrollback deduplication.
+ * Detects ESC[2J (erase display) and ESC[3J (erase scrollback) — both
+ * used by TUI apps on the primary buffer (Claude Code, Gemini CLI, Codex).
+ */
+function handleEpochTracking(
+  vt: ReturnType<typeof createVt>,
+  str: string,
+  inAltScreen: boolean,
+  eventIndex: number,
+  epochBoundaries: EpochBoundary[]
+): void {
+  if (inAltScreen) return;
+  if (!str.includes('\x1b[2J') && !str.includes('\x1b[3J')) return;
+
+  const lineCount = vt.getAllLines().lines.length;
+  // Avoid duplicate boundaries at the same line count (e.g., 2J+3J in same event)
+  if (epochBoundaries.at(-1)?.rawLineCount !== lineCount) {
+    epochBoundaries.push({ eventIndex, rawLineCount: lineCount });
+  }
+}
+
+/**
+ * Captures section data at a CLI/TUI boundary.
+ * TUI sections get a viewport snapshot; CLI sections get a line count (with viewport fallback
+ * when scrollback is full and getAllLines() has stopped growing).
+ */
+function captureSectionData(
+  vt: ReturnType<typeof createVt>,
+  inAltScreen: boolean,
+  boundaryIdx: number,
+  highWaterLineCount: number,
+  sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>
+): number {
+  if (inAltScreen) {
+    // TUI section: capture viewport snapshot
+    sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
+    return highWaterLineCount;
+  }
+
+  // CLI section: record line count AND capture viewport as fallback.
+  // When scrollback is full, getAllLines() plateaus and line ranges become empty.
+  // The viewport fallback ensures we always have something to show.
+  const currentLineCount = vt.getAllLines().lines.length;
+  if (currentLineCount <= highWaterLineCount) {
+    // Scrollback overflow: line count didn't grow since last boundary → capture viewport
+    sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
+    return highWaterLineCount;
+  }
+
+  sectionData[boundaryIdx] = { lineCount: currentLineCount, snapshot: null };
+  return currentLineCount;
+}
+
 /**
  * Replays events through the VT terminal engine, capturing snapshots at section boundaries.
  *
@@ -162,15 +238,7 @@ function replaySession(
   const vt = createVt(header.width, header.height, 200000);
 
   try {
-    // Build a map of section end events → boundary index for O(1) lookup during replay
-    const sectionEndEvents: Map<number, number> = new Map();
-    for (let i = 0; i < boundaries.length; i++) {
-      const nextBoundary = boundaries[i + 1];
-      const endEvent = i < boundaries.length - 1 && nextBoundary !== undefined
-        ? nextBoundary.eventIndex
-        : eventCount;
-      sectionEndEvents.set(endEvent, i);
-    }
+    const sectionEndEvents = buildSectionEndMap(boundaries, eventCount);
 
     // Track alt-screen state during replay
     let inAltScreen = false;
@@ -191,13 +259,10 @@ function replaySession(
       const event = events[j];
       if (event === undefined) continue;
       const [, eventType, data] = event;
+
       if (eventType === 'r') {
         // Resize event: asciicast v3 format is [timestamp, "r", "COLSxROWS"]
-        const sizeStr = String(data);
-        const match = sizeStr.match(/^(\d+)x(\d+)$/);
-        if (match && match[1] !== undefined && match[2] !== undefined) {
-          vt.resize(parseInt(match[1], 10), parseInt(match[2], 10));
-        }
+        handleResizeEvent(vt, data);
       } else if (eventType === 'o') {
         const str = String(data);
         // Strip \x1b[3J (erase scrollback) before feeding to VT so scrollback
@@ -207,39 +272,12 @@ function replaySession(
         // Track alt-screen transitions
         if (str.includes('\x1b[?1049h')) inAltScreen = true;
         if (str.includes('\x1b[?1049l')) inAltScreen = false;
-        // Track clear-screen events for epoch-based scrollback dedup.
-        // Detect ESC[2J (erase display) and ESC[3J (erase scrollback) — both
-        // used by TUI apps on the primary buffer (Claude Code, Gemini CLI, Codex).
-        if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
-          const lineCount = vt.getAllLines().lines.length;
-          // Avoid duplicate boundaries at the same line count (e.g., 2J+3J in same event)
-          const lastEpoch = epochBoundaries[epochBoundaries.length - 1];
-          if (epochBoundaries.length === 0 || lastEpoch === undefined || lastEpoch.rawLineCount !== lineCount) {
-            epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
-          }
-        }
+        handleEpochTracking(vt, str, inAltScreen, j, epochBoundaries);
       }
 
       const boundaryIdx = sectionEndEvents.get(j + 1);
       if (boundaryIdx !== undefined) {
-        if (inAltScreen) {
-          // TUI section: capture viewport snapshot
-          sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
-        } else {
-          // CLI section: record line count AND capture viewport as fallback.
-          // When scrollback is full, getAllLines() plateaus and line ranges become empty.
-          // The viewport fallback ensures we always have something to show.
-          const lines = vt.getAllLines();
-          const currentLineCount = lines.lines.length;
-
-          if (currentLineCount <= highWaterLineCount) {
-            // Scrollback overflow: line count didn't grow since last boundary → capture viewport
-            sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
-          } else {
-            sectionData[boundaryIdx] = { lineCount: currentLineCount, snapshot: null };
-            highWaterLineCount = currentLineCount;
-          }
-        }
+        highWaterLineCount = captureSectionData(vt, inAltScreen, boundaryIdx, highWaterLineCount, sectionData);
       }
     }
 
