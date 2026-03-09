@@ -4,7 +4,7 @@ import { pinoLogger } from 'hono-pino';
 import { loadConfig } from './config.js';
 import { logger } from './logger.js';
 import { DatabaseFactory } from './db/database_factory.js';
-import { EmitterEventBus } from './events/emitter_event_bus.js';
+import { EmitterEventBusImpl } from './events/emitter_event_bus_impl.js';
 import { PipelineOrchestrator } from './processing/pipeline_orchestrator.js';
 import { handleUpload } from './routes/upload.js';
 import {
@@ -39,7 +39,7 @@ const { sessionRepository, sectionRepository, storageAdapter, jobQueue, eventLog
   await db.initialize({ dataDir: config.dataDir });
 
 // Initialize event bus and pipeline orchestrator
-const eventBus = new EmitterEventBus();
+const eventBus = new EmitterEventBusImpl();
 const orchestrator = new PipelineOrchestrator(eventBus, jobQueue, {
   sessionRepository,
   storageAdapter,

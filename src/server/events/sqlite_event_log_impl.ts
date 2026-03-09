@@ -10,7 +10,7 @@
 
 import type Database from 'better-sqlite3';
 import type { EventLogAdapter, EventLogEntry } from './event_log_adapter.js';
-import type { PipelineEvent } from '../../../shared/pipeline_events.js';
+import type { PipelineEvent } from '../../shared/pipeline_events.js';
 
 /** Extract the stage field from events that have one; returns null otherwise. */
 function extractStage(event: PipelineEvent): string | null {

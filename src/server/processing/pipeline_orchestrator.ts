@@ -10,7 +10,7 @@
  * Connections: EventBus (events/), JobQueueAdapter (jobs/), stage functions (stages/).
  */
 
-import type { EventBus } from '../events/event_bus.js';
+import type { EventBusAdapter } from '../events/event_bus_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
@@ -47,7 +47,7 @@ export interface StageDependencies {
  * Call start() once at server startup (it initialises WASM), stop() at shutdown.
  */
 export class PipelineOrchestrator {
-  private readonly eventBus: EventBus;
+  private readonly eventBus: EventBusAdapter;
   private readonly jobQueue: JobQueueAdapter;
   private readonly deps: StageDependencies;
   private activeCount = 0;
@@ -55,7 +55,7 @@ export class PipelineOrchestrator {
 
   private readonly onUploaded: (event: PipelineEvent) => void;
 
-  constructor(eventBus: EventBus, jobQueue: JobQueueAdapter, deps: StageDependencies) {
+  constructor(eventBus: EventBusAdapter, jobQueue: JobQueueAdapter, deps: StageDependencies) {
     this.eventBus = eventBus;
     this.jobQueue = jobQueue;
     this.deps = deps;

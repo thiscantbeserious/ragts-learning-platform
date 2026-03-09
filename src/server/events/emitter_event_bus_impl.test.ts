@@ -1,18 +1,18 @@
 // @vitest-environment node
 /**
- * Tests for EmitterEventBus — the in-process EventEmitter implementation of EventBus.
+ * Tests for EmitterEventBusImpl — the in-process EventEmitter implementation of EventBusAdapter.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EmitterEventBus } from './emitter_event_bus.js';
+import { EmitterEventBusImpl } from './emitter_event_bus_impl.js';
 import type { PipelineEvent } from '../../shared/pipeline_events.js';
 import { PipelineStage } from '../../shared/pipeline_events.js';
 
-describe('EmitterEventBus', () => {
-  let bus: EmitterEventBus;
+describe('EmitterEventBusImpl', () => {
+  let bus: EmitterEventBusImpl;
 
   beforeEach(() => {
-    bus = new EmitterEventBus();
+    bus = new EmitterEventBusImpl();
   });
 
   describe('emit and on', () => {

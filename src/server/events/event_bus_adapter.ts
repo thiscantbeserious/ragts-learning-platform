@@ -1,5 +1,5 @@
 /**
- * EventBus interface for typed pipeline event publish/subscribe.
+ * EventBusAdapter interface for typed pipeline event publish/subscribe.
  *
  * The interface is intentionally minimal — it covers emit, persistent
  * subscription, one-shot subscription, and unsubscribe. No wildcards,
@@ -17,12 +17,12 @@ export type EventHandler<T extends PipelineEventType> = (event: PipelineEventPay
 export type AnyEventHandler = (event: PipelineEvent) => void;
 
 /**
- * Typed event bus for pipeline domain events.
+ * Typed event bus adapter for pipeline domain events.
  *
  * Implementations must be safe to use with many concurrent SSE connections;
  * the in-process implementation sets a high listener limit accordingly.
  */
-export interface EventBus {
+export interface EventBusAdapter {
   /** Emit an event to all registered handlers for its type. */
   emit(event: PipelineEvent): void;
 

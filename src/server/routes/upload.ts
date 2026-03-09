@@ -11,7 +11,7 @@ import { validateAsciicast } from '../../shared/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
-import type { EventBus } from '../events/event_bus.js';
+import type { EventBusAdapter } from '../events/event_bus_adapter.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'upload' });
@@ -27,7 +27,7 @@ export async function handleUpload(
   storageAdapter: StorageAdapter,
   maxFileSizeMB: number,
   jobQueue: JobQueueAdapter,
-  eventBus: EventBus
+  eventBus: EventBusAdapter
 ): Promise<Response> {
   try {
     const formData = await c.req.parseBody();

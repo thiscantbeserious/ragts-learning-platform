@@ -12,7 +12,7 @@ import { tmpdir } from 'os';
 import { initVt } from '#vt-wasm';
 import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../db/database_adapter.js';
-import { EmitterEventBus } from '../events/emitter_event_bus.js';
+import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
 import { PipelineOrchestrator, type StageDependencies } from './pipeline_orchestrator.js';
 import { PipelineStage } from '../../shared/pipeline_events.js';
 
@@ -28,7 +28,7 @@ function buildShortCast(): string {
 
 /** Wait for a pipeline event of the given type with a timeout. */
 function waitForEvent(
-  eventBus: EmitterEventBus,
+  eventBus: EmitterEventBusImpl,
   type: string,
   timeoutMs = 3000
 ): Promise<unknown> {
@@ -44,7 +44,7 @@ function waitForEvent(
 describe('PipelineOrchestrator', () => {
   let tmpDir: string;
   let ctx: DatabaseContext;
-  let eventBus: EmitterEventBus;
+  let eventBus: EmitterEventBusImpl;
   let orchestrator: PipelineOrchestrator;
   let deps: StageDependencies;
 
@@ -53,7 +53,7 @@ describe('PipelineOrchestrator', () => {
     tmpDir = mkdtempSync(join(tmpdir(), 'orchestrator-test-'));
     const impl = new SqliteDatabaseImpl();
     ctx = await impl.initialize({ dataDir: tmpDir });
-    eventBus = new EmitterEventBus();
+    eventBus = new EmitterEventBusImpl();
 
     deps = {
       sessionRepository: ctx.sessionRepository,

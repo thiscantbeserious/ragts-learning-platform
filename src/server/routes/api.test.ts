@@ -14,7 +14,7 @@ import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
-import { EmitterEventBus } from '../events/emitter_event_bus.js';
+import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
 import { PipelineOrchestrator } from '../processing/pipeline_orchestrator.js';
 import { handleUpload } from './upload.js';
 import {
@@ -33,7 +33,7 @@ describe('API Routes', () => {
   let sectionRepository: SectionAdapter;
   let storageAdapter: StorageAdapter;
   let jobQueue: JobQueueAdapter;
-  let eventBus: EmitterEventBus;
+  let eventBus: EmitterEventBusImpl;
   let orchestrator: PipelineOrchestrator;
 
   const validFixture = readFileSync(
@@ -58,7 +58,7 @@ describe('API Routes', () => {
     storageAdapter = ctx.storageAdapter;
     jobQueue = ctx.jobQueue;
 
-    eventBus = new EmitterEventBus();
+    eventBus = new EmitterEventBusImpl();
     orchestrator = new PipelineOrchestrator(eventBus, jobQueue, {
       sessionRepository,
       storageAdapter,

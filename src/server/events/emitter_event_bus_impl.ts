@@ -1,5 +1,5 @@
 /**
- * In-process EventBus implementation backed by Node.js EventEmitter.
+ * In-process EventBusAdapter implementation backed by Node.js EventEmitter.
  *
  * Suitable for single-process deployments. Max listeners is raised to 100
  * to support many concurrent SSE connections without triggering Node.js
@@ -9,12 +9,12 @@
  */
 
 import { EventEmitter } from 'node:events';
-import type { EventBus, EventHandler, AnyEventHandler } from './event_bus.js';
+import type { EventBusAdapter, EventHandler, AnyEventHandler } from './event_bus_adapter.js';
 import type { PipelineEvent, PipelineEventType } from '../../shared/pipeline_events.js';
 
 const MAX_LISTENERS = 100;
 
-export class EmitterEventBus implements EventBus {
+export class EmitterEventBusImpl implements EventBusAdapter {
   private readonly emitter: EventEmitter;
 
   constructor() {
