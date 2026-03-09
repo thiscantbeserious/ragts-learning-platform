@@ -94,8 +94,7 @@ export async function handleUpload(
 
       // Trigger async processing (bounded concurrency, non-blocking)
       runPipeline(() =>
-        processSessionPipeline(filepath, id, parsed.markers, sectionRepository, repository)
-          .catch(err => log.error({ err, sessionId: id }, 'Session processing failed'))
+        processSessionPipeline(filepath, id, parsed.markers, repository)
       );
 
       const { filepath: _fp, ...sessionData } = session;

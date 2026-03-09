@@ -10,7 +10,6 @@ import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../db/database_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { SectionAdapter } from '../db/section_adapter.js';
 import { processSessionPipeline } from './session-pipeline.js';
 import { initVt } from '../../../packages/vt-wasm/index.js';
 
@@ -18,7 +17,6 @@ describe('processSessionPipeline', () => {
   let tmpDir: string;
   let ctx: DatabaseContext;
   let sessionRepo: SessionAdapter;
-  let sectionRepo: SectionAdapter;
 
   beforeEach(async () => {
     // Initialize WASM module once before tests
@@ -29,7 +27,6 @@ describe('processSessionPipeline', () => {
     const impl = new SqliteDatabaseImpl();
     ctx = await impl.initialize({ dataDir: tmpDir });
     sessionRepo = ctx.sessionRepository;
-    sectionRepo = ctx.sectionRepository;
   });
 
   afterEach(async () => {
@@ -58,7 +55,6 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
@@ -69,7 +65,7 @@ describe('processSessionPipeline', () => {
     expect(updatedSession?.event_count).toBe(200);
 
     // Verify sections were created (may or may not detect boundaries depending on content)
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     expect(Array.isArray(sections)).toBe(true);
   });
 
@@ -96,11 +92,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       markers,
-      sectionRepo,
       sessionRepo
     );
 
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const markerSections = sections.filter((s) => s.type === 'marker');
 
     // Should have 2 marker sections
@@ -145,11 +140,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const detectedSections = sections.filter((s) => s.type === 'detected');
 
     // Should have at least 1 detected section from screen clear
@@ -189,7 +183,6 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
@@ -215,7 +208,6 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
@@ -241,7 +233,6 @@ describe('processSessionPipeline', () => {
       '/nonexistent/file.cast',
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
@@ -267,11 +258,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
-    const firstSections = await sectionRepo.findBySessionId(session.id);
+    const firstSections = await ctx.sectionRepository.findBySessionId(session.id);
     const firstCount = firstSections.length;
 
     // Second processing (should replace sections)
@@ -279,11 +269,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
-    const secondSections = await sectionRepo.findBySessionId(session.id);
+    const secondSections = await ctx.sectionRepository.findBySessionId(session.id);
 
     // Should have same number of sections (replaced, not appended)
     expect(secondSections.length).toBe(firstCount);
@@ -316,11 +305,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       markers,
-      sectionRepo,
       sessionRepo
     );
 
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
 
     // Each section's end_event should be the next section's start_event
@@ -358,11 +346,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       markers,
-      sectionRepo,
       sessionRepo
     );
 
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
 
     // 4 sections: preamble (detected) + 3 markers
@@ -427,11 +414,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       markers,
-      sectionRepo,
       sessionRepo
     );
 
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
 
     // Should have sections (preamble + 3 markers)
@@ -502,7 +488,6 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       markers,
-      sectionRepo,
       sessionRepo
     );
 
@@ -523,7 +508,7 @@ describe('processSessionPipeline', () => {
     expect(allText).toContain('Line'); // Our test fixture generates "Line X" content
 
     // Verify section line ranges correctly slice the session snapshot
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     for (const section of sections) {
       if (section.start_line !== null && section.end_line !== null) {
         const sectionLines = fullSnapshot.lines.slice(section.start_line, section.end_line);
@@ -557,11 +542,10 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       markers,
-      sectionRepo,
       sessionRepo
     );
 
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
 
     // Filter to CLI sections only (those with line ranges)
@@ -606,12 +590,11 @@ describe('processSessionPipeline', () => {
       filePath,
       session.id,
       [],
-      sectionRepo,
       sessionRepo
     );
 
     // Verify no sections were created
-    const sections = await sectionRepo.findBySessionId(session.id);
+    const sections = await ctx.sectionRepository.findBySessionId(session.id);
     expect(sections.length).toBe(0);
 
     // Verify session has non-null snapshot
@@ -653,7 +636,6 @@ describe('processSessionPipeline', () => {
         filePath,
         session.id,
         [],
-        sectionRepo,
         sessionRepo
       );
 
@@ -663,7 +645,7 @@ describe('processSessionPipeline', () => {
       expect(updatedSession?.event_count).toBe(0);
 
       // Should have no sections (below minimum threshold)
-      const sections = await sectionRepo.findBySessionId(session.id);
+      const sections = await ctx.sectionRepository.findBySessionId(session.id);
       expect(sections.length).toBe(0);
     });
 
@@ -690,7 +672,6 @@ describe('processSessionPipeline', () => {
         filePath,
         session.id,
         [],
-        sectionRepo,
         sessionRepo
       );
 
@@ -700,7 +681,7 @@ describe('processSessionPipeline', () => {
       expect(updatedSession?.event_count).toBe(1);
 
       // Should have no sections (below minimum threshold)
-      const sections = await sectionRepo.findBySessionId(session.id);
+      const sections = await ctx.sectionRepository.findBySessionId(session.id);
       expect(sections.length).toBe(0);
     });
 
@@ -740,7 +721,6 @@ describe('processSessionPipeline', () => {
         filePath,
         session.id,
         [],
-        sectionRepo,
         sessionRepo
       );
 
@@ -750,7 +730,7 @@ describe('processSessionPipeline', () => {
       expect(updatedSession?.event_count).toBe(200);
 
       // If sections were created, verify snapshots don't error
-      const sections = await sectionRepo.findBySessionId(session.id);
+      const sections = await ctx.sectionRepository.findBySessionId(session.id);
       sections.forEach((section) => {
         if (section.snapshot) {
           // Should parse without error

@@ -3,11 +3,13 @@
  * Locks down the full pipeline output: sections, line ranges, detection status.
  *
  * Uses in-memory repository mocks to isolate the pipeline logic.
+ * The session mock implements completeProcessing to capture the ProcessedSession result.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { processSessionPipeline } from '../../../src/server/processing/session-pipeline.js';
+import type { ProcessedSession } from '../../../src/server/processing/types.js';
 import { initVt } from '../../../packages/vt-wasm/index.js';
 
 beforeAll(async () => {
@@ -40,32 +42,29 @@ function loadFixtureWithMarkers(fixturePath: string) {
   return { events, markers };
 }
 
-/** In-memory mock for SessionRepository. */
+/** In-memory mock for SessionRepository. Captures completeProcessing result. */
 function createMockSessionRepo() {
-  const state: Record<string, any> = {};
-  return {
-    updateDetectionStatus(id: string, status: string, eventCount?: number, sectionsCount?: number) {
-      state[id] = { ...state[id], status, eventCount, sectionsCount };
-    },
-    updateSnapshot(id: string, snapshot: string) {
-      state[id] = { ...state[id], snapshot };
-    },
-    getState(id: string) { return state[id]; },
-  };
-}
+  let processed: ProcessedSession | null = null;
+  let failedStatus: string | null = null;
 
-/** In-memory mock for SectionRepository. */
-function createMockSectionRepo() {
-  const sections: any[] = [];
   return {
-    create(input: any) { sections.push({ ...input }); },
-    deleteBySessionId(_id: string) { sections.length = 0; },
-    getSections() { return sections; },
+    updateDetectionStatus(_id: string, status: string) {
+      if (status === 'failed') failedStatus = status;
+    },
+    updateSnapshot(_id: string, _snapshot: string) {},
+    create: async () => { throw new Error('not implemented'); },
+    createWithId: async () => { throw new Error('not implemented'); },
+    findAll: async () => [],
+    findById: async () => null,
+    deleteById: async () => false,
+    completeProcessing: async (ps: ProcessedSession) => { processed = ps; },
+    getProcessed() { return processed; },
+    getFailedStatus() { return failedStatus; },
   };
 }
 
 /** Serialize sections for deterministic snapshots. */
-function serializeSections(sections: any[]) {
+function serializeSections(sections: ProcessedSession['sections']) {
   return sections
     .toSorted((a: any, b: any) => a.startEvent - b.startEvent)
     .map((s: any) => ({
@@ -89,43 +88,39 @@ describe('session-pipeline snapshots', () => {
     const { markers } = loadFixtureWithMarkers(castPath);
 
     const sessionRepo = createMockSessionRepo();
-    const sectionRepo = createMockSectionRepo();
 
     await processSessionPipeline(
       castPath,
       'test-session-markers',
       markers,
-      sectionRepo as any,
       sessionRepo as any,
     );
 
-    const sections = serializeSections(sectionRepo.getSections());
+    const processed = sessionRepo.getProcessed();
+    expect(processed).not.toBeNull();
+    const sections = serializeSections(processed!.sections);
     expect(sections).toMatchSnapshot();
 
-    const state = sessionRepo.getState('test-session-markers');
-    expect(state.status).toBe('completed');
-    expect(state.eventCount).toMatchSnapshot();
+    expect(processed!.eventCount).toMatchSnapshot();
   });
 
   it('synthetic TUI session with epochs — exercises dedup', async () => {
     const castPath = join(__dirname, '../../fixtures/synthetic-tui-session.cast');
 
     const sessionRepo = createMockSessionRepo();
-    const sectionRepo = createMockSectionRepo();
 
     await processSessionPipeline(
       castPath,
       'test-session-tui',
-      [], // No markers
-      sectionRepo as any,
+      [],
       sessionRepo as any,
     );
 
-    const state = sessionRepo.getState('test-session-tui');
-    expect(state.status).toBe('completed');
+    const processed = sessionRepo.getProcessed();
+    expect(processed).not.toBeNull();
 
     // Verify dedup happened: session snapshot should exist and be smaller than raw
-    const snapshot = state.snapshot ? JSON.parse(state.snapshot) : null;
+    const snapshot = processed!.snapshot ? JSON.parse(processed!.snapshot) : null;
     expect(snapshot).not.toBeNull();
     expect(snapshot.lines.length).toMatchSnapshot();
   });
@@ -135,23 +130,21 @@ describe('session-pipeline snapshots', () => {
     const { markers } = loadFixtureWithMarkers(castPath);
 
     const sessionRepo = createMockSessionRepo();
-    const sectionRepo = createMockSectionRepo();
 
     await processSessionPipeline(
       castPath,
       'test-pipeline-full',
       markers,
-      sectionRepo as any,
       sessionRepo as any,
     );
 
-    const state = sessionRepo.getState('test-pipeline-full');
-    const snapshot = state.snapshot ? JSON.parse(state.snapshot) : null;
+    const processed = sessionRepo.getProcessed();
+    const snapshot = processed!.snapshot ? JSON.parse(processed!.snapshot) : null;
 
     expect({
-      status: state.status,
-      eventCount: state.eventCount,
-      sectionsCount: state.sectionsCount,
+      status: processed ? 'completed' : 'failed',
+      eventCount: processed!.eventCount,
+      sectionsCount: processed!.detectedSectionsCount,
       snapshotLineCount: snapshot?.lines?.length ?? 0,
       snapshotCols: snapshot?.cols,
       snapshotRows: snapshot?.rows,
@@ -162,22 +155,20 @@ describe('session-pipeline snapshots', () => {
     const castPath = join(__dirname, '../../fixtures/header-only.cast');
 
     const sessionRepo = createMockSessionRepo();
-    const sectionRepo = createMockSectionRepo();
 
     await processSessionPipeline(
       castPath,
       'test-empty-session',
       [],
-      sectionRepo as any,
       sessionRepo as any,
     );
 
-    const state = sessionRepo.getState('test-empty-session');
+    const processed = sessionRepo.getProcessed();
     expect({
-      status: state.status,
-      eventCount: state.eventCount,
-      sectionsCount: state.sectionsCount,
+      status: processed ? 'completed' : sessionRepo.getFailedStatus() ?? 'failed',
+      eventCount: processed?.eventCount ?? 0,
+      sectionsCount: processed?.detectedSectionsCount ?? 0,
     }).toMatchSnapshot();
-    expect(sectionRepo.getSections().length).toBe(0);
+    expect(processed?.sections.length ?? 0).toBe(0);
   });
 });
