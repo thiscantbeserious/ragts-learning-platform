@@ -183,7 +183,7 @@ Choose Variant A if the immediate goal is to ship a production-ready single-tena
 flowchart TB
     Upload["Upload API"]
     Upload -- "SessionUploaded event" --> EventBus
-    EventBus["Event Bus\n(in-process default, Redis/NATS opt-in)"]
+    EventBus["Event Bus<br/>(in-process default, Redis/NATS opt-in)"]
     EventBus --> Validator["Validator Stage"]
     EventBus --> Detector["Detector Stage"]
     EventBus --> VTReplay["VT Replay Stage"]
@@ -461,13 +461,13 @@ The recommended sequence:
 
 ```mermaid
 flowchart LR
-    A12["A1-A2\nRuntime safety + build"] --> A3["A3\nVirtual scrolling"]
-    A3 --> A45["A4-A5\nTypes + auth stub"]
-    A45 --> A6["A6\nClient resilience"]
-    A6 --> B12["B1-B2\nEvents + pipeline\ndecomposition"]
-    B12 --> B34["B3-B4\nJob queue +\nreal-time client"]
-    B34 --> B5["B5\nObservability"]
-    B5 -. "when needed" .-> C12["C1-C2\nPlugin contract +\nformat plugin"]
+    A12["A1-A2<br/>Runtime safety + build"] --> A3["A3<br/>Virtual scrolling"]
+    A3 --> A45["A4-A5<br/>Types + auth stub"]
+    A45 --> A6["A6<br/>Client resilience"]
+    A6 --> B12["B1-B2<br/>Events + pipeline<br/>decomposition"]
+    B12 --> B34["B3-B4<br/>Job queue +<br/>real-time client"]
+    B34 --> B5["B5<br/>Observability"]
+    B5 -. "when needed" .-> C12["C1-C2<br/>Plugin contract +<br/>format plugin"]
 ```
 
 ---
