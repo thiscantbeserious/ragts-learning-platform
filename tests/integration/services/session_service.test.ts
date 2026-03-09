@@ -86,6 +86,144 @@ describe('SessionService.getSession — null section field coalescing', () => {
   });
 });
 
+describe('SessionService.getSession — storage read throws non-Error', () => {
+  let testDir: string;
+  let ctx: DatabaseContext;
+  let service: SessionService;
+
+  beforeEach(async () => {
+    testDir = mkdtempSync(join(tmpdir(), 'ragts-sessionsvc-storeerr-'));
+    const impl = new SqliteDatabaseImpl();
+    ctx = await impl.initialize({ dataDir: testDir });
+
+    // Create session record but give it a bogus filepath so storage.read throws
+    const filepath = await ctx.storageAdapter.save('bogus-session', 'dummy');
+    await ctx.sessionRepository.createWithId('bogus-session', {
+      filename: 'bogus.cast',
+      filepath,
+      size_bytes: 5,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
+    });
+
+    // Provide a storageAdapter that throws a non-Error value on read
+    const brokenStorage = {
+      ...ctx.storageAdapter,
+      read: (_id: string) => { throw 'disk-failure'; },
+    };
+
+    service = new SessionService({
+      sessionRepository: ctx.sessionRepository,
+      sectionRepository: ctx.sectionRepository,
+      storageAdapter: brokenStorage as typeof ctx.storageAdapter,
+      jobQueue: ctx.jobQueue,
+      eventBus: new EmitterEventBusImpl(),
+    });
+  });
+
+  afterEach(async () => {
+    await ctx.close();
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  it('re-throws when storage.read throws a non-Error value', async () => {
+    await expect(service.getSession('bogus-session')).rejects.toThrow();
+  });
+});
+
+describe('SessionService.redetectSession — UNIQUE constraint concurrent branch', () => {
+  let testDir: string;
+  let ctx: DatabaseContext;
+  let eventBus: EmitterEventBusImpl;
+  let sessionId: string;
+
+  beforeEach(async () => {
+    testDir = mkdtempSync(join(tmpdir(), 'ragts-sessionsvc-unique-'));
+    const impl = new SqliteDatabaseImpl();
+    ctx = await impl.initialize({ dataDir: testDir });
+    eventBus = new EmitterEventBusImpl();
+
+    const content = buildShortCast();
+    const filepath = await ctx.storageAdapter.save('unique-session', content);
+    const session = await ctx.sessionRepository.createWithId('unique-session', {
+      filename: 'unique.cast',
+      filepath,
+      size_bytes: content.length,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
+    });
+    sessionId = session.id;
+  });
+
+  afterEach(async () => {
+    await ctx.close();
+    rmSync(testDir, { recursive: true, force: true });
+  });
+
+  it('handles concurrent redetect UNIQUE constraint by retrying the existing job', async () => {
+    // Pre-create a job via the real queue so findBySessionId can find it after the UNIQUE error
+    const realJob = await ctx.jobQueue.create(sessionId);
+    await ctx.jobQueue.start(realJob.id);
+    await ctx.jobQueue.fail(realJob.id, 'previous failure');
+
+    // Wrap real jobQueue: first findBySessionId returns null (simulating no existing job),
+    // then create throws UNIQUE, then second findBySessionId returns the real job.
+    let findCallCount = 0;
+    const wrappedQueue = {
+      create: (_id: string) => { throw new Error('UNIQUE constraint failed'); },
+      findBySessionId: async (id: string) => {
+        findCallCount++;
+        if (findCallCount === 1) return null; // first call: no existing job
+        return ctx.jobQueue.findBySessionId(id); // second call: find the real job
+      },
+      findPending: ctx.jobQueue.findPending.bind(ctx.jobQueue),
+      start: ctx.jobQueue.start.bind(ctx.jobQueue),
+      advance: ctx.jobQueue.advance.bind(ctx.jobQueue),
+      complete: ctx.jobQueue.complete.bind(ctx.jobQueue),
+      fail: ctx.jobQueue.fail.bind(ctx.jobQueue),
+      retry: ctx.jobQueue.retry.bind(ctx.jobQueue),
+      recoverInterrupted: ctx.jobQueue.recoverInterrupted.bind(ctx.jobQueue),
+    };
+
+    const wrappedService = new SessionService({
+      sessionRepository: ctx.sessionRepository,
+      sectionRepository: ctx.sectionRepository,
+      storageAdapter: ctx.storageAdapter,
+      jobQueue: wrappedQueue as typeof ctx.jobQueue,
+      eventBus,
+    });
+
+    const result = await wrappedService.redetectSession(sessionId);
+    expect(result.ok).toBe(true);
+    assert(result.ok);
+    expect(result.data.sessionId).toBe(sessionId);
+  });
+
+  it('re-throws when create fails with a non-UNIQUE error', async () => {
+    const badJobQueue = {
+      create: (_id: string) => { throw new Error('Disk full'); },
+      findBySessionId: async () => null,
+      findPending: ctx.jobQueue.findPending.bind(ctx.jobQueue),
+      start: ctx.jobQueue.start.bind(ctx.jobQueue),
+      advance: ctx.jobQueue.advance.bind(ctx.jobQueue),
+      complete: ctx.jobQueue.complete.bind(ctx.jobQueue),
+      fail: ctx.jobQueue.fail.bind(ctx.jobQueue),
+      retry: ctx.jobQueue.retry.bind(ctx.jobQueue),
+      recoverInterrupted: ctx.jobQueue.recoverInterrupted.bind(ctx.jobQueue),
+    };
+
+    const failService = new SessionService({
+      sessionRepository: ctx.sessionRepository,
+      sectionRepository: ctx.sectionRepository,
+      storageAdapter: ctx.storageAdapter,
+      jobQueue: badJobQueue as typeof ctx.jobQueue,
+      eventBus,
+    });
+
+    await expect(failService.redetectSession(sessionId)).rejects.toThrow('Disk full');
+  });
+});
+
 describe('SessionService.redetectSession', () => {
   let testDir: string;
   let ctx: DatabaseContext;
