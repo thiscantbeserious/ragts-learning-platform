@@ -13,6 +13,9 @@ import type { DatabaseContext } from '../db/database_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
+import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
+import { EmitterEventBus } from '../events/emitter_event_bus.js';
+import { PipelineOrchestrator } from '../processing/pipeline_orchestrator.js';
 import { handleUpload } from './upload.js';
 import {
   handleListSessions,
@@ -20,7 +23,6 @@ import {
   handleDeleteSession,
   handleRedetect,
 } from './sessions.js';
-import { waitForPipelines } from '../processing/index.js';
 import { initVt } from '#vt-wasm';
 
 describe('API Routes', () => {
@@ -30,6 +32,9 @@ describe('API Routes', () => {
   let sessionRepository: SessionAdapter;
   let sectionRepository: SectionAdapter;
   let storageAdapter: StorageAdapter;
+  let jobQueue: JobQueueAdapter;
+  let eventBus: EmitterEventBus;
+  let orchestrator: PipelineOrchestrator;
 
   const validFixture = readFileSync(
     join(__dirname, '../../..', 'tests', 'fixtures', 'valid-with-markers.cast'),
@@ -42,23 +47,27 @@ describe('API Routes', () => {
   );
 
   beforeEach(async () => {
-    // Initialize WASM module once before tests
     await initVt();
 
-    // Create temporary directory for each test
     testDir = mkdtempSync(join(tmpdir(), 'ragts-api-test-'));
 
-    // Initialize database and repositories
     const impl = new SqliteDatabaseImpl();
     ctx = await impl.initialize({ dataDir: testDir });
     sessionRepository = ctx.sessionRepository;
     sectionRepository = ctx.sectionRepository;
     storageAdapter = ctx.storageAdapter;
+    jobQueue = ctx.jobQueue;
 
-    // Setup Hono app with routes
+    eventBus = new EmitterEventBus();
+    orchestrator = new PipelineOrchestrator(eventBus, jobQueue, {
+      sessionRepository,
+      storageAdapter,
+    });
+    await orchestrator.start();
+
     app = new Hono();
     app.post('/api/upload', (c) =>
-      handleUpload(c, sessionRepository, storageAdapter, 2)
+      handleUpload(c, sessionRepository, storageAdapter, 2, jobQueue, eventBus)
     );
     app.get('/api/sessions', (c) => handleListSessions(c, sessionRepository));
     app.get('/api/sessions/:id', (c) =>
@@ -68,16 +77,13 @@ describe('API Routes', () => {
       handleDeleteSession(c, sessionRepository, storageAdapter)
     );
     app.post('/api/sessions/:id/redetect', (c) =>
-      handleRedetect(c, sessionRepository, storageAdapter)
+      handleRedetect(c, sessionRepository, storageAdapter, jobQueue, eventBus)
     );
   });
 
   afterEach(async () => {
-    // Wait for all in-flight pipelines to complete before teardown
-    await waitForPipelines();
-    // Close database before removing files
-    ctx.close();
-    // Clean up temporary directory
+    await orchestrator.stop();
+    await ctx.close();
     rmSync(testDir, { recursive: true, force: true });
   });
 
@@ -136,7 +142,6 @@ describe('API Routes', () => {
     });
 
     it('should reject file exceeding size limit', async () => {
-      // Create file just over the 2MB limit configured below
       const largeContent = 'x'.repeat(2.1 * 1024 * 1024);
       const formData = new FormData();
       const file = new File([largeContent], 'large.cast', { type: 'text/plain' });
@@ -166,7 +171,6 @@ describe('API Routes', () => {
     });
 
     it('should list uploaded sessions', async () => {
-      // Upload a session first
       const formData = new FormData();
       const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
       formData.append('file', file);
@@ -178,7 +182,6 @@ describe('API Routes', () => {
         })
       );
 
-      // List sessions
       const req = new Request('http://localhost/api/sessions');
       const res = await app.fetch(req);
       const data = await res.json();
@@ -191,7 +194,6 @@ describe('API Routes', () => {
 
   describe('GET /api/sessions/:id', () => {
     it('should return session with parsed content', async () => {
-      // Upload a session first
       const formData = new FormData();
       const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
       formData.append('file', file);
@@ -204,7 +206,6 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
-      // Get session
       const req = new Request(
         `http://localhost/api/sessions/${uploadData.id}`
       );
@@ -215,10 +216,9 @@ describe('API Routes', () => {
       expect(data.id).toBe(uploadData.id);
       expect(data.filename).toBe('test.cast');
       expect(data.content).toHaveProperty('header');
-      expect(data.content).not.toHaveProperty('events'); // events are excluded per Stage 3
+      expect(data.content).not.toHaveProperty('events');
       expect(data.content).toHaveProperty('markers');
       expect(data.content.markers).toHaveLength(3);
-      // Snapshot field should exist (may be null if not yet processed)
       expect(data).toHaveProperty('snapshot');
     });
 
@@ -234,7 +234,6 @@ describe('API Routes', () => {
 
   describe('DELETE /api/sessions/:id', () => {
     it('should delete session from DB and filesystem', async () => {
-      // Upload a session first
       const formData = new FormData();
       const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
       formData.append('file', file);
@@ -247,10 +246,8 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
-      // Wait for upload pipeline to finish before deleting the file
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Delete session
       const deleteReq = new Request(
         `http://localhost/api/sessions/${uploadData.id}`,
         { method: 'DELETE' }
@@ -261,7 +258,6 @@ describe('API Routes', () => {
       expect(deleteRes.status).toBe(200);
       expect(deleteData.success).toBe(true);
 
-      // Verify session no longer exists
       const getReq = new Request(
         `http://localhost/api/sessions/${uploadData.id}`
       );
@@ -317,8 +313,7 @@ describe('API Routes', () => {
       expect(retrieved.id).toBe(session.id);
       expect(retrieved.content).toBeDefined();
 
-      // Wait for upload pipeline to finish before deleting the file
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
       // 4. Delete
       const deleteRes = await app.fetch(
@@ -342,7 +337,6 @@ describe('API Routes', () => {
 
   describe('POST /api/sessions/:id/redetect', () => {
     it('should return 202 and trigger async re-detection', async () => {
-      // Upload a session first
       const formData = new FormData();
       const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
       formData.append('file', file);
@@ -355,10 +349,8 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
-      // Wait for initial processing to complete
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Trigger re-detection
       const req = new Request(
         `http://localhost/api/sessions/${uploadData.id}/redetect`,
         { method: 'POST' }
@@ -367,7 +359,7 @@ describe('API Routes', () => {
       const data = await res.json();
 
       expect(res.status).toBe(202);
-      expect(data.message).toContain('Re-detection started');
+      expect(data.message).toContain('Re-detection');
       expect(data.sessionId).toBe(uploadData.id);
     });
 
@@ -386,7 +378,6 @@ describe('API Routes', () => {
 
   describe('Upload with async processing', () => {
     it('should include sections in session response after processing', async () => {
-      // Upload a session
       const formData = new FormData();
       const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
       formData.append('file', file);
@@ -399,10 +390,8 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
-      // Wait for async processing to complete
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Get session - should include sections
       const getRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`)
       );
@@ -411,13 +400,11 @@ describe('API Routes', () => {
       expect(sessionData.sections).toBeDefined();
       expect(Array.isArray(sessionData.sections)).toBe(true);
 
-      // Should have marker sections (validFixture has 3 markers)
-      const markerSections = sessionData.sections.filter((s: any) => s.type === 'marker');
+      const markerSections = sessionData.sections.filter((s: { type: string }) => s.type === 'marker');
       expect(markerSections.length).toBeGreaterThan(0);
     });
 
     it('should update detection_status after processing', async () => {
-      // Upload a session
       const formData = new FormData();
       const file = new File([validFixture], 'test.cast', { type: 'text/plain' });
       formData.append('file', file);
@@ -430,10 +417,8 @@ describe('API Routes', () => {
       );
       const uploadData = await uploadRes.json();
 
-      // Wait for async processing to complete
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Get session - check status
       const getRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`)
       );
@@ -446,19 +431,16 @@ describe('API Routes', () => {
 
   describe('Error paths', () => {
     it('should return 404 when session file is missing from filesystem', async () => {
-      // Upload a session first
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Delete the file from filesystem but keep DB record
       await storageAdapter.delete(uploadData.id);
 
-      // GET should fail because file is gone
       const getRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`)
       );
@@ -482,14 +464,13 @@ describe('API Routes', () => {
     });
 
     it('should handle redetect on session with missing file', async () => {
-      // Upload then delete the file (keep DB record)
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
       await storageAdapter.delete(uploadData.id);
 
@@ -503,22 +484,19 @@ describe('API Routes', () => {
     });
 
     it('should handle session with corrupt snapshot JSON', async () => {
-      // Upload a valid session
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Corrupt the snapshot in the DB directly
       await sessionRepository.updateSnapshot(uploadData.id, '{invalid json');
 
       const getRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`)
       );
-      // Should still return session, just with null snapshot
       expect(getRes.status).toBe(200);
       const body = await getRes.json();
       expect(body.snapshot).toBeNull();
@@ -531,9 +509,8 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Insert a section with corrupt snapshot directly
       await sectionRepository.create({
         sessionId: uploadData.id,
         type: 'detected',
@@ -550,12 +527,11 @@ describe('API Routes', () => {
       );
       expect(getRes.status).toBe(200);
       const body = await getRes.json();
-      const corruptSection = body.sections.find((s: any) => s.label === 'corrupt');
+      const corruptSection = body.sections.find((s: { label: string }) => s.label === 'corrupt');
       expect(corruptSection.snapshot).toBeNull();
     });
 
     it('should return 500 when list sessions fails', async () => {
-      // Create a separate app with a failing repository
       const failApp = new Hono();
       const failingRepo = {
         findAll: () => { throw new Error('DB connection lost'); },
@@ -569,16 +545,14 @@ describe('API Routes', () => {
     });
 
     it('should return 500 when get session fails with non-filesystem error', async () => {
-      // Upload a session first
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Create app with repository that throws a generic (non-"not found") error on findById
       const failApp = new Hono();
       const failRepo = {
         findById: () => { throw new Error('DB connection failed'); },
@@ -596,16 +570,14 @@ describe('API Routes', () => {
     });
 
     it('should return 500 when deleteById returns false', async () => {
-      // Upload a session first
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Create app with repository that returns false from deleteById
       const failApp = new Hono();
       const failRepo = {
         findById: sessionRepository.findById.bind(sessionRepository),
@@ -643,7 +615,6 @@ describe('API Routes', () => {
     it('should use String(err) when non-Error is thrown from list sessions', async () => {
       const failApp = new Hono();
       const failRepo = {
-        // Throw a non-Error value (string) to cover the String(err) branch
         findAll: () => { throw 'string error code'; },
       } as unknown as SessionAdapter;
       failApp.get('/api/sessions', (c) => handleListSessions(c, failRepo));
@@ -694,7 +665,7 @@ describe('API Routes', () => {
         findById: () => { throw 'redetect-error'; },
       } as unknown as SessionAdapter;
       failApp.post('/api/sessions/:id/redetect', (c) =>
-        handleRedetect(c, failRepo, storageAdapter)
+        handleRedetect(c, failRepo, storageAdapter, jobQueue, eventBus)
       );
 
       const res = await failApp.fetch(
@@ -714,7 +685,7 @@ describe('API Routes', () => {
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, failStorage, 250)
+        handleUpload(c, sessionRepository, failStorage, 250, jobQueue, eventBus)
       );
 
       const formData = new FormData();
@@ -735,12 +706,10 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Remove file first (simulates filesystem issue)
       await storageAdapter.delete(uploadData.id);
 
-      // Delete should still succeed (DB is source of truth)
       const deleteRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
       );
@@ -754,9 +723,8 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
       const uploadData = await uploadRes.json();
-      await waitForPipelines();
+      await orchestrator.waitForPending();
 
-      // Create app with storage that throws on delete
       const failApp = new Hono();
       const failStorage = {
         delete: () => { throw new Error('Permission denied'); },
@@ -765,7 +733,6 @@ describe('API Routes', () => {
         handleDeleteSession(c, sessionRepository, failStorage)
       );
 
-      // Should still succeed — DB is source of truth, file delete is best-effort
       const res = await failApp.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
       );
@@ -773,7 +740,6 @@ describe('API Routes', () => {
     });
 
     it('should return 500 when upload storage fails', async () => {
-      // Create app with a storage adapter that fails on save
       const failApp = new Hono();
       const failStorage = {
         save: () => { throw new Error('Disk full'); },
@@ -782,7 +748,7 @@ describe('API Routes', () => {
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, failStorage, 250)
+        handleUpload(c, sessionRepository, failStorage, 250, jobQueue, eventBus)
       );
 
       const formData = new FormData();
@@ -801,7 +767,7 @@ describe('API Routes', () => {
         createWithId: () => { throw new Error('UNIQUE constraint failed'); },
       } as unknown as SessionAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, failRepo, storageAdapter, 250)
+        handleUpload(c, failRepo, storageAdapter, 250, jobQueue, eventBus)
       );
 
       const formData = new FormData();
@@ -815,7 +781,6 @@ describe('API Routes', () => {
     });
 
     it('should return 500 when DB insert fails and cleanup delete also fails', async () => {
-      // Both DB insert and file cleanup fail — the cleanup error is swallowed, DB error is returned
       const failApp = new Hono();
       const failRepo = {
         createWithId: () => { throw new Error('UNIQUE constraint failed'); },
@@ -827,7 +792,7 @@ describe('API Routes', () => {
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, failRepo, failStorage, 250)
+        handleUpload(c, failRepo, failStorage, 250, jobQueue, eventBus)
       );
 
       const formData = new FormData();
@@ -835,7 +800,6 @@ describe('API Routes', () => {
       const res = await failApp.fetch(
         new Request('http://localhost/api/upload', { method: 'POST', body: formData })
       );
-      // Should still return 500 with the original DB error (cleanup error is swallowed)
       expect(res.status).toBe(500);
       const body = await res.json();
       expect(body.error).toBe('Internal server error');

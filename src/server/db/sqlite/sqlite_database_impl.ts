@@ -12,6 +12,8 @@ import { migrate004PipelineJobsEvents } from './migrations/004_pipeline_jobs_eve
 import { SqliteSessionImpl } from './sqlite_session_impl.js';
 import { SqliteSectionImpl } from './sqlite_section_impl.js';
 import { FsStorageImpl } from '../../storage/fs_storage_impl.js';
+import { SqliteJobQueueImpl } from '../../jobs/sqlite_job_queue_impl.js';
+import { SqliteEventLogImpl } from './sqlite_event_log_impl.js';
 import type { DatabaseAdapter, DatabaseContext } from '../database_adapter.js';
 
 // Schema source: src/server/db/sqlite/sql/schema.sql (kept for documentation)
@@ -80,11 +82,15 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
     const sessionRepository = new SqliteSessionImpl(db);
     const sectionRepository = new SqliteSectionImpl(db);
     const storageAdapter = new FsStorageImpl(config.dataDir);
+    const jobQueue = new SqliteJobQueueImpl(db);
+    const eventLog = new SqliteEventLogImpl(db);
 
     return {
       sessionRepository,
       sectionRepository,
       storageAdapter,
+      jobQueue,
+      eventLog,
       ping: async () => { db.prepare('SELECT 1').get(); },
       close: async () => { db.close(); },
     };

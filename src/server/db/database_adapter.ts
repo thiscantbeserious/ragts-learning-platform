@@ -7,6 +7,8 @@
 import type { SessionAdapter } from './session_adapter.js';
 import type { SectionAdapter } from './section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
+import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
+import type { EventLogAdapter } from './event_log_adapter.js';
 
 /**
  * All live persistence objects returned by a DatabaseAdapter.
@@ -16,6 +18,8 @@ export interface DatabaseContext {
   sessionRepository: SessionAdapter;
   sectionRepository: SectionAdapter;
   storageAdapter: StorageAdapter;
+  jobQueue: JobQueueAdapter;
+  eventLog: EventLogAdapter;
   /** Execute a trivial query to verify database connectivity. */
   ping(): Promise<void>;
   /** Release all underlying resources (DB connection, file handles, etc.). */

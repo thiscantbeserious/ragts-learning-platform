@@ -59,6 +59,13 @@ export interface SessionAdapter {
   updateSnapshot(id: string, snapshot: string): Promise<void>;
 
   /**
+   * Update the current pipeline stage on a session.
+   * Called by the orchestrator as jobs advance through stages.
+   * Maps pipeline stage names to the `detection_status` column value.
+   */
+  updateProcessingStage(id: string, stage: string): Promise<void>;
+
+  /**
    * Complete session processing. Atomically replaces all sections, stores the snapshot,
    * and marks the session as completed. The implementation owns the transaction boundary.
    * This is the counterpart to `updateDetectionStatus('processing')` — it transitions

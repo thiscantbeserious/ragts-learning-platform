@@ -2,14 +2,16 @@
  * Upload route handler.
  * Accepts multipart form upload of asciicast v3 files.
  * Validates, stores, and registers sessions in database.
+ * Triggers async processing via job queue + event bus.
  */
 
 import type { Context } from 'hono';
 import { nanoid } from 'nanoid';
-import { parseAsciicast, validateAsciicast } from '../../shared/asciicast.js';
+import { validateAsciicast } from '../../shared/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
-import { processSessionPipeline, runPipeline } from '../processing/index.js';
+import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
+import type { EventBus } from '../events/event_bus.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'upload' });
@@ -17,24 +19,24 @@ const log = logger.child({ module: 'upload' });
 /**
  * Handle POST /api/upload
  * Multipart file upload with validation and transactional storage.
+ * Creates a job and emits session.uploaded — the orchestrator handles processing.
  */
 export async function handleUpload(
   c: Context,
   repository: SessionAdapter,
   storageAdapter: StorageAdapter,
-  maxFileSizeMB: number
+  maxFileSizeMB: number,
+  jobQueue: JobQueueAdapter,
+  eventBus: EventBus
 ): Promise<Response> {
   try {
-    // Parse multipart form data
     const formData = await c.req.parseBody();
     const file = formData['file'];
 
-    // Validate file exists
     if (!file || typeof file === 'string') {
       return c.json({ error: 'No file uploaded' }, 400);
     }
 
-    // Check file size (convert MB to bytes)
     const maxBytes = maxFileSizeMB * 1024 * 1024;
     if (file.size > maxBytes) {
       return c.json(
@@ -43,10 +45,8 @@ export async function handleUpload(
       );
     }
 
-    // Read file content
     const content = await file.text();
 
-    // Validate asciicast format
     const validation = validateAsciicast(content);
     if (!validation.valid) {
       return c.json(
@@ -59,14 +59,9 @@ export async function handleUpload(
       );
     }
 
-    // Parse to extract marker count
-    const parsed = parseAsciicast(content);
-    const markerCount = parsed.markers.length;
-
     // Generate nanoid upfront for consistent ID across file and DB
     const id = nanoid();
 
-    // Save file (fail fast if filesystem issues)
     let filepath: string;
     try {
       filepath = await storageAdapter.save(id, content);
@@ -80,8 +75,10 @@ export async function handleUpload(
       );
     }
 
-    // Create database record with transaction safety
     try {
+      // Count markers from raw file scan (avoid full parse — we only need marker count)
+      const markerCount = countMarkers(content);
+
       const session = await repository.createWithId(id, {
         filename: file.name,
         filepath,
@@ -90,15 +87,13 @@ export async function handleUpload(
         uploaded_at: new Date().toISOString(),
       });
 
-      // Trigger async processing (bounded concurrency, non-blocking)
-      runPipeline(() =>
-        processSessionPipeline(filepath, id, parsed.markers, repository)
-      );
+      // Create job and emit session.uploaded — orchestrator picks this up
+      await jobQueue.create(id);
+      eventBus.emit({ type: 'session.uploaded', sessionId: id, filename: file.name });
 
       const { filepath: _fp, ...sessionData } = session;
       return c.json(sessionData, 201);
     } catch (err) {
-      // DB insert failed — clean up file (best effort, don't mask original error)
       try {
         await storageAdapter.delete(id);
       } catch (cleanupErr) {
@@ -116,4 +111,20 @@ export async function handleUpload(
       500
     );
   }
+}
+
+/** Count the number of marker events in a raw .cast file (NDJSON lines with type 'm'). */
+function countMarkers(content: string): number {
+  let count = 0;
+  for (const line of content.split('\n')) {
+    if (line.includes('"m"') || line.includes("'m'")) {
+      try {
+        const parsed = JSON.parse(line);
+        if (Array.isArray(parsed) && parsed[1] === 'm') count++;
+      } catch {
+        // skip malformed lines
+      }
+    }
+  }
+  return count;
 }

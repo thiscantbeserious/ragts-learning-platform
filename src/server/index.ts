@@ -4,7 +4,8 @@ import { pinoLogger } from 'hono-pino';
 import { loadConfig } from './config.js';
 import { logger } from './logger.js';
 import { DatabaseFactory } from './db/database_factory.js';
-import { waitForPipelines } from './processing/index.js';
+import { EmitterEventBus } from './events/emitter_event_bus.js';
+import { PipelineOrchestrator } from './processing/pipeline_orchestrator.js';
 import { handleUpload } from './routes/upload.js';
 import {
   handleListSessions,
@@ -34,16 +35,34 @@ const config = loadConfig();
 // Initialize database and repositories through the factory
 const factory = new DatabaseFactory();
 const db = await factory.create();
-const { sessionRepository, sectionRepository, storageAdapter, ping, close } =
+const { sessionRepository, sectionRepository, storageAdapter, jobQueue, eventLog, ping, close } =
   await db.initialize({ dataDir: config.dataDir });
 
+// Initialize event bus and pipeline orchestrator
+const eventBus = new EmitterEventBus();
+const orchestrator = new PipelineOrchestrator(eventBus, jobQueue, {
+  sessionRepository,
+  storageAdapter,
+});
+await orchestrator.start();
+
+// Subscribe event log to every pipeline event type for audit/debugging
+const allEventTypes = [
+  'session.uploaded', 'session.validated', 'session.detected',
+  'session.replayed', 'session.deduped', 'session.ready',
+  'session.failed', 'session.retrying',
+] as const;
+for (const type of allEventTypes) {
+  eventBus.on(type, (event) => { void eventLog.log(event as never); });
+}
+
 process.on('SIGTERM', async () => {
-  await waitForPipelines();
+  await orchestrator.stop();
   await close();
   process.exit(0);
 });
 process.on('SIGINT', async () => {
-  await waitForPipelines();
+  await orchestrator.stop();
   await close();
   process.exit(0);
 });
@@ -61,7 +80,7 @@ app.get('/api/health', async (c) => {
 
 // Upload endpoint
 app.post('/api/upload', (c) =>
-  handleUpload(c, sessionRepository, storageAdapter, config.maxFileSizeMB)
+  handleUpload(c, sessionRepository, storageAdapter, config.maxFileSizeMB, jobQueue, eventBus)
 );
 
 // Session endpoints
@@ -73,7 +92,7 @@ app.delete('/api/sessions/:id', (c) =>
   handleDeleteSession(c, sessionRepository, storageAdapter)
 );
 app.post('/api/sessions/:id/redetect', (c) =>
-  handleRedetect(c, sessionRepository, storageAdapter)
+  handleRedetect(c, sessionRepository, storageAdapter, jobQueue, eventBus)
 );
 
 // Serve frontend in production — single-container deployment

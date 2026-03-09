@@ -4,8 +4,13 @@
  * This module provides streaming-based processing of .cast files:
  * - NdjsonStream: Low-level streaming NDJSON parser
  * - SectionDetector: Section boundary detection for sessions
- * - processSessionPipeline: Full session processing pipeline with VT integration,
- *   snapshot capture, section detection, and database persistence
+ *
+ * Stage 3 (job queue + event bus): processing is now driven by PipelineOrchestrator.
+ * The processSessionPipeline / runPipeline exports are kept for backward compatibility
+ * (existing tests) but are no longer called from production routes.
+ *
+ * @deprecated processSessionPipeline — use PipelineOrchestrator instead.
+ * @deprecated runPipeline / waitForPipelines — replaced by orchestrator concurrency control.
  */
 
 export { NdjsonStream, type NdjsonItem } from './ndjson_stream.js';
