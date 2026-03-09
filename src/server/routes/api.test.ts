@@ -58,7 +58,7 @@ describe('API Routes', () => {
     // Setup Hono app with routes
     app = new Hono();
     app.post('/api/upload', (c) =>
-      handleUpload(c, sessionRepository, sectionRepository, storageAdapter, 2)
+      handleUpload(c, sessionRepository, storageAdapter, 2)
     );
     app.get('/api/sessions', (c) => handleListSessions(c, sessionRepository));
     app.get('/api/sessions/:id', (c) =>
@@ -68,7 +68,7 @@ describe('API Routes', () => {
       handleDeleteSession(c, sessionRepository, storageAdapter)
     );
     app.post('/api/sessions/:id/redetect', (c) =>
-      handleRedetect(c, sessionRepository, sectionRepository, storageAdapter)
+      handleRedetect(c, sessionRepository, storageAdapter)
     );
   });
 
@@ -641,7 +641,7 @@ describe('API Routes', () => {
         createWithId: () => { throw new Error('UNIQUE constraint failed'); },
       } as unknown as SessionAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, failRepo, sectionRepository, storageAdapter, 250)
+        handleUpload(c, failRepo, storageAdapter, 250)
       );
 
       const formData = new FormData();

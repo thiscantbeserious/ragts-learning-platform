@@ -8,7 +8,6 @@ import type { Context } from 'hono';
 import { nanoid } from 'nanoid';
 import { parseAsciicast, validateAsciicast } from '../../shared/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import { processSessionPipeline, runPipeline } from '../processing/index.js';
 import { logger } from '../logger.js';
@@ -22,7 +21,6 @@ const log = logger.child({ module: 'upload' });
 export async function handleUpload(
   c: Context,
   repository: SessionAdapter,
-  sectionRepository: SectionAdapter,
   storageAdapter: StorageAdapter,
   maxFileSizeMB: number
 ): Promise<Response> {

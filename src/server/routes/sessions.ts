@@ -179,7 +179,6 @@ export async function handleDeleteSession(
 export async function handleRedetect(
   c: Context,
   sessionRepository: SessionAdapter,
-  sectionRepository: SectionAdapter,
   storageAdapter: StorageAdapter
 ): Promise<Response> {
   try {
