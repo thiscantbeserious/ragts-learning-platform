@@ -14,6 +14,10 @@ import {
   handleDeleteSession,
   handleRedetect,
 } from './routes/sessions.js';
+import { handleSseEvents } from './routes/sse.js';
+import { handleGetStatus } from './routes/status.js';
+import { handleRetry } from './routes/retry.js';
+import { handleGetEventLog } from './routes/event-log.js';
 
 const log = logger.child({ module: 'server' });
 const app = new Hono();
@@ -101,6 +105,26 @@ app.delete('/api/sessions/:id', (c) =>
 );
 app.post('/api/sessions/:id/redetect', (c) =>
   handleRedetect(c, sessionRepository, storageAdapter, jobQueue, eventBus)
+);
+
+// SSE endpoint — real-time pipeline events for a session
+app.get('/api/sessions/:id/events', (c) =>
+  handleSseEvents(c, sessionRepository, eventBus, eventLog)
+);
+
+// Session status endpoint — current processing stage for UI hydration
+app.get('/api/sessions/:id/status', (c) =>
+  handleGetStatus(c, sessionRepository, jobQueue)
+);
+
+// Retry endpoint — restart processing from validate stage for failed jobs
+app.post('/api/sessions/:id/retry', (c) =>
+  handleRetry(c, sessionRepository, jobQueue, eventBus)
+);
+
+// Event log endpoint — pipeline event history for debugging
+app.get('/api/events', (c) =>
+  handleGetEventLog(c, sessionRepository, eventLog)
 );
 
 // Serve frontend in production — single-container deployment
