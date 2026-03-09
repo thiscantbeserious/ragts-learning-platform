@@ -4,18 +4,31 @@
  */
 
 import Database from 'better-sqlite3';
-import { readFileSync, mkdirSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { migrate002Sections } from './migrations/002-sections.js';
-import { migrate003UnifiedSnapshot } from './migrations/003-unified-snapshot.js';
+import { migrate002Sections } from './migrations/002_sections.js';
+import { migrate003UnifiedSnapshot } from './migrations/003_unified_snapshot.js';
 import { SqliteSessionImpl } from './sqlite_session_impl.js';
 import { SqliteSectionImpl } from './sqlite_section_impl.js';
 import { FsStorageImpl } from '../../storage/fs_storage_impl.js';
 import type { DatabaseAdapter, DatabaseContext } from '../database_adapter.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Schema source: src/server/db/sqlite/sql/schema.sql (kept for documentation)
+const BASE_SCHEMA = `
+-- Sessions table: metadata for uploaded asciicast v3 recordings
+CREATE TABLE IF NOT EXISTS sessions (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  filepath TEXT NOT NULL UNIQUE,
+  size_bytes INTEGER NOT NULL,
+  marker_count INTEGER DEFAULT 0,
+  uploaded_at TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Index for efficient newest-first listing
+CREATE INDEX IF NOT EXISTS idx_sessions_uploaded_at ON sessions(uploaded_at DESC);
+`.trim();
 
 /**
  * SQLite-backed database implementation.
@@ -54,12 +67,8 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       // Enable foreign key constraints
       db.pragma('foreign_keys = ON');
 
-      // Apply base schema from sql/schema.sql.
-      // Accepted exception: sync file read at startup only -- runs before the HTTP server starts.
-      // See ADR: Harden the Foundation, Decision #4.
-      const schemaPath = join(__dirname, 'sql', 'schema.sql');
-      const schema = readFileSync(schemaPath, 'utf-8');
-      db.exec(schema);
+      // Apply base schema (inlined to avoid __dirname dependency in compiled output)
+      db.exec(BASE_SCHEMA);
 
       // Run migrations
       migrate002Sections(db);
@@ -77,6 +86,7 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       sessionRepository,
       sectionRepository,
       storageAdapter,
+      ping: async () => { db.prepare('SELECT 1').get(); },
       close: async () => { db.close(); },
     };
   }

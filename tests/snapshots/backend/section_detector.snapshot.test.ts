@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SectionDetector, type SectionBoundary } from '../../../src/server/processing/section-detector.js';
+import { SectionDetector, type SectionBoundary } from '../../../src/server/processing/section_detector.js';
 import type { AsciicastEvent, Marker } from '../../../src/shared/asciicast-types.js';
 
 /** Generate N output events with the given timing gap. */

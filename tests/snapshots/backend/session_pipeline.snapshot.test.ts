@@ -8,9 +8,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { writeFileSync, mkdirSync, rmSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { processSessionPipeline } from '../../../src/server/processing/session-pipeline.js';
+import { processSessionPipeline } from '../../../src/server/processing/session_pipeline.js';
 import type { ProcessedSession } from '../../../src/server/processing/types.js';
-import { initVt } from '../../../packages/vt-wasm/index.js';
+import { initVt } from '#vt-wasm';
 
 beforeAll(async () => {
   await initVt();

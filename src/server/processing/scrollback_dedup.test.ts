@@ -5,8 +5,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { buildCleanDocument } from './scrollback-dedup.js';
-import type { TerminalSnapshot, SnapshotLine } from '../../../packages/vt-wasm/types.js';
+import { buildCleanDocument } from './scrollback_dedup.js';
+import type { TerminalSnapshot, SnapshotLine } from '#vt-wasm/types';
 
 /**
  * Helper to create a SnapshotLine from plain text.

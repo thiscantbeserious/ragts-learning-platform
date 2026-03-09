@@ -14,8 +14,8 @@ import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../db/database_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import { processSessionPipeline } from './session-pipeline.js';
-import { initVt } from '../../../packages/vt-wasm/index.js';
+import { processSessionPipeline } from './session_pipeline.js';
+import { initVt } from '#vt-wasm';
 import type { ProcessedSession } from './types.js';
 
 /**

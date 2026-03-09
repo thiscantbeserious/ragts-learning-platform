@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import TerminalSnapshot from '@client/components/TerminalSnapshot.vue';
-import type { SnapshotLine } from '../../../packages/vt-wasm/types';
+import type { SnapshotLine } from '#vt-wasm/types';
 
 describe('TerminalSnapshot component snapshots', () => {
   it('plain text lines', () => {

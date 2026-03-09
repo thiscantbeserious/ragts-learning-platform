@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import TerminalSnapshot from './TerminalSnapshot.vue';
-import type { SnapshotLine } from '../../../packages/vt-wasm/types';
+import type { SnapshotLine } from '#vt-wasm/types';
 
 describe('TerminalSnapshot', () => {
   it('renders plain text spans correctly', () => {

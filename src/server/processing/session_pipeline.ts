@@ -22,10 +22,10 @@ import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'pipeline' });
 import { normalizeHeader } from '../../shared/asciicast.js';
-import { NdjsonStream } from './ndjson-stream.js';
-import { SectionDetector, type SectionBoundary } from './section-detector.js';
-import { createVt, initVt, type TerminalSnapshot } from '../../../packages/vt-wasm/index.js';
-import { buildCleanDocument, type EpochBoundary } from './scrollback-dedup.js';
+import { NdjsonStream } from './ndjson_stream.js';
+import { SectionDetector, type SectionBoundary } from './section_detector.js';
+import { createVt, initVt, type TerminalSnapshot } from '#vt-wasm';
+import { buildCleanDocument, type EpochBoundary } from './scrollback_dedup.js';
 import type { ProcessedSession } from './types.js';
 
 /**
@@ -143,9 +143,9 @@ function buildSectionEndMap(boundaries: SectionBoundary[], eventCount: number): 
 /** Handles a resize event ('r'): parses COLSxROWS and calls vt.resize(). */
 function handleResizeEvent(vt: ReturnType<typeof createVt>, data: unknown): void {
   const sizeStr = String(data);
-  const match = sizeStr.match(/^(\d+)x(\d+)$/);
+  const match = /^(\d+)x(\d+)$/.exec(sizeStr);
   if (match?.[1] !== undefined && match?.[2] !== undefined) {
-    vt.resize(parseInt(match[1], 10), parseInt(match[2], 10));
+    vt.resize(Number.parseInt(match[1], 10), Number.parseInt(match[2], 10));
   }
 }
 

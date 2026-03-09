@@ -1,6 +1,6 @@
 import { ref, computed, watch, toValue, type MaybeRef } from 'vue';
 import type { AsciicastFile } from '../../shared/asciicast-types';
-import type { TerminalSnapshot } from '../../../packages/vt-wasm/types';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 
 /**
  * Client-side section interface.

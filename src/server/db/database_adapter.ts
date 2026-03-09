@@ -16,6 +16,8 @@ export interface DatabaseContext {
   sessionRepository: SessionAdapter;
   sectionRepository: SectionAdapter;
   storageAdapter: StorageAdapter;
+  /** Execute a trivial query to verify database connectivity. */
+  ping(): Promise<void>;
   /** Release all underlying resources (DB connection, file handles, etc.). */
   close(): Promise<void>;
 }

@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { pinoLogger } from 'hono-pino';
 import { loadConfig } from './config.js';
 import { logger } from './logger.js';
@@ -33,7 +34,7 @@ const config = loadConfig();
 // Initialize database and repositories through the factory
 const factory = new DatabaseFactory();
 const db = await factory.create();
-const { sessionRepository, sectionRepository, storageAdapter, close } =
+const { sessionRepository, sectionRepository, storageAdapter, ping, close } =
   await db.initialize({ dataDir: config.dataDir });
 
 process.on('SIGTERM', async () => {
@@ -47,9 +48,15 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-// Health check
-app.get('/api/health', (c) => {
-  return c.json({ status: 'ok' });
+// Health check — includes DB ping to verify connectivity
+app.get('/api/health', async (c) => {
+  try {
+    await ping();
+    return c.json({ status: 'ok', db: 'ok' });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    return c.json({ status: 'degraded', db: 'error', detail }, 503);
+  }
 });
 
 // Upload endpoint
@@ -68,5 +75,12 @@ app.delete('/api/sessions/:id', (c) =>
 app.post('/api/sessions/:id/redetect', (c) =>
   handleRedetect(c, sessionRepository, storageAdapter)
 );
+
+// Serve frontend in production — single-container deployment
+if (config.nodeEnv === 'production') {
+  app.use('/*', serveStatic({ root: './dist/client' }));
+  // SPA fallback: serve index.html for Vue Router history mode routes
+  app.get('*', serveStatic({ root: './dist/client', path: 'index.html' }));
+}
 
 export default app;

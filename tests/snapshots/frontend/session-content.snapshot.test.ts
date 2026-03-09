@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import SessionContent from '@client/components/SessionContent.vue';
 import type { Section } from '@client/composables/useSession';
-import type { TerminalSnapshot } from '../../../packages/vt-wasm/types';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 
 function makeSnapshot(lineTexts: string[]): TerminalSnapshot {
   return {

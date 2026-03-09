@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SnapshotLine } from '../../../packages/vt-wasm/types';
+import type { SnapshotLine } from '#vt-wasm/types';
 import './terminal-colors.css';
 
 const props = withDefaults(defineProps<{

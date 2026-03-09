@@ -10,8 +10,8 @@ import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../db/database_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import { migrateV2 } from './migrate-v2.js';
-import { initVt } from '../../../packages/vt-wasm/index.js';
+import { migrateV2 } from './migrate_v2.js';
+import { initVt } from '#vt-wasm';
 
 describe('migrateV2', () => {
   let tmpDir: string;

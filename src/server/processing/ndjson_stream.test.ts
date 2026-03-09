@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { NdjsonStream } from './ndjson-stream.js';
+import { NdjsonStream } from './ndjson_stream.js';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';

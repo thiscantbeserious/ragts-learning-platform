@@ -34,16 +34,16 @@ export function migrate003UnifiedSnapshot(db: Database.Database): void {
   }
 
   // Add snapshot column to sessions table
-  const sessionColumns = db.pragma('table_info(sessions)');
-  const sessionColumnNames = new Set(sessionColumns.map((col: any) => col.name));
+  const sessionColumns = db.pragma('table_info(sessions)') as Array<{ name: string }>;
+  const sessionColumnNames = new Set(sessionColumns.map((col) => col.name));
 
   if (!sessionColumnNames.has('snapshot')) {
     db.exec('ALTER TABLE sessions ADD COLUMN snapshot TEXT');
   }
 
   // Add start_line and end_line columns to sections table
-  const sectionColumns = db.pragma('table_info(sections)');
-  const sectionColumnNames = new Set(sectionColumns.map((col: any) => col.name));
+  const sectionColumns = db.pragma('table_info(sections)') as Array<{ name: string }>;
+  const sectionColumnNames = new Set(sectionColumns.map((col) => col.name));
 
   if (!sectionColumnNames.has('start_line')) {
     db.exec('ALTER TABLE sections ADD COLUMN start_line INTEGER');

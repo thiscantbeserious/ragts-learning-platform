@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
-import { NdjsonStream } from '../../../src/server/processing/ndjson-stream.js';
+import { NdjsonStream } from '../../../src/server/processing/ndjson_stream.js';
 
 const fixturesDir = join(__dirname, '../../fixtures');
 

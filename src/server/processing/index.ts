@@ -8,8 +8,8 @@
  *   snapshot capture, section detection, and database persistence
  */
 
-export { NdjsonStream, type NdjsonItem } from './ndjson-stream.js';
-export { SectionDetector, type SectionBoundary } from './section-detector.js';
-export { processSessionPipeline } from './session-pipeline.js';
-export { runPipeline, waitForPipelines } from './pipeline-tracker.js';
+export { NdjsonStream, type NdjsonItem } from './ndjson_stream.js';
+export { SectionDetector, type SectionBoundary } from './section_detector.js';
+export { processSessionPipeline } from './session_pipeline.js';
+export { runPipeline, waitForPipelines } from './pipeline_tracker.js';
 export type { ProcessedSession } from './types.js';

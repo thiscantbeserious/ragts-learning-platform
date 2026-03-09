@@ -3,7 +3,7 @@
  * Provides factory functions for creating deterministic test data.
  */
 
-import type { SnapshotLine, SnapshotSpan, TerminalSnapshot } from '../../packages/vt-wasm/types.js';
+import type { SnapshotLine, SnapshotSpan, TerminalSnapshot } from '#vt-wasm/types';
 
 /**
  * Create a simple SnapshotLine from plain text.

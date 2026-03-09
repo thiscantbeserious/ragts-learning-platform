@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { SectionDetector } from './section-detector.js';
+import { SectionDetector } from './section_detector.js';
 import type { AsciicastEvent } from '../../shared/asciicast-types.js';
 
 describe('SectionDetector', () => {

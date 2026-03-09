@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, computed } from 'vue';
-import type { TerminalSnapshot } from '../../../packages/vt-wasm/types';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 import type { Section } from '../composables/useSession';
 import TerminalSnapshotComponent from './TerminalSnapshot.vue';
 import SectionHeader from './SectionHeader.vue';

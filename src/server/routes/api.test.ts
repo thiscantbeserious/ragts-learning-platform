@@ -21,7 +21,7 @@ import {
   handleRedetect,
 } from './sessions.js';
 import { waitForPipelines } from '../processing/index.js';
-import { initVt } from '../../../packages/vt-wasm/index.js';
+import { initVt } from '#vt-wasm';
 
 describe('API Routes', () => {
   let testDir: string;
@@ -622,7 +622,7 @@ describe('API Routes', () => {
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
       failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, sectionRepository, failStorage, 250)
+        handleUpload(c, sessionRepository, failStorage, 250)
       );
 
       const formData = new FormData();

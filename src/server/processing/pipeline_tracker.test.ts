@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest';
-import { runPipeline, waitForPipelines } from './pipeline-tracker.js';
-import { NdjsonStream } from './ndjson-stream.js';
+import { runPipeline, waitForPipelines } from './pipeline_tracker.js';
+import { NdjsonStream } from './ndjson_stream.js';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';

@@ -23,8 +23,8 @@ export function migrate002Sections(db: Database.Database): void {
 
   // Add new columns to sessions table
   // Check if each column exists before adding it (idempotency)
-  const sessionColumns = db.pragma('table_info(sessions)');
-  const columnNames = new Set(sessionColumns.map((col: any) => col.name));
+  const sessionColumns = db.pragma('table_info(sessions)') as Array<{ name: string }>;
+  const columnNames = new Set(sessionColumns.map((col) => col.name));
 
   if (!columnNames.has('agent_type')) {
     db.exec('ALTER TABLE sessions ADD COLUMN agent_type TEXT');

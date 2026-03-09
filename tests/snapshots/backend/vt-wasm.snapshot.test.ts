@@ -5,8 +5,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { initVt, createVt } from '../../../packages/vt-wasm/index.js';
-import type { TerminalSnapshot } from '../../../packages/vt-wasm/types.js';
+import { initVt, createVt } from '#vt-wasm';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 import { snapshotToText } from '../../helpers/test-utils.js';
 
 beforeAll(async () => {
