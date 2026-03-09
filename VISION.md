@@ -100,19 +100,27 @@ Nothing the human learned carries over. And if you're on a team, none of it help
 
 This is what Erika builds.
 
+Right now, agents write their own context. MEMORY.md, AGENTS.md, CLAUDE.md — these files exist because agents need somewhere to store what happened. They're useful, but they're never curated by a human. The agent writes them, the agent reads them. Humans rarely touch them, and when they do it's ad-hoc.
+
 Instead of requiring humans to supervise agents in real-time, Erika captures every session and makes it reviewable after the fact. Humans browse what happened, understand why, mark what mattered, and annotate what should have gone differently — on their own time, at their own pace.
 
-Those curated insights feed back to agents as structured context for future sessions. Not raw logs. Not auto-retrieved snippets. Human-validated, intent-aware context that tells agents not just what happened, but what *should* have happened.
+Those curated insights feed back to agents as structured context. Not raw logs. Not keyword-matched snippets. Not files the agent wrote to itself. Human-validated, intent-aware context that tells agents not just what happened, but what *should* have happened — delivered however the agent can consume it.
 
 ```mermaid
-%%{ init: { 'flowchart': { 'nodeSpacing': 50, 'rankSpacing': 50 } } }%%
+%%{ init: { 'flowchart': { 'nodeSpacing': 50, 'rankSpacing': 60 } } }%%
 flowchart TD
     subgraph Session["Synchronous · Sessions"]
-        Human(["👤 Human"]) -->|prompt| Agent([Agent])
-        Agent -->|works| Human([Human])
+        Human(["👤 Human"]) -->|prompt| Agent(["🤖 Agent"])
+        Agent -->|works| Human
     end
 
-    Session -->|raw output| Adapter{{"🔌 Adapter"}}
+    Session -->|raw output| Adapter
+
+    subgraph Adapter["🔌 Adapter"]
+        direction LR
+        Asciicast["🖥️ asciicast"] ~~~ JSONL["📄 JSONL"] ~~~ OTel["📡 OTel"]
+    end
+
     Adapter -->|normalized sessions| Platform
 
     subgraph Platform["Erika Platform"]
@@ -123,26 +131,27 @@ flowchart TD
     subgraph Team["Asynchronous Learning"]
         H1(["👤 Human 1"])
         H2(["👤 Human 2"])
-        H3(["👤 Human 3"])
+        A1(["🤖 Agent"])
     end
 
     S1@{ shape: brace, label: '"Wrong pattern here"' }
     S2@{ shape: brace, label: '"Ah I understand now"' }
-    S3@{ shape: brace, label: '"Not a good choice"' }
+    S3@{ shape: brace, label: '"Pattern matches issue #42"' }
     H1 -.- S1
     H2 -.- S2
-    H3 -.- S3
+    A1 -.- S3
 
-    Platform --> Team
-    Team --> Platform
+    Platform <--> Team
 
-    RAG[(RAG)]
-    Platform -->|writes curated| RAG
-    RAG -.->|curated| Agent
+    Curated[("🗄️ Curated Context<br/>RAG · MCP · AGENTS.md")]
+    Platform -->|writes curated| Curated
+    Curated -.->|structured context| Agent
+
+    style Adapter stroke-dasharray: 5 5, fill:#f5f5f5, stroke:#999, color:#333
 ```
 
-Each cycle sharpens both sides. Humans browse sessions, curate what matters, share with the team — on their own time, not blocking the agent. Curated insights flow back as structured context, replacing the uncurated noise from Step 4.
+Each cycle sharpens both sides. Humans browse sessions, curate what matters, share with the team — on their own time, not blocking the agent. Agents contribute too: flagging patterns, linking related sessions, suggesting refinements. Both feed back into the platform asynchronously. Curated insights flow back as structured context, replacing the self-written, uncurated files from Step 4.
 
-The loop is **asynchronous** — humans refine at their own pace. It's **compounding** — every curation pass improves the next session. And it's **collaborative** — the whole team contributes, not just whoever happened to be watching.
+The loop is **asynchronous** — humans and agents refine at their own pace. It's **compounding** — every curation pass improves the next session. And it's **collaborative** — the whole team contributes, humans and agents alike.
 
-The loop doesn't replace human judgment. It scales it.
+The loop doesn't replace human judgment. It scales it — and lets agents help.
