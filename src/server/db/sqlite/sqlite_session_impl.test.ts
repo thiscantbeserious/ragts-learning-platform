@@ -89,8 +89,8 @@ describe('SqliteSessionImpl', () => {
 
       const sessions = await repository.findAll();
 
-      expect(sessions[0].id).toBe(newerSession.id);
-      expect(sessions[0].uploaded_at).toBe(newer.uploaded_at);
+      expect(sessions[0]!.id).toBe(newerSession.id);
+      expect(sessions[0]!.uploaded_at).toBe(newer.uploaded_at);
     });
   });
 
@@ -147,7 +147,7 @@ describe('SqliteSessionImpl', () => {
 
       const remaining = await repository.findAll();
       expect(remaining).toHaveLength(1);
-      expect(remaining[0].id).toBe(session2.id);
+      expect(remaining[0]!.id).toBe(session2.id);
     });
   });
 

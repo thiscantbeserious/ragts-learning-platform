@@ -31,7 +31,7 @@ describe('TerminalSnapshot', () => {
 
     const span = wrapper.find('.terminal-span');
     expect(span.exists()).toBe(true);
-    expect(span.element.style.color).toBe('var(--term-color-1)');
+    expect((span.element as HTMLElement).style.color).toBe('var(--term-color-1)');
   });
 
   it('renders background color', () => {
@@ -45,7 +45,7 @@ describe('TerminalSnapshot', () => {
 
     const span = wrapper.find('.terminal-span');
     expect(span.exists()).toBe(true);
-    expect(span.element.style.backgroundColor).toBe('var(--term-color-4)');
+    expect((span.element as HTMLElement).style.backgroundColor).toBe('var(--term-color-4)');
   });
 
   it('renders bold/italic/underline attributes', () => {
@@ -60,9 +60,9 @@ describe('TerminalSnapshot', () => {
     });
 
     const spans = wrapper.findAll('.terminal-span');
-    expect(spans[0].classes()).toContain('terminal-span--bold');
-    expect(spans[1].classes()).toContain('terminal-span--italic');
-    expect(spans[2].classes()).toContain('terminal-span--underline');
+    expect(spans[0]!.classes()).toContain('terminal-span--bold');
+    expect(spans[1]!.classes()).toContain('terminal-span--italic');
+    expect(spans[2]!.classes()).toContain('terminal-span--underline');
   });
 
   it('renders 256-color palette span', () => {
@@ -77,7 +77,7 @@ describe('TerminalSnapshot', () => {
     const span = wrapper.find('.terminal-span');
     expect(span.exists()).toBe(true);
     // Should compute RGB color from palette index 208
-    expect(span.element.style.color).toMatch(/rgb/);
+    expect((span.element as HTMLElement).style.color).toMatch(/rgb/);
   });
 
   it('renders true color (#RRGGBB) span', () => {
@@ -91,7 +91,7 @@ describe('TerminalSnapshot', () => {
 
     const span = wrapper.find('.terminal-span');
     expect(span.exists()).toBe(true);
-    expect(span.element.style.color).toBe('#ff5733');
+    expect((span.element as HTMLElement).style.color).toBe('#ff5733');
   });
 
   it('renders empty snapshot (no crash)', () => {
@@ -135,7 +135,7 @@ describe('TerminalSnapshot', () => {
     expect(span.classes()).toContain('terminal-span--bold');
     expect(span.classes()).toContain('terminal-span--italic');
     expect(span.classes()).toContain('terminal-span--underline');
-    expect(span.element.style.color).toBe('var(--term-color-2)');
+    expect((span.element as HTMLElement).style.color).toBe('var(--term-color-2)');
   });
 
   it('handles faint, strikethrough, blink, and inverse attributes', () => {
@@ -151,10 +151,10 @@ describe('TerminalSnapshot', () => {
     });
 
     const spans = wrapper.findAll('.terminal-span');
-    expect(spans[0].classes()).toContain('terminal-span--faint');
-    expect(spans[1].classes()).toContain('terminal-span--strikethrough');
-    expect(spans[2].classes()).toContain('terminal-span--blink');
-    expect(spans[3].classes()).toContain('terminal-span--inverse');
+    expect(spans[0]!.classes()).toContain('terminal-span--faint');
+    expect(spans[1]!.classes()).toContain('terminal-span--strikethrough');
+    expect(spans[2]!.classes()).toContain('terminal-span--blink');
+    expect(spans[3]!.classes()).toContain('terminal-span--inverse');
   });
 
   it('handles bright ANSI colors (8-15)', () => {
@@ -168,8 +168,8 @@ describe('TerminalSnapshot', () => {
     });
 
     const spans = wrapper.findAll('.terminal-span');
-    expect(spans[0].element.style.color).toBe('var(--term-color-9)');
-    expect(spans[1].element.style.color).toBe('var(--term-color-14)');
+    expect((spans[0]!.element as HTMLElement).style.color).toBe('var(--term-color-9)');
+    expect((spans[1]!.element as HTMLElement).style.color).toBe('var(--term-color-14)');
   });
 
   it('handles grayscale colors (232-255)', () => {
@@ -184,6 +184,6 @@ describe('TerminalSnapshot', () => {
     const span = wrapper.find('.terminal-span');
     expect(span.exists()).toBe(true);
     // Should compute grayscale RGB value
-    expect(span.element.style.color).toMatch(/rgb/);
+    expect((span.element as HTMLElement).style.color).toMatch(/rgb/);
   });
 });

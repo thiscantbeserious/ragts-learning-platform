@@ -102,18 +102,18 @@ describe('processSessionPipeline', () => {
     expect(markerSections.length).toBe(2);
 
     // First marker section - CLI section should have line ranges, not snapshot
-    expect(markerSections[0].label).toBe('Start');
-    expect(markerSections[0].start_event).toBe(50);
-    expect(markerSections[0].snapshot).toBe(null);
-    expect(markerSections[0].start_line).toBeTypeOf('number');
-    expect(markerSections[0].end_line).toBeTypeOf('number');
+    expect(markerSections[0]!.label).toBe('Start');
+    expect(markerSections[0]!.start_event).toBe(50);
+    expect(markerSections[0]!.snapshot).toBe(null);
+    expect(markerSections[0]!.start_line).toBeTypeOf('number');
+    expect(markerSections[0]!.end_line).toBeTypeOf('number');
 
     // Second marker section
-    expect(markerSections[1].label).toBe('Middle');
-    expect(markerSections[1].start_event).toBe(100);
-    expect(markerSections[1].snapshot).toBe(null);
-    expect(markerSections[1].start_line).toBeTypeOf('number');
-    expect(markerSections[1].end_line).toBeTypeOf('number');
+    expect(markerSections[1]!.label).toBe('Middle');
+    expect(markerSections[1]!.start_event).toBe(100);
+    expect(markerSections[1]!.snapshot).toBe(null);
+    expect(markerSections[1]!.start_line).toBeTypeOf('number');
+    expect(markerSections[1]!.end_line).toBeTypeOf('number');
 
     // Verify session has full snapshot
     const updatedSession = await sessionRepo.findById(session.id);
@@ -150,7 +150,7 @@ describe('processSessionPipeline', () => {
     expect(detectedSections.length).toBeGreaterThan(0);
 
     // Verify line ranges exist (CLI section), not snapshot
-    const firstDetected = detectedSections[0];
+    const firstDetected = detectedSections[0]!;
     expect(firstDetected.snapshot).toBe(null);
     expect(firstDetected.start_line).toBeTypeOf('number');
     expect(firstDetected.end_line).toBeTypeOf('number');
@@ -313,11 +313,11 @@ describe('processSessionPipeline', () => {
 
     // Each section's end_event should be the next section's start_event
     for (let i = 0; i < sortedSections.length - 1; i++) {
-      expect(sortedSections[i].end_event).toBe(sortedSections[i + 1].start_event);
+      expect(sortedSections[i]!.end_event).toBe(sortedSections[i + 1]!.start_event);
     }
 
     // Last section's end_event should be the total event count
-    const lastSection = sortedSections[sortedSections.length - 1];
+    const lastSection = sortedSections[sortedSections.length - 1]!;
     const updatedSession = await sessionRepo.findById(session.id);
     expect(lastSection.end_event).toBe(updatedSession?.event_count);
   });
@@ -356,9 +356,9 @@ describe('processSessionPipeline', () => {
     expect(sortedSections.length).toBe(4);
 
     // First section is preamble (detected type)
-    expect(sortedSections[0].type).toBe('detected');
-    expect(sortedSections[0].label).toBe('Preamble');
-    expect(sortedSections[0].start_event).toBe(0);
+    expect(sortedSections[0]!.type).toBe('detected');
+    expect(sortedSections[0]!.label).toBe('Preamble');
+    expect(sortedSections[0]!.start_event).toBe(0);
 
     const markerSections = sortedSections.filter((s) => s.type === 'marker');
     expect(markerSections.length).toBe(3);
@@ -383,7 +383,7 @@ describe('processSessionPipeline', () => {
     // Sections with line ranges should be non-overlapping and monotonic
     const rangedSections = sortedSections.filter(s => s.start_line !== null && s.end_line !== null);
     for (let i = 0; i < rangedSections.length - 1; i++) {
-      expect(rangedSections[i].end_line).toBeLessThanOrEqual(rangedSections[i + 1].start_line);
+      expect(rangedSections[i]!.end_line).toBeLessThanOrEqual(rangedSections[i + 1]!.start_line!);
     }
 
     // Sections with viewport snapshots should have valid snapshot data
@@ -429,7 +429,7 @@ describe('processSessionPipeline', () => {
     expect(tuiSections.length).toBeGreaterThan(0);
 
     // Verify TUI section has snapshot and no line ranges
-    const tuiSection = tuiSections[0];
+    const tuiSection = tuiSections[0]!;
     expect(tuiSection.snapshot).toBeTruthy();
     expect(tuiSection.start_line).toBe(null);
     expect(tuiSection.end_line).toBe(null);
@@ -558,19 +558,19 @@ describe('processSessionPipeline', () => {
     const sortedByLine = cliSections.sort((a, b) => a.start_line! - b.start_line!);
 
     // Verify first section starts at beginning
-    expect(sortedByLine[0].start_line).toBe(0);
+    expect(sortedByLine[0]!.start_line).toBe(0);
 
     // Verify line ranges are contiguous (strict equality)
     for (let i = 0; i < sortedByLine.length - 1; i++) {
-      const current = sortedByLine[i];
-      const next = sortedByLine[i + 1];
+      const current = sortedByLine[i]!;
+      const next = sortedByLine[i + 1]!;
       expect(current.end_line).toBe(next.start_line);
     }
 
     // Verify last section's end_line doesn't exceed full snapshot length
     const updatedSession = await sessionRepo.findById(session.id);
     const fullSnapshot = JSON.parse(updatedSession!.snapshot!);
-    const lastSection = sortedByLine[sortedByLine.length - 1];
+    const lastSection = sortedByLine[sortedByLine.length - 1]!;
     expect(lastSection.end_line).toBeLessThanOrEqual(fullSnapshot.lines.length);
   });
 

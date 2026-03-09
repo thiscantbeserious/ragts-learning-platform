@@ -66,17 +66,17 @@ describe('migrateV2', () => {
     const markerSections = sections.filter((s) => s.type === 'marker');
 
     expect(markerSections.length).toBe(2);
-    expect(markerSections[0].label).toBe('Start');
-    expect(markerSections[0].start_event).toBe(50);
-    expect(markerSections[0].snapshot).toBe(null);
-    expect(markerSections[0].start_line).toBeTypeOf('number');
-    expect(markerSections[0].end_line).toBeTypeOf('number');
+    expect(markerSections[0]!.label).toBe('Start');
+    expect(markerSections[0]!.start_event).toBe(50);
+    expect(markerSections[0]!.snapshot).toBe(null);
+    expect(markerSections[0]!.start_line).toBeTypeOf('number');
+    expect(markerSections[0]!.end_line).toBeTypeOf('number');
 
-    expect(markerSections[1].label).toBe('Middle');
-    expect(markerSections[1].start_event).toBe(100);
-    expect(markerSections[1].snapshot).toBe(null);
-    expect(markerSections[1].start_line).toBeTypeOf('number');
-    expect(markerSections[1].end_line).toBeTypeOf('number');
+    expect(markerSections[1]!.label).toBe('Middle');
+    expect(markerSections[1]!.start_event).toBe(100);
+    expect(markerSections[1]!.snapshot).toBe(null);
+    expect(markerSections[1]!.start_line).toBeTypeOf('number');
+    expect(markerSections[1]!.end_line).toBeTypeOf('number');
 
     // Verify session has full snapshot
     expect(updatedSession?.snapshot).toBeTruthy();
@@ -129,7 +129,7 @@ describe('migrateV2', () => {
     // Verify no new sections were created
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     expect(sections.length).toBe(1);
-    expect(sections[0].label).toBe('Existing Section');
+    expect(sections[0]!.label).toBe('Existing Section');
   });
 
   it('handles corrupt .cast file gracefully', async () => {

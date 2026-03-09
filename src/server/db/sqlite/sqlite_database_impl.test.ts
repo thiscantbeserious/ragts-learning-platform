@@ -57,7 +57,7 @@ describe('SqliteDatabaseImpl', () => {
 
       const sections = await ctx.sectionRepository.findBySessionId(session.id);
       expect(sections).toHaveLength(1);
-      expect(sections[0].label).toBe('Setup');
+      expect(sections[0]!.label).toBe('Setup');
     });
 
     it('should return working storageAdapter (save + read round-trip)', async () => {

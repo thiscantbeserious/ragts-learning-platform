@@ -56,7 +56,7 @@ export function validateAsciicast(content: string): ValidationResult {
   // Validate header (first line)
   let header: AsciicastHeader;
   try {
-    const raw = JSON.parse(lines[0]);
+    const raw = JSON.parse(lines[0] ?? '');
     if (!raw || typeof raw !== 'object') {
       return {
         valid: false,
@@ -92,7 +92,7 @@ export function validateAsciicast(content: string): ValidationResult {
   // Validate events (remaining lines)
   for (let i = 1; i < lines.length; i++) {
     try {
-      const event = JSON.parse(lines[i]);
+      const event = JSON.parse(lines[i] ?? '');
       if (!Array.isArray(event) || event.length < 3) {
         return {
           valid: false,
@@ -138,7 +138,7 @@ export function parseAsciicast(content: string): AsciicastFile {
 
   const lines = content.split('\n').filter(line => line.trim().length > 0);
 
-  const header: AsciicastHeader = normalizeHeader(JSON.parse(lines[0]));
+  const header: AsciicastHeader = normalizeHeader(JSON.parse(lines[0] ?? ''));
   const rawEvents: AsciicastEvent[] = lines.slice(1).map(line => JSON.parse(line));
 
   const events = computeCumulativeTimes(rawEvents);
@@ -183,7 +183,7 @@ export function extractMarkers(events: ParsedEvent[]): Marker[] {
 
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
-    if (event.type === 'm') {
+    if (event?.type === 'm') {
       markers.push({
         time: event.time,
         label: String(event.data),

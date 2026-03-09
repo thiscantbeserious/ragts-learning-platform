@@ -144,7 +144,7 @@ jobs:
       - if: steps.node-modules.outputs.cache-hit != 'true'
         run: npm ci
 
-      - run: npx tsc -p tsconfig.build.json --noEmit
+      - run: npx tsc --noEmit
 
   test-e2e:
     name: E2E Tests

@@ -65,12 +65,22 @@ function lineKey(line: SnapshotLine): string {
 }
 
 /**
+ * Get a line from an array at a known-valid index.
+ * The caller is responsible for ensuring the index is within bounds.
+ */
+function getLine(lines: SnapshotLine[], index: number): SnapshotLine {
+  const line = lines[index];
+  if (line === undefined) throw new RangeError(`Line index ${index} out of bounds`);
+  return line;
+}
+
+/**
  * Check if all lines between index `from` (exclusive) and `to` (exclusive) are trivial.
  * Trivial means blank or whitespace-only (character count <= TRIVIAL_THRESHOLD).
  */
 function allLinesBetweenTrivial(rawLines: SnapshotLine[], from: number, to: number): boolean {
   for (let k = from + 1; k < to; k++) {
-    if (lineKey(rawLines[k]).length > TRIVIAL_THRESHOLD) return false;
+    if (lineKey(getLine(rawLines, k)).length > TRIVIAL_THRESHOLD) return false;
   }
   return true;
 }
@@ -83,7 +93,7 @@ function allLinesBetweenTrivial(rawLines: SnapshotLine[], from: number, to: numb
 function findStutterPartner(rawLines: SnapshotLine[], i: number, key: string): number {
   const limit = Math.min(i + STUTTER_WINDOW, rawLines.length - 1);
   for (let j = i + 1; j <= limit; j++) {
-    if (lineKey(rawLines[j]) !== key) continue;
+    if (lineKey(getLine(rawLines, j)) !== key) continue;
     if (allLinesBetweenTrivial(rawLines, i, j)) return j;
   }
   return -1;
@@ -101,7 +111,7 @@ function detectStutters(rawLines: SnapshotLine[]): Set<number> {
   const skip = new Set<number>();
   for (let i = 0; i < rawLines.length; i++) {
     if (skip.has(i)) continue;
-    const key = lineKey(rawLines[i]);
+    const key = lineKey(getLine(rawLines, i));
     if (key.length <= TRIVIAL_THRESHOLD) continue;
 
     const partner = findStutterPartner(rawLines, i, key);
@@ -151,7 +161,7 @@ function findBestBlock(
   epochLen: number,
   i: number
 ): { bestLen: number; bestCleanStart: number } {
-  const key = lineKey(state.rawLines[epochStart + i]);
+  const key = lineKey(getLine(state.rawLines, epochStart + i));
   const candidates = state.cleanIndex.get(key);
   let bestLen = 0;
   let bestCleanStart = -1;
@@ -163,7 +173,7 @@ function findBestBlock(
     while (
       i + len < epochLen &&
       cleanPos + len < state.cleanLines.length &&
-      lineKey(state.rawLines[epochStart + i + len]) === lineKey(state.cleanLines[cleanPos + len])
+      lineKey(getLine(state.rawLines, epochStart + i + len)) === lineKey(getLine(state.cleanLines, cleanPos + len))
     ) {
       len++;
     }
@@ -209,7 +219,7 @@ function processEpoch(
       i += bestLen;
     } else {
       // New content: append to clean doc (immediately available for future matches)
-      addToClean(state, epochStart + i, state.rawLines[epochStart + i]);
+      addToClean(state, epochStart + i, getLine(state.rawLines, epochStart + i));
       i++;
     }
   }
@@ -328,7 +338,7 @@ export function buildCleanDocument(
     rawLineCountToClean: (rawLineCount: number) => {
       if (rawLineCount <= 0) return 0;
       if (rawLineCount >= rawLines.length) return cleanLines.length;
-      return maxCleanAtRaw[rawLineCount];
+      return maxCleanAtRaw[rawLineCount] ?? 0;
     },
   };
 }

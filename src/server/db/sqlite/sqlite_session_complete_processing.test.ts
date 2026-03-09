@@ -79,8 +79,8 @@ describe('SqliteSessionImpl.completeProcessing', () => {
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     expect(sections.length).toBe(2);
-    expect(sections[0].type).toBe('detected');
-    expect(sections[1].type).toBe('marker');
+    expect(sections[0]!.type).toBe('detected');
+    expect(sections[1]!.type).toBe('marker');
   });
 
   it('replaces existing sections on second call (second set wins)', async () => {
@@ -149,7 +149,7 @@ describe('SqliteSessionImpl.completeProcessing', () => {
 
     const secondSections = await ctx.sectionRepository.findBySessionId(session.id);
     expect(secondSections.length).toBe(1);
-    expect(secondSections[0].label).toBe('Second Only Section');
+    expect(secondSections[0]!.label).toBe('Second Only Section');
 
     const updated = await sessionRepo.findById(session.id);
     expect(updated?.event_count).toBe(15);

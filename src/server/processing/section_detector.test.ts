@@ -57,9 +57,9 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].signals).toContain('timing_gap');
-      expect(boundaries[0].score).toBeGreaterThan(0);
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('timing_gap');
+      expect(boundaries[0]!.score).toBeGreaterThan(0);
     });
 
     it('falls back to other signals when timing is compressed (median < 0.1s)', () => {
@@ -75,9 +75,9 @@ describe('SectionDetector', () => {
 
       // Should detect the screen clear, not timing
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].signals).toContain('screen_clear');
-      expect(boundaries[0].signals).not.toContain('timing_gap');
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('screen_clear');
+      expect(boundaries[0]!.signals).not.toContain('timing_gap');
     });
   });
 
@@ -93,8 +93,8 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].signals).toContain('screen_clear');
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('screen_clear');
     });
 
     it('detects \\x1b[H\\x1b[2J (home + clear screen)', () => {
@@ -108,8 +108,8 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].signals).toContain('screen_clear');
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('screen_clear');
     });
   });
 
@@ -125,8 +125,8 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].signals).toContain('alt_screen_exit');
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('alt_screen_exit');
     });
   });
 
@@ -198,8 +198,8 @@ describe('SectionDetector', () => {
 
       // Should keep both boundaries
       expect(boundaries.length).toBe(2);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[1].eventIndex).toBe(161);
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[1]!.eventIndex).toBe(161);
     });
   });
 
@@ -229,7 +229,7 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(120);
+      expect(boundaries[0]!.eventIndex).toBe(120);
     });
   });
 
@@ -253,11 +253,11 @@ describe('SectionDetector', () => {
       // Should cap at 50 boundaries
       expect(boundaries.length).toBe(50);
       // Should keep top 50 scores (2.18 to 3.18)
-      expect(boundaries[0].score).toBeGreaterThanOrEqual(2.18);
-      expect(boundaries[boundaries.length - 1].score).toBeGreaterThanOrEqual(2.18);
+      expect(boundaries[0]!.score).toBeGreaterThanOrEqual(2.18);
+      expect(boundaries[boundaries.length - 1]!.score).toBeGreaterThanOrEqual(2.18);
       // Should be sorted by eventIndex (for rendering)
       for (let i = 1; i < boundaries.length; i++) {
-        expect(boundaries[i].eventIndex).toBeGreaterThan(boundaries[i - 1].eventIndex);
+        expect(boundaries[i]!.eventIndex).toBeGreaterThan(boundaries[i - 1]!.eventIndex);
       }
     });
   });
@@ -276,8 +276,8 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       expect(boundaries.length).toBe(2);
-      expect(boundaries[0].label).toBe('Section 1');
-      expect(boundaries[1].label).toBe('Section 2');
+      expect(boundaries[0]!.label).toBe('Section 1');
+      expect(boundaries[1]!.label).toBe('Section 2');
     });
   });
 
@@ -298,10 +298,10 @@ describe('SectionDetector', () => {
       const boundaries = detector.detectWithMarkers(markers);
 
       expect(boundaries.length).toBe(2);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].label).toBe('Marker 1');
-      expect(boundaries[1].eventIndex).toBe(200);
-      expect(boundaries[1].label).toBe('Marker 2');
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.label).toBe('Marker 1');
+      expect(boundaries[1]!.eventIndex).toBe(200);
+      expect(boundaries[1]!.label).toBe('Marker 2');
     });
 
     it('runs detection between markers', () => {
@@ -352,8 +352,8 @@ describe('SectionDetector', () => {
 
       // Should only have the marker boundary (marker wins)
       expect(boundaries.length).toBe(1);
-      expect(boundaries[0].eventIndex).toBe(100);
-      expect(boundaries[0].label).toBe('Manual Marker');
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.label).toBe('Manual Marker');
     });
   });
 });

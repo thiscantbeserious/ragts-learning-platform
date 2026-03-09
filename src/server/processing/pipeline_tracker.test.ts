@@ -34,7 +34,7 @@ describe('pipeline-tracker semaphore', () => {
       const idx = i;
       runPipeline(async () => {
         started.push(idx);
-        await deferreds[idx].promise;
+        await deferreds[idx]!.promise;
       });
     }
 
@@ -54,7 +54,7 @@ describe('pipeline-tracker semaphore', () => {
 
     for (let i = 0; i < 3; i++) {
       const idx = i;
-      runPipeline(async () => { await deferreds[idx].promise; });
+      runPipeline(async () => { await deferreds[idx]!.promise; });
     }
 
     // Yield so the 3 pipelines acquire their slots
@@ -70,13 +70,13 @@ describe('pipeline-tracker semaphore', () => {
     expect(fourthStarted).toBe(false);
 
     // Release one slot
-    deferreds[0].resolve();
+    deferreds[0]!.resolve();
     await new Promise(r => setTimeout(r, 10));
 
     expect(fourthStarted).toBe(true);
 
-    deferreds[1].resolve();
-    deferreds[2].resolve();
+    deferreds[1]!.resolve();
+    deferreds[2]!.resolve();
     await waitForPipelines();
   });
 
@@ -87,7 +87,7 @@ describe('pipeline-tracker semaphore', () => {
     // Fill 2 slots with blocking pipelines
     for (let i = 0; i < 2; i++) {
       const idx = i;
-      runPipeline(async () => { await blockDeferreds[idx].promise; });
+      runPipeline(async () => { await blockDeferreds[idx]!.promise; });
     }
 
     // Fill slot 3 with a throwing pipeline
@@ -114,8 +114,8 @@ describe('pipeline-tracker semaphore', () => {
 
     expect(afterThrowStarted).toBe(true);
 
-    blockDeferreds[0].resolve();
-    blockDeferreds[1].resolve();
+    blockDeferreds[0]!.resolve();
+    blockDeferreds[1]!.resolve();
     await waitForPipelines();
   });
 
@@ -126,7 +126,7 @@ describe('pipeline-tracker semaphore', () => {
     // Fill 3 slots
     for (let i = 0; i < 3; i++) {
       const idx = i;
-      runPipeline(async () => { await blockDeferreds[idx].promise; });
+      runPipeline(async () => { await blockDeferreds[idx]!.promise; });
     }
 
     await Promise.resolve();
@@ -142,7 +142,7 @@ describe('pipeline-tracker semaphore', () => {
 
     // Release slots one at a time and verify FIFO order
     for (let i = 0; i < 3; i++) {
-      blockDeferreds[i].resolve();
+      blockDeferreds[i]!.resolve();
       await new Promise(r => setTimeout(r, 10));
     }
 

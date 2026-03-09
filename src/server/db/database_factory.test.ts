@@ -69,7 +69,7 @@ describe('DatabaseFactory', () => {
 
       const sections = await ctx.sectionRepository.findBySessionId(session.id);
       expect(sections).toHaveLength(1);
-      expect(sections[0].label).toBe('Intro');
+      expect(sections[0]!.label).toBe('Intro');
     });
 
     it('should return a working storageAdapter (save + read round-trip)', async () => {

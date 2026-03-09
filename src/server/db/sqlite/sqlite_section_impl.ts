@@ -21,11 +21,8 @@ export class SqliteSectionImpl implements SectionAdapter {
   private readonly deleteBySessionIdStmt: Database.Statement;
   private readonly deleteBySessionIdAndTypeStmt: Database.Statement;
   private readonly deleteByIdStmt: Database.Statement;
-  private readonly db: Database.Database;
 
   constructor(db: Database.Database) {
-    this.db = db;
-
     // Prepare statements once at construction
     this.insertStmt = db.prepare(`
       INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)

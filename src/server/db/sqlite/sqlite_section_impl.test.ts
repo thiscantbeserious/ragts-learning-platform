@@ -112,12 +112,12 @@ describe('SqliteSectionImpl', () => {
       const sections = await sectionRepo.findBySessionId(testSessionId);
 
       expect(sections).toHaveLength(3);
-      expect(sections[0].start_event).toBe(0);
-      expect(sections[0].label).toBe('Earlier section');
-      expect(sections[1].start_event).toBe(10);
-      expect(sections[1].label).toBe('Middle section');
-      expect(sections[2].start_event).toBe(20);
-      expect(sections[2].label).toBe('Later section');
+      expect(sections[0]!.start_event).toBe(0);
+      expect(sections[0]!.label).toBe('Earlier section');
+      expect(sections[1]!.start_event).toBe(10);
+      expect(sections[1]!.label).toBe('Middle section');
+      expect(sections[2]!.start_event).toBe(20);
+      expect(sections[2]!.label).toBe('Later section');
     });
 
     it('should not return sections from other sessions', async () => {
@@ -131,8 +131,8 @@ describe('SqliteSectionImpl', () => {
       const sections = await sectionRepo.findBySessionId(testSessionId);
 
       expect(sections).toHaveLength(1);
-      expect(sections[0].session_id).toBe(testSessionId);
-      expect(sections[0].label).toBe('Test session section');
+      expect(sections[0]!.session_id).toBe(testSessionId);
+      expect(sections[0]!.label).toBe('Test session section');
     });
   });
 
@@ -173,8 +173,8 @@ describe('SqliteSectionImpl', () => {
 
       const remaining = await sectionRepo.findBySessionId(testSessionId);
       expect(remaining).toHaveLength(1);
-      expect(remaining[0].type).toBe('marker');
-      expect(remaining[0].label).toBe('Marker section');
+      expect(remaining[0]!.type).toBe('marker');
+      expect(remaining[0]!.label).toBe('Marker section');
     });
 
     it('should delete only marker sections when type is specified', async () => {
@@ -192,8 +192,8 @@ describe('SqliteSectionImpl', () => {
 
       const remaining = await sectionRepo.findBySessionId(testSessionId);
       expect(remaining).toHaveLength(1);
-      expect(remaining[0].type).toBe('detected');
-      expect(remaining[0].label).toBe('Detected section');
+      expect(remaining[0]!.type).toBe('detected');
+      expect(remaining[0]!.label).toBe('Detected section');
     });
 
     it('should not affect sections from other sessions', async () => {
@@ -213,7 +213,7 @@ describe('SqliteSectionImpl', () => {
 
       const otherSections = await sectionRepo.findBySessionId(otherSession.id);
       expect(otherSections).toHaveLength(1);
-      expect(otherSections[0].label).toBe('Other session section');
+      expect(otherSections[0]!.label).toBe('Other session section');
     });
   });
 
@@ -247,8 +247,8 @@ describe('SqliteSectionImpl', () => {
 
       const remaining = await sectionRepo.findBySessionId(testSessionId);
       expect(remaining).toHaveLength(1);
-      expect(remaining[0].id).toBe(section2.id);
-      expect(remaining[0].label).toBe('Section 2');
+      expect(remaining[0]!.id).toBe(section2.id);
+      expect(remaining[0]!.label).toBe('Section 2');
     });
   });
 

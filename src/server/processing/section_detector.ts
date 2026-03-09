@@ -96,16 +96,20 @@ export class SectionDetector {
     const detectedBoundaries: SectionBoundary[] = [];
 
     // Before first marker
-    if (sortedMarkers[0].index > this.MIN_SECTION_SIZE) {
-      const segmentEvents = this.events.slice(0, sortedMarkers[0].index);
+    const firstMarker = sortedMarkers[0];
+    if (firstMarker !== undefined && firstMarker.index > this.MIN_SECTION_SIZE) {
+      const segmentEvents = this.events.slice(0, firstMarker.index);
       const segmentBoundaries = new SectionDetector(segmentEvents).detect(false);
       detectedBoundaries.push(...segmentBoundaries);
     }
 
     // Between markers - skip minimum size filtering within marker segments
     for (let i = 0; i < sortedMarkers.length - 1; i++) {
-      const start = sortedMarkers[i].index + 1;
-      const end = sortedMarkers[i + 1].index;
+      const currentMarker = sortedMarkers[i];
+      const nextMarker = sortedMarkers[i + 1];
+      if (currentMarker === undefined || nextMarker === undefined) continue;
+      const start = currentMarker.index + 1;
+      const end = nextMarker.index;
 
       // Allow smaller segments between markers (markers define the structure)
       if (end - start >= this.MIN_SESSION_SIZE) {
@@ -175,10 +179,13 @@ export class SectionDetector {
 
     // Calculate median
     const sortedGaps = [...gaps].sort((a, b) => a - b);
+    const midHigh = sortedGaps[sortedGaps.length / 2] ?? 0;
+    const midLow = sortedGaps[sortedGaps.length / 2 - 1] ?? 0;
+    const midFloor = sortedGaps[Math.floor(sortedGaps.length / 2)] ?? 0;
     const median =
       sortedGaps.length % 2 === 0
-        ? (sortedGaps[sortedGaps.length / 2 - 1] + sortedGaps[sortedGaps.length / 2]) / 2
-        : sortedGaps[Math.floor(sortedGaps.length / 2)];
+        ? (midLow + midHigh) / 2
+        : midFloor;
 
     return median >= this.TIMING_RELIABILITY_THRESHOLD;
   }
@@ -190,7 +197,9 @@ export class SectionDetector {
     const candidates: BoundaryCandidate[] = [];
 
     for (let i = 0; i < this.events.length; i++) {
-      const gap = this.events[i][0];
+      const event = this.events[i];
+      if (event === undefined) continue;
+      const gap = event[0];
 
       if (gap > this.TIMING_GAP_THRESHOLD) {
         // Score is proportional to gap size
@@ -215,6 +224,7 @@ export class SectionDetector {
 
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
+      if (event === undefined) continue;
       const eventType = event[1];
       const data = event[2];
 
@@ -242,6 +252,7 @@ export class SectionDetector {
 
     for (let i = 0; i < this.events.length; i++) {
       const event = this.events[i];
+      if (event === undefined) continue;
       const eventType = event[1];
       const data = event[2];
 
@@ -282,10 +293,12 @@ export class SectionDetector {
         volumes.slice(i - WINDOW_SIZE, i).reduce((sum, v) => sum + v, 0) / WINDOW_SIZE;
 
       // Check if current event is a burst
-      const currentVolume = volumes[i];
+      const currentVolume = volumes[i] ?? 0;
       if (precedingAvg > 0 && currentVolume > precedingAvg * BURST_THRESHOLD) {
         // Check if there's also a timing gap (even if small)
-        const gap = this.events[i][0];
+        const currentEvent = this.events[i];
+        if (currentEvent === undefined) continue;
+        const gap = currentEvent[0];
         if (gap > 1) {
           // Small bonus for volume burst
           candidates.push({
@@ -334,9 +347,11 @@ export class SectionDetector {
 
     const merged: BoundaryCandidate[] = [];
     let current = candidates[0];
+    if (current === undefined) return merged;
 
     for (let i = 1; i < candidates.length; i++) {
       const next = candidates[i];
+      if (next === undefined) continue;
 
       if (next.eventIndex - current.eventIndex <= this.MERGE_WINDOW) {
         // Merge: keep higher score
@@ -376,6 +391,7 @@ export class SectionDetector {
     // Check each boundary
     for (let i = 0; i < candidates.length; i++) {
       const boundary = candidates[i];
+      if (boundary === undefined) continue;
 
       // For first boundary: check if section from start to boundary is large enough
       if (i === 0 && boundary.eventIndex < this.MIN_SECTION_SIZE) {

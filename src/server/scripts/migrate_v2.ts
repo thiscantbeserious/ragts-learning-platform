@@ -89,6 +89,7 @@ async function processPendingSessions(
 
   for (let i = 0; i < sessions.length; i++) {
     const session = sessions[i];
+    if (session === undefined) continue;
     const progress = `[${i + 1}/${sessions.length}]`;
 
     try {
@@ -118,7 +119,9 @@ async function reprocessMissingSnapshots(
   let reprocessed = 0;
 
   for (let i = 0; i < allSessions.length; i++) {
-    const fullSession = await sessionRepo.findById(allSessions[i].id);
+    const sessionEntry = allSessions[i];
+    if (sessionEntry === undefined) continue;
+    const fullSession = await sessionRepo.findById(sessionEntry.id);
     if (!fullSession || fullSession.snapshot) continue;
 
     const progress = `[${i + 1}/${allSessions.length}]`;

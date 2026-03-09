@@ -29,8 +29,8 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, []);
 
       expect(result.cleanSnapshot.lines.length).toBe(10);
-      expect(result.cleanSnapshot.lines[0].spans[0].text).toBe('A');
-      expect(result.cleanSnapshot.lines[9].spans[0].text).toBe('J');
+      expect(result.cleanSnapshot.lines[0]!.spans[0]!.text).toBe('A');
+      expect(result.cleanSnapshot.lines[9]!.spans[0]!.text).toBe('J');
     });
 
     it('rawToClean maps are identity when no epochs', () => {
@@ -66,7 +66,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(7);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D', 'E', 'F', 'G',
       ]);
     });
@@ -116,7 +116,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(3);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual(['A', 'B', 'C']);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual(['A', 'B', 'C']);
     });
   });
 
@@ -140,7 +140,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(9);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
       ]);
     });
@@ -166,7 +166,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(8);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
       ]);
     });
@@ -189,7 +189,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(7);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D', 'E', 'F', 'G',
       ]);
     });
@@ -212,7 +212,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(6);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'X', 'Y', 'Z',
       ]);
     });
@@ -249,7 +249,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(4);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D',
       ]);
     });
@@ -278,7 +278,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(4);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual(['A', 'B', 'C', 'D']);
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual(['A', 'B', 'C', 'D']);
     });
   });
 
@@ -317,7 +317,7 @@ describe('buildCleanDocument', () => {
 
       // X is new, A,B,C deduped, Y is new
       expect(result.cleanSnapshot.lines.length).toBe(6);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D', 'X', 'Y',
       ]);
     });
@@ -387,7 +387,7 @@ describe('buildCleanDocument', () => {
 
       // Stutter removed: first HEADER + blank gone, only full render kept
       expect(result.cleanSnapshot.lines.length).toBe(3);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'HEADER', 'SUBTITLE', 'INFO',
       ]);
     });
@@ -431,7 +431,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(11);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0].text)).toEqual([
+      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
         'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'X', 'Y', 'Z',
       ]);
     });

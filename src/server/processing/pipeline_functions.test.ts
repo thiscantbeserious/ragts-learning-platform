@@ -90,8 +90,8 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
     expect(captured!.sections.length).toBeGreaterThanOrEqual(2);
     const markerSections = captured!.sections.filter(s => s.type === 'marker');
     expect(markerSections.length).toBe(2);
-    expect(markerSections[0].label).toBe('Start');
-    expect(markerSections[1].label).toBe('End');
+    expect(markerSections[0]!.label).toBe('Start');
+    expect(markerSections[1]!.label).toBe('End');
   });
 
   it('calls completeProcessing with zero sections for event-count-below-threshold file', async () => {
@@ -172,10 +172,10 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
     expect(captured).not.toBeNull();
     const sections = captured!.sections.sort((a, b) => a.startEvent - b.startEvent);
     for (let i = 0; i < sections.length - 1; i++) {
-      expect(sections[i].endEvent).toBe(sections[i + 1].startEvent);
+      expect(sections[i]!.endEvent).toBe(sections[i + 1]!.startEvent);
     }
     // Last section endEvent = total event count
-    expect(sections[sections.length - 1].endEvent).toBe(captured!.eventCount);
+    expect(sections[sections.length - 1]!.endEvent).toBe(captured!.eventCount);
   });
 });
 

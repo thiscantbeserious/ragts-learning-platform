@@ -44,8 +44,9 @@ export function useUpload(onSuccess?: () => void) {
   function handleDrop(event: DragEvent): void {
     isDragging.value = false;
     const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      uploadFile(files[0]);
+    const file = files?.[0];
+    if (file !== undefined) {
+      uploadFile(file);
     }
   }
 
@@ -59,8 +60,9 @@ export function useUpload(onSuccess?: () => void) {
 
   function handleFileInput(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      uploadFile(input.files[0]);
+    const file = input.files?.[0];
+    if (file !== undefined) {
+      uploadFile(file);
       input.value = '';
     }
   }
