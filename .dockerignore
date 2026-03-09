@@ -1,0 +1,13 @@
+node_modules
+.git
+data/
+.state/
+.research/
+design/
+agents/
+*.md
+.claude/
+coverage/
+playwright-report/
+test-results/
+.husky/
