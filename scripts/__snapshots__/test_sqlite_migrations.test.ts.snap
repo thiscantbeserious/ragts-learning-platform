@@ -1,0 +1,405 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SQLite schema migrations > after 002_sections.ts matches snapshot 1`] = `
+{
+  "tables": {
+    "sections": {
+      "columns": [
+        {
+          "dflt_value": null,
+          "name": "id",
+          "notnull": 0,
+          "pk": 1,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "session_id",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "type",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "start_event",
+          "notnull": 1,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "end_event",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "label",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "snapshot",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "name": "created_at",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+      ],
+      "indexes": [
+        "idx_sections_session_id",
+        "idx_sections_start_event",
+        "sqlite_autoindex_sections_1",
+      ],
+    },
+    "sessions": {
+      "columns": [
+        {
+          "dflt_value": null,
+          "name": "id",
+          "notnull": 0,
+          "pk": 1,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "filename",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "filepath",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "size_bytes",
+          "notnull": 1,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "0",
+          "name": "marker_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "uploaded_at",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "name": "created_at",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "agent_type",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "event_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "0",
+          "name": "detected_sections_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "'pending'",
+          "name": "detection_status",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+      ],
+      "indexes": [
+        "idx_sessions_agent_type",
+        "idx_sessions_uploaded_at",
+        "sqlite_autoindex_sessions_1",
+        "sqlite_autoindex_sessions_2",
+      ],
+    },
+  },
+}
+`;
+
+exports[`SQLite schema migrations > after 003_unified_snapshot.ts matches snapshot 1`] = `
+{
+  "tables": {
+    "sections": {
+      "columns": [
+        {
+          "dflt_value": null,
+          "name": "id",
+          "notnull": 0,
+          "pk": 1,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "session_id",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "type",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "start_event",
+          "notnull": 1,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "end_event",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "label",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "snapshot",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "name": "created_at",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "start_line",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "end_line",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+      ],
+      "indexes": [
+        "idx_sections_session_id",
+        "idx_sections_start_event",
+        "sqlite_autoindex_sections_1",
+      ],
+    },
+    "sessions": {
+      "columns": [
+        {
+          "dflt_value": null,
+          "name": "id",
+          "notnull": 0,
+          "pk": 1,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "filename",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "filepath",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "size_bytes",
+          "notnull": 1,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "0",
+          "name": "marker_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "uploaded_at",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "name": "created_at",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "agent_type",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "event_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "0",
+          "name": "detected_sections_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "'pending'",
+          "name": "detection_status",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "snapshot",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+      ],
+      "indexes": [
+        "idx_sessions_agent_type",
+        "idx_sessions_uploaded_at",
+        "sqlite_autoindex_sessions_1",
+        "sqlite_autoindex_sessions_2",
+      ],
+    },
+  },
+}
+`;
+
+exports[`SQLite schema migrations > base schema matches snapshot 1`] = `
+{
+  "tables": {
+    "sessions": {
+      "columns": [
+        {
+          "dflt_value": null,
+          "name": "id",
+          "notnull": 0,
+          "pk": 1,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "filename",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "filepath",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": null,
+          "name": "size_bytes",
+          "notnull": 1,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": "0",
+          "name": "marker_count",
+          "notnull": 0,
+          "pk": 0,
+          "type": "INTEGER",
+        },
+        {
+          "dflt_value": null,
+          "name": "uploaded_at",
+          "notnull": 1,
+          "pk": 0,
+          "type": "TEXT",
+        },
+        {
+          "dflt_value": "CURRENT_TIMESTAMP",
+          "name": "created_at",
+          "notnull": 0,
+          "pk": 0,
+          "type": "TEXT",
+        },
+      ],
+      "indexes": [
+        "idx_sessions_uploaded_at",
+        "sqlite_autoindex_sessions_1",
+        "sqlite_autoindex_sessions_2",
+      ],
+    },
+  },
+}
+`;
