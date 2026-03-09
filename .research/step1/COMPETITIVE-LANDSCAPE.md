@@ -61,7 +61,7 @@ These are the projects closest to Erika in concept: open-source tools for browsi
 |-----------|--------|
 | **URL** | [agentsview.io](https://agentsview.io) / [GitHub](https://github.com/wesm/agentsview) |
 | **Stack** | Go single binary + embedded Svelte 5 frontend + SQLite with FTS5 |
-| **License** | Not specified (check repo) |
+| **License** | MIT |
 | **Stars** | 379 (as of March 2026) |
 | **Created** | 2026 |
 | **Agents** | Claude Code, Codex, Copilot CLI, Gemini CLI, OpenCode, Amp, VSCode Copilot |
