@@ -355,7 +355,7 @@ describe('buildCleanDocument', () => {
     });
   });
 
-  describe('edge cases', () => {
+  describe('buildCleanDocument edge cases', () => {
     it('handles empty snapshot', () => {
       const raw = makeSnapshot([]);
       const result = buildCleanDocument(raw, []);

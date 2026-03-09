@@ -160,7 +160,7 @@ describe('createCastContentWithEpochs', () => {
     ]);
     // The content is JSON-stringified, so the escape appears as \\u001b or the literal sequence
     // Check that the clear-screen sequence appears somewhere in the file
-    expect(content).toMatch(/\\u001b\[2J|\\u001b\[3J|\x1b\[2J|\x1b\[3J/);
+    expect(content).toMatch(/\\u001b\[2J|\\u001b\[3J/);
   });
 
   it('includes rerender and newContent lines for each epoch', () => {
