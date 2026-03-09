@@ -36,93 +36,78 @@ export function normalizeHeader(raw: Record<string, any>): AsciicastHeader {
  */
 export function validateAsciicast(content: string): ValidationResult {
   if (!content || content.trim().length === 0) {
-    return {
-      valid: false,
-      error: 'File is empty',
-      line: 0,
-    };
+    return { valid: false, error: 'File is empty', line: 0 };
   }
 
   const lines = content.split('\n').filter(line => line.trim().length > 0);
-
   if (lines.length === 0) {
-    return {
-      valid: false,
-      error: 'File contains no valid lines',
-      line: 0,
-    };
+    return { valid: false, error: 'File contains no valid lines', line: 0 };
   }
 
-  // Validate header (first line)
+  const headerResult = validateHeader(lines[0] ?? '');
+  if (!headerResult.valid) return headerResult;
+
+  return validateEvents(lines);
+}
+
+/**
+ * Validates the header line of an asciicast file.
+ * Checks JSON validity, object shape, version, and required dimensions.
+ */
+function validateHeader(headerLine: string): ValidationResult {
   let header: AsciicastHeader;
   try {
-    const raw = JSON.parse(lines[0] ?? '');
+    const raw = JSON.parse(headerLine);
     if (!raw || typeof raw !== 'object') {
-      return {
-        valid: false,
-        error: 'Header must be a JSON object',
-        line: 1,
-      };
+      return { valid: false, error: 'Header must be a JSON object', line: 1 };
     }
     header = normalizeHeader(raw);
   } catch {
-    return {
-      valid: false,
-      error: 'Invalid JSON in header',
-      line: 1,
-    };
+    return { valid: false, error: 'Invalid JSON in header', line: 1 };
   }
 
   if (header.version !== 3) {
-    return {
-      valid: false,
-      error: `Unsupported version: ${header.version}. Only version 3 is supported.`,
-      line: 1,
-    };
+    return { valid: false, error: `Unsupported version: ${header.version}. Only version 3 is supported.`, line: 1 };
   }
 
   if (typeof header.width !== 'number' || typeof header.height !== 'number') {
-    return {
-      valid: false,
-      error: 'Header must include term.cols/term.rows (v3) or width/height (v2-compat)',
-      line: 1,
-    };
+    return { valid: false, error: 'Header must include term.cols/term.rows (v3) or width/height (v2-compat)', line: 1 };
   }
 
-  // Validate events (remaining lines)
+  return { valid: true };
+}
+
+/**
+ * Validates the event lines (all lines after the header) of an asciicast file.
+ * Each event must be a JSON array with at least 3 elements, a numeric timestamp, and a string type.
+ */
+function validateEvents(lines: string[]): ValidationResult {
   for (let i = 1; i < lines.length; i++) {
-    try {
-      const event = JSON.parse(lines[i] ?? '');
-      if (!Array.isArray(event) || event.length < 3) {
-        return {
-          valid: false,
-          error: 'Event must be an array with at least 3 elements',
-          line: i + 1,
-        };
-      }
-      if (typeof event[0] !== 'number') {
-        return {
-          valid: false,
-          error: 'Event timestamp must be a number',
-          line: i + 1,
-        };
-      }
-      if (typeof event[1] !== 'string') {
-        return {
-          valid: false,
-          error: 'Event type must be a string',
-          line: i + 1,
-        };
-      }
-    } catch (err) {
-      return {
-        valid: false,
-        error: `Invalid JSON in event: ${err instanceof Error ? err.message : String(err)}`,
-        line: i + 1,
-      };
-    }
+    const result = validateSingleEvent(lines[i] ?? '', i + 1);
+    if (!result.valid) return result;
   }
+  return { valid: true };
+}
 
+/**
+ * Validates a single event line against the asciicast event schema.
+ * Returns a ValidationResult with the 1-based line number on failure.
+ */
+function validateSingleEvent(line: string, lineNumber: number): ValidationResult {
+  try {
+    const event = JSON.parse(line);
+    if (!Array.isArray(event) || event.length < 3) {
+      return { valid: false, error: 'Event must be an array with at least 3 elements', line: lineNumber };
+    }
+    if (typeof event[0] !== 'number') {
+      return { valid: false, error: 'Event timestamp must be a number', line: lineNumber };
+    }
+    if (typeof event[1] !== 'string') {
+      return { valid: false, error: 'Event type must be a string', line: lineNumber };
+    }
+  } catch (err) {
+    return { valid: false, error: `Invalid JSON in event: ${err instanceof Error ? err.message : String(err)}`, line: lineNumber };
+  }
   return { valid: true };
 }
 

@@ -2,7 +2,7 @@ import { ref, computed, watch, toValue, type MaybeRef } from 'vue';
 import type { TerminalSnapshot } from '#vt-wasm/types';
 import type { Section, SessionDetailResponse } from '../../shared/types/index.js';
 
-export type { Section };
+export type { Section } from '../../shared/types/index.js';
 
 /**
  * Parse snapshot JSON string into TerminalSnapshot object.

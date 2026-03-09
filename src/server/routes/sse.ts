@@ -69,34 +69,47 @@ export async function handleSseEvents(
 
   return streamSSE(c, async (stream) => {
     try {
-      if (lastEventId !== undefined) {
-        const afterId = parseInt(lastEventId, 10);
-        if (!isNaN(afterId)) {
-          const missed = await getMissedEvents(eventLog, id, afterId);
-          let replayedTerminal = false;
-          for (const entry of missed) {
-            if (stream.closed) { unregisterSessionHandlers(eventBus, handlers); return; }
-            await stream.writeSSE({
-              id: String(entry.id),
-              event: entry.eventType,
-              data: entry.payload ?? '{}',
-            });
-            if (TERMINAL_TYPES.has(entry.eventType as PipelineEventType)) {
-              replayedTerminal = true;
-            }
-          }
-          if (replayedTerminal) {
-            unregisterSessionHandlers(eventBus, handlers);
-            return;
-          }
-        }
-      }
+      const cleanup = () => unregisterSessionHandlers(eventBus, handlers);
+      const replayed = await replayMissedEvents(stream, eventLog, id, lastEventId, cleanup);
+      if (replayed) return;
 
-      await drainAndListen(stream, pendingLive, () => unregisterSessionHandlers(eventBus, handlers), waitForEvent);
+      await drainAndListen(stream, pendingLive, cleanup, waitForEvent);
     } catch {
       unregisterSessionHandlers(eventBus, handlers);
     }
   });
+}
+
+/**
+ * Replays missed events from the event log for a reconnecting client.
+ * Returns true if a terminal event was replayed (stream should be closed after).
+ */
+async function replayMissedEvents(
+  stream: { writeSSE: (msg: SseMessage) => Promise<void>; closed: boolean },
+  eventLog: EventLogAdapter,
+  sessionId: string,
+  lastEventId: string | undefined,
+  cleanup: () => void
+): Promise<boolean> {
+  if (lastEventId === undefined) return false;
+
+  const afterId = Number.parseInt(lastEventId, 10);
+  if (Number.isNaN(afterId)) return false;
+
+  const missed = await getMissedEvents(eventLog, sessionId, afterId);
+  for (const entry of missed) {
+    if (stream.closed) { cleanup(); return true; }
+    await stream.writeSSE({
+      id: String(entry.id),
+      event: entry.eventType,
+      data: entry.payload ?? '{}',
+    });
+    if (TERMINAL_TYPES.has(entry.eventType as PipelineEventType)) {
+      cleanup();
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

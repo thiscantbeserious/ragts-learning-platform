@@ -135,27 +135,36 @@ export class SessionService {
       return { ok: true, data: { message: 'Re-detection already in progress', sessionId: id } };
     }
 
-    if (existing) {
-      await this.jobQueue.retry(existing.id, PipelineStage.Validate);
-    } else {
-      try {
-        await this.jobQueue.create(id);
-      } catch (err) {
-        // Concurrent request may have already created the job — treat as success
-        if (err instanceof Error && err.message.includes('UNIQUE constraint')) {
-          log.info({ sessionId: id }, 'Concurrent redetect — job already created');
-          const retryJob = await this.jobQueue.findBySessionId(id);
-          if (retryJob) {
-            await this.jobQueue.retry(retryJob.id, PipelineStage.Validate);
-          }
-        } else {
-          throw err;
-        }
-      }
-    }
+    await this.ensureJob(id, existing?.id);
 
     this.eventBus.emit({ type: 'session.uploaded', sessionId: id, filename: session.filename });
     return { ok: true, data: { message: 'Re-detection started', sessionId: id } };
+  }
+
+  /**
+   * Ensures a pipeline job exists and is queued for the given session.
+   * Retries an existing job or creates a new one, handling concurrent creation via UNIQUE constraint.
+   */
+  private async ensureJob(id: string, existingJobId?: string): Promise<void> {
+    if (existingJobId) {
+      await this.jobQueue.retry(existingJobId, PipelineStage.Validate);
+      return;
+    }
+
+    try {
+      await this.jobQueue.create(id);
+    } catch (err) {
+      // Concurrent request may have already created the job — treat as success
+      if (err instanceof Error && err.message.includes('UNIQUE constraint')) {
+        log.info({ sessionId: id }, 'Concurrent redetect — job already created');
+        const retryJob = await this.jobQueue.findBySessionId(id);
+        if (retryJob) {
+          await this.jobQueue.retry(retryJob.id, PipelineStage.Validate);
+        }
+      } else {
+        throw err;
+      }
+    }
   }
 }
 
@@ -174,7 +183,7 @@ function parseSnapshotJson(value: string | null | undefined, context: string, id
 function transformSection(section: SectionRow): Section {
   return {
     id: section.id,
-    type: section.type as Section['type'],
+    type: section.type,
     label: section.label ?? '',
     startEvent: section.start_event,
     endEvent: section.end_event ?? 0,
