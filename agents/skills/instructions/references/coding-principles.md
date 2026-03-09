@@ -2,6 +2,16 @@
 
 Guidelines for maintaining clean, readable, and maintainable code.
 
+## File Naming
+
+**All source files use `snake_case` — NO EXCEPTIONS**
+
+- `pipeline_events.ts` not `pipeline-events.ts`
+- `event_bus.ts` not `event-bus.ts`
+- `emitter_event_bus.test.ts` not `emitter-event-bus.test.ts`
+
+This applies to all `.ts`, `.vue`, `.css`, and `.test.ts` files under `src/`, `packages/`, and `tests/`. Only exceptions are config files at root level (`vite.config.ts`, `eslint.config.js`, etc.) which follow their ecosystem conventions.
+
 ## File Size
 
 **Target: ~400 lines max per file - NO EXCEPTIONS**

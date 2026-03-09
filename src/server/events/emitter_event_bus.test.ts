@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { EmitterEventBus } from './emitter-event-bus.js';
-import type { PipelineEvent } from '../../shared/pipeline-events.js';
+import { EmitterEventBus } from './emitter_event_bus.js';
+import type { PipelineEvent } from '../../shared/pipeline_events.js';
 
 describe('EmitterEventBus', () => {
   let bus: EmitterEventBus;

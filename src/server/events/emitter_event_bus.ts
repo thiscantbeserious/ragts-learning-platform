@@ -9,8 +9,8 @@
  */
 
 import { EventEmitter } from 'node:events';
-import type { EventBus, EventHandler, AnyEventHandler } from './event-bus.js';
-import type { PipelineEvent, PipelineEventType } from '../../shared/pipeline-events.js';
+import type { EventBus, EventHandler, AnyEventHandler } from './event_bus.js';
+import type { PipelineEvent, PipelineEventType } from '../../shared/pipeline_events.js';
 
 const MAX_LISTENERS = 100;
 
