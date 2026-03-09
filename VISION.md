@@ -141,8 +141,7 @@ flowchart TD
     H2 -.- S2
     H3 -.- S3
 
-    Platform --> Team
-    Team --> Platform
+    Platform <--> Team
 
     Curated[("🗄️ Curated Context<br/>RAG · MCP · AGENTS.md")]
     Platform -->|writes curated| Curated
