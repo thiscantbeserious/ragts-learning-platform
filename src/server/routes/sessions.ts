@@ -204,11 +204,11 @@ export async function handleRedetect(
       return c.json({ message: 'Re-detection already in progress', sessionId: id }, 202);
     }
 
-    if (!existing) {
-      await jobQueue.create(id);
-    } else {
+    if (existing) {
       // Re-queue a completed or failed job for re-detection
       await jobQueue.retry(existing.id, PipelineStage.Validate);
+    } else {
+      await jobQueue.create(id);
     }
 
     eventBus.emit({ type: 'session.uploaded', sessionId: id, filename: session.filename });

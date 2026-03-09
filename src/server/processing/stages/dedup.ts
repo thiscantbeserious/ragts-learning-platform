@@ -70,16 +70,12 @@ function buildSections(
       : eventCount;
     const isMarker = boundary.signals.includes('marker');
 
-    const section = buildSection(
-      sessionId,
+    const section = buildSection(sessionId, boundary, endEvent, isMarker, {
       sd,
-      boundary,
-      endEvent,
-      isMarker,
       rawSnapshot,
       rawLineCountToClean,
-      previousCleanLineCount
-    );
+      previousCleanLineCount,
+    });
     sections.push(section.input);
     previousCleanLineCount = section.nextLineCount;
   }
@@ -87,17 +83,22 @@ function buildSections(
   return sections;
 }
 
+interface BuildSectionOptions {
+  sd: { lineCount: number | null; snapshot: TerminalSnapshot | null };
+  rawSnapshot: TerminalSnapshot;
+  rawLineCountToClean: (rawLineCount: number) => number;
+  previousCleanLineCount: number;
+}
+
 /** Builds a single section input, returning updated line count. */
 function buildSection(
   sessionId: string,
-  sd: { lineCount: number | null; snapshot: TerminalSnapshot | null },
   boundary: SectionBoundary,
   endEvent: number,
   isMarker: boolean,
-  rawSnapshot: TerminalSnapshot,
-  rawLineCountToClean: (rawLineCount: number) => number,
-  previousCleanLineCount: number
+  options: BuildSectionOptions
 ): { input: CreateSectionInput; nextLineCount: number } {
+  const { sd, rawSnapshot, rawLineCountToClean, previousCleanLineCount } = options;
   if (sd.snapshot) {
     return {
       input: {

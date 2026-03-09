@@ -7,8 +7,6 @@ import type { Session, SessionCreate } from '../../shared/types.js';
 import type { ProcessedSession } from '../processing/types.js';
 import type { DetectionStatus } from '../../shared/pipeline_events.js';
 
-export type { DetectionStatus };
-
 /**
  * Adapter for managing session entities.
  * Defines the contract for session data access.
