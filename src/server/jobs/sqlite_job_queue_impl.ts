@@ -93,15 +93,16 @@ export class SqliteJobQueueImpl implements JobQueueAdapter {
       SELECT * FROM jobs WHERE status = 'pending' ORDER BY created_at ASC
     `);
 
-    // Count before marking as failed (for return value)
+    // Count before re-queuing as pending (for return value)
     this.countRecoveredStmt = db.prepare(`
       SELECT COUNT(*) as cnt FROM jobs WHERE status = 'running'
     `);
 
     this.recoverStmt = db.prepare(`
       UPDATE jobs
-      SET status = 'failed',
-          last_error = 'Server restarted — job interrupted'
+      SET status = 'pending',
+          last_error = 'Server restarted — job interrupted',
+          current_stage = 'validate'
       WHERE status = 'running'
     `);
   }

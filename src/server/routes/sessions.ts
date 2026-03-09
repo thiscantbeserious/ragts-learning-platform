@@ -9,6 +9,7 @@ import type { SectionAdapter } from '../db/section_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { EventBusAdapter } from '../events/event_bus_adapter.js';
+import { PipelineStage } from '../../shared/pipeline_events.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'routes' });
@@ -194,12 +195,11 @@ export async function handleRedetect(
 
     // Read and parse to verify the file is accessible
     const content = await storageAdapter.read(id);
-    const parsed = parseAsciicast(content);
-    void parsed; // parsed used only for validation side-effect
+    parseAsciicast(content); // validate file is still parseable
 
     // Upsert job: replace existing job if present, then emit session.uploaded
     const existing = await jobQueue.findBySessionId(id);
-    if (existing && existing.status !== 'completed') {
+    if (existing && (existing.status === 'pending' || existing.status === 'running')) {
       // Already queued or running — return 202 without re-creating
       return c.json({ message: 'Re-detection already in progress', sessionId: id }, 202);
     }
@@ -207,8 +207,8 @@ export async function handleRedetect(
     if (!existing) {
       await jobQueue.create(id);
     } else {
-      // Re-queue a completed job for re-detection
-      await jobQueue.retry(existing.id, 'validate' as never);
+      // Re-queue a completed or failed job for re-detection
+      await jobQueue.retry(existing.id, PipelineStage.Validate);
     }
 
     eventBus.emit({ type: 'session.uploaded', sessionId: id, filename: session.filename });

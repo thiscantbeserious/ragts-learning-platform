@@ -117,7 +117,7 @@ export async function handleUpload(
 function countMarkers(content: string): number {
   let count = 0;
   for (const line of content.split('\n')) {
-    if (line.includes('"m"') || line.includes("'m'")) {
+    if (line.includes('"m"')) {
       try {
         const parsed = JSON.parse(line);
         if (Array.isArray(parsed) && parsed[1] === 'm') count++;

@@ -20,7 +20,6 @@ export class SqliteSessionImpl implements SessionAdapter {
   private readonly deleteByIdStmt: Database.Statement;
   private readonly updateDetectionStatusStmt: Database.Statement;
   private readonly updateSnapshotStmt: Database.Statement;
-  private readonly updateProcessingStageStmt: Database.Statement;
   private readonly deleteSectionsStmt: Database.Statement;
   private readonly insertSectionStmt: Database.Statement;
   private readonly completeProcessingTxn: (session: ProcessedSession) => void;
@@ -63,12 +62,6 @@ export class SqliteSessionImpl implements SessionAdapter {
     this.updateSnapshotStmt = db.prepare(`
       UPDATE sessions
       SET snapshot = ?
-      WHERE id = ?
-    `);
-
-    this.updateProcessingStageStmt = db.prepare(`
-      UPDATE sessions
-      SET detection_status = ?
       WHERE id = ?
     `);
 
@@ -169,14 +162,6 @@ export class SqliteSessionImpl implements SessionAdapter {
    */
   async updateSnapshot(id: string, snapshot: string): Promise<void> {
     this.updateSnapshotStmt.run(snapshot, id);
-  }
-
-  /**
-   * Update the current pipeline stage on a session.
-   * Maps pipeline stage names to the detection_status column (used for observability).
-   */
-  async updateProcessingStage(id: string, stage: string): Promise<void> {
-    this.updateProcessingStageStmt.run(stage, id);
   }
 
   /**

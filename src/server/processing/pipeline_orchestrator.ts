@@ -10,7 +10,7 @@
  * Connections: EventBus (events/), JobQueueAdapter (jobs/), stage functions (stages/).
  */
 
-import type { EventBusAdapter } from '../events/event_bus_adapter.js';
+import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
@@ -74,13 +74,13 @@ export class PipelineOrchestrator {
   async start(): Promise<void> {
     const { initVt } = await import('#vt-wasm');
     await initVt();
-    this.eventBus.on('session.uploaded', this.onUploaded as never);
+    this.eventBus.on('session.uploaded', this.onUploaded as EventHandler<'session.uploaded'>);
     await this.recoverInterrupted();
   }
 
   /** Unsubscribe from events and wait for in-flight jobs to finish. */
   async stop(): Promise<void> {
-    this.eventBus.off('session.uploaded', this.onUploaded as never);
+    this.eventBus.off('session.uploaded', this.onUploaded as EventHandler<'session.uploaded'>);
     await Promise.allSettled(this.inflight);
   }
 
@@ -89,7 +89,7 @@ export class PipelineOrchestrator {
     await Promise.allSettled(this.inflight);
   }
 
-  /** Recover interrupted jobs on boot by marking them failed then re-queueing. */
+  /** Recover interrupted jobs on boot by resetting them to pending for re-processing. */
   private async recoverInterrupted(): Promise<void> {
     const count = await this.jobQueue.recoverInterrupted();
     if (count > 0) {

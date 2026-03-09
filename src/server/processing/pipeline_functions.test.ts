@@ -34,7 +34,6 @@ function createCapturingSessionRepo(
     deleteById: (id) => real.deleteById(id),
     updateDetectionStatus: (...args) => real.updateDetectionStatus(...args),
     updateSnapshot: (id, snapshot) => real.updateSnapshot(id, snapshot),
-    updateProcessingStage: (id, stage) => real.updateProcessingStage(id, stage),
     completeProcessing: async (ps) => {
       onComplete(ps);
       return real.completeProcessing(ps);
@@ -256,7 +255,6 @@ describe('processSessionPipeline — WASM resource cleanup via try/finally', () 
       deleteById: (id) => sessionRepo.deleteById(id),
       updateDetectionStatus: (...args) => sessionRepo.updateDetectionStatus(...args),
       updateSnapshot: (id, snap) => sessionRepo.updateSnapshot(id, snap),
-      updateProcessingStage: (id, stage) => sessionRepo.updateProcessingStage(id, stage),
       completeProcessing: async () => {
         throw new Error('Simulated DB failure after VT replay');
       },

@@ -6,6 +6,7 @@ import { logger } from './logger.js';
 import { DatabaseFactory } from './db/database_factory.js';
 import { EmitterEventBusImpl } from './events/emitter_event_bus_impl.js';
 import { PipelineOrchestrator } from './processing/pipeline_orchestrator.js';
+import type { PipelineEvent } from '../shared/pipeline_events.js';
 import { handleUpload } from './routes/upload.js';
 import {
   handleListSessions,
@@ -53,7 +54,7 @@ const allEventTypes = [
   'session.failed', 'session.retrying',
 ] as const;
 for (const type of allEventTypes) {
-  eventBus.on(type, (event) => { void eventLog.log(event as never); });
+  eventBus.on(type, (event) => { void eventLog.log(event as PipelineEvent); });
 }
 
 process.on('SIGTERM', async () => {

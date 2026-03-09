@@ -207,7 +207,7 @@ describe('SqliteJobQueueImpl', () => {
       expect(count).toBe(0);
     });
 
-    it('marks running jobs as failed with interrupted error', async () => {
+    it('re-queues running jobs as pending with interrupted error preserved', async () => {
       const job = await queue.create(sessionId);
       await queue.start(job.id);
 
@@ -215,7 +215,8 @@ describe('SqliteJobQueueImpl', () => {
       expect(count).toBe(1);
 
       const updated = await queue.findBySessionId(sessionId);
-      expect(updated!.status).toBe('failed');
+      expect(updated!.status).toBe('pending');
+      expect(updated!.currentStage).toBe('validate');
       expect(updated!.lastError).toContain('interrupted');
     });
 
