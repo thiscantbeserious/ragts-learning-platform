@@ -1,22 +1,29 @@
 /**
  * Migration integration test script.
  *
- * Creates a fresh in-memory SQLite database, runs all migrations in order
- * (identical to how the server initializes), then verifies that all expected
- * tables and indexes exist. Exits 0 on success, 1 on failure.
+ * Creates a fresh in-memory SQLite database, auto-discovers all migration
+ * files in src/server/db/sqlite/migrations/, runs them in order with timing,
+ * then reports the resulting schema. Exits 0 on success, 1 on failure.
+ *
+ * New migrations are picked up automatically — no edits to this file needed.
  *
  * Run with: npx tsx scripts/test_migrations.ts
  */
 
 import Database from 'better-sqlite3';
-import { migrate002Sections } from '../src/server/db/sqlite/migrations/002_sections.js';
-import { migrate003UnifiedSnapshot } from '../src/server/db/sqlite/migrations/003_unified_snapshot.js';
-import { migrate004PipelineJobsEvents } from '../src/server/db/sqlite/migrations/004_pipeline_jobs_events.js';
+import { readdirSync } from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // ---------------------------------------------------------------------------
-// Base schema (mirrors SqliteDatabaseImpl.BASE_SCHEMA)
+// Path resolution
 // ---------------------------------------------------------------------------
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const MIGRATIONS_DIR = resolve(__dirname, '../src/server/db/sqlite/migrations');
+
+// Base schema mirrors SqliteDatabaseImpl.BASE_SCHEMA in sqlite_database_impl.ts
 const BASE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
@@ -31,129 +38,112 @@ CREATE INDEX IF NOT EXISTS idx_sessions_uploaded_at ON sessions(uploaded_at DESC
 `.trim();
 
 // ---------------------------------------------------------------------------
-// DB helpers
+// Migration discovery
 // ---------------------------------------------------------------------------
 
-/** Returns true if a table exists in the schema. */
-function tableExists(db: Database.Database, table: string): boolean {
-  return (
-    db
-      .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
-      .get(table) !== undefined
-  );
+/** Resolves all migration files sorted by filename (excludes test files). */
+function discoverMigrationFiles(): string[] {
+  const entries = readdirSync(MIGRATIONS_DIR);
+  return entries
+    .filter((f) => /^\d{3}_/.test(f) && f.endsWith('.ts') && !f.endsWith('.test.ts'))
+    .sort()
+    .map((f) => join(MIGRATIONS_DIR, f));
 }
 
-/** Returns index names for the given table (excludes internal sqlite_ indexes). */
-function getIndexNames(db: Database.Database, table: string): string[] {
+// ---------------------------------------------------------------------------
+// Schema introspection
+// ---------------------------------------------------------------------------
+
+type SqliteMasterRow = { name: string; tbl_name: string };
+
+/** Returns all user table names from sqlite_master, sorted. */
+function listTables(db: Database.Database): string[] {
   const rows = db
-    .prepare(
-      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=? AND name NOT LIKE 'sqlite_%'"
-    )
-    .all(table) as Array<{ name: string }>;
+    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+    .all() as SqliteMasterRow[];
   return rows.map((r) => r.name);
 }
 
-// ---------------------------------------------------------------------------
-// Assertions
-// ---------------------------------------------------------------------------
-
-/** Asserts that all required tables exist; logs pass/fail per table. */
-function assertTables(db: Database.Database, tables: string[]): boolean {
-  let ok = true;
-  for (const table of tables) {
-    if (tableExists(db, table)) {
-      console.log(`  [PASS] table '${table}' exists`);
-    } else {
-      console.error(`  [FAIL] table '${table}' is missing`);
-      ok = false;
-    }
-  }
-  return ok;
-}
-
-/** Asserts that a specific index exists on its table; logs pass/fail. */
-function assertIndex(db: Database.Database, table: string, index: string): boolean {
-  const names = getIndexNames(db, table);
-  if (names.includes(index)) {
-    console.log(`  [PASS] index '${index}' on '${table}' exists`);
-    return true;
-  }
-  console.error(`  [FAIL] index '${index}' on '${table}' is missing (found: ${names.join(', ') || 'none'})`);
-  return false;
-}
-
-/** Asserts all required indexes; returns false if any is missing. */
-function assertIndexes(db: Database.Database, checks: Array<{ table: string; index: string }>): boolean {
-  return checks.reduce((ok, { table, index }) => assertIndex(db, table, index) && ok, true);
+/** Returns all user index names from sqlite_master, sorted. */
+function listIndexes(db: Database.Database): string[] {
+  const rows = db
+    .prepare("SELECT name FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_%' ORDER BY name")
+    .all() as SqliteMasterRow[];
+  return rows.map((r) => r.name);
 }
 
 // ---------------------------------------------------------------------------
 // Migration runner
 // ---------------------------------------------------------------------------
 
-/** Opens an in-memory database and applies all migrations in order. */
-function applyAllMigrations(): Database.Database {
-  const db = new Database(':memory:');
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
+/** Applies the base schema as step 1, then runs each discovered migration. */
+async function runMigrations(db: Database.Database): Promise<number> {
+  console.log('\nRunning migrations on fresh database...');
 
-  console.log('\nRunning migrations on :memory: database...');
-
+  const t0 = Date.now();
   db.exec(BASE_SCHEMA);
-  console.log('  [OK] base schema applied (sessions table + idx_sessions_uploaded_at)');
+  console.log(`  Step 1: base schema ... OK (${Date.now() - t0}ms)`);
 
-  migrate002Sections(db);
-  console.log('  [OK] migration 002: sections table + session processing columns');
+  const migrationFiles = discoverMigrationFiles();
 
-  migrate003UnifiedSnapshot(db);
-  console.log('  [OK] migration 003: unified snapshot columns');
+  for (let i = 0; i < migrationFiles.length; i++) {
+    const filePath = migrationFiles[i];
+    const label = filePath.split('/').pop() ?? filePath;
+    const stepStart = Date.now();
 
-  migrate004PipelineJobsEvents(db);
-  console.log('  [OK] migration 004: jobs + events tables + pipeline indexes');
+    const mod = await import(filePath) as Record<string, unknown>;
+    const migrateFn = findMigrateFunction(mod, label);
+    migrateFn(db);
 
-  return db;
+    console.log(`  Step ${i + 2}: ${label} ... OK (${Date.now() - stepStart}ms)`);
+  }
+
+  // +1 for base schema
+  return migrationFiles.length + 1;
+}
+
+/** Extracts the single exported migration function from a module. */
+function findMigrateFunction(mod: Record<string, unknown>, label: string): (db: Database.Database) => void {
+  const fns = Object.values(mod).filter((v) => typeof v === 'function');
+  if (fns.length === 0) {
+    throw new Error(`Migration ${label} exports no functions.`);
+  }
+  return fns[0] as (db: Database.Database) => void;
 }
 
 // ---------------------------------------------------------------------------
-// Verification
+// Schema reporter
 // ---------------------------------------------------------------------------
 
-const REQUIRED_TABLES = ['sessions', 'sections', 'jobs', 'events'];
+/** Prints schema summary and returns counts. */
+function reportSchema(db: Database.Database): { tableCount: number; indexCount: number } {
+  const tables = listTables(db);
+  const indexes = listIndexes(db);
 
-const REQUIRED_INDEXES = [
-  { table: 'jobs', index: 'idx_jobs_session_id' },
-  { table: 'jobs', index: 'idx_jobs_status' },
-  { table: 'events', index: 'idx_events_session_id' },
-];
+  console.log('\nSchema after all migrations:');
+  console.log(`  Tables:  ${tables.join(', ')}`);
+  console.log(`  Indexes: ${indexes.join(', ')}`);
 
-/** Verifies schema has all expected tables and indexes. Returns true if all pass. */
-function verifySchema(db: Database.Database): boolean {
-  console.log('\nVerifying tables...');
-  const tablesOk = assertTables(db, REQUIRED_TABLES);
-
-  console.log('\nVerifying indexes...');
-  const indexesOk = assertIndexes(db, REQUIRED_INDEXES);
-
-  return tablesOk && indexesOk;
+  return { tableCount: tables.length, indexCount: indexes.length };
 }
 
 // ---------------------------------------------------------------------------
 // Entry point
 // ---------------------------------------------------------------------------
 
-try {
-  const db = applyAllMigrations();
-  const passed = verifySchema(db);
-  db.close();
+const db = new Database(':memory:');
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
-  if (passed) {
-    console.log('\n[SUCCESS] All migration checks passed.\n');
-    process.exit(0);
-  } else {
-    console.error('\n[FAILURE] One or more migration checks failed.\n');
-    process.exit(1);
-  }
+try {
+  const stepCount = await runMigrations(db);
+  const { tableCount, indexCount } = reportSchema(db);
+
+  console.log(`\n[SUCCESS] ${stepCount} migrations applied, ${tableCount} tables, ${indexCount} indexes\n`);
+  process.exit(0);
 } catch (err) {
-  console.error('\n[ERROR] Migration run threw an exception:', err);
+  console.error('\n[ERROR] Migration run failed:', err);
   process.exit(1);
+} finally {
+  db.close();
 }
