@@ -66,12 +66,14 @@
   --accent-primary-subtle: rgba(0, 212, 255, 0.08);
   --accent-primary-glow: rgba(0, 212, 255, 0.4);
   --accent-primary-glow-strong: rgba(0, 212, 255, 0.7);
+  --accent-primary-dim: color-mix(in srgb, var(--accent-primary) 50%, var(--bg-page));
 
   /* --- Secondary accent — neon pink, WCAG AA on elevated --- */
   --accent-secondary: #ff4d6a;
   --accent-secondary-hover: #ff6b83;
   --accent-secondary-subtle: rgba(255, 77, 106, 0.08);
   --accent-secondary-glow: rgba(255, 77, 106, 0.35);
+  --accent-secondary-dim: color-mix(in srgb, var(--accent-secondary) 50%, var(--bg-page));
 
   /* --- Status — semantic colors --- */
   /* Success: neon green — 12.59:1 contrast, AAA */

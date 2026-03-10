@@ -260,6 +260,18 @@
   outline: none;
 }
 
+/* Disabled buttons must not show TRON trail */
+.btn--primary-disabled:hover::before,
+.btn--primary-disabled:focus-visible::before,
+.btn--secondary-disabled:hover::before,
+.btn--secondary-disabled:focus-visible::before,
+.btn--ghost-disabled:hover::before,
+.btn--ghost-disabled:focus-visible::before,
+.btn--destructive-disabled:hover::before,
+.btn--destructive-disabled:focus-visible::before {
+  display: none;
+}
+
 /* Destructive trail — red */
 .btn--destructive:hover::before,
 .btn--destructive:focus-visible::before {
@@ -844,12 +856,12 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
-  color: var(--accent-secondary);
+  color: var(--accent-primary);
   transition: box-shadow var(--duration-normal) var(--easing-default);
 }
 
 .app-header__brand:hover .app-header__logo {
-  box-shadow: 0 0 12px var(--accent-secondary-glow);
+  box-shadow: 0 0 12px var(--accent-primary-glow);
 }
 
 .app-header__name {
