@@ -208,7 +208,7 @@
 }
 
 /* ================================================================
-   RESPONSIVE
+   RESPONSIVE — MOBILE
    ================================================================ */
 @media (max-width: 767px) {
   .page {
@@ -241,5 +241,37 @@
   .input-demo {
     width: 100%;
     max-width: 100%;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE — WIDE SCREEN (2-column section layout)
+   ================================================================
+   On viewports >= 1440px the page container widens to hold two
+   content columns side-by-side. Each column is --container-max wide
+   with a --rhythm-2 (42px) gap between them.
+
+   The page header spans both columns. Dividers are hidden since
+   the section__title border-bottom provides sufficient visual
+   separation within the 2-column grid.
+   ================================================================ */
+@media (min-width: 1440px) {
+  .page {
+    max-width: calc(var(--container-max) * 2 + var(--rhythm-2));
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--rhythm-2);  /* 42px between columns */
+  }
+
+  /* Page header spans full width */
+  .page__title,
+  .page__subtitle {
+    grid-column: 1 / -1;
+  }
+
+  /* Hide dividers — they break the 2-column flow by forcing new rows.
+     Section title border-bottom provides enough visual separation. */
+  .divider {
+    display: none;
   }
 }

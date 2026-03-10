@@ -302,14 +302,14 @@ body {
       rgba(0, 212, 255, 0.06) 0px,
       rgba(0, 212, 255, 0.06) 1px,
       transparent 1px,
-      transparent 42px
+      transparent 84px
     ),
     repeating-linear-gradient(
       90deg,
       rgba(0, 212, 255, 0.06) 0px,
       rgba(0, 212, 255, 0.06) 1px,
       transparent 1px,
-      transparent 42px
+      transparent 84px
     ),
     var(--bg-page);
   /* Offset: header is 63px (3 baselines). The grid starts at the
