@@ -245,8 +245,8 @@ watch(isEmpty, applyBodyClass);
 
 .landing-empty {
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  min-height: 100vh;
+  grid-template-rows: 1fr auto;
+  min-height: calc(100vh - var(--header-height));
 }
 
 /* Copied from design/drafts/theme-tron-v1.html lines 102-108 */
