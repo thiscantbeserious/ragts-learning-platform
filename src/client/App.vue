@@ -10,11 +10,7 @@ import AppHeader from './components/AppHeader.vue';
 </script>
 
 <style>
-body {
-  font-family: var(--font-body);
-  background: var(--bg-page);
-  color: var(--text-primary);
-}
+/* body base styles (font, background, color) come from design/styles/layout.css */
 
 a {
   color: var(--accent-primary);
