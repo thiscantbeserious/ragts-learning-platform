@@ -6,10 +6,12 @@
  */
 
 import { computed, watch, onMounted, onUnmounted, ref } from 'vue';
-import UploadZone from '../components/UploadZone.vue';
 import SessionToolbar from '../components/SessionToolbar.vue';
 import SessionGrid from '../components/SessionGrid.vue';
 import ToastContainer from '../components/ToastContainer.vue';
+import BackgroundGrid from '../components/BackgroundGrid.vue';
+import AmbientParticles from '../components/AmbientParticles.vue';
+import PipelineVisualization from '../components/PipelineVisualization.vue';
 import { useSessionList } from '../composables/useSessionList';
 import { useSessionFilter, type SessionFilterGroup } from '../composables/useSessionFilter';
 import { useSessionSSE } from '../composables/useSessionSSE';
@@ -22,14 +24,11 @@ const { connectionStates } = useSessionSSE(sessions, updateSession);
 const { toasts, addToast, removeToast } = useToast();
 
 const {
-  uploading,
-  error: uploadError,
   isDragging,
   handleDrop,
   handleDragOver,
   handleDragLeave,
   handleFileInput,
-  clearError,
 } = useUpload(() => {
   fetchSessions();
   addToast('is being processed', 'success', 'Session uploaded');
@@ -37,6 +36,14 @@ const {
 
 /** File input ref for the compact upload strip's hidden input. */
 const fileInputRef = ref<HTMLInputElement | null>(null);
+
+/** File input ref for the empty-state drop zone's hidden input. */
+const emptyFileInputRef = ref<HTMLInputElement | null>(null);
+
+/** Triggers the hidden file input in the empty-state drop zone. */
+function triggerEmptyFileInput(): void {
+  emptyFileInputRef.value?.click();
+}
 
 /** Whether the page is in the empty state (no sessions, load complete). */
 const isEmpty = computed(() => !loading.value && sessions.value.length === 0);
@@ -72,31 +79,98 @@ watch(isEmpty, applyBodyClass);
 </script>
 
 <template>
-  <!-- Empty state: no sessions uploaded yet -->
+  <!-- Empty state: no sessions uploaded yet — Stage 8 TRON atmosphere -->
+  <!-- Copied from design/drafts/theme-tron-v1.html lines 1267-1491 -->
   <div
     v-if="isEmpty"
     class="landing-empty"
   >
-    <UploadZone
-      :uploading="uploading"
-      :error="uploadError"
-      :is-dragging="isDragging"
-      @drop="handleDrop"
-      @dragover="handleDragOver"
-      @dragleave="handleDragLeave"
-      @file-input="handleFileInput"
-      @clear-error="clearError"
-    />
-    <p class="landing-empty__hint">
-      Powered by <a
-        href="https://github.com/thiscantbeserious/agent-session-recorder"
-        target="_blank"
-        rel="noopener"
-      >AGR</a>
-    </p>
-    <p class="landing-empty__tagline">
-      // the subagent deleted half your codebase again.
-    </p>
+    <!-- MAIN: SVG Pipeline + atmosphere + content overlay -->
+    <main class="landing-empty__main">
+
+      <!-- Background atmosphere layers — absolutely positioned, non-interactive -->
+      <BackgroundGrid />
+      <AmbientParticles />
+      <PipelineVisualization />
+
+      <!-- Content overlay — centered drop zone -->
+      <div class="landing-empty__content">
+        <!-- Drop zone — Flat TRON 2D, backdrop-filter blur, cyan border glow -->
+        <!-- Copied from design/drafts/theme-tron-v1.html lines 1427-1471 -->
+        <div
+          class="landing-empty__drop-zone"
+          :class="{ 'landing-empty__drop-zone--drag': isDragging }"
+          tabindex="0"
+          role="button"
+          aria-label="Upload session files"
+          @click="triggerEmptyFileInput"
+          @drop.prevent="handleDrop"
+          @dragover.prevent="handleDragOver"
+          @dragleave="handleDragLeave"
+        >
+          <!-- Hidden file input -->
+          <input
+            ref="emptyFileInputRef"
+            type="file"
+            accept=".cast"
+            style="display: none"
+            @change="handleFileInput"
+          />
+
+          <!-- Upload icon with single thin disc ring, gentle bob animation -->
+          <div class="landing-empty__upload-icon" style="position: relative;">
+            <div
+              class="landing-empty__disc-ring landing-empty__disc-ring--1"
+              aria-hidden="true"
+            />
+            <svg
+              viewBox="0 0 48 48"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 30v6h24v-6"/>
+              <path d="M24 10v18"/>
+              <path d="M16 18l8-8 8 8"/>
+            </svg>
+          </div>
+
+          <!-- Heading -->
+          <h1 class="landing-empty__heading">No sessions yet. Fix that.</h1>
+
+          <!-- Subtitle -->
+          <p class="landing-empty__subtitle">
+            Drop a <code>.cast</code> file here or click to browse
+            -- watch it unfold into something you can actually read.
+          </p>
+
+          <!-- CTA — TRON styled -->
+          <button type="button" class="landing-empty__cta">Browse Files</button>
+        </div>
+
+        <!-- AGR hint -->
+        <p class="landing-empty__hint">
+          Recording sessions? Use
+          <a
+            href="https://github.com/thiscantbeserious/agent-session-recorder"
+            target="_blank"
+            rel="noopener"
+          >AGR</a>
+          to capture them.
+        </p>
+      </div>
+    </main>
+
+    <!-- Footer tagline -->
+    <!-- Copied from design/drafts/theme-tron-v1.html lines 1486-1491 -->
+    <footer class="landing-empty__footer">
+      <p class="landing-empty__tagline">
+        // the subagent deleted half your codebase again.<br />
+        // at least now you can learn from it.
+      </p>
+    </footer>
   </div>
 
   <!-- Populated state: sessions exist -->
@@ -156,38 +230,355 @@ watch(isEmpty, applyBodyClass);
 
 <style scoped>
 /* ================================================================
-   Landing Page — Empty State
+   Landing Page — Empty State (Stage 8 TRON)
+   Copied from design/drafts/theme-tron-v1.html lines 96-108
    ================================================================ */
+
 .landing-empty {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+/* Copied from design/drafts/theme-tron-v1.html lines 102-108 */
+.landing-empty__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ================================================================
+   CONTENT OVERLAY — centered over the SVG
+   Copied from design/drafts/theme-tron-v1.html lines 366-375
+   ================================================================ */
+
+.landing-empty__content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-6);
-  padding: var(--space-12) var(--container-padding);
-  min-height: 60vh;
   text-align: center;
+  padding: var(--space-6) var(--space-8);
+  max-width: 560px;
 }
 
-.landing-empty__hint {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
+/* ================================================================
+   DROP ZONE — FIX 4: Flat TRON 2D, backdrop-filter blur, cyan border glow
+   Copied from design/drafts/theme-tron-v1.html lines 382-424
+   ================================================================ */
+
+.landing-empty__drop-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-8) 44px var(--space-8);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  background: rgba(10, 10, 25, 0.79);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
+              0 0 8px rgba(0, 212, 255, 0.15),
+              inset 0 0 8px rgba(0, 212, 255, 0.05);
+  overflow: hidden;
+  opacity: 0;
+  transition: transform var(--duration-normal) var(--easing-default),
+              box-shadow var(--duration-normal) var(--easing-default),
+              border-color var(--duration-normal) var(--easing-default);
 }
 
-.landing-empty__hint a {
+/* Hover: lift + intensify glow — TRON power-up feel */
+.landing-empty__drop-zone:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7),
+              0 0 14px rgba(0, 212, 255, 0.25),
+              inset 0 0 12px rgba(0, 212, 255, 0.08);
+}
+
+/* Focus visible ring — clean cyan outline */
+.landing-empty__drop-zone:focus-visible {
+  outline: 1px solid var(--accent-primary);
+  outline-offset: 4px;
+}
+
+/* Drag-over state: border intensifies, glow pulses */
+.landing-empty__drop-zone--drag {
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7),
+              0 0 16px rgba(0, 212, 255, 0.3),
+              inset 0 0 16px rgba(0, 212, 255, 0.1);
+}
+
+/* ================================================================
+   UPLOAD ICON — single thin disc ring, gentle bob animation
+   Copied from design/drafts/theme-tron-v1.html lines 502-533
+   ================================================================ */
+
+/* FIX 4: Upload icon — simplified, single thin circle, no rotation */
+.landing-empty__upload-icon {
+  width: 44px;
+  height: 44px;
   color: var(--accent-primary);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px var(--accent-primary-glow));
+}
+
+.landing-empty__upload-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* FIX 4: Single thin circle, no rotation */
+.landing-empty__disc-ring {
+  position: absolute;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing-empty__disc-ring--1 {
+  width: 72px;
+  height: 72px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Heading */
+.landing-empty__heading {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Subtitle */
+.landing-empty__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 400px;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.landing-empty__subtitle code {
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--accent-primary-subtle);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+}
+
+/* CTA button — TRON clean geometric style
+   Copied from design/drafts/theme-tron-v1.html lines 574-602 */
+.landing-empty__cta {
+  color: var(--accent-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-mono);
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0;
+  margin-top: var(--space-2);
+  position: relative;
+  z-index: 2;
+  padding: 8px 24px;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: all var(--duration-fast) var(--easing-default);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-empty__cta:hover {
+  background: rgba(0, 212, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.12),
+              0 0 40px rgba(0, 212, 255, 0.04),
+              inset 0 0 16px rgba(0, 212, 255, 0.04);
+  color: var(--accent-primary-hover);
   text-decoration: none;
 }
 
+/* AGR hint — Copied from design/drafts/theme-tron-v1.html lines 604-621 */
+.landing-empty__hint {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.landing-empty__hint a {
+  color: var(--accent-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
 .landing-empty__hint a:hover {
-  text-decoration: underline;
+  border-bottom-color: var(--accent-secondary);
+}
+
+/* Footer tagline — Copied from design/drafts/theme-tron-v1.html lines 651-663 */
+.landing-empty__footer {
+  padding: var(--space-4) var(--space-6);
+  text-align: center;
+  opacity: 0;
 }
 
 .landing-empty__tagline {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   color: var(--text-disabled);
-  letter-spacing: var(--tracking-wide);
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   KEYFRAMES for empty state content entrance
+   Copied from design/drafts/theme-tron-v1.html lines 687-689, 749-759
+   ================================================================ */
+
+@keyframes slideUpFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes iconBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* Drop zone entrance — TRON power-on */
+@keyframes dropZoneReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ================================================================
+   REDUCED MOTION — show everything in final state, no animation
+   Copied from design/drafts/theme-tron-v1.html lines 910-931
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-empty__drop-zone { opacity: 1 !important; }
+  .landing-empty__upload-icon { opacity: 1 !important; }
+  .landing-empty__heading { opacity: 1 !important; }
+  .landing-empty__subtitle { opacity: 1 !important; }
+  .landing-empty__cta { opacity: 1 !important; }
+  .landing-empty__hint { opacity: 1 !important; }
+  .landing-empty__footer { opacity: 1 !important; }
+  .landing-empty__disc-ring { opacity: 0 !important; }
+}
+
+/* ================================================================
+   MOTION-ALLOWED ANIMATIONS — content entrance choreography
+   Copied from design/drafts/theme-tron-v1.html lines 1057-1093
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* FIX 4: Drop zone: power-on only, NO rotating border animation */
+  .landing-empty__drop-zone {
+    animation: dropZoneReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+  }
+
+  /* Upload icon (after 2nd node) — subtle bob */
+  .landing-empty__upload-icon {
+    animation: slideUpFadeIn 0.5s ease-out 2.0s forwards,
+               iconBob 4s ease-in-out 4s infinite;
+  }
+
+  /* Heading */
+  .landing-empty__heading {
+    animation: slideUpFadeIn 0.5s ease-out 2.5s forwards;
+  }
+
+  /* Subtitle */
+  .landing-empty__subtitle {
+    animation: slideUpFadeIn 0.5s ease-out 2.8s forwards;
+  }
+
+  /* CTA */
+  .landing-empty__cta {
+    animation: slideUpFadeIn 0.4s ease-out 3.1s forwards;
+  }
+
+  /* Hint */
+  .landing-empty__hint {
+    animation: fadeIn 0.5s ease-out 3.4s forwards;
+  }
+
+  /* Footer tagline */
+  .landing-empty__footer {
+    animation: fadeIn 0.8s ease-out 4.5s forwards;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE — Mobile
+   Copied from design/drafts/theme-tron-v1.html lines 1214-1264
+   ================================================================ */
+
+@media (max-width: 767px) {
+  .landing-empty__content {
+    padding: var(--space-4) var(--space-4);
+    max-width: 100%;
+  }
+
+  .landing-empty__drop-zone {
+    padding: 44px var(--space-4) var(--space-4);
+  }
+
+  .landing-empty__heading {
+    font-size: var(--text-xl);
+  }
+
+  .landing-empty__subtitle {
+    font-size: var(--text-sm);
+    max-width: 300px;
+  }
+
+  .landing-empty__footer {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .landing-empty__tagline {
+    font-size: 9px;
+  }
+
+  .landing-empty__disc-ring {
+    display: none;
+  }
 }
 
 /* ================================================================

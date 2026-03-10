@@ -142,11 +142,17 @@ describe('LandingPage — empty state', () => {
     document.body.classList.remove('no-body-grid');
   });
 
-  it('renders UploadZone in .landing-empty when no sessions and not loading', () => {
+  it('renders .landing-empty container when no sessions and not loading', () => {
     setupMocks({ sessions: [], loading: false });
     const wrapper = mountPage();
     expect(wrapper.find('.landing-empty').exists()).toBe(true);
-    expect(wrapper.findComponent({ name: 'UploadZone' }).exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders the TRON drop zone in .landing-empty (replaces UploadZone)', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    expect(wrapper.find('.landing-empty__drop-zone').exists()).toBe(true);
     wrapper.unmount();
   });
 
@@ -462,6 +468,96 @@ describe('LandingPage — drag state on upload strip', () => {
     const wrapper = mountPage();
     const strip = wrapper.find('.landing__upload-strip');
     expect(strip.classes()).toContain('landing__upload-strip--drag');
+    wrapper.unmount();
+  });
+});
+
+describe('LandingPage — Stage 8 TRON empty state atmosphere', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    document.body.classList.remove('no-body-grid');
+  });
+
+  it('renders BackgroundGrid in empty state', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    expect(wrapper.findComponent({ name: 'BackgroundGrid' }).exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders AmbientParticles in empty state', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    expect(wrapper.findComponent({ name: 'AmbientParticles' }).exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders PipelineVisualization in empty state', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    expect(wrapper.findComponent({ name: 'PipelineVisualization' }).exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders drop-zone with heading "No sessions yet. Fix that."', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    const heading = wrapper.find('.landing-empty__heading');
+    expect(heading.exists()).toBe(true);
+    expect(heading.text()).toBe('No sessions yet. Fix that.');
+    wrapper.unmount();
+  });
+
+  it('renders drop-zone with "Browse Files" CTA button', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    const cta = wrapper.find('.landing-empty__cta');
+    expect(cta.exists()).toBe(true);
+    expect(cta.text()).toBe('Browse Files');
+    wrapper.unmount();
+  });
+
+  it('renders AGR hint link in empty state', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    const hint = wrapper.find('.landing-empty__hint');
+    expect(hint.exists()).toBe(true);
+    expect(hint.find('a').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('renders footer tagline in empty state', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    const tagline = wrapper.find('.landing-empty__tagline');
+    expect(tagline.exists()).toBe(true);
+    expect(tagline.text()).toContain('the subagent deleted half your codebase again');
+    wrapper.unmount();
+  });
+
+  it('renders the drop-zone container', () => {
+    setupMocks({ sessions: [], loading: false });
+    const wrapper = mountPage();
+    expect(wrapper.find('.landing-empty__drop-zone').exists()).toBe(true);
+    wrapper.unmount();
+  });
+
+  it('does NOT render BackgroundGrid in populated state', () => {
+    const sessions = [makeSession('1')];
+    setupMocks({ sessions, filteredSessions: sessions });
+    const wrapper = mountPage();
+    expect(wrapper.findComponent({ name: 'BackgroundGrid' }).exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('does NOT render PipelineVisualization in populated state', () => {
+    const sessions = [makeSession('1')];
+    setupMocks({ sessions, filteredSessions: sessions });
+    const wrapper = mountPage();
+    expect(wrapper.findComponent({ name: 'PipelineVisualization' }).exists()).toBe(false);
     wrapper.unmount();
   });
 });
