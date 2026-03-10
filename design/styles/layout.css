@@ -30,7 +30,7 @@
      All multi-col grids collapse to 1fr below 768px.
    ================================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+/* Google Fonts CDN removed — Geist is self-hosted via src/client/styles/fonts.css */
 
 :root {
   /* ============================================================

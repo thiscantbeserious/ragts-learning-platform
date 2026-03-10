@@ -1,0 +1,54 @@
+/*
+ * Vue App Overrides
+ *
+ * Minimal overrides where the Vue application needs to diverge from the
+ * static design system mockups. This file is loaded LAST in the CSS chain:
+ *
+ *   layout.css (tokens, reset) -> page.css -> components.css -> fonts.css -> app_overrides.css
+ *
+ * Rules:
+ *   - Keep this file as small as possible
+ *   - Document WHY each override is needed
+ *   - Prefer scoped component styles for component-specific adjustments
+ */
+
+/* ================================================================
+   APP SHELL
+   ================================================================ */
+
+/* Vue mounts into #app — ensure it fills the viewport */
+#app {
+  min-height: 100vh;
+}
+
+/* ================================================================
+   LINK DEFAULTS
+   ================================================================
+   Design system doesn't set a global link color. Provide a sensible
+   default using the accent token so unstyled <a> elements match the
+   design direction. */
+a {
+  color: var(--accent-primary);
+}
+
+/* ================================================================
+   VUE TRANSITIONS
+   ================================================================
+   Placeholder for Vue <Transition> classes. Add as needed:
+
+   .fade-enter-active, .fade-leave-active { ... }
+   .fade-enter-from, .fade-leave-to { ... }
+   ================================================================ */
+
+/* ================================================================
+   Z-INDEX ADJUSTMENTS
+   ================================================================
+   Vue's dynamic elements (modals, toasts, dropdowns) may need z-index
+   coordination. Define named layers here as needed:
+
+   --z-header: 100;
+   --z-dropdown: 200;
+   --z-modal-overlay: 300;
+   --z-modal: 400;
+   --z-toast: 500;
+   ================================================================ */
