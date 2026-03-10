@@ -38,6 +38,25 @@ export function useSessionList() {
     }
   }
 
+  /**
+   * Merges patch into the matching session in-place.
+   * If patch includes detection_status: 'completed', re-fetches the single session
+   * via GET /api/sessions/:id to obtain final counts. No-op for unknown IDs.
+   */
+  async function updateSession(id: string, patch: Partial<Session>): Promise<void> {
+    const index = sessions.value.findIndex((s) => s.id === id);
+    if (index === -1) return;
+
+    sessions.value[index] = { ...sessions.value[index]!, ...patch };
+
+    if (patch.detection_status === 'completed') {
+      const res = await fetch(`/api/sessions/${id}`);
+      if (res.ok) {
+        sessions.value[index] = await res.json() as Session;
+      }
+    }
+  }
+
   onMounted(fetchSessions);
 
   return {
@@ -46,5 +65,6 @@ export function useSessionList() {
     error,
     fetchSessions,
     deleteSession,
+    updateSession,
   };
 }
