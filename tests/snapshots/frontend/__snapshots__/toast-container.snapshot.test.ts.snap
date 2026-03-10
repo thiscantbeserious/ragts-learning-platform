@@ -1,27 +1,63 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`ToastContainer component snapshots > error toast 1`] = `
-"<div data-v-dd40d1fc="" class="toast-container">
-  <div data-v-dd40d1fc="" class="toast toast--error"><span data-v-dd40d1fc="" class="toast__message">Upload failed: invalid file type</span><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button></div>
+"<div data-v-dd40d1fc="" class="toast-stack">
+  <div data-v-dd40d1fc="" class="toast toast--error">
+    <div data-v-dd40d1fc="" class="toast__icon"><span data-v-dd40d1fc="" class="icon icon--md icon-error-circle"></span></div>
+    <div data-v-dd40d1fc="" class="toast__content">
+      <!--v-if-->
+      <div data-v-dd40d1fc="" class="toast__message">Upload failed: invalid file type</div>
+    </div><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button>
+  </div>
 </div>"
 `;
 
 exports[`ToastContainer component snapshots > info toast 1`] = `
-"<div data-v-dd40d1fc="" class="toast-container">
-  <div data-v-dd40d1fc="" class="toast toast--info"><span data-v-dd40d1fc="" class="toast__message">Processing session...</span><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button></div>
+"<div data-v-dd40d1fc="" class="toast-stack">
+  <div data-v-dd40d1fc="" class="toast toast--info">
+    <div data-v-dd40d1fc="" class="toast__icon"><span data-v-dd40d1fc="" class="icon icon--md icon-info"></span></div>
+    <div data-v-dd40d1fc="" class="toast__content">
+      <!--v-if-->
+      <div data-v-dd40d1fc="" class="toast__message">Processing session...</div>
+    </div><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button>
+  </div>
 </div>"
 `;
 
 exports[`ToastContainer component snapshots > multiple toasts stacked 1`] = `
-"<div data-v-dd40d1fc="" class="toast-container">
-  <div data-v-dd40d1fc="" class="toast toast--success"><span data-v-dd40d1fc="" class="toast__message">Upload complete</span><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button></div>
-  <div data-v-dd40d1fc="" class="toast toast--error"><span data-v-dd40d1fc="" class="toast__message">Another warning</span><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button></div>
-  <div data-v-dd40d1fc="" class="toast toast--info"><span data-v-dd40d1fc="" class="toast__message">FYI</span><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button></div>
+"<div data-v-dd40d1fc="" class="toast-stack">
+  <div data-v-dd40d1fc="" class="toast toast--success">
+    <div data-v-dd40d1fc="" class="toast__icon"><span data-v-dd40d1fc="" class="icon icon--md icon-check-circle"></span></div>
+    <div data-v-dd40d1fc="" class="toast__content">
+      <!--v-if-->
+      <div data-v-dd40d1fc="" class="toast__message">Upload complete</div>
+    </div><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button>
+  </div>
+  <div data-v-dd40d1fc="" class="toast toast--error">
+    <div data-v-dd40d1fc="" class="toast__icon"><span data-v-dd40d1fc="" class="icon icon--md icon-error-circle"></span></div>
+    <div data-v-dd40d1fc="" class="toast__content">
+      <!--v-if-->
+      <div data-v-dd40d1fc="" class="toast__message">Another warning</div>
+    </div><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button>
+  </div>
+  <div data-v-dd40d1fc="" class="toast toast--info">
+    <div data-v-dd40d1fc="" class="toast__icon"><span data-v-dd40d1fc="" class="icon icon--md icon-info"></span></div>
+    <div data-v-dd40d1fc="" class="toast__content">
+      <!--v-if-->
+      <div data-v-dd40d1fc="" class="toast__message">FYI</div>
+    </div><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button>
+  </div>
 </div>"
 `;
 
 exports[`ToastContainer component snapshots > success toast 1`] = `
-"<div data-v-dd40d1fc="" class="toast-container">
-  <div data-v-dd40d1fc="" class="toast toast--success"><span data-v-dd40d1fc="" class="toast__message">Session uploaded successfully</span><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button></div>
+"<div data-v-dd40d1fc="" class="toast-stack">
+  <div data-v-dd40d1fc="" class="toast toast--success">
+    <div data-v-dd40d1fc="" class="toast__icon"><span data-v-dd40d1fc="" class="icon icon--md icon-check-circle"></span></div>
+    <div data-v-dd40d1fc="" class="toast__content">
+      <!--v-if-->
+      <div data-v-dd40d1fc="" class="toast__message">Session uploaded successfully</div>
+    </div><button data-v-dd40d1fc="" class="toast__close" aria-label="Dismiss notification"><span data-v-dd40d1fc="" class="icon icon--sm icon-close"></span></button>
+  </div>
 </div>"
 `;

@@ -8,17 +8,30 @@ defineProps<{
 const emit = defineEmits<{
   dismiss: [id: number];
 }>();
+
+/** Maps a toast type to its corresponding design system icon name. */
+const typeIconMap: Record<Toast['type'], string> = {
+  success: 'icon-check-circle',
+  error: 'icon-error-circle',
+  info: 'icon-info',
+};
 </script>
 
 <template>
-  <div class="toast-container">
+  <div class="toast-stack">
     <div
       v-for="toast in toasts"
       :key="toast.id"
       class="toast"
       :class="`toast--${toast.type}`"
     >
-      <span class="toast__message">{{ toast.message }}</span>
+      <div class="toast__icon">
+        <span class="icon icon--md" :class="typeIconMap[toast.type]" />
+      </div>
+      <div class="toast__content">
+        <div v-if="toast.title" class="toast__title">{{ toast.title }}</div>
+        <div class="toast__message">{{ toast.message }}</div>
+      </div>
       <button
         class="toast__close"
         aria-label="Dismiss notification"
@@ -31,36 +44,8 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
-/* .toast, .toast--success/error/info come from design/styles/components.css */
-
-.toast-container {
-  position: fixed;
-  bottom: var(--space-6);
-  right: var(--space-6);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  max-width: var(--toast-max-width);
-}
-
-.toast--success {
-  background: var(--status-success-subtle);
-  border: 1px solid color-mix(in srgb, var(--status-success) 30%, transparent);
-  color: var(--status-success);
-}
-
-.toast--error {
-  background: var(--status-error-subtle);
-  border: 1px solid color-mix(in srgb, var(--status-error) 30%, transparent);
-  color: var(--status-error);
-}
-
-.toast--info {
-  background: var(--status-info-subtle);
-  border: 1px solid color-mix(in srgb, var(--status-info) 30%, transparent);
-  color: var(--status-info);
-}
+/* .toast-stack, .toast, .toast--success/error/info, .toast__icon, .toast__content,
+   .toast__title, .toast__message, .toast__close come from design/styles/components.css */
 
 @keyframes toast-in {
   from {
@@ -75,6 +60,5 @@ const emit = defineEmits<{
 
 .toast {
   animation: toast-in var(--duration-normal) var(--easing-default);
-  font-size: var(--text-sm);
 }
 </style>
