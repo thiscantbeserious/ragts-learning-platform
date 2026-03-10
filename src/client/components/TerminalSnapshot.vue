@@ -165,7 +165,7 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
 }
 
 .terminal-span--blink {
-  animation: blink 1s step-start infinite;
+  animation: blink 1s step-start infinite; /* terminal-standard blink rate — no matching design token */
 }
 
 @keyframes blink {

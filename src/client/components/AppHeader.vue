@@ -22,7 +22,12 @@
         </router-link>
       </nav>
     </div>
-    <div class="app-header__right" />
+    <div class="app-header__right">
+      <button class="btn btn--primary btn--sm" @click="$router.push('/')">
+        <span class="icon icon--sm icon-upload"></span>
+        Upload
+      </button>
+    </div>
   </header>
 </template>
 
