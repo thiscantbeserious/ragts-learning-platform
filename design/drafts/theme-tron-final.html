@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme: TRON Final - Erika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   Theme: TRON Final
+   Midnight Neon palette + TRON: Legacy aesthetic
+   TRON line grid, light cycle trails, system HUD, pipeline pulse
+   ================================================================ */
+
+:root {
+  /* --- Midnight Neon Palette --- */
+  --bg-page: #1a1a2e;
+  --bg-surface: #212136;
+  --bg-elevated: #28283e;
+  --accent-primary: #00d4ff;
+  --accent-primary-hover: #33ddff;
+  --accent-primary-subtle: rgba(0, 212, 255, 0.08);
+  --accent-primary-glow: rgba(0, 212, 255, 0.4);
+  --accent-primary-glow-strong: rgba(0, 212, 255, 0.7);
+  --accent-secondary: #ff4d6a;
+  --accent-secondary-hover: #ff6b83;
+  --accent-secondary-subtle: rgba(255, 77, 106, 0.08);
+  --accent-secondary-glow: rgba(255, 77, 106, 0.35);
+  --text-primary: #f1f1f7;
+  --text-secondary: #d3d4d9;
+  --text-muted: #aaaab0;
+  --text-disabled: #55556a;
+  --border-default: #28283e;
+  --border-strong: #323349;
+  --terminal-bg: #12122a;
+
+  /* --- Typography --- */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --text-xs: 0.625rem;
+  --text-sm: 0.6875rem;
+  --text-base: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* --- Spacing --- */
+  --space-px: 1px;
+  --space-0_5: 2px;
+  --space-1: 4px;
+  --space-1_5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* --- Shape --- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* --- Animation --- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-default: ease-out;
+
+  /* --- Grid --- */
+  --grid-spacing: 70px;
+  --grid-line-color: rgba(0, 212, 255, 0.06);
+  --grid-line-bright: rgba(0, 212, 255, 0.10);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================================
+   FULL PAGE LAYOUT
+   ================================================================ */
+
+.landing-empty {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-empty__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ================================================================
+   TRON LINE GRID -- Full-page background
+   Layered repeating-linear-gradients for H + V lines
+   ================================================================ */
+
+.landing-empty__tron-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    /* Horizontal lines */
+    repeating-linear-gradient(
+      0deg,
+      var(--grid-line-color) 0px,
+      var(--grid-line-color) 1px,
+      transparent 1px,
+      transparent var(--grid-spacing)
+    ),
+    /* Vertical lines */
+    repeating-linear-gradient(
+      90deg,
+      var(--grid-line-color) 0px,
+      var(--grid-line-color) 1px,
+      transparent 1px,
+      transparent var(--grid-spacing)
+    );
+  opacity: 0;
+}
+
+/* Intersection glow overlay -- brighter dots at grid crossings */
+.landing-empty__tron-grid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 1.5px at 0px 0px, var(--grid-line-bright) 0%, transparent 100%);
+  background-size: var(--grid-spacing) var(--grid-spacing);
+}
+
+/* ================================================================
+   LIGHT CYCLE TRAILS
+   position: absolute elements with linear-gradient bodies
+   racing along grid lines in strict H/V directions
+   ================================================================ */
+
+.landing-empty__trails {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.light-trail {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Horizontal trails: 2px tall, 60px long */
+.light-trail--h {
+  height: 2px;
+  width: 60px;
+}
+
+/* Vertical trails: 2px wide, 60px long */
+.light-trail--v {
+  width: 2px;
+  height: 60px;
+}
+
+/* --- Cyan horizontal left-to-right --- */
+.light-trail--h-cyan-ltr {
+  background: linear-gradient(to right, transparent, rgba(0, 212, 255, 0.3) 40%, #00d4ff 85%, #00d4ff);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.5), 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+/* --- Cyan horizontal right-to-left --- */
+.light-trail--h-cyan-rtl {
+  background: linear-gradient(to left, transparent, rgba(0, 212, 255, 0.3) 40%, #00d4ff 85%, #00d4ff);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.5), 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+/* --- Cyan vertical top-to-bottom --- */
+.light-trail--v-cyan-ttb {
+  background: linear-gradient(to bottom, transparent, rgba(0, 212, 255, 0.3) 40%, #00d4ff 85%, #00d4ff);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.5), 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+/* --- Cyan vertical bottom-to-top --- */
+.light-trail--v-cyan-btt {
+  background: linear-gradient(to top, transparent, rgba(0, 212, 255, 0.3) 40%, #00d4ff 85%, #00d4ff);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.5), 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+/* --- Pink horizontal left-to-right --- */
+.light-trail--h-pink-ltr {
+  background: linear-gradient(to right, transparent, rgba(255, 77, 106, 0.3) 40%, #ff4d6a 85%, #ff4d6a);
+  box-shadow: 0 0 6px rgba(255, 77, 106, 0.5), 0 0 12px rgba(255, 77, 106, 0.2);
+}
+
+/* --- Pink vertical top-to-bottom --- */
+.light-trail--v-pink-ttb {
+  background: linear-gradient(to bottom, transparent, rgba(255, 77, 106, 0.3) 40%, #ff4d6a 85%, #ff4d6a);
+  box-shadow: 0 0 6px rgba(255, 77, 106, 0.5), 0 0 12px rgba(255, 77, 106, 0.2);
+}
+
+/* Trail 1: Horizontal cyan L->R, grid line y=210px (3*70) */
+.light-trail--1 {
+  top: 210px;
+  width: 70px;
+}
+
+/* Trail 2: Horizontal cyan R->L, grid line y=420px (6*70) */
+.light-trail--2 {
+  top: 420px;
+  width: 50px;
+}
+
+/* Trail 3: Vertical cyan T->B, grid line x=280px (4*70) */
+.light-trail--3 {
+  left: 280px;
+  height: 70px;
+}
+
+/* Trail 4: Horizontal cyan L->R, grid line y=560px (8*70) */
+.light-trail--4 {
+  top: 560px;
+  width: 80px;
+}
+
+/* Trail 5: Pink horizontal L->R, grid line y=140px (2*70) */
+.light-trail--5 {
+  top: 140px;
+  width: 55px;
+}
+
+/* Trail 6: Pink vertical T->B, grid line x=840px (12*70) */
+.light-trail--6 {
+  left: 840px;
+  height: 65px;
+}
+
+/* Trail keyframes */
+@keyframes trailMoveRight {
+  from { transform: translateX(-100px); }
+  to   { transform: translateX(calc(100vw + 100px)); }
+}
+
+@keyframes trailMoveLeft {
+  from { transform: translateX(calc(100vw + 100px)); }
+  to   { transform: translateX(-100px); }
+}
+
+@keyframes trailMoveDown {
+  from { transform: translateY(-100px); }
+  to   { transform: translateY(calc(100vh + 100px)); }
+}
+
+@keyframes trailMoveUp {
+  from { transform: translateY(calc(100vh + 100px)); }
+  to   { transform: translateY(-100px); }
+}
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  height: 48px;
+  background: var(--bg-surface);
+  position: relative;
+  border-bottom: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent-primary) 20%,
+    var(--accent-primary) 50%,
+    var(--accent-secondary) 80%,
+    transparent 100%
+  );
+  opacity: 0.8;
+  box-shadow: 0 0 12px var(--accent-primary-glow),
+              0 0 24px rgba(0, 212, 255, 0.2);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-header__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--accent-primary);
+  transition: box-shadow var(--duration-normal) var(--easing-default);
+}
+
+.app-header__brand:hover .app-header__logo {
+  box-shadow: 0 0 12px var(--accent-primary-glow);
+}
+
+.app-header__name {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  border: 1px solid transparent;
+  background: transparent;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.btn--primary {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: rgba(0, 212, 255, 0.12);
+  box-shadow: 0 0 12px var(--accent-primary-glow),
+              inset 0 0 12px rgba(0, 212, 255, 0.06);
+}
+
+.btn--sm {
+  padding: var(--space-0_5) var(--space-2);
+  font-size: var(--text-xs);
+}
+
+/* ================================================================
+   SYSTEM HUD READOUT -- top-right boot sequence
+   ================================================================ */
+
+.landing-empty__hud {
+  position: absolute;
+  top: 72px;
+  right: 28px;
+  z-index: 5;
+  text-align: right;
+  pointer-events: none;
+  user-select: none;
+}
+
+.landing-empty__hud-line {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-primary);
+  opacity: 0;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  line-height: 2;
+  white-space: nowrap;
+}
+
+/* ================================================================
+   SVG PIPELINE BACKDROP
+   ================================================================ */
+
+.landing-empty__pipeline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.landing-empty__path-segment {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px var(--accent-primary-glow))
+          drop-shadow(0 0 14px rgba(0, 212, 255, 0.2));
+  opacity: 0;
+  visibility: hidden;
+}
+
+.landing-empty__path-segment--1 {
+  stroke-dasharray: 380;
+  stroke-dashoffset: 380;
+}
+.landing-empty__path-segment--2 {
+  stroke-dasharray: 350;
+  stroke-dashoffset: 350;
+}
+.landing-empty__path-segment--3 {
+  stroke-dasharray: 360;
+  stroke-dashoffset: 360;
+}
+.landing-empty__path-segment--4 {
+  stroke-dasharray: 380;
+  stroke-dashoffset: 380;
+}
+
+/* Decorative secondary paths */
+.landing-empty__deco-path {
+  fill: none;
+  stroke-width: 0.5;
+  stroke-dasharray: 3 8;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Pipeline nodes */
+.landing-empty__node-ring {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0;
+}
+
+.landing-empty__node-ring--cyan {
+  stroke: var(--accent-primary);
+  filter: drop-shadow(0 0 8px var(--accent-primary-glow))
+          drop-shadow(0 0 16px rgba(0, 212, 255, 0.2));
+}
+
+.landing-empty__node-ring--pink {
+  stroke: var(--accent-secondary);
+  filter: drop-shadow(0 0 8px var(--accent-secondary-glow))
+          drop-shadow(0 0 16px rgba(255, 77, 106, 0.2));
+}
+
+.landing-empty__node-ring--final {
+  stroke: var(--accent-primary);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 14px var(--accent-primary-glow))
+          drop-shadow(0 0 30px rgba(0, 212, 255, 0.25));
+}
+
+.landing-empty__node-outer-ring {
+  fill: none;
+  stroke-width: 0.5;
+  opacity: 0;
+}
+
+.landing-empty__node-fill {
+  opacity: 0;
+}
+
+.landing-empty__node-fill--cyan {
+  fill: rgba(0, 212, 255, 0.15);
+}
+
+.landing-empty__node-fill--pink {
+  fill: rgba(255, 77, 106, 0.12);
+}
+
+.landing-empty__node-fill--final {
+  fill: rgba(0, 212, 255, 0.25);
+}
+
+.landing-empty__node-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  fill: var(--text-muted);
+  text-anchor: middle;
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+/* Decorative anchor dots */
+.landing-empty__anchor-dot {
+  fill: none;
+  stroke-width: 0.5;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ================================================================
+   CONTENT OVERLAY
+   ================================================================ */
+
+.landing-empty__content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-8);
+  max-width: 560px;
+}
+
+/* ================================================================
+   DROP ZONE -- Flat TRON 2D terminal
+   ================================================================ */
+
+.landing-empty__drop-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 52px 44px var(--space-8);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: #141428;
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.3),
+              inset 0 0 8px rgba(0, 212, 255, 0.1);
+  overflow: hidden;
+  opacity: 0;
+  transition: transform var(--duration-normal) var(--easing-default),
+              box-shadow var(--duration-normal) var(--easing-default),
+              border-color var(--duration-normal) var(--easing-default);
+}
+
+.landing-empty__drop-zone:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4),
+              0 0 30px rgba(0, 212, 255, 0.1),
+              inset 0 0 12px rgba(0, 212, 255, 0.12);
+}
+
+.landing-empty__drop-zone:focus-visible {
+  outline: 1px solid var(--accent-primary);
+  outline-offset: 4px;
+}
+
+/* Terminal title bar */
+.landing-empty__drop-zone-titlebar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+  z-index: 3;
+}
+
+.landing-empty__titlebar-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: rgba(0, 212, 255, 0.25);
+}
+
+.landing-empty__titlebar-dot:nth-child(2) {
+  background: rgba(255, 77, 106, 0.22);
+}
+
+.landing-empty__titlebar-dot:nth-child(3) {
+  background: rgba(0, 212, 255, 0.12);
+}
+
+.landing-empty__titlebar-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: rgba(0, 212, 255, 0.3);
+  letter-spacing: 0.16em;
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
+/* Corner brackets */
+.landing-empty__corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.landing-empty__corner::before,
+.landing-empty__corner::after {
+  content: '';
+  position: absolute;
+  background: var(--accent-primary);
+  opacity: 0.4;
+  box-shadow: 0 0 6px var(--accent-primary-glow);
+}
+
+.landing-empty__corner::before {
+  width: 18px;
+  height: 1px;
+}
+
+.landing-empty__corner::after {
+  width: 1px;
+  height: 18px;
+}
+
+.landing-empty__corner--tl { top: 6px; left: 6px; }
+.landing-empty__corner--tl::before { top: 0; left: 0; }
+.landing-empty__corner--tl::after  { top: 0; left: 0; }
+
+.landing-empty__corner--tr { top: 6px; right: 6px; }
+.landing-empty__corner--tr::before { top: 0; right: 0; }
+.landing-empty__corner--tr::after  { top: 0; right: 0; }
+
+.landing-empty__corner--bl { bottom: 6px; left: 6px; }
+.landing-empty__corner--bl::before { bottom: 0; left: 0; }
+.landing-empty__corner--bl::after  { bottom: 0; left: 0; }
+
+.landing-empty__corner--br { bottom: 6px; right: 6px; }
+.landing-empty__corner--br::before { bottom: 0; right: 0; }
+.landing-empty__corner--br::after  { bottom: 0; right: 0; }
+
+/* Fine grid inside drop zone */
+.landing-empty__grid-overlay {
+  position: absolute;
+  inset: 28px 0 0 0;
+  background:
+    linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Upload icon */
+.landing-empty__upload-icon {
+  width: 44px;
+  height: 44px;
+  color: var(--accent-primary);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 8px var(--accent-primary-glow));
+}
+
+.landing-empty__upload-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.landing-empty__disc-ring {
+  position: absolute;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing-empty__disc-ring--1 {
+  width: 72px;
+  height: 72px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.landing-empty__disc-ring--2 {
+  display: none;
+}
+
+/* Heading */
+.landing-empty__heading {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Subtitle */
+.landing-empty__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 400px;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.landing-empty__subtitle code {
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--accent-primary-subtle);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+}
+
+/* CTA button */
+.landing-empty__cta {
+  color: var(--accent-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-mono);
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0;
+  margin-top: var(--space-2);
+  position: relative;
+  z-index: 2;
+  padding: 8px 24px;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: all var(--duration-fast) var(--easing-default);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-empty__cta:hover {
+  background: rgba(0, 212, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.12),
+              0 0 40px rgba(0, 212, 255, 0.04),
+              inset 0 0 16px rgba(0, 212, 255, 0.04);
+  color: var(--accent-primary-hover);
+  text-decoration: none;
+}
+
+/* AGR hint */
+.landing-empty__hint {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.landing-empty__hint a {
+  color: var(--accent-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+.landing-empty__hint a:hover {
+  border-bottom-color: var(--accent-secondary);
+}
+
+/* ================================================================
+   BLINKING TERMINAL CURSOR
+   ================================================================ */
+
+.landing-empty__cursor-prompt {
+  position: absolute;
+  bottom: 8%;
+  left: 4%;
+  z-index: 3;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--accent-primary);
+  opacity: 0;
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 0 10px var(--accent-primary-glow),
+               0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.landing-empty__cursor-chevron {
+  opacity: 0.7;
+}
+
+.landing-empty__cursor-blink {
+  opacity: 0.6;
+}
+
+/* Footer tagline */
+.landing-empty__footer {
+  padding: var(--space-4) var(--space-6);
+  text-align: center;
+  opacity: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.landing-empty__tagline {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   AMBIENT DATA PARTICLES
+   ================================================================ */
+
+.landing-empty__ambient-particle {
+  position: absolute;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 4;
+}
+
+/* ================================================================
+   KEYFRAMES
+   ================================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUpFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes drawSegment1 {
+  from { stroke-dashoffset: 380; opacity: 1; visibility: visible; }
+  to   { stroke-dashoffset: 0; opacity: 1; visibility: visible; }
+}
+
+@keyframes drawSegment2 {
+  from { stroke-dashoffset: 350; opacity: 1; visibility: visible; }
+  to   { stroke-dashoffset: 0; opacity: 1; visibility: visible; }
+}
+
+@keyframes drawSegment3 {
+  from { stroke-dashoffset: 360; opacity: 1; visibility: visible; }
+  to   { stroke-dashoffset: 0; opacity: 1; visibility: visible; }
+}
+
+@keyframes drawSegment4 {
+  from { stroke-dashoffset: 380; opacity: 1; visibility: visible; }
+  to   { stroke-dashoffset: 0; opacity: 1; visibility: visible; }
+}
+
+/* Deco paths fade in */
+@keyframes decoFadeIn {
+  from { visibility: visible; opacity: 0; }
+  to   { visibility: visible; }
+}
+
+@keyframes nodeAppear {
+  0%   { opacity: 0; transform: scale(0.4); }
+  60%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes outerRingAppear {
+  0%   { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 0.3; transform: scale(1); }
+}
+
+@keyframes fillAppear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes labelReveal {
+  from { opacity: 0; }
+  to   { opacity: 0.3; }
+}
+
+/* Upload icon bob */
+@keyframes iconBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* Drop zone entrance */
+@keyframes dropZoneReveal {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Corner bracket fade-in */
+@keyframes cornerReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Pipeline pulse -- replaces separate energy flow element.
+   Animates brightness of existing drawn segments. */
+@keyframes pipelinePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px var(--accent-primary-glow))
+            drop-shadow(0 0 14px rgba(0, 212, 255, 0.2));
+    stroke-opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 12px var(--accent-primary-glow-strong))
+            drop-shadow(0 0 28px rgba(0, 212, 255, 0.35));
+    stroke-opacity: 0.85;
+  }
+}
+
+/* Node glow pulses */
+@keyframes nodePulseCyan {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.35))
+                     drop-shadow(0 0 14px rgba(0, 212, 255, 0.15)); }
+  50%      { filter: drop-shadow(0 0 14px rgba(0, 212, 255, 0.65))
+                     drop-shadow(0 0 28px rgba(0, 212, 255, 0.25)); }
+}
+
+@keyframes nodePulsePink {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 77, 106, 0.35))
+                     drop-shadow(0 0 14px rgba(255, 77, 106, 0.15)); }
+  50%      { filter: drop-shadow(0 0 14px rgba(255, 77, 106, 0.65))
+                     drop-shadow(0 0 28px rgba(255, 77, 106, 0.25)); }
+}
+
+@keyframes nodePulseFinal {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.4))
+            drop-shadow(0 0 20px rgba(0, 212, 255, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.7))
+            drop-shadow(0 0 40px rgba(0, 212, 255, 0.3));
+  }
+}
+
+/* Particle drifts */
+@keyframes particleDrift1 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  25%  { transform: translate(25px, -35px) scale(1.3); opacity: 0.8; }
+  50%  { transform: translate(-15px, -70px) scale(0.7); opacity: 0.5; }
+  75%  { transform: translate(35px, -25px) scale(1.1); opacity: 0.7; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+}
+
+@keyframes particleDrift2 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  25%  { transform: translate(-35px, 18px) scale(1.2); opacity: 0.7; }
+  50%  { transform: translate(8px, 45px) scale(0.6); opacity: 0.4; }
+  75%  { transform: translate(-25px, -8px) scale(1.4); opacity: 0.6; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+}
+
+@keyframes particleDrift3 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  25%  { transform: translate(45px, 25px) scale(1.4); opacity: 0.7; }
+  50%  { transform: translate(18px, -35px) scale(0.8); opacity: 0.5; }
+  75%  { transform: translate(-18px, 18px) scale(1); opacity: 0.6; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+}
+
+@keyframes particleDrift4 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  25%  { transform: translate(-25px, -45px) scale(0.7); opacity: 0.4; }
+  50%  { transform: translate(35px, -18px) scale(1.3); opacity: 0.6; }
+  75%  { transform: translate(8px, 25px) scale(0.9); opacity: 0.5; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+}
+
+@keyframes particleDrift5 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  25%  { transform: translate(18px, 35px) scale(0.6); opacity: 0.4; }
+  50%  { transform: translate(-35px, 8px) scale(1.2); opacity: 0.7; }
+  75%  { transform: translate(25px, -18px) scale(1.4); opacity: 0.5; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+}
+
+@keyframes particleDrift6 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  25%  { transform: translate(-18px, -25px) scale(1.2); opacity: 0.6; }
+  50%  { transform: translate(25px, 35px) scale(0.7); opacity: 0.5; }
+  75%  { transform: translate(-35px, 8px) scale(1); opacity: 0.4; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+}
+
+@keyframes particleDrift7 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  25%  { transform: translate(35px, -18px) scale(1.4); opacity: 0.7; }
+  50%  { transform: translate(-8px, 45px) scale(0.8); opacity: 0.4; }
+  75%  { transform: translate(18px, -35px) scale(1.1); opacity: 0.6; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+}
+
+@keyframes particleDrift8 {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  25%  { transform: translate(-45px, 18px) scale(0.6); opacity: 0.5; }
+  50%  { transform: translate(18px, -25px) scale(1.3); opacity: 0.6; }
+  75%  { transform: translate(-8px, 35px) scale(1); opacity: 0.4; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+}
+
+/* Blinking cursor */
+@keyframes cursorBlink {
+  0%, 49.9% { opacity: 0.6; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes cursorFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Grid fade in */
+@keyframes gridFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Anchor dots fade in */
+@keyframes anchorFadeIn {
+  from { visibility: visible; opacity: 0; }
+  to   { visibility: visible; }
+}
+
+/* HUD line boot-up fade */
+@keyframes hudLineReveal {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 0.35; transform: translateX(0); }
+}
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-empty__tron-grid { opacity: 1 !important; }
+  .landing-empty__trails { display: none !important; }
+  .landing-empty__path-segment { stroke-dashoffset: 0 !important; opacity: 1 !important; visibility: visible !important; }
+  .landing-empty__node-ring { opacity: 1 !important; }
+  .landing-empty__node-outer-ring { opacity: 0.3 !important; }
+  .landing-empty__node-fill { opacity: 1 !important; }
+  .landing-empty__node-label { opacity: 0.3 !important; }
+  .landing-empty__drop-zone { opacity: 1 !important; }
+  .landing-empty__upload-icon { opacity: 1 !important; }
+  .landing-empty__heading { opacity: 1 !important; }
+  .landing-empty__subtitle { opacity: 1 !important; }
+  .landing-empty__cta { opacity: 1 !important; }
+  .landing-empty__hint { opacity: 1 !important; }
+  .landing-empty__footer { opacity: 1 !important; }
+  .landing-empty__ambient-particle { display: none !important; }
+  .landing-empty__cursor-prompt { opacity: 1 !important; }
+  .landing-empty__cursor-blink { opacity: 0.6 !important; }
+  .landing-empty__disc-ring { opacity: 0 !important; }
+  .landing-empty__deco-path { opacity: 0.06 !important; visibility: visible !important; }
+  .landing-empty__anchor-dot { opacity: 0.08 !important; visibility: visible !important; }
+  .landing-empty__hud-line { opacity: 0.35 !important; }
+}
+
+/* ================================================================
+   MOTION-ALLOWED ANIMATIONS
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* 0. TRON grid fades in */
+  .landing-empty__tron-grid {
+    animation: gridFadeIn 2s ease-out 0.2s forwards;
+  }
+
+  /* 0b. Light cycle trails */
+  .light-trail--1 {
+    animation: trailMoveRight 6s linear 1.5s infinite;
+  }
+  .light-trail--2 {
+    animation: trailMoveLeft 8s linear 0.5s infinite;
+  }
+  .light-trail--3 {
+    animation: trailMoveDown 5s linear 2s infinite;
+  }
+  .light-trail--4 {
+    animation: trailMoveRight 7s linear 3s infinite;
+  }
+  .light-trail--5 {
+    animation: trailMoveRight 9s linear 0s infinite;
+  }
+  .light-trail--6 {
+    animation: trailMoveDown 6.5s linear 1s infinite;
+  }
+
+  /* 1. Deco paths and anchor dots fade in early */
+  .landing-empty__deco-path {
+    animation: decoFadeIn 1s ease-out 0.3s forwards;
+  }
+  .landing-empty__anchor-dot {
+    animation: anchorFadeIn 1s ease-out 0.3s forwards;
+  }
+
+  /* 2. Pipeline path segments draw sequentially.
+     After drawing, they PULSE (replaces separate energy flow). */
+  .landing-empty__path-segment--1 {
+    animation: drawSegment1 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.5s forwards,
+               pipelinePulse 4s ease-in-out 5s infinite;
+  }
+
+  .landing-empty__path-segment--2 {
+    animation: drawSegment2 1.3s cubic-bezier(0.4, 0, 0.2, 1) 1.4s forwards,
+               pipelinePulse 4s ease-in-out 5.5s infinite;
+  }
+
+  .landing-empty__path-segment--3 {
+    animation: drawSegment3 1.3s cubic-bezier(0.4, 0, 0.2, 1) 2.1s forwards,
+               pipelinePulse 4s ease-in-out 6s infinite;
+  }
+
+  .landing-empty__path-segment--4 {
+    animation: drawSegment4 1.6s cubic-bezier(0.4, 0, 0.2, 1) 2.8s forwards,
+               pipelinePulse 4s ease-in-out 6.5s infinite;
+  }
+
+  /* NO separate energy flow element -- bug eliminated */
+
+  /* 3. Nodes light up as lines reach them */
+
+  /* Node 1: record (cyan) */
+  .landing-empty__node-ring--n1 {
+    transform-origin: 160px 160px;
+    animation: nodeAppear 0.5s ease-out 0.8s forwards,
+               nodePulseCyan 4s ease-in-out 5.0s infinite;
+  }
+  .landing-empty__node-outer-ring--n1 {
+    transform-origin: 160px 160px;
+    animation: outerRingAppear 0.6s ease-out 1.0s forwards;
+  }
+  .landing-empty__node-fill--n1 {
+    animation: fillAppear 0.3s ease-out 0.9s forwards;
+  }
+  .landing-empty__node-label--n1 {
+    animation: labelReveal 0.4s ease-out 1.0s forwards;
+  }
+
+  /* Node 2: validate (pink) */
+  .landing-empty__node-ring--n2 {
+    transform-origin: 400px 400px;
+    animation: nodeAppear 0.5s ease-out 1.8s forwards,
+               nodePulsePink 4.5s ease-in-out 5.7s infinite;
+  }
+  .landing-empty__node-outer-ring--n2 {
+    transform-origin: 400px 400px;
+    animation: outerRingAppear 0.6s ease-out 2.0s forwards;
+  }
+  .landing-empty__node-fill--n2 {
+    animation: fillAppear 0.3s ease-out 1.9s forwards;
+  }
+  .landing-empty__node-label--n2 {
+    animation: labelReveal 0.4s ease-out 2.0s forwards;
+  }
+
+  /* Node 3: detect (cyan) */
+  .landing-empty__node-ring--n3 {
+    transform-origin: 640px 160px;
+    animation: nodeAppear 0.5s ease-out 2.5s forwards,
+               nodePulseCyan 4.2s ease-in-out 6.2s infinite;
+  }
+  .landing-empty__node-outer-ring--n3 {
+    transform-origin: 640px 160px;
+    animation: outerRingAppear 0.6s ease-out 2.7s forwards;
+  }
+  .landing-empty__node-fill--n3 {
+    animation: fillAppear 0.3s ease-out 2.6s forwards;
+  }
+  .landing-empty__node-label--n3 {
+    animation: labelReveal 0.4s ease-out 2.7s forwards;
+  }
+
+  /* Node 4: replay (pink) */
+  .landing-empty__node-ring--n4 {
+    transform-origin: 880px 400px;
+    animation: nodeAppear 0.5s ease-out 3.2s forwards,
+               nodePulsePink 4.8s ease-in-out 5.3s infinite;
+  }
+  .landing-empty__node-outer-ring--n4 {
+    transform-origin: 880px 400px;
+    animation: outerRingAppear 0.6s ease-out 3.4s forwards;
+  }
+  .landing-empty__node-fill--n4 {
+    animation: fillAppear 0.3s ease-out 3.3s forwards;
+  }
+  .landing-empty__node-label--n4 {
+    animation: labelReveal 0.4s ease-out 3.4s forwards;
+  }
+
+  /* Node 5: ready (cyan, final) */
+  .landing-empty__node-ring--n5 {
+    transform-origin: 1120px 160px;
+    animation: nodeAppear 0.7s ease-out 4.0s forwards,
+               nodePulseFinal 3.5s ease-in-out 6.0s infinite;
+  }
+  .landing-empty__node-outer-ring--n5 {
+    transform-origin: 1120px 160px;
+    animation: outerRingAppear 0.8s ease-out 4.2s forwards;
+  }
+  .landing-empty__node-fill--n5 {
+    animation: fillAppear 0.4s ease-out 4.1s forwards;
+  }
+  .landing-empty__node-label--n5 {
+    animation: labelReveal 0.5s ease-out 4.2s forwards;
+  }
+
+  /* 4. Content entrance choreography */
+
+  .landing-empty__drop-zone {
+    animation: dropZoneReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+  }
+
+  .landing-empty__upload-icon {
+    animation: slideUpFadeIn 0.5s ease-out 2.0s forwards,
+               iconBob 4s ease-in-out 4s infinite;
+  }
+
+  .landing-empty__heading {
+    animation: slideUpFadeIn 0.5s ease-out 2.5s forwards;
+  }
+
+  .landing-empty__subtitle {
+    animation: slideUpFadeIn 0.5s ease-out 2.8s forwards;
+  }
+
+  .landing-empty__cta {
+    animation: slideUpFadeIn 0.4s ease-out 3.1s forwards;
+  }
+
+  .landing-empty__hint {
+    animation: fadeIn 0.5s ease-out 3.4s forwards;
+  }
+
+  .landing-empty__footer {
+    animation: fadeIn 0.8s ease-out 4.5s forwards;
+  }
+
+  /* 5. HUD boot sequence -- staggered line reveals */
+  .landing-empty__hud-line--1 {
+    animation: hudLineReveal 0.4s ease-out 0.6s forwards;
+  }
+  .landing-empty__hud-line--2 {
+    animation: hudLineReveal 0.4s ease-out 0.9s forwards;
+  }
+  .landing-empty__hud-line--3 {
+    animation: hudLineReveal 0.4s ease-out 1.2s forwards;
+  }
+  .landing-empty__hud-line--4 {
+    animation: hudLineReveal 0.4s ease-out 1.5s forwards;
+  }
+
+  /* 6. Ambient data particles */
+
+  .landing-empty__ambient-particle--1 {
+    top: 12%;
+    left: 8%;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary-glow),
+                0 0 16px rgba(0, 212, 255, 0.15);
+    animation: particleDrift1 12s ease-in-out infinite;
+    animation-delay: -3s;
+  }
+
+  .landing-empty__ambient-particle--2 {
+    top: 18%;
+    right: 12%;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-secondary);
+    box-shadow: 0 0 8px var(--accent-secondary-glow),
+                0 0 16px rgba(255, 77, 106, 0.15);
+    animation: particleDrift2 15s ease-in-out infinite;
+    animation-delay: -7s;
+  }
+
+  .landing-empty__ambient-particle--3 {
+    top: 40%;
+    left: 5%;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px var(--accent-primary-glow),
+                0 0 12px rgba(0, 212, 255, 0.12);
+    animation: particleDrift3 10s ease-in-out infinite;
+    animation-delay: -1s;
+  }
+
+  .landing-empty__ambient-particle--4 {
+    top: 45%;
+    right: 7%;
+    width: 5px;
+    height: 5px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary-glow),
+                0 0 16px rgba(0, 212, 255, 0.15);
+    animation: particleDrift4 13s ease-in-out infinite;
+    animation-delay: -5s;
+  }
+
+  .landing-empty__ambient-particle--5 {
+    bottom: 22%;
+    left: 15%;
+    width: 6px;
+    height: 6px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 10px var(--accent-primary-glow),
+                0 0 20px rgba(0, 212, 255, 0.18);
+    animation: particleDrift5 16s ease-in-out infinite;
+    animation-delay: -9s;
+  }
+
+  .landing-empty__ambient-particle--6 {
+    bottom: 18%;
+    right: 18%;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px var(--accent-primary-glow),
+                0 0 12px rgba(0, 212, 255, 0.12);
+    animation: particleDrift6 9s ease-in-out infinite;
+    animation-delay: -2s;
+  }
+
+  .landing-empty__ambient-particle--7 {
+    top: 25%;
+    left: 30%;
+    width: 4px;
+    height: 4px;
+    background: var(--accent-secondary);
+    box-shadow: 0 0 6px var(--accent-secondary-glow),
+                0 0 12px rgba(255, 77, 106, 0.12);
+    animation: particleDrift7 14s ease-in-out infinite;
+    animation-delay: -6s;
+  }
+
+  .landing-empty__ambient-particle--8 {
+    bottom: 30%;
+    right: 25%;
+    width: 5px;
+    height: 5px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px var(--accent-primary-glow),
+                0 0 16px rgba(0, 212, 255, 0.15);
+    animation: particleDrift8 17s ease-in-out infinite;
+    animation-delay: -11s;
+  }
+
+  /* 7. Blinking terminal cursor */
+  .landing-empty__cursor-prompt {
+    animation: cursorFadeIn 0.6s ease-out 4.8s forwards;
+  }
+
+  .landing-empty__cursor-blink {
+    animation: cursorBlink 1.1s step-end 5.2s infinite;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE -- Mobile
+   ================================================================ */
+@media (max-width: 767px) {
+  .landing-empty__content {
+    padding: var(--space-4) var(--space-4);
+    max-width: 100%;
+  }
+
+  .landing-empty__drop-zone {
+    padding: 44px var(--space-4) var(--space-4);
+  }
+
+  .landing-empty__heading {
+    font-size: var(--text-xl);
+  }
+
+  .landing-empty__subtitle {
+    font-size: var(--text-sm);
+    max-width: 300px;
+  }
+
+  .landing-empty__pipeline {
+    opacity: 0.3;
+  }
+
+  .landing-empty__node-label {
+    display: none;
+  }
+
+  .landing-empty__cursor-prompt {
+    bottom: 5%;
+    left: 3%;
+    font-size: var(--text-lg);
+  }
+
+  .landing-empty__footer {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .landing-empty__tagline {
+    font-size: 9px;
+  }
+
+  .landing-empty__disc-ring {
+    display: none;
+  }
+
+  .app-header {
+    padding: 0 var(--space-4);
+  }
+
+  .landing-empty__hud {
+    top: 60px;
+    right: 12px;
+  }
+
+  .landing-empty__hud-line {
+    font-size: 8px;
+    letter-spacing: 0.12em;
+  }
+
+  /* Hide some trails on mobile for performance */
+  .light-trail--3,
+  .light-trail--4,
+  .light-trail--6 {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="landing-empty">
+
+  <!-- ============================================================
+       TRON LINE GRID -- full-page background
+       ============================================================ -->
+  <div class="landing-empty__tron-grid" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       LIGHT CYCLE TRAILS
+       6 trails: 4 cyan, 2 pink
+       Positioned on grid lines (multiples of 70px)
+       ============================================================ -->
+  <div class="landing-empty__trails" aria-hidden="true">
+    <!-- Trail 1: Cyan horizontal L->R at y=210 -->
+    <div class="light-trail light-trail--h light-trail--h-cyan-ltr light-trail--1"></div>
+    <!-- Trail 2: Cyan horizontal R->L at y=420 -->
+    <div class="light-trail light-trail--h light-trail--h-cyan-rtl light-trail--2"></div>
+    <!-- Trail 3: Cyan vertical T->B at x=280 -->
+    <div class="light-trail light-trail--v light-trail--v-cyan-ttb light-trail--3"></div>
+    <!-- Trail 4: Cyan horizontal L->R at y=560 -->
+    <div class="light-trail light-trail--h light-trail--h-cyan-ltr light-trail--4"></div>
+    <!-- Trail 5: Pink horizontal L->R at y=140 -->
+    <div class="light-trail light-trail--h light-trail--h-pink-ltr light-trail--5"></div>
+    <!-- Trail 6: Pink vertical T->B at x=840 -->
+    <div class="light-trail light-trail--v light-trail--v-pink-ttb light-trail--6"></div>
+  </div>
+
+  <!-- ============================================================
+       APP HEADER
+       ============================================================ -->
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">
+        <div class="app-header__logo">E</div>
+        <span class="app-header__name">Erika</span>
+      </a>
+    </div>
+    <div class="app-header__right">
+      <button class="btn btn--primary btn--sm">Upload</button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAIN -- SVG Pipeline + Content Overlay
+       ============================================================ -->
+  <main class="landing-empty__main">
+
+    <!-- System HUD Readout -->
+    <div class="landing-empty__hud" aria-hidden="true">
+      <div class="landing-empty__hud-line landing-empty__hud-line--1">SYS.GRID // ACTIVE</div>
+      <div class="landing-empty__hud-line landing-empty__hud-line--2">NODES // 48 ONLINE</div>
+      <div class="landing-empty__hud-line landing-empty__hud-line--3">PROTOCOL // ERIKA_V1</div>
+      <div class="landing-empty__hud-line landing-empty__hud-line--4">STATUS // AWAITING INPUT</div>
+    </div>
+
+    <!-- SVG Pipeline Backdrop -->
+    <svg class="landing-empty__pipeline"
+         viewBox="0 0 1280 560"
+         preserveAspectRatio="xMidYMid slice"
+         xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Decorative secondary paths -->
+      <path class="landing-empty__deco-path" d="M 100,90 C 180,70 240,110 320,90 S 460,50 560,85"
+            stroke="#00d4ff" data-target-opacity="0.07"/>
+      <path class="landing-empty__deco-path" d="M 700,470 C 780,450 840,490 920,470 S 1040,430 1140,460"
+            stroke="#ff4d6a" data-target-opacity="0.05"/>
+      <path class="landing-empty__deco-path" d="M 240,480 C 300,460 350,500 430,475"
+            stroke="#00d4ff" data-target-opacity="0.04"/>
+      <path class="landing-empty__deco-path" d="M 960,90 C 1020,75 1080,105 1160,85"
+            stroke="#ff4d6a" data-target-opacity="0.04"/>
+
+      <!-- Decorative anchor dots -->
+      <circle class="landing-empty__anchor-dot" cx="100" cy="90" r="1" stroke="#00d4ff" data-target-opacity="0.08"/>
+      <circle class="landing-empty__anchor-dot" cx="320" cy="90" r="1" stroke="#00d4ff" data-target-opacity="0.08"/>
+      <circle class="landing-empty__anchor-dot" cx="560" cy="85" r="1" stroke="#00d4ff" data-target-opacity="0.08"/>
+      <circle class="landing-empty__anchor-dot" cx="700" cy="470" r="1" stroke="#ff4d6a" data-target-opacity="0.06"/>
+      <circle class="landing-empty__anchor-dot" cx="920" cy="470" r="1" stroke="#ff4d6a" data-target-opacity="0.06"/>
+      <circle class="landing-empty__anchor-dot" cx="1140" cy="460" r="1" stroke="#ff4d6a" data-target-opacity="0.06"/>
+
+      <!-- MAIN PIPELINE -- S-curve light trail
+           Nodes at: 160,160 / 400,400 / 640,160 / 880,400 / 1120,160
+           NO separate energy flow element. Pipeline segments pulse after drawing. -->
+
+      <!-- Segment 1: record -> validate -->
+      <path class="landing-empty__path-segment landing-empty__path-segment--1"
+            d="M 160,160 C 240,100 280,440 400,400"/>
+
+      <!-- Segment 2: validate -> detect -->
+      <path class="landing-empty__path-segment landing-empty__path-segment--2"
+            d="M 400,400 C 480,380 540,100 640,160"/>
+
+      <!-- Segment 3: detect -> replay -->
+      <path class="landing-empty__path-segment landing-empty__path-segment--3"
+            d="M 640,160 C 720,200 780,440 880,400"/>
+
+      <!-- Segment 4: replay -> ready -->
+      <path class="landing-empty__path-segment landing-empty__path-segment--4"
+            d="M 880,400 C 960,370 1020,100 1120,160"/>
+
+      <!-- PIPELINE NODES -- 5 stages -->
+
+      <!-- Node 1: record (cyan) -->
+      <g>
+        <circle class="landing-empty__node-fill landing-empty__node-fill--cyan landing-empty__node-fill--n1"
+                cx="160" cy="160" r="4"/>
+        <circle class="landing-empty__node-ring landing-empty__node-ring--cyan landing-empty__node-ring--n1"
+                cx="160" cy="160" r="7"/>
+        <circle class="landing-empty__node-outer-ring landing-empty__node-outer-ring--n1"
+                cx="160" cy="160" r="12" stroke="#00d4ff" stroke-dasharray="3 3"/>
+        <text class="landing-empty__node-label landing-empty__node-label--n1"
+              x="160" y="185">record</text>
+      </g>
+
+      <!-- Node 2: validate (pink) -->
+      <g>
+        <circle class="landing-empty__node-fill landing-empty__node-fill--pink landing-empty__node-fill--n2"
+                cx="400" cy="400" r="4"/>
+        <circle class="landing-empty__node-ring landing-empty__node-ring--pink landing-empty__node-ring--n2"
+                cx="400" cy="400" r="7"/>
+        <circle class="landing-empty__node-outer-ring landing-empty__node-outer-ring--n2"
+                cx="400" cy="400" r="12" stroke="#ff4d6a" stroke-dasharray="3 3"/>
+        <text class="landing-empty__node-label landing-empty__node-label--n2"
+              x="400" y="425">validate</text>
+      </g>
+
+      <!-- Node 3: detect (cyan) -->
+      <g>
+        <circle class="landing-empty__node-fill landing-empty__node-fill--cyan landing-empty__node-fill--n3"
+                cx="640" cy="160" r="4"/>
+        <circle class="landing-empty__node-ring landing-empty__node-ring--cyan landing-empty__node-ring--n3"
+                cx="640" cy="160" r="7"/>
+        <circle class="landing-empty__node-outer-ring landing-empty__node-outer-ring--n3"
+                cx="640" cy="160" r="12" stroke="#00d4ff" stroke-dasharray="3 3"/>
+        <text class="landing-empty__node-label landing-empty__node-label--n3"
+              x="640" y="185">detect</text>
+      </g>
+
+      <!-- Node 4: replay (pink) -->
+      <g>
+        <circle class="landing-empty__node-fill landing-empty__node-fill--pink landing-empty__node-fill--n4"
+                cx="880" cy="400" r="4"/>
+        <circle class="landing-empty__node-ring landing-empty__node-ring--pink landing-empty__node-ring--n4"
+                cx="880" cy="400" r="7"/>
+        <circle class="landing-empty__node-outer-ring landing-empty__node-outer-ring--n4"
+                cx="880" cy="400" r="12" stroke="#ff4d6a" stroke-dasharray="3 3"/>
+        <text class="landing-empty__node-label landing-empty__node-label--n4"
+              x="880" y="425">replay</text>
+      </g>
+
+      <!-- Node 5: ready (cyan, final) -->
+      <g>
+        <circle class="landing-empty__node-fill landing-empty__node-fill--final landing-empty__node-fill--n5"
+                cx="1120" cy="160" r="5"/>
+        <circle class="landing-empty__node-ring landing-empty__node-ring--final landing-empty__node-ring--n5"
+                cx="1120" cy="160" r="9"/>
+        <circle class="landing-empty__node-outer-ring landing-empty__node-outer-ring--n5"
+                cx="1120" cy="160" r="15" stroke="#00d4ff" stroke-dasharray="4 4"/>
+        <text class="landing-empty__node-label landing-empty__node-label--n5"
+              x="1120" y="188">ready</text>
+      </g>
+    </svg>
+
+    <!-- Ambient data particles -->
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--1" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--2" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--3" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--4" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--5" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--6" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--7" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--8" aria-hidden="true"></div>
+
+    <!-- Blinking terminal cursor -->
+    <div class="landing-empty__cursor-prompt" aria-hidden="true">
+      <span class="landing-empty__cursor-chevron">&gt;</span><span class="landing-empty__cursor-blink">_</span>
+    </div>
+
+    <!-- Content overlay -->
+    <div class="landing-empty__content">
+      <div class="landing-empty__drop-zone"
+           tabindex="0"
+           role="button"
+           aria-label="Upload session files">
+
+        <!-- Terminal title bar -->
+        <div class="landing-empty__drop-zone-titlebar" aria-hidden="true">
+          <span class="landing-empty__titlebar-dot"></span>
+          <span class="landing-empty__titlebar-dot"></span>
+          <span class="landing-empty__titlebar-dot"></span>
+          <span class="landing-empty__titlebar-label">session.cast</span>
+        </div>
+
+        <!-- Corner brackets -->
+        <span class="landing-empty__corner landing-empty__corner--tl" aria-hidden="true"></span>
+        <span class="landing-empty__corner landing-empty__corner--tr" aria-hidden="true"></span>
+        <span class="landing-empty__corner landing-empty__corner--bl" aria-hidden="true"></span>
+        <span class="landing-empty__corner landing-empty__corner--br" aria-hidden="true"></span>
+
+        <!-- Subtle fine grid -->
+        <div class="landing-empty__grid-overlay" aria-hidden="true"></div>
+
+        <!-- Upload icon -->
+        <div class="landing-empty__upload-icon" style="position: relative;">
+          <div class="landing-empty__disc-ring landing-empty__disc-ring--1" aria-hidden="true"></div>
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor"
+               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 30v6h24v-6"/>
+            <path d="M24 10v18"/>
+            <path d="M16 18l8-8 8 8"/>
+          </svg>
+        </div>
+
+        <!-- Heading -->
+        <h1 class="landing-empty__heading">No sessions yet. Fix that.</h1>
+
+        <!-- Subtitle -->
+        <p class="landing-empty__subtitle">
+          Drop a <code>.cast</code> file here or click to browse
+          -- watch it unfold into something you can actually read.
+        </p>
+
+        <!-- CTA -->
+        <a href="#" class="landing-empty__cta">Browse Files</a>
+      </div>
+
+      <!-- AGR hint -->
+      <p class="landing-empty__hint">
+        Recording sessions? Use
+        <a href="https://github.com/thiscantbeserious/agent-session-recorder"
+           target="_blank" rel="noopener">AGR</a>
+        to capture them.
+      </p>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       FOOTER TAGLINE
+       ============================================================ -->
+  <footer class="landing-empty__footer">
+    <p class="landing-empty__tagline">
+      // the subagent deleted half your codebase again.<br>
+      // at least now you can learn from it.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>

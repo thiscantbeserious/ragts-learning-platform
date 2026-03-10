@@ -10,18 +10,18 @@
 <link rel="stylesheet" href="../styles/icons.css">
 <style>
 /* ================================================================
-   Landing Page — Populated State (sessions exist)
+   Landing Page — Populated State (Grid Gallery with Terminal Previews)
    Page-specific layout styles only. No token redefinitions.
    ================================================================ */
 
-/* Main content area */
+/* Main content area — wider than default container for grid */
 .landing {
-  max-width: var(--container-max);
+  max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-8) var(--container-padding);
 }
 
-/* Compact upload strip — horizontal drop zone above session list */
+/* Compact upload strip — horizontal drop zone above session grid */
 .landing__upload-strip {
   display: flex;
   align-items: center;
@@ -62,80 +62,409 @@
   border-radius: var(--radius-sm);
 }
 
-/* Toolbar: search + filters row */
+/* Toolbar: search + filters + count row */
 .landing__toolbar {
   display: flex;
   align-items: center;
   gap: var(--space-4);
   margin-bottom: var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-page);
+  padding-block: var(--space-3);
+  margin-top: calc(-1 * var(--space-3));
 }
 
 .landing__search {
-  flex: 1;
+  flex: 0 1 240px;
+  min-width: 140px;
 }
 
-/* Session list — vertical stack of cards */
-.landing__session-list {
+.landing__toolbar-right {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-/* Session card row layout — two-column: main info left, meta right */
-.landing__card-layout {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: var(--space-4);
-}
-
-/* Session card main info — left column */
-.landing__card-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  flex: 1;
   min-width: 0;
 }
 
-/* Top row: filename + badge inline */
-.landing__card-top {
+/* Session count label */
+.landing__session-count {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ================================================================
+   SESSION GRID — Responsive card grid
+   ================================================================ */
+.landing__session-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+/* ================================================================
+   GALLERY CARD — Terminal preview + metadata
+   ================================================================ */
+.landing__gallery-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid color-mix(in srgb, var(--border-default) 60%, transparent);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--easing-default);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.landing__gallery-card:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm), var(--glow-accent);
+}
+
+/* --- Terminal Preview Area --- */
+.landing__preview {
+  background: var(--terminal-bg);
+  padding: var(--space-2) var(--space-3);
+  min-height: 110px;
+  position: relative;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-default) 40%, transparent);
+}
+
+.landing__preview-titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1\.5);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-1\.5);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-default) 25%, transparent);
+}
+
+.landing__preview-dot {
+  width: var(--space-1\.5);
+  height: var(--space-1\.5);
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+  opacity: 0.5;
+}
+
+.landing__preview-title {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  letter-spacing: var(--tracking-wide);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing__preview-lines {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--leading-mono);
+  color: var(--terminal-text);
+  overflow: hidden;
+}
+
+.landing__preview-line {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landing__preview-prompt {
+  color: var(--accent-primary);
+}
+
+.landing__preview-cmd {
+  color: var(--text-primary);
+}
+
+.landing__preview-output {
+  color: var(--text-muted);
+}
+
+.landing__preview-comment {
+  color: var(--text-disabled);
+  font-style: italic;
+}
+
+.landing__preview-path {
+  color: var(--accent-secondary);
+}
+
+.landing__preview-flag {
+  color: var(--status-info);
+}
+
+.landing__preview-string {
+  color: var(--status-warning);
+}
+
+.landing__preview-success {
+  color: var(--status-success);
+}
+
+.landing__preview-error-text {
+  color: var(--status-error);
+}
+
+/* Fade-out at the bottom of preview */
+.landing__preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--space-6);
+  background: linear-gradient(to bottom, transparent, var(--terminal-bg));
+  pointer-events: none;
+}
+
+/* --- Card Body (below preview) --- */
+.landing__card-body {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.landing__card-filename {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.landing__card-meta {
   display: flex;
   align-items: center;
   gap: var(--space-3);
 }
 
-/* Right column: date + file size */
-.landing__card-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+.landing__card-meta-item {
+  display: inline-flex;
+  align-items: center;
   gap: var(--space-1);
-  flex-shrink: 0;
-}
-
-.landing__card-date {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-}
-
-.landing__card-size {
   font-size: var(--text-xs);
   color: var(--text-muted);
   letter-spacing: var(--tracking-wide);
 }
 
-/* Processing card — warning accent on border */
-.session-card--processing {
+.landing__card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-1\.5);
+  border-top: 1px solid color-mix(in srgb, var(--border-default) 30%, transparent);
+}
+
+.landing__card-date {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.landing__card-size {
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ================================================================
+   CARD STATE: PROCESSING
+   ================================================================ */
+.landing__gallery-card--processing {
   border-color: color-mix(in srgb, var(--status-warning) 25%, transparent);
 }
 
-/* Processing meta text */
-.landing__card-processing {
+.landing__gallery-card--processing .landing__preview {
+  position: relative;
+}
+
+.landing__preview-processing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  min-height: 90px;
+  color: var(--text-muted);
+}
+
+.landing__preview-processing-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Processing card meta */
+.landing__card-processing-meta {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--text-muted);
+}
+
+/* ================================================================
+   CARD STATE: FAILED
+   ================================================================ */
+.landing__gallery-card--failed {
+  border-color: color-mix(in srgb, var(--status-error) 20%, transparent);
+  opacity: 0.85;
+}
+
+.landing__gallery-card--failed:hover {
+  opacity: 1;
+  border-color: var(--status-error);
+  box-shadow: var(--shadow-sm), var(--glow-error);
+}
+
+.landing__preview-failed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 90px;
+  color: var(--status-error-dim);
+}
+
+.landing__preview-failed-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--status-error-dim);
+  letter-spacing: var(--tracking-wide);
+}
+
+.landing__card-error {
+  font-size: var(--text-xs);
+  color: var(--status-error-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ================================================================
+   STATUS BADGE OVERLAY (on card preview)
+   ================================================================ */
+.landing__card-status {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 2;
+}
+
+/* ================================================================
+   NO RESULTS STATE
+   ================================================================ */
+.landing__no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.landing__no-results-text {
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}
+
+.landing__no-results-action {
+  font-size: var(--text-sm);
+  color: var(--accent-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: color var(--duration-fast) var(--easing-default);
+}
+
+.landing__no-results-action:hover {
+  text-decoration: underline;
+}
+
+/* ================================================================
+   SKELETON GRID CARD
+   ================================================================ */
+.landing__skeleton-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.landing__skeleton-preview {
+  background: var(--terminal-bg);
+  padding: var(--space-3);
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.landing__skeleton-body {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.landing__skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-1\.5);
+  border-top: 1px solid color-mix(in srgb, var(--border-default) 30%, transparent);
+}
+
+/* Filter pill tinted variants */
+.landing__pill--processing {
+  border-color: color-mix(in srgb, var(--status-warning) 30%, var(--border-default));
+  color: var(--status-warning);
+}
+
+.landing__pill--processing.filter-pill--active {
+  border-color: var(--status-warning);
+  color: var(--status-warning);
+  background: var(--status-warning-subtle);
+}
+
+.landing__pill--failed {
+  border-color: color-mix(in srgb, var(--status-error) 30%, var(--border-default));
+  color: var(--status-error-dim);
+}
+
+.landing__pill--failed.filter-pill--active {
+  border-color: var(--status-error);
+  color: var(--status-error);
+  background: var(--status-error-subtle);
+}
+
+.landing__pill--ready.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
 }
 
 /* Toast stack — fixed bottom-right */
@@ -146,33 +475,78 @@
   z-index: 1000;
 }
 
+/* --- Reference section divider (design draft only) --- */
+.landing__ref-divider {
+  margin: var(--space-12) 0 var(--space-8);
+  border: none;
+  border-top: 1px dashed var(--border-default);
+}
+
+.landing__ref-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: var(--space-4);
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+
+/* Tablet: 2 columns */
+@media (max-width: 1024px) {
+  .landing__session-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
 @media (max-width: 767px) {
   .landing {
     padding: var(--space-6) var(--space-4);
   }
 
+  .landing__session-grid {
+    grid-template-columns: 1fr;
+  }
+
   .landing__toolbar {
     flex-direction: column;
     gap: var(--space-3);
+    align-items: stretch;
   }
 
-  .landing__card-layout {
+  .landing__search {
+    flex: none;
+    width: 100%;
+  }
+
+  .landing__toolbar-right {
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
+    align-items: stretch;
+    gap: var(--space-3);
   }
 
-  .landing__card-right {
-    flex-direction: row;
-    gap: var(--space-3);
-    align-items: center;
+  .landing__session-count {
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .landing__upload-strip {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .landing__preview {
+    min-height: 90px;
   }
 }
 </style>
 </head>
 <body>
 
-<!-- App Header — full: brand, nav, upload button, avatar -->
+<!-- App Header -->
 <header class="app-header">
   <div class="app-header__left">
     <a href="#" class="app-header__brand">
@@ -194,14 +568,14 @@
 
 <main class="landing">
   <!-- Compact upload strip -->
-  <div class="landing__upload-strip">
+  <div class="landing__upload-strip" tabindex="0" role="button" aria-label="Upload session files">
     <span class="landing__upload-strip-icon icon icon--md icon-upload"></span>
     <span class="landing__upload-strip-text">
-      Drop <code>.cast</code> files here to upload, or use the button above
+      Drop <code>.cast</code> files here or click to upload
     </span>
   </div>
 
-  <!-- Toolbar: Search (left) + Filter Pills (right) -->
+  <!-- Toolbar: Search + Filter Pills + Session Count -->
   <div class="landing__toolbar">
     <div class="landing__search search-bar">
       <span class="search-bar__icon">
@@ -209,196 +583,390 @@
       </span>
       <input type="text" class="search-bar__input" placeholder="Search sessions...">
     </div>
-    <div class="filter-pills">
-      <button class="filter-pill filter-pill--active">All</button>
-      <button class="filter-pill">Claude</button>
-      <button class="filter-pill">Claude Code</button>
-      <button class="filter-pill">Gemini</button>
-      <button class="filter-pill">Codex</button>
+    <div class="landing__toolbar-right">
+      <div class="filter-pills">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill landing__pill--processing">Processing</button>
+        <button class="filter-pill landing__pill--ready">Ready</button>
+        <button class="filter-pill landing__pill--failed">Failed</button>
+      </div>
+      <span class="landing__session-count">8 sessions</span>
     </div>
   </div>
 
-  <!-- Session List -->
-  <div class="landing__session-list">
+  <!-- Session Grid -->
+  <div class="landing__session-grid">
 
-    <!-- Card 1: Hover state shown via --hover modifier -->
-    <a href="#" class="session-card session-card--hover">
-      <div class="landing__card-layout">
-        <div class="landing__card-main">
-          <div class="landing__card-top">
-            <span class="session-card__filename">refactor-auth-middleware.cast</span>
-            <span class="badge badge--secondary">
-              <span class="badge__dot"></span>
-              Claude Code
-            </span>
-          </div>
-          <div class="session-card__meta">
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-tag"></span>
-              7 markers
-            </span>
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-sections"></span>
-              23 sections
-            </span>
-          </div>
+    <!-- Card 1: Ready — hover state shown -->
+    <a href="#" class="landing__gallery-card" style="border-color: var(--accent-primary); transform: translateY(-2px); box-shadow: var(--shadow-sm), var(--glow-accent);">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">refactor-auth-middleware</span>
         </div>
-        <div class="landing__card-right">
-          <span class="landing__card-date">2 hours ago</span>
+        <div class="landing__preview-lines">
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">npm run test</span> <span class="landing__preview-flag">--coverage</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">PASS  src/auth/middleware.test.ts</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-success">  12 passing</span> <span class="landing__preview-output">(2.3s)</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">git commit</span> <span class="landing__preview-flag">-m</span> <span class="landing__preview-string">"refactor: extract auth"</span></div>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">refactor-auth-middleware.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-tag"></span>
+            7 markers
+          </span>
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-sections"></span>
+            23 sections
+          </span>
+        </div>
+        <div class="landing__card-footer">
+          <span class="landing__card-date">just now</span>
           <span class="landing__card-size">342 KB</span>
         </div>
       </div>
     </a>
 
-    <!-- Card 2: Claude (regular state) -->
-    <a href="#" class="session-card">
-      <div class="landing__card-layout">
-        <div class="landing__card-main">
-          <div class="landing__card-top">
-            <span class="session-card__filename">debug-pipeline-timeout.cast</span>
-            <span class="badge badge--accent">
-              <span class="badge__dot"></span>
-              Claude
-            </span>
-          </div>
-          <div class="session-card__meta">
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-tag"></span>
-              3 markers
-            </span>
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-sections"></span>
-              15 sections
-            </span>
-          </div>
+    <!-- Card 2: Ready -->
+    <a href="#" class="landing__gallery-card">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">debug-pipeline-timeout</span>
         </div>
-        <div class="landing__card-right">
-          <span class="landing__card-date">yesterday</span>
+        <div class="landing__preview-lines">
+          <div class="landing__preview-line"><span class="landing__preview-prompt">~ </span><span class="landing__preview-cmd">kubectl logs</span> <span class="landing__preview-flag">-f</span> <span class="landing__preview-path">deploy/api-gateway</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-error-text">E0310 14:23:01 timeout waiting for connection</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-prompt">~ </span><span class="landing__preview-cmd">curl</span> <span class="landing__preview-flag">-sS</span> <span class="landing__preview-string">http://localhost:8080/health</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-success">{"status":"ok","latency":"12ms"}</span></div>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">debug-pipeline-timeout.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-tag"></span>
+            3 markers
+          </span>
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-sections"></span>
+            15 sections
+          </span>
+        </div>
+        <div class="landing__card-footer">
+          <span class="landing__card-date">2 hours ago</span>
           <span class="landing__card-size">187 KB</span>
         </div>
       </div>
     </a>
 
-    <!-- Card 3: Gemini CLI -->
-    <a href="#" class="session-card">
-      <div class="landing__card-layout">
-        <div class="landing__card-main">
-          <div class="landing__card-top">
-            <span class="session-card__filename">gemini-api-integration.cast</span>
-            <span class="badge badge--info">
-              <span class="badge__dot"></span>
-              Gemini CLI
-            </span>
-          </div>
-          <div class="session-card__meta">
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-tag"></span>
-              5 markers
-            </span>
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-sections"></span>
-              31 sections
-            </span>
-          </div>
+    <!-- Card 3: Ready -->
+    <a href="#" class="landing__gallery-card">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">api-integration-session</span>
         </div>
-        <div class="landing__card-right">
-          <span class="landing__card-date">3 days ago</span>
+        <div class="landing__preview-lines">
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">python</span> <span class="landing__preview-path">scripts/sync_api.py</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">Syncing endpoints... </span><span class="landing__preview-success">done</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">  POST /api/v2/sessions  </span><span class="landing__preview-success">200</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">  GET  /api/v2/health    </span><span class="landing__preview-success">200</span></div>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">api-integration-session.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-tag"></span>
+            5 markers
+          </span>
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-sections"></span>
+            31 sections
+          </span>
+        </div>
+        <div class="landing__card-footer">
+          <span class="landing__card-date">yesterday</span>
           <span class="landing__card-size">521 KB</span>
         </div>
       </div>
     </a>
 
-    <!-- Card 4: Processing state -->
-    <a href="#" class="session-card session-card--processing">
-      <div class="landing__card-layout">
-        <div class="landing__card-main">
-          <div class="landing__card-top">
-            <span class="session-card__filename">setup-ci-pipeline.cast</span>
-            <span class="badge badge--warning">
-              <span class="spinner spinner--sm spinner--secondary"></span>
-              Processing
-            </span>
-          </div>
-          <div class="session-card__meta">
-            <span class="landing__card-processing">
-              <span class="dot-spinner dot-spinner--muted">
-                <span class="dot-spinner__dot"></span>
-                <span class="dot-spinner__dot"></span>
-                <span class="dot-spinner__dot"></span>
-              </span>
-              Detecting sections...
-            </span>
-          </div>
+    <!-- Card 4: Processing -->
+    <a href="#" class="landing__gallery-card landing__gallery-card--processing">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">setup-ci-pipeline</span>
         </div>
-        <div class="landing__card-right">
+        <div class="landing__preview-processing">
+          <span class="spinner spinner--sm spinner--secondary"></span>
+          <span class="landing__preview-processing-label">Analyzing session...</span>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">setup-ci-pipeline.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-processing-meta">
+            <span class="dot-spinner dot-spinner--muted">
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+              <span class="dot-spinner__dot"></span>
+            </span>
+            Detecting sections...
+          </span>
+        </div>
+        <div class="landing__card-footer">
           <span class="landing__card-date">just now</span>
           <span class="landing__card-size">89 KB</span>
         </div>
       </div>
-    </a>
-
-    <!-- Card 5: Codex -->
-    <a href="#" class="session-card">
-      <div class="landing__card-layout">
-        <div class="landing__card-main">
-          <div class="landing__card-top">
-            <span class="session-card__filename">codex-data-pipeline.cast</span>
-            <span class="badge badge--warning">
-              <span class="badge__dot"></span>
-              Codex
-            </span>
-          </div>
-          <div class="session-card__meta">
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-tag"></span>
-              2 markers
-            </span>
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-sections"></span>
-              8 sections
-            </span>
-          </div>
-        </div>
-        <div class="landing__card-right">
-          <span class="landing__card-date">Feb 25</span>
-          <span class="landing__card-size">98 KB</span>
-        </div>
+      <div class="landing__card-status">
+        <span class="badge badge--warning">
+          <span class="spinner spinner--sm spinner--secondary"></span>
+          Processing
+        </span>
       </div>
     </a>
 
-    <!-- Card 6: Claude Code (second) -->
-    <a href="#" class="session-card">
-      <div class="landing__card-layout">
-        <div class="landing__card-main">
-          <div class="landing__card-top">
-            <span class="session-card__filename">lennart-working-session-result-1.cast</span>
-            <span class="badge badge--secondary">
-              <span class="badge__dot"></span>
-              Claude Code
-            </span>
-          </div>
-          <div class="session-card__meta">
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-tag"></span>
-              12 markers
-            </span>
-            <span class="session-card__meta-item">
-              <span class="icon icon--xs icon-sections"></span>
-              47 sections
-            </span>
-          </div>
+    <!-- Card 5: Failed -->
+    <a href="#" class="landing__gallery-card landing__gallery-card--failed">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">corrupted-recording</span>
         </div>
-        <div class="landing__card-right">
+        <div class="landing__preview-failed">
+          <span class="icon icon--lg icon-error-circle"></span>
+          <span class="landing__preview-failed-label">Parse failed</span>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">corrupted-recording.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-error">
+            <span class="icon icon--xs icon-warning"></span>
+            Invalid format
+          </span>
+        </div>
+        <div class="landing__card-footer">
+          <span class="landing__card-date">3 days ago</span>
+          <span class="landing__card-size">12 KB</span>
+        </div>
+      </div>
+      <div class="landing__card-status">
+        <span class="badge badge--error">
+          <span class="icon icon--xs icon-error-circle"></span>
+          Failed
+        </span>
+      </div>
+    </a>
+
+    <!-- Card 6: Ready -->
+    <a href="#" class="landing__gallery-card">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">lennart-working-session</span>
+        </div>
+        <div class="landing__preview-lines">
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">cargo build</span> <span class="landing__preview-flag">--release</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">   Compiling ragts v0.3.1</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-success">    Finished</span><span class="landing__preview-output"> release target(s) in 42.1s</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">./target/release/ragts</span> <span class="landing__preview-flag">serve</span></div>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">lennart-working-session-result-1.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-tag"></span>
+            12 markers
+          </span>
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-sections"></span>
+            47 sections
+          </span>
+        </div>
+        <div class="landing__card-footer">
           <span class="landing__card-date">Feb 24</span>
           <span class="landing__card-size">1.2 MB</span>
         </div>
       </div>
     </a>
 
+    <!-- Card 7: Ready -->
+    <a href="#" class="landing__gallery-card">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">database-migration</span>
+        </div>
+        <div class="landing__preview-lines">
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">npx prisma migrate</span> <span class="landing__preview-flag">dev</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">Applying migration `20260308_add_events`</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-success">Migration applied successfully.</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-prompt">$ </span><span class="landing__preview-cmd">npx prisma generate</span></div>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">database-migration-v3.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-tag"></span>
+            4 markers
+          </span>
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-sections"></span>
+            18 sections
+          </span>
+        </div>
+        <div class="landing__card-footer">
+          <span class="landing__card-date">Mar 8</span>
+          <span class="landing__card-size">156 KB</span>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 8: Ready -->
+    <a href="#" class="landing__gallery-card">
+      <div class="landing__preview">
+        <div class="landing__preview-titlebar">
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-dot"></span>
+          <span class="landing__preview-title">deploy-staging-v2</span>
+        </div>
+        <div class="landing__preview-lines">
+          <div class="landing__preview-line"><span class="landing__preview-prompt">~ </span><span class="landing__preview-cmd">docker compose</span> <span class="landing__preview-flag">up -d</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-output">[+] Running 4/4</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-success"> Container api-1      Started</span></div>
+          <div class="landing__preview-line"><span class="landing__preview-success"> Container worker-1   Started</span></div>
+        </div>
+      </div>
+      <div class="landing__card-body">
+        <span class="landing__card-filename">deploy-staging-v2.cast</span>
+        <div class="landing__card-meta">
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-tag"></span>
+            9 markers
+          </span>
+          <span class="landing__card-meta-item">
+            <span class="icon icon--xs icon-sections"></span>
+            28 sections
+          </span>
+        </div>
+        <div class="landing__card-footer">
+          <span class="landing__card-date">Mar 6</span>
+          <span class="landing__card-size">298 KB</span>
+        </div>
+      </div>
+    </a>
+
   </div>
+
+  <!-- ================================================================
+       REFERENCE STATES
+       ================================================================ -->
+
+  <hr class="landing__ref-divider">
+  <div class="landing__ref-label">Skeleton loading state (shown during initial fetch)</div>
+
+  <!-- Skeleton grid cards -->
+  <div class="landing__session-grid">
+    <div class="landing__skeleton-card">
+      <div class="landing__skeleton-preview">
+        <div class="skeleton skeleton--text" style="width: 60%;"></div>
+        <div class="skeleton skeleton--text" style="width: 80%;"></div>
+        <div class="skeleton skeleton--text" style="width: 45%;"></div>
+        <div class="skeleton skeleton--text" style="width: 70%;"></div>
+      </div>
+      <div class="landing__skeleton-body">
+        <div class="skeleton skeleton--text" style="width: 75%;"></div>
+        <div style="display: flex; gap: var(--space-3);">
+          <div class="skeleton skeleton--text-sm" style="width: 70px;"></div>
+          <div class="skeleton skeleton--text-sm" style="width: 80px;"></div>
+        </div>
+        <div class="landing__skeleton-footer">
+          <div class="skeleton skeleton--text-sm" style="width: 60px;"></div>
+          <div class="skeleton skeleton--text-sm" style="width: 45px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing__skeleton-card">
+      <div class="landing__skeleton-preview">
+        <div class="skeleton skeleton--text" style="width: 50%;"></div>
+        <div class="skeleton skeleton--text" style="width: 90%;"></div>
+        <div class="skeleton skeleton--text" style="width: 65%;"></div>
+        <div class="skeleton skeleton--text" style="width: 55%;"></div>
+      </div>
+      <div class="landing__skeleton-body">
+        <div class="skeleton skeleton--text" style="width: 85%;"></div>
+        <div style="display: flex; gap: var(--space-3);">
+          <div class="skeleton skeleton--text-sm" style="width: 65px;"></div>
+          <div class="skeleton skeleton--text-sm" style="width: 90px;"></div>
+        </div>
+        <div class="landing__skeleton-footer">
+          <div class="skeleton skeleton--text-sm" style="width: 55px;"></div>
+          <div class="skeleton skeleton--text-sm" style="width: 50px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing__skeleton-card">
+      <div class="landing__skeleton-preview">
+        <div class="skeleton skeleton--text" style="width: 70%;"></div>
+        <div class="skeleton skeleton--text" style="width: 55%;"></div>
+        <div class="skeleton skeleton--text" style="width: 85%;"></div>
+        <div class="skeleton skeleton--text" style="width: 40%;"></div>
+      </div>
+      <div class="landing__skeleton-body">
+        <div class="skeleton skeleton--text" style="width: 65%;"></div>
+        <div style="display: flex; gap: var(--space-3);">
+          <div class="skeleton skeleton--text-sm" style="width: 75px;"></div>
+          <div class="skeleton skeleton--text-sm" style="width: 85px;"></div>
+        </div>
+        <div class="landing__skeleton-footer">
+          <div class="skeleton skeleton--text-sm" style="width: 70px;"></div>
+          <div class="skeleton skeleton--text-sm" style="width: 40px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="landing__ref-divider">
+  <div class="landing__ref-label">No-results state (search/filter returns nothing)</div>
+
+  <div class="landing__session-grid">
+    <div class="landing__no-results">
+      <span class="icon icon--lg icon-search" style="color: var(--text-disabled);"></span>
+      <span class="landing__no-results-text">No sessions match your search</span>
+      <button class="landing__no-results-action">Clear filters</button>
+    </div>
+  </div>
+
 </main>
 
-<!-- Toast stack — success notification -->
+<!-- Toast stack -->
 <div class="landing__toast-stack toast-stack">
   <div class="toast toast--success">
     <div class="toast__icon">

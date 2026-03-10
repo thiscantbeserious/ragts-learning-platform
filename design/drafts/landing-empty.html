@@ -11,7 +11,7 @@
 <style>
 /* ================================================================
    Landing Page — Empty State (first-run, no sessions)
-   Page-specific layout styles only. No token redefinitions.
+   Page-specific layout styles + CSS animations.
    ================================================================ */
 
 /* Full-height layout below header */
@@ -25,10 +25,114 @@
   text-align: center;
 }
 
-/* Override upload zone max width for centered hero treatment */
+/* Hero upload zone — wider for empty state */
 .landing-empty .upload-zone {
-  max-width: 520px;
+  max-width: 560px;
   width: 100%;
+  cursor: pointer;
+  position: relative;
+}
+
+/* ================================================================
+   TERMINAL PREVIEW — Animated typing
+   ================================================================ */
+
+.landing-empty__preview-placeholder {
+  background: var(--terminal-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
+  text-align: left;
+  border: 1px solid color-mix(in srgb, var(--border-default) 30%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ambient glow behind the terminal */
+.landing-empty__preview-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: var(--radius-xl);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Titlebar */
+.landing-empty__preview-titlebar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1\.5);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-default) 20%, transparent);
+}
+
+.landing-empty__preview-dot {
+  width: var(--space-1\.5);
+  height: var(--space-1\.5);
+  border-radius: var(--radius-full);
+  background: var(--border-strong);
+  opacity: 0.4;
+}
+
+.landing-empty__preview-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  letter-spacing: var(--tracking-wide);
+}
+
+/* Terminal lines container */
+.landing-empty__preview-lines {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--leading-mono);
+  color: var(--terminal-text);
+  min-height: 6.4em; /* Reserve space for 4 lines + prompt */
+}
+
+/* Each typed line */
+.landing-empty__preview-line {
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  opacity: 0;
+}
+
+.landing-empty__preview-prompt {
+  color: var(--accent-primary-dim);
+}
+
+.landing-empty__preview-output {
+  color: var(--text-muted);
+}
+
+.landing-empty__preview-arrow {
+  color: var(--accent-secondary);
+}
+
+.landing-empty__preview-highlight {
+  color: var(--accent-primary);
+}
+
+/* Blinking cursor */
+.landing-empty__cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  background: var(--accent-primary);
+  vertical-align: text-bottom;
+  opacity: 0;
+}
+
+/* ================================================================
+   UPLOAD ZONE — Breathing border + floating icon
+   ================================================================ */
+
+.landing-empty .upload-zone__icon {
+  margin-bottom: var(--space-3);
 }
 
 /* AGR link styling */
@@ -36,6 +140,7 @@
   font-size: var(--text-sm);
   color: var(--text-muted);
   margin-top: var(--space-4);
+  opacity: 0;
 }
 
 .landing-empty__hint a {
@@ -58,7 +163,7 @@
   border-radius: var(--radius-sm);
 }
 
-/* Personality tagline at bottom */
+/* Personality tagline */
 .landing-empty__tagline {
   margin-top: var(--space-8);
   font-family: var(--font-mono);
@@ -67,8 +172,255 @@
   max-width: 400px;
   line-height: var(--leading-relaxed);
   letter-spacing: var(--tracking-wide);
+  opacity: 0;
 }
 
+/* ================================================================
+   DRAG-OVER STATE — Dramatic light-up
+   ================================================================ */
+
+.landing-empty .upload-zone--drag-over {
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb, var(--accent-primary) 8%, var(--bg-surface));
+  box-shadow:
+    0 0 30px color-mix(in srgb, var(--accent-primary) 20%, transparent),
+    0 0 60px color-mix(in srgb, var(--accent-primary) 10%, transparent),
+    inset 0 0 30px color-mix(in srgb, var(--accent-primary) 5%, transparent);
+}
+
+.landing-empty .upload-zone--drag-over .landing-empty__preview-placeholder {
+  border-color: var(--accent-primary-dim);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+}
+
+.landing-empty .upload-zone--drag-over .upload-zone__icon {
+  color: var(--accent-primary);
+}
+
+.landing-empty .upload-zone--drag-over .upload-zone__title {
+  color: var(--accent-primary);
+}
+
+/* ================================================================
+   ANIMATIONS — @keyframes
+   ================================================================ */
+
+/* --- Typing animation: reveal text width via steps --- */
+@keyframes typewriter-line-1 {
+  from { width: 0; }
+  to   { width: 25ch; } /* $ agr record my-session */
+}
+@keyframes typewriter-line-2 {
+  from { width: 0; }
+  to   { width: 24ch; } /* Recording started... */
+}
+@keyframes typewriter-line-3 {
+  from { width: 0; }
+  to   { width: 22ch; } /* Watching for markers */
+}
+@keyframes typewriter-line-4 {
+  from { width: 0; }
+  to   { width: 35ch; } /* Session saved -> my-session.cast */
+}
+@keyframes typewriter-line-5 {
+  from { width: 0; }
+  to   { width: 2ch; } /* $ _ */
+}
+
+/* --- Fade in (used for revealing lines) --- */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* --- Slide up + fade in (entrance) --- */
+@keyframes entrance-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Cursor blink --- */
+@keyframes cursor-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* --- Border pulse (breathing dashed border) --- */
+@keyframes border-pulse {
+  0%, 100% { border-color: color-mix(in srgb, var(--border-default) 60%, transparent); }
+  50%      { border-color: color-mix(in srgb, var(--border-default) 30%, transparent); }
+}
+
+/* --- Upload icon float / bob --- */
+@keyframes icon-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* --- Ambient glow pulse --- */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 40px color-mix(in srgb, var(--accent-primary) 8%, transparent),
+                0 0 80px color-mix(in srgb, var(--accent-primary) 4%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 60px color-mix(in srgb, var(--accent-primary) 14%, transparent),
+                0 0 120px color-mix(in srgb, var(--accent-primary) 7%, transparent);
+  }
+}
+
+/* --- Drag-over glow intensify --- */
+@keyframes drag-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 30px color-mix(in srgb, var(--accent-primary) 20%, transparent),
+      0 0 60px color-mix(in srgb, var(--accent-primary) 10%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 50px color-mix(in srgb, var(--accent-primary) 30%, transparent),
+      0 0 100px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  }
+}
+
+/* ================================================================
+   ANIMATION APPLICATION — prefers-reduced-motion gated
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* --- Terminal typing animation --- */
+
+  /* Line 1: $ agr record my-session (25ch, starts at 0.6s) */
+  .landing-empty__preview-line:nth-child(1) {
+    animation:
+      fade-in 0.01s 0.6s forwards,
+      typewriter-line-1 1.2s steps(25) 0.6s forwards;
+  }
+
+  /* Line 2: Recording started... (24ch, starts after line 1) */
+  .landing-empty__preview-line:nth-child(2) {
+    animation:
+      fade-in 0.01s 2.1s forwards,
+      typewriter-line-2 0.6s steps(24) 2.1s forwards;
+  }
+
+  /* Line 3: Watching for markers (22ch, starts after line 2) */
+  .landing-empty__preview-line:nth-child(3) {
+    animation:
+      fade-in 0.01s 2.9s forwards,
+      typewriter-line-3 0.5s steps(22) 2.9s forwards;
+  }
+
+  /* Line 4: Session saved (35ch, starts after line 3) */
+  .landing-empty__preview-line:nth-child(4) {
+    animation:
+      fade-in 0.01s 3.6s forwards,
+      typewriter-line-4 0.8s steps(35) 3.6s forwards;
+  }
+
+  /* Line 5: $ _ (2ch, starts after line 4) */
+  .landing-empty__preview-line:nth-child(5) {
+    animation:
+      fade-in 0.01s 4.7s forwards,
+      typewriter-line-5 0.15s steps(2) 4.7s forwards;
+  }
+
+  /* Cursor: appears at end of typing, then blinks forever */
+  .landing-empty__cursor {
+    animation:
+      fade-in 0.01s 4.85s forwards,
+      cursor-blink 0.8s step-end 4.85s infinite;
+  }
+
+  /* --- Upload zone breathing border --- */
+  .landing-empty .upload-zone {
+    animation: border-pulse 4s ease-in-out infinite;
+  }
+
+  /* --- Upload icon float --- */
+  .landing-empty .upload-zone__icon .icon {
+    animation: icon-float 3s ease-in-out infinite;
+  }
+
+  /* --- Ambient glow behind terminal --- */
+  .landing-empty__preview-glow {
+    animation: glow-pulse 4s ease-in-out infinite;
+  }
+
+  /* --- Staggered entrance animations --- */
+
+  /* Terminal appears first */
+  .landing-empty__preview-placeholder {
+    opacity: 0;
+    animation: entrance-slide-up 0.6s var(--easing-default) 0.1s forwards;
+  }
+
+  /* Upload heading enters second */
+  .landing-empty .upload-zone__title {
+    opacity: 0;
+    animation: entrance-slide-up 0.5s var(--easing-default) 0.3s forwards;
+  }
+
+  /* Subtitle enters third */
+  .landing-empty .upload-zone__subtitle {
+    opacity: 0;
+    animation: entrance-slide-up 0.5s var(--easing-default) 0.5s forwards;
+  }
+
+  /* Browse link enters with subtitle */
+  .landing-empty .upload-zone__browse {
+    opacity: 0;
+    animation: entrance-slide-up 0.5s var(--easing-default) 0.6s forwards;
+  }
+
+  /* Upload icon enters */
+  .landing-empty .upload-zone__icon {
+    opacity: 0;
+    animation: entrance-slide-up 0.4s var(--easing-default) 0.2s forwards;
+  }
+
+  /* AGR hint */
+  .landing-empty__hint {
+    animation: entrance-slide-up 0.5s var(--easing-default) 0.8s forwards;
+  }
+
+  /* Personality tagline — fades in last, like an afterthought */
+  .landing-empty__tagline {
+    animation: entrance-slide-up 0.8s var(--easing-default) 5.2s forwards;
+  }
+
+  /* --- Drag-over: pulsing glow --- */
+  .landing-empty .upload-zone--drag-over {
+    animation: drag-glow-pulse 1.5s ease-in-out infinite;
+  }
+}
+
+/* ================================================================
+   REDUCED MOTION — show everything immediately, no animation
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .landing-empty__preview-line {
+    width: auto !important;
+    opacity: 0.7 !important;
+  }
+  .landing-empty__cursor {
+    opacity: 1 !important;
+  }
+  .landing-empty__hint,
+  .landing-empty__tagline {
+    opacity: 1 !important;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE — Mobile adjustments
+   ================================================================ */
 @media (max-width: 767px) {
   .landing-empty {
     padding: var(--space-6) var(--space-4);
@@ -77,6 +429,18 @@
 
   .landing-empty .upload-zone {
     padding: var(--space-8) var(--space-4);
+  }
+
+  .landing-empty__preview-placeholder {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .landing-empty__preview-lines {
+    font-size: 0.5625rem; /* Slightly smaller on mobile to prevent overflow */
+  }
+
+  .landing-empty__tagline {
+    max-width: 300px;
   }
 }
 </style>
@@ -100,18 +464,39 @@
   </div>
 </header>
 
-<!-- Main: centered empty state with upload zone -->
+<!-- Main: centered empty state with animated terminal + upload zone -->
 <main class="landing-empty">
-  <div class="upload-zone">
+  <div class="upload-zone" tabindex="0" role="button" aria-label="Upload session files">
+
+    <!-- Ambient glow layer (behind terminal) -->
+    <div class="landing-empty__preview-glow" aria-hidden="true"></div>
+
+    <!-- Terminal preview — animated typing -->
+    <div class="landing-empty__preview-placeholder">
+      <div class="landing-empty__preview-titlebar">
+        <span class="landing-empty__preview-dot"></span>
+        <span class="landing-empty__preview-dot"></span>
+        <span class="landing-empty__preview-dot"></span>
+        <span class="landing-empty__preview-title">my-session.cast</span>
+      </div>
+      <div class="landing-empty__preview-lines">
+        <div class="landing-empty__preview-line"><span class="landing-empty__preview-prompt">$ </span>agr record my-session</div>
+        <div class="landing-empty__preview-line"><span class="landing-empty__preview-arrow">&#9656; </span><span class="landing-empty__preview-output">Recording started...</span></div>
+        <div class="landing-empty__preview-line"><span class="landing-empty__preview-arrow">&#9656; </span><span class="landing-empty__preview-output">Watching for markers</span></div>
+        <div class="landing-empty__preview-line"><span class="landing-empty__preview-arrow">&#9656; </span><span class="landing-empty__preview-output">Session saved </span><span class="landing-empty__preview-highlight">&rarr; my-session.cast</span></div>
+        <div class="landing-empty__preview-line"><span class="landing-empty__preview-prompt">$ </span><span class="landing-empty__cursor"></span></div>
+      </div>
+    </div>
+
     <div class="upload-zone__icon">
       <span class="icon icon--xl icon-upload" style="color: var(--text-muted);"></span>
     </div>
     <div class="upload-zone__title">No sessions yet. Fix that.</div>
     <div class="upload-zone__subtitle">
-      Drop a <span class="landing-empty__code">.cast</span> file here and watch it unfold
-      into something you can actually read.
+      Drop a <span class="landing-empty__code">.cast</span> file here or click to browse
+      -- watch it unfold into something you can actually read.
     </div>
-    <span class="upload-zone__browse">Or click to browse files</span>
+    <span class="upload-zone__browse">Click to browse files</span>
   </div>
 
   <p class="landing-empty__hint">

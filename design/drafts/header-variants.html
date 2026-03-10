@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Header Variants - Erika</title>
+<link rel="stylesheet" href="../styles/layout.css">
+<link rel="stylesheet" href="../styles/page.css">
+<link rel="stylesheet" href="../styles/components.css">
+<link rel="stylesheet" href="../styles/icons.css">
+<style>
+/* ================================================================
+   Header Variants Showcase — 3 distinct header designs
+   ================================================================ */
+
+.showcase {
+  min-height: 100vh;
+  padding: var(--space-8) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+}
+
+/* Section wrapper for each variant */
+.variant-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.variant-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  padding: 0 var(--space-6);
+}
+
+.variant-wrapper {
+  position: relative;
+}
+
+/* Fake page content for glass demo */
+.fake-content {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fake-card {
+  height: 64px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+}
+
+.fake-card--wide {
+  height: 48px;
+  width: 80%;
+}
+
+.fake-card--narrow {
+  height: 40px;
+  width: 60%;
+}
+
+/* ================================================================
+   VARIANT A: SUBTLE PREMIUM
+   ================================================================ */
+
+.header-a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  background: var(--bg-surface);
+  height: var(--header-height);
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient bottom line — the signature detail */
+.header-a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00ff9f, #ff6b2b);
+  opacity: 0.6;
+}
+
+.header-a__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.header-a__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.header-a__logo {
+  width: var(--space-6);
+  height: var(--space-6);
+  background: var(--accent-primary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-inverse);
+  transition: box-shadow var(--duration-normal) var(--easing-default);
+}
+
+.header-a__brand:hover .header-a__logo {
+  box-shadow: 0 0 12px rgba(0, 255, 159, 0.4);
+}
+
+.header-a__name {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.header-a__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.header-a__nav-link {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.header-a__nav-link:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.header-a__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+
+/* ================================================================
+   VARIANT B: GLASS HEADER
+   ================================================================ */
+
+.header-b-wrapper {
+  position: relative;
+  min-height: 240px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--bg-page);
+}
+
+.header-b {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  height: var(--header-height);
+  background: rgba(30, 30, 36, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 255, 159, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 255, 159, 0.1);
+}
+
+.header-b__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.header-b__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.header-b__logo {
+  width: var(--space-6);
+  height: var(--space-6);
+  background: var(--accent-primary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-inverse);
+}
+
+.header-b__name {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.header-b__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.header-b__nav-link {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.header-b__nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.header-b__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Content behind the glass header to demonstrate blur */
+.header-b-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: var(--space-3) var(--space-6);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.header-b-content__card {
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+}
+
+.header-b-content__card--accent {
+  border-left: 3px solid var(--accent-primary);
+}
+
+.header-b-content__card--orange {
+  border-left: 3px solid #ff6b2b;
+}
+
+.header-b-content__text {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  padding-top: var(--space-2);
+}
+
+/* ================================================================
+   VARIANT C: STATEMENT HEADER
+   ================================================================ */
+
+.header-c {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  background: var(--bg-surface);
+  height: var(--header-height);
+  position: relative;
+  border-bottom: 2px solid #ff6b2b;
+}
+
+.header-c__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.header-c__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.header-c__logo {
+  width: var(--space-6);
+  height: var(--space-6);
+  background: var(--accent-primary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--text-inverse);
+}
+
+/* Logo pulse animation — runs once on load */
+@keyframes logoPulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .header-c__logo {
+    animation: logoPulse 0.6s ease-out 0.3s;
+    box-shadow: 0 0 10px rgba(0, 255, 159, 0.3);
+  }
+}
+
+/* Gradient brand text */
+.header-c__name {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  background: linear-gradient(135deg, #00ff9f, #ff6b2b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-c__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.header-c__nav-link {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.header-c__nav-link:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.header-c__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Filled green upload button for Variant C */
+.btn--filled-green {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  border: 1px solid transparent;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+.btn--filled-green:hover {
+  background: var(--accent-primary-hover);
+  box-shadow: 0 0 16px rgba(0, 255, 159, 0.3);
+}
+</style>
+</head>
+<body>
+<div class="showcase">
+
+  <!-- ============================================================
+       VARIANT A: SUBTLE PREMIUM
+       ============================================================ -->
+  <div class="variant-section">
+    <span class="variant-label">Variant A: Subtle Premium</span>
+    <div class="variant-wrapper">
+      <header class="header-a">
+        <div class="header-a__left">
+          <a href="#" class="header-a__brand">
+            <div class="header-a__logo">E</div>
+            <span class="header-a__name">Erika</span>
+          </a>
+          <nav class="header-a__nav">
+            <a href="#" class="header-a__nav-link">Sessions</a>
+          </nav>
+        </div>
+        <div class="header-a__right">
+          <button class="btn btn--primary btn--sm">
+            <span class="icon icon--sm icon-upload"></span>
+            Upload
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       VARIANT B: GLASS HEADER
+       ============================================================ -->
+  <div class="variant-section">
+    <span class="variant-label">Variant B: Glass Header</span>
+    <div class="variant-wrapper header-b-wrapper">
+      <!-- Content behind the header to show blur effect -->
+      <div class="header-b-content">
+        <div class="header-b-content__text">Recent Sessions</div>
+        <div class="header-b-content__card header-b-content__card--accent"></div>
+        <div class="header-b-content__card header-b-content__card--orange"></div>
+        <div class="header-b-content__card"></div>
+      </div>
+
+      <header class="header-b">
+        <div class="header-b__left">
+          <a href="#" class="header-b__brand">
+            <div class="header-b__logo">E</div>
+            <span class="header-b__name">Erika</span>
+          </a>
+          <nav class="header-b__nav">
+            <a href="#" class="header-b__nav-link">Sessions</a>
+          </nav>
+        </div>
+        <div class="header-b__right">
+          <button class="btn btn--primary btn--sm">
+            <span class="icon icon--sm icon-upload"></span>
+            Upload
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       VARIANT C: STATEMENT HEADER
+       ============================================================ -->
+  <div class="variant-section">
+    <span class="variant-label">Variant C: Statement Header</span>
+    <div class="variant-wrapper">
+      <header class="header-c">
+        <div class="header-c__left">
+          <a href="#" class="header-c__brand">
+            <div class="header-c__logo">E</div>
+            <span class="header-c__name">Erika</span>
+          </a>
+          <nav class="header-c__nav">
+            <a href="#" class="header-c__nav-link">Sessions</a>
+          </nav>
+        </div>
+        <div class="header-c__right">
+          <button class="btn--filled-green">
+            <span class="icon icon--sm icon-upload"></span>
+            Upload
+          </button>
+        </div>
+      </header>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme 2: Void — Erika</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   Theme 2: "Void" — Color Comparison Mockup
+   Static version for visual comparison. No animations.
+   ================================================================ */
+
+:root {
+  /* --- Void Theme Colors --- */
+  --bg-page: #121215;
+  --bg-surface: #19191c;
+  --bg-elevated: #202023;
+  --accent-primary: #a78bfa;
+  --accent-primary-hover: #bfa6ff;
+  --accent-primary-subtle: rgba(167, 139, 250, 0.07);
+  --accent-secondary: #f472b6;
+  --accent-secondary-hover: #f9a8d4;
+  --text-primary: #f1f1f7;
+  --text-secondary: #d3d3d9;
+  --text-muted: #aaaab0;
+  --text-disabled: #55555a;
+  --border-default: #202023;
+  --border-strong: #2a2a2d;
+  --terminal-bg: #0e0e11;
+
+  /* --- Typography --- */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --text-xs: 0.625rem;
+  --text-sm: 0.6875rem;
+  --text-base: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --tracking-tight: -0.025em;
+  --tracking-wide: 0.06em;
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* --- Spacing --- */
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* --- Shape --- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-full: 9999px;
+
+  /* --- Animation --- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --easing-default: ease-out;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+
+.landing-empty {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-6);
+  background: var(--bg-surface);
+  position: relative;
+  border-bottom: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #a78bfa, #f472b6);
+  opacity: 0.6;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-header__logo {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--accent-primary);
+  color: var(--bg-page);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+}
+
+.app-header__name {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: var(--space-px) solid var(--accent-primary);
+  color: var(--accent-primary);
+  background: transparent;
+}
+
+/* ================================================================
+   MAIN
+   ================================================================ */
+
+.landing-empty__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ================================================================
+   SVG PIPELINE
+   ================================================================ */
+
+.landing-empty__pipeline {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-empty__path-segment {
+  fill: none;
+  stroke: #a78bfa;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.35));
+}
+
+.landing-empty__deco-path {
+  fill: none;
+  stroke-width: 0.5;
+  stroke-dasharray: 3 8;
+}
+
+.landing-empty__node-ring {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.landing-empty__node-ring--violet {
+  stroke: #a78bfa;
+  filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.5));
+}
+
+.landing-empty__node-ring--pink {
+  stroke: #f472b6;
+  filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.5));
+}
+
+.landing-empty__node-ring--final {
+  stroke: #a78bfa;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 14px rgba(167, 139, 250, 0.6))
+          drop-shadow(0 0 30px rgba(167, 139, 250, 0.25));
+}
+
+.landing-empty__node-fill--violet {
+  fill: rgba(167, 139, 250, 0.2);
+}
+
+.landing-empty__node-fill--pink {
+  fill: rgba(244, 114, 182, 0.2);
+}
+
+.landing-empty__node-fill--final {
+  fill: rgba(167, 139, 250, 0.35);
+}
+
+.landing-empty__node-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  fill: var(--text-muted);
+  text-anchor: middle;
+  opacity: 0.35;
+}
+
+.landing-empty__anchor-dot {
+  fill: none;
+  stroke-width: 0.5;
+}
+
+/* Grid dot pattern */
+.landing-empty__grid-dots {
+  opacity: 1;
+}
+
+/* ================================================================
+   CONTENT OVERLAY
+   ================================================================ */
+
+.landing-empty__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-8);
+  max-width: 560px;
+}
+
+.landing-empty__drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 40px 40px var(--space-8);
+  border: 1px solid rgba(167, 139, 250, 0.08);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  background: rgba(8, 8, 10, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
+              0 4px 12px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.landing-empty__upload-icon {
+  width: 44px;
+  height: 44px;
+  color: var(--accent-primary);
+}
+
+.landing-empty__upload-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.landing-empty__heading {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+}
+
+.landing-empty__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: var(--leading-normal);
+  max-width: 400px;
+}
+
+.landing-empty__subtitle code {
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--accent-primary-subtle);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.landing-empty__cta {
+  color: var(--accent-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: var(--space-1);
+}
+
+.landing-empty__hint {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.landing-empty__hint a {
+  color: var(--accent-secondary);
+  text-decoration: none;
+}
+
+/* ================================================================
+   CURSOR PROMPT
+   ================================================================ */
+
+.landing-empty__cursor-prompt {
+  position: absolute;
+  bottom: 8%;
+  left: 4%;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: #a78bfa;
+  user-select: none;
+  pointer-events: none;
+}
+
+.landing-empty__cursor-chevron {
+  opacity: 0.6;
+}
+
+.landing-empty__cursor-blink {
+  opacity: 0.7;
+}
+
+/* ================================================================
+   AMBIENT PARTICLES
+   ================================================================ */
+
+.landing-empty__ambient-particle {
+  position: absolute;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing-empty__ambient-particle--1 {
+  top: 12%; left: 8%;
+  width: 4px; height: 4px;
+  background: #a78bfa;
+  box-shadow: 0 0 6px rgba(167, 139, 250, 0.7);
+  opacity: 0.6;
+}
+
+.landing-empty__ambient-particle--2 {
+  top: 18%; right: 12%;
+  width: 5px; height: 5px;
+  background: #f472b6;
+  box-shadow: 0 0 8px rgba(244, 114, 182, 0.7);
+  opacity: 0.5;
+}
+
+.landing-empty__ambient-particle--3 {
+  top: 40%; left: 5%;
+  width: 3px; height: 3px;
+  background: #a78bfa;
+  box-shadow: 0 0 5px rgba(167, 139, 250, 0.6);
+  opacity: 0.4;
+}
+
+.landing-empty__ambient-particle--4 {
+  top: 45%; right: 7%;
+  width: 4px; height: 4px;
+  background: #f472b6;
+  box-shadow: 0 0 6px rgba(244, 114, 182, 0.6);
+  opacity: 0.5;
+}
+
+.landing-empty__ambient-particle--5 {
+  bottom: 22%; left: 15%;
+  width: 6px; height: 6px;
+  background: #a78bfa;
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.8);
+  opacity: 0.6;
+}
+
+.landing-empty__ambient-particle--6 {
+  bottom: 18%; right: 18%;
+  width: 3px; height: 3px;
+  background: #f472b6;
+  box-shadow: 0 0 5px rgba(244, 114, 182, 0.5);
+  opacity: 0.4;
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+
+.landing-empty__footer {
+  padding: var(--space-4) var(--space-6);
+  text-align: center;
+}
+
+.landing-empty__tagline {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  line-height: var(--leading-relaxed);
+  letter-spacing: var(--tracking-wide);
+}
+</style>
+</head>
+<body>
+<div class="landing-empty">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">
+        <div class="app-header__logo">E</div>
+        <span class="app-header__name">Erika</span>
+      </a>
+    </div>
+    <div class="app-header__right">
+      <button class="btn">Upload</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="landing-empty__main">
+
+    <!-- SVG Pipeline -->
+    <svg class="landing-empty__pipeline"
+         viewBox="0 0 1280 560"
+         preserveAspectRatio="xMidYMid slice"
+         xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Grid dot pattern -->
+      <defs>
+        <pattern id="dotGrid" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+          <circle cx="16" cy="16" r="0.8" fill="#a78bfa" opacity="0.07"/>
+        </pattern>
+      </defs>
+      <rect class="landing-empty__grid-dots" width="100%" height="100%" fill="url(#dotGrid)"/>
+
+      <!-- Decorative secondary paths -->
+      <path class="landing-empty__deco-path" d="M 100,90 C 180,70 240,110 320,90 S 460,50 560,85"
+            stroke="#a78bfa" opacity="0.1"/>
+      <path class="landing-empty__deco-path" d="M 700,470 C 780,450 840,490 920,470 S 1040,430 1140,460"
+            stroke="#f472b6" opacity="0.08"/>
+      <path class="landing-empty__deco-path" d="M 240,480 C 300,460 350,500 430,475"
+            stroke="#a78bfa" opacity="0.06"/>
+      <path class="landing-empty__deco-path" d="M 960,90 C 1020,75 1080,105 1160,85"
+            stroke="#f472b6" opacity="0.06"/>
+
+      <!-- Decorative anchor dots -->
+      <circle class="landing-empty__anchor-dot" cx="100" cy="90" r="1.5" stroke="#a78bfa" opacity="0.12"/>
+      <circle class="landing-empty__anchor-dot" cx="320" cy="90" r="1.5" stroke="#a78bfa" opacity="0.12"/>
+      <circle class="landing-empty__anchor-dot" cx="560" cy="85" r="1.5" stroke="#a78bfa" opacity="0.12"/>
+      <circle class="landing-empty__anchor-dot" cx="700" cy="470" r="1.5" stroke="#f472b6" opacity="0.09"/>
+      <circle class="landing-empty__anchor-dot" cx="920" cy="470" r="1.5" stroke="#f472b6" opacity="0.09"/>
+      <circle class="landing-empty__anchor-dot" cx="1140" cy="460" r="1.5" stroke="#f472b6" opacity="0.09"/>
+
+      <!-- Pipeline S-curve segments -->
+      <path class="landing-empty__path-segment"
+            d="M 160,160 C 240,100 280,440 400,400"/>
+      <path class="landing-empty__path-segment"
+            d="M 400,400 C 480,380 540,100 640,160"/>
+      <path class="landing-empty__path-segment"
+            d="M 640,160 C 720,200 780,440 880,400"/>
+      <path class="landing-empty__path-segment"
+            d="M 880,400 C 960,370 1020,100 1120,160"/>
+
+      <!-- Nodes -->
+      <!-- Node 1: record (violet) -->
+      <circle class="landing-empty__node-fill--violet" cx="160" cy="160" r="5"/>
+      <circle class="landing-empty__node-ring landing-empty__node-ring--violet" cx="160" cy="160" r="8"/>
+      <text class="landing-empty__node-label" x="160" y="183">record</text>
+
+      <!-- Node 2: validate (pink) -->
+      <circle class="landing-empty__node-fill--pink" cx="400" cy="400" r="5"/>
+      <circle class="landing-empty__node-ring landing-empty__node-ring--pink" cx="400" cy="400" r="8"/>
+      <text class="landing-empty__node-label" x="400" y="423">validate</text>
+
+      <!-- Node 3: detect (violet) -->
+      <circle class="landing-empty__node-fill--violet" cx="640" cy="160" r="5"/>
+      <circle class="landing-empty__node-ring landing-empty__node-ring--violet" cx="640" cy="160" r="8"/>
+      <text class="landing-empty__node-label" x="640" y="183">detect</text>
+
+      <!-- Node 4: replay (pink) -->
+      <circle class="landing-empty__node-fill--pink" cx="880" cy="400" r="5"/>
+      <circle class="landing-empty__node-ring landing-empty__node-ring--pink" cx="880" cy="400" r="8"/>
+      <text class="landing-empty__node-label" x="880" y="423">replay</text>
+
+      <!-- Node 5: ready (violet, final glow) -->
+      <circle class="landing-empty__node-fill--final" cx="1120" cy="160" r="6"/>
+      <circle class="landing-empty__node-ring landing-empty__node-ring--final" cx="1120" cy="160" r="10"/>
+      <text class="landing-empty__node-label" x="1120" y="185">ready</text>
+    </svg>
+
+    <!-- Ambient particles -->
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--1" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--2" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--3" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--4" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--5" aria-hidden="true"></div>
+    <div class="landing-empty__ambient-particle landing-empty__ambient-particle--6" aria-hidden="true"></div>
+
+    <!-- Cursor prompt -->
+    <div class="landing-empty__cursor-prompt" aria-hidden="true">
+      <span class="landing-empty__cursor-chevron">&gt;</span><span class="landing-empty__cursor-blink">_</span>
+    </div>
+
+    <!-- Content overlay -->
+    <div class="landing-empty__content">
+      <div class="landing-empty__drop-zone"
+           tabindex="0"
+           role="button"
+           aria-label="Upload session files">
+
+        <div class="landing-empty__upload-icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor"
+               stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 30v6h24v-6"/>
+            <path d="M24 10v18"/>
+            <path d="M16 18l8-8 8 8"/>
+          </svg>
+        </div>
+
+        <h1 class="landing-empty__heading">No sessions yet. Fix that.</h1>
+
+        <p class="landing-empty__subtitle">
+          Drop a <code>.cast</code> file here or click to browse
+          — watch it unfold into something you can actually read.
+        </p>
+
+        <a href="#" class="landing-empty__cta">Click to browse files</a>
+      </div>
+
+      <p class="landing-empty__hint">
+        Recording sessions? Use
+        <a href="https://github.com/thiscantbeserious/agent-session-recorder"
+           target="_blank" rel="noopener">AGR</a>
+        to capture them.
+      </p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="landing-empty__footer">
+    <p class="landing-empty__tagline">
+      // the subagent deleted half your codebase again.<br>
+      // at least now you can learn from it.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>

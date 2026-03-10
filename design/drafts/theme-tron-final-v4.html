@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme: TRON Final v4 - Erika</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   Theme: TRON Final v4
+   Canvas-based grid, pipeline dots, and light cycle riders.
+   HTML/CSS portal, header, HUD, footer layered above.
+   ================================================================ */
+
+:root {
+  /* --- Palette --- */
+  --bg-page: #1a1a2e;
+  --bg-surface: #212136;
+  --bg-elevated: #28283e;
+  --bg-drop: #141428;
+  --accent-primary: #00d4ff;
+  --accent-primary-hover: #33ddff;
+  --accent-primary-subtle: rgba(0, 212, 255, 0.08);
+  --accent-primary-glow: rgba(0, 212, 255, 0.4);
+  --accent-primary-glow-strong: rgba(0, 212, 255, 0.7);
+  --accent-secondary: #ff4d6a;
+  --accent-secondary-hover: #ff6b83;
+  --accent-secondary-subtle: rgba(255, 77, 106, 0.08);
+  --accent-secondary-glow: rgba(255, 77, 106, 0.35);
+  --text-primary: #f1f1f7;
+  --text-secondary: #d3d4d9;
+  --text-muted: #aaaab0;
+  --text-disabled: #55556a;
+  --border-default: #28283e;
+  --border-strong: #323349;
+  --terminal-bg: #12122a;
+
+  /* --- Grid --- */
+  --grid-size: 70px;
+  --grid-color: rgba(0, 212, 255, 0.06);
+
+  /* --- Typography --- */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --text-xs: 0.625rem;
+  --text-sm: 0.6875rem;
+  --text-base: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* --- Spacing --- */
+  --space-px: 1px;
+  --space-0_5: 2px;
+  --space-1: 4px;
+  --space-1_5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* --- Shape --- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* --- Animation --- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-default: ease-out;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(to bottom right, #1a1a2e 30%, #3a1a2e);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ================================================================
+   CANVAS -- full-viewport, behind all HTML content
+   ================================================================ */
+
+#tron-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ================================================================
+   FULL PAGE LAYOUT
+   ================================================================ */
+
+.landing {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  position: relative;
+  z-index: 10;
+}
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  max-height: 71px;
+  height: 71px;
+  background: rgba(33, 33, 54, 0.32);
+  position: relative;
+  border-bottom: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+/* Gradient bottom line */
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--accent-primary) 20%,
+    var(--accent-primary) 50%,
+    var(--accent-secondary) 80%,
+    transparent 100%
+  );
+  opacity: 0.8;
+  box-shadow: 0 0 12px var(--accent-primary-glow),
+              0 0 24px rgba(0, 212, 255, 0.2);
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+}
+
+.header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+.header__logo {
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: #fff;
+  position: relative;
+  transition: filter var(--duration-normal) var(--easing-default);
+}
+
+.header__logo-hex {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.header__logo-letter {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  font-size: var(--text-lg);
+}
+
+.header__brand:hover .header__logo {
+  filter: brightness(1.15);
+}
+
+.header__name {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 900;
+  color: var(--text-primary);
+  opacity: 0.6;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+  letter-spacing: 0.04em;
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0_5) var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  border: 1px solid transparent;
+  background: transparent;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.btn--primary {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: rgba(0, 212, 255, 0.12);
+  box-shadow: 0 0 12px var(--accent-primary-glow),
+              inset 0 0 12px rgba(0, 212, 255, 0.06);
+}
+
+/* ================================================================
+   MAIN AREA
+   ================================================================ */
+
+.main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ================================================================
+   SYSTEM HUD READOUT -- top-right
+   ================================================================ */
+
+.hud {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.hud__line {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-primary);
+  opacity: 0;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ================================================================
+   CONTENT OVERLAY
+   ================================================================ */
+
+.content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-8);
+  max-width: 560px;
+}
+
+/* ================================================================
+   DROP ZONE -- v3 "Portal" with TRON treatment
+   ================================================================ */
+
+.portal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 490px; /* 7 * 70px grid */
+  padding: 52px 44px 44px;
+  cursor: pointer;
+  border-radius: 0;
+  background: var(--bg-drop);
+  border: none;
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.3),
+              inset 0 0 8px rgba(0, 212, 255, 0.1);
+  overflow: hidden;
+  opacity: 0;
+  transition: transform var(--duration-normal) var(--easing-default),
+              box-shadow var(--duration-normal) var(--easing-default),
+              border-color var(--duration-normal) var(--easing-default);
+}
+
+.portal:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.4),
+              0 0 30px rgba(0, 212, 255, 0.1),
+              inset 0 0 12px rgba(0, 212, 255, 0.12);
+}
+
+.portal:focus-visible {
+  outline: 1px solid var(--accent-primary);
+  outline-offset: 4px;
+}
+
+/* Corner brackets */
+.portal__corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.portal__corner::before,
+.portal__corner::after {
+  content: '';
+  position: absolute;
+  background: var(--accent-primary);
+  opacity: 0.45;
+  box-shadow: 0 0 6px var(--accent-primary-glow);
+}
+
+.portal__corner::before { width: 20px; height: 1px; }
+.portal__corner::after  { width: 1px; height: 20px; }
+
+.portal__corner--tl { top: 6px; left: 6px; }
+.portal__corner--tl::before { top: 0; left: 0; }
+.portal__corner--tl::after  { top: 0; left: 0; }
+
+.portal__corner--tr { top: 6px; right: 6px; }
+.portal__corner--tr::before { top: 0; right: 0; }
+.portal__corner--tr::after  { top: 0; right: 0; }
+
+.portal__corner--bl { bottom: 6px; left: 6px; }
+.portal__corner--bl::before { bottom: 0; left: 0; }
+.portal__corner--bl::after  { bottom: 0; left: 0; }
+
+.portal__corner--br { bottom: 6px; right: 6px; }
+.portal__corner--br::before { bottom: 0; right: 0; }
+.portal__corner--br::after  { bottom: 0; right: 0; }
+
+/* Status line at top */
+.portal__status {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-secondary), transparent);
+  border-radius: 0 0 2px 2px;
+  opacity: 0;
+}
+
+/* Icon wrap with rotating rings */
+.portal__icon-wrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  z-index: 2;
+}
+
+/* Concentric rings */
+.portal__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  pointer-events: none;
+}
+
+.portal__ring--outer {
+  inset: -12px;
+  border-color: rgba(0, 212, 255, 0.18);
+  border-top-color: rgba(0, 212, 255, 0.5);
+  border-right-color: rgba(0, 212, 255, 0.3);
+}
+
+.portal__ring--mid {
+  inset: -6px;
+  border-color: rgba(0, 212, 255, 0.1);
+  border-bottom-color: rgba(255, 77, 106, 0.35);
+  border-left-color: rgba(255, 77, 106, 0.2);
+}
+
+.portal__ring--inner {
+  inset: -1px;
+  border-color: rgba(0, 212, 255, 0.12);
+}
+
+.portal__icon {
+  width: 36px;
+  height: 36px;
+  color: var(--accent-primary);
+  filter: drop-shadow(0 0 8px var(--accent-primary-glow));
+  position: relative;
+  z-index: 2;
+}
+
+.portal__icon svg { width: 100%; height: 100%; }
+
+.portal__heading {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: var(--space-3);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.portal__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 380px;
+  margin-bottom: var(--space-5);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.portal__subtitle code {
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--accent-primary-subtle);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.portal__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--accent-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-mono);
+  text-decoration: none;
+  cursor: pointer;
+  padding: 8px 24px;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: var(--radius-full);
+  background: rgba(0, 212, 255, 0.04);
+  transition: all var(--duration-fast) var(--easing-default);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.portal__cta:hover {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.45);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.12),
+              0 0 40px rgba(0, 212, 255, 0.04);
+  color: var(--accent-primary-hover);
+}
+
+.portal__label {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-disabled);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+/* ================================================================
+   AGR HINT
+   ================================================================ */
+
+.hint {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.hint a {
+  color: var(--accent-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--easing-default);
+}
+
+.hint a:hover { border-bottom-color: var(--accent-secondary); }
+
+/* Animated dashed border */
+.portal__border {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.portal__border rect {
+  fill: none;
+  stroke: rgba(0, 212, 255, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 8 6;
+}
+
+@keyframes dashRotate {
+  to { stroke-dashoffset: -56; }
+}
+
+/* cursor is drawn on canvas */
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+
+.footer {
+  padding: var(--space-4) var(--space-6);
+  text-align: center;
+  opacity: 0;
+  position: relative;
+  z-index: 5;
+}
+
+.footer__tagline {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   KEYFRAMES
+   ================================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUpFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes portalReveal {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes cornerReveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes discSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes discSpinReverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@keyframes iconBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+@keyframes statusGlow {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes portalPulse {
+  0%, 100% { box-shadow: 0 0 80px rgba(0, 212, 255, 0.03), inset 0 0 50px rgba(0, 212, 255, 0.01); border-color: rgba(0, 212, 255, 0.18); }
+  50%      { box-shadow: 0 0 120px rgba(0, 212, 255, 0.07), inset 0 0 80px rgba(0, 212, 255, 0.03); border-color: rgba(0, 212, 255, 0.28); }
+}
+
+@keyframes cornerPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.7; }
+}
+
+@keyframes hudFadeIn {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 0.35; transform: translateX(0); }
+}
+
+@keyframes cursorBlink {
+  0%, 49.9% { opacity: 0.6; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .portal { opacity: 1 !important; }
+  .portal__corner { opacity: 0.5 !important; }
+  .portal__status { opacity: 0.4 !important; }
+  .portal__icon-wrap { opacity: 1 !important; }
+  .portal__ring { animation: none !important; }
+  .portal__heading { opacity: 1 !important; }
+  .portal__subtitle { opacity: 1 !important; }
+  .portal__cta { opacity: 1 !important; }
+  .portal__label { opacity: 1 !important; }
+  .hint { opacity: 1 !important; }
+  .footer { opacity: 1 !important; }
+  .hud__line { opacity: 0.35 !important; }
+  /* cursor drawn on canvas */
+}
+
+/* ================================================================
+   MOTION-ALLOWED ANIMATIONS (HTML/CSS elements only)
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* HUD readout */
+  .hud__line--1 { animation: hudFadeIn 0.5s ease-out 0.8s forwards; }
+  .hud__line--2 { animation: hudFadeIn 0.5s ease-out 1.2s forwards; }
+  .hud__line--3 { animation: hudFadeIn 0.5s ease-out 1.6s forwards; }
+  .hud__line--4 { animation: hudFadeIn 0.5s ease-out 2.0s forwards; }
+
+  /* Portal entrance */
+  .portal {
+    animation: portalReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
+  }
+
+  .portal__corner {
+    animation: cornerReveal 0.4s ease-out 2.2s forwards,
+               cornerPulse 3s ease-in-out 4s infinite;
+  }
+  .portal__corner--tl { animation-delay: 2.2s, 4s; }
+  .portal__corner--tr { animation-delay: 2.4s, 4.3s; }
+  .portal__corner--bl { animation-delay: 2.6s, 4.6s; }
+  .portal__corner--br { animation-delay: 2.8s, 4.9s; }
+
+  .portal__status {
+    animation: fadeIn 0.5s ease-out 2.2s forwards,
+               statusGlow 2.5s ease-in-out 3.5s infinite;
+  }
+
+  .portal__icon-wrap {
+    animation: slideUpFadeIn 0.5s ease-out 2.0s forwards;
+  }
+
+  .portal__icon {
+    animation: iconBob 4s ease-in-out 4s infinite;
+  }
+
+  .portal__ring--outer {
+    animation: discSpin 14s linear infinite;
+  }
+
+  .portal__ring--mid {
+    animation: discSpinReverse 10s linear infinite;
+  }
+
+  .portal__heading {
+    animation: slideUpFadeIn 0.5s ease-out 2.5s forwards;
+  }
+
+  .portal__subtitle {
+    animation: slideUpFadeIn 0.5s ease-out 2.8s forwards;
+  }
+
+  .portal__cta {
+    animation: slideUpFadeIn 0.4s ease-out 3.1s forwards;
+  }
+
+  .portal__label {
+    animation: fadeIn 0.5s ease-out 3.3s forwards;
+  }
+
+  .portal__border rect {
+    animation: dashRotate 4s linear infinite;
+  }
+
+  .hint {
+    animation: fadeIn 0.5s ease-out 3.5s forwards;
+  }
+
+  .footer {
+    animation: fadeIn 0.8s ease-out 4.5s forwards;
+  }
+
+  /* cursor drawn on canvas */
+}
+
+/* ================================================================
+   RESPONSIVE -- Mobile
+   ================================================================ */
+
+@media (max-width: 767px) {
+  .content {
+    padding: var(--space-4);
+    max-width: 100%;
+  }
+
+  .portal {
+    width: 100%;
+    max-width: 360px;
+    padding: 40px var(--space-4) 36px;
+  }
+
+  .portal__heading {
+    font-size: var(--text-xl);
+  }
+
+  .portal__subtitle {
+    font-size: var(--text-sm);
+    max-width: 280px;
+  }
+
+  .portal__icon-wrap {
+    width: 44px;
+    height: 44px;
+    margin-bottom: var(--space-4);
+  }
+
+  .portal__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .footer {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .footer__tagline {
+    font-size: 9px;
+  }
+
+  .header {
+    padding: 0 var(--space-4);
+  }
+
+  .hud {
+    top: 12px;
+    right: 12px;
+  }
+
+  .hud__line {
+    font-size: 8px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     CANVAS -- grid, pipeline dots, light cycle riders
+     ================================================================ -->
+<canvas id="tron-canvas" aria-hidden="true"></canvas>
+
+<div class="landing">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header__left">
+      <a href="#" class="header__brand">
+        <div class="header__logo">
+          <svg class="header__logo-hex" viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="hex-grad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#0066ff"/>
+                <stop offset="60%" stop-color="#8833ff"/>
+                <stop offset="100%" stop-color="#ff3355"/>
+              </linearGradient>
+              <linearGradient id="hex-shine" x1="0.3" y1="0" x2="0.7" y2="1">
+                <stop offset="0%" stop-color="rgba(255,255,255,0.25)"/>
+                <stop offset="50%" stop-color="rgba(255,255,255,0)"/>
+                <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
+              </linearGradient>
+              <clipPath id="hex-clip">
+                <polygon points="18,2 32,10 32,26 18,34 4,26 4,10"/>
+              </clipPath>
+            </defs>
+            <polygon points="18,1 33,9.5 33,26.5 18,35 3,26.5 3,9.5"
+                     fill="url(#hex-grad)" stroke="#0a0a1a" stroke-width="1.5"/>
+            <polygon points="18,1 33,9.5 33,26.5 18,35 3,26.5 3,9.5"
+                     fill="url(#hex-shine)"/>
+          </svg>
+          <span class="header__logo-letter">E</span>
+        </div>
+        <span class="header__name">E.R.I.K.A.</span>
+      </a>
+    </div>
+    <div class="header__right">
+      <button class="btn btn--primary">Upload</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- System HUD Readout -->
+    <div class="hud" aria-hidden="true">
+      <span class="hud__line hud__line--1">SYS.GRID // ACTIVE</span>
+      <span class="hud__line hud__line--2">NODES // 48 ONLINE</span>
+      <span class="hud__line hud__line--3">PROTOCOL // ERIKA_V1</span>
+      <span class="hud__line hud__line--4">STATUS // AWAITING INPUT</span>
+    </div>
+
+    <!-- Content overlay -->
+    <div class="content">
+      <div class="portal"
+           tabindex="0"
+           role="button"
+           aria-label="Upload session files">
+
+        <!-- Animated dashed border -->
+        <svg class="portal__border" aria-hidden="true">
+          <rect class="portal__border-rect" x="0.5" y="0.5"/>
+        </svg>
+
+        <!-- Corner brackets -->
+        <span class="portal__corner portal__corner--tl" aria-hidden="true"></span>
+        <span class="portal__corner portal__corner--tr" aria-hidden="true"></span>
+        <span class="portal__corner portal__corner--bl" aria-hidden="true"></span>
+        <span class="portal__corner portal__corner--br" aria-hidden="true"></span>
+
+        <!-- Status bar -->
+        <div class="portal__status" aria-hidden="true"></div>
+
+        <!-- Icon with concentric rotating rings -->
+        <div class="portal__icon-wrap">
+          <div class="portal__ring portal__ring--outer" aria-hidden="true"></div>
+          <div class="portal__ring portal__ring--mid" aria-hidden="true"></div>
+          <div class="portal__ring portal__ring--inner" aria-hidden="true"></div>
+          <div class="portal__icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor"
+                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 30v6h24v-6"/>
+              <path d="M24 10v18"/>
+              <path d="M16 18l8-8 8 8"/>
+            </svg>
+          </div>
+        </div>
+
+        <h1 class="portal__heading">No sessions yet. Fix that.</h1>
+
+        <p class="portal__subtitle">
+          Drop a <code>.cast</code> file here or click to browse
+          -- watch it unfold into something you can actually read.
+        </p>
+
+        <a href="#" class="portal__cta">Browse Files</a>
+
+        <span class="portal__label" aria-hidden="true">drag & drop enabled</span>
+      </div>
+
+      <p class="hint">
+        Recording sessions? Use
+        <a href="https://github.com/thiscantbeserious/agent-session-recorder"
+           target="_blank" rel="noopener">AGR</a>
+        to capture them.
+      </p>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p class="footer__tagline">
+      // the subagent deleted half your codebase again.<br>
+      // at least now you can learn from it.
+    </p>
+  </footer>
+
+</div>
+
+<!-- ================================================================
+     CANVAS SCRIPT -- Grid, Pipeline Dots, Light Cycle Riders
+     All rendered on a single <canvas> with 2D context.
+     Uses devicePixelRatio for retina crispness.
+     ================================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  var canvas = document.getElementById('tron-canvas');
+  var ctx = canvas.getContext('2d');
+  var GRID = 70;
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // --- Colors ---
+  var CYAN = { r: 0, g: 212, b: 255 };
+  var PINK = { r: 255, g: 77, b: 106 };
+
+  function rgba(c, a) {
+    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
+  }
+
+  // --- Retina support ---
+  var W, H, dpr;
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // --- Pipeline node positions (snapped to grid intersections) ---
+  function getNodes() {
+    var cols = Math.floor(W / GRID);
+    var rows = Math.floor(H / GRID);
+    var pad = 1;
+    // Push dots toward corners — further out
+    var cLeft  = Math.max(pad, Math.floor(cols * 0.04));
+    var cRight = Math.min(cols - pad, Math.ceil(cols * 0.96));
+    var rUp    = Math.max(pad, Math.floor(rows * 0.08)) + 1;   // +1 grid down
+    var rDown  = Math.min(rows - pad, Math.ceil(rows * 0.92)) - 1; // -1 grid up
+
+    return [
+      { x: cLeft  * GRID, y: rUp   * GRID, label: 'RECORD',   color: CYAN },
+      { x: cLeft  * GRID, y: rDown * GRID, label: 'VALIDATE', color: CYAN },
+      { x: (cRight - 2) * GRID, y: (rUp + 1) * GRID, label: 'REPLAY',   color: PINK },
+      { x: cRight * GRID, y: rDown * GRID, label: 'READY',    color: CYAN }
+    ];
+  }
+  var nodes = getNodes();
+
+  // --- Light Cycle Riders ---
+  var TRAIL_MAX = 200; // max trail distance in px
+  var riders = [];
+
+  function initRiders() {
+    riders.length = 0;
+    var configs = [
+      { nodeIdx: 0, color: CYAN, speed: 1.2, dir: 0 },
+      { nodeIdx: 0, color: CYAN, speed: 0.9, dir: 1 },
+      { nodeIdx: 1, color: CYAN, speed: 1.5, dir: 2 },
+      { nodeIdx: 2, color: PINK, speed: 1.0, dir: 3 },
+      { nodeIdx: 2, color: PINK, speed: 1.3, dir: 0 },
+      { nodeIdx: 3, color: CYAN, speed: 1.8, dir: 1 }
+    ];
+
+    for (var i = 0; i < configs.length; i++) {
+      var cfg = configs[i];
+      var node = nodes[cfg.nodeIdx];
+      riders.push({
+        x: node.x,
+        y: node.y,
+        dir: cfg.dir,  // 0=right 1=down 2=left 3=up
+        trail: [{ x: node.x, y: node.y }],
+        color: cfg.color,
+        speed: cfg.speed,
+        cooldown: 0
+      });
+    }
+  }
+
+  function snapGrid(v) {
+    return Math.round(v / GRID) * GRID;
+  }
+
+  function atIntersection(r) {
+    return Math.abs(r.x - snapGrid(r.x)) < r.speed + 0.5 &&
+           Math.abs(r.y - snapGrid(r.y)) < r.speed + 0.5;
+  }
+
+  var DX = [1, 0, -1, 0];
+  var DY = [0, 1, 0, -1];
+
+  function moveRider(r) {
+    r.x += DX[r.dir] * r.speed;
+    r.y += DY[r.dir] * r.speed;
+
+    // Push trail point
+    var last = r.trail[r.trail.length - 1];
+    if (Math.abs(r.x - last.x) > 0.5 || Math.abs(r.y - last.y) > 0.5) {
+      r.trail.push({ x: r.x, y: r.y });
+    }
+
+    // Trim trail to max distance
+    var dist = 0;
+    for (var i = r.trail.length - 1; i > 0; i--) {
+      var dx = r.trail[i].x - r.trail[i - 1].x;
+      var dy = r.trail[i].y - r.trail[i - 1].y;
+      dist += Math.abs(dx) + Math.abs(dy);
+      if (dist > TRAIL_MAX) {
+        r.trail = r.trail.slice(i);
+        break;
+      }
+    }
+
+    r.cooldown--;
+
+    // Turn at intersections
+    if (atIntersection(r) && r.cooldown <= 0) {
+      r.x = snapGrid(r.x);
+      r.y = snapGrid(r.y);
+      // Update last trail point to snapped position
+      r.trail[r.trail.length - 1] = { x: r.x, y: r.y };
+
+      var roll = Math.random();
+      if (roll < 0.15) {
+        r.dir = (r.dir + 1) % 4;
+      } else if (roll < 0.30) {
+        r.dir = (r.dir + 3) % 4;
+      }
+      // 70% go straight — fewer sharp turns, longer runs
+      r.cooldown = Math.ceil(GRID / r.speed);
+    }
+
+    // Wrap around edges
+    var margin = GRID * 3;
+    if (r.x < -margin || r.x > W + margin || r.y < -margin || r.y > H + margin) {
+      // Respawn at a random node
+      var node = nodes[Math.floor(Math.random() * nodes.length)];
+      r.x = node.x;
+      r.y = node.y;
+      r.trail = [{ x: r.x, y: r.y }];
+      r.dir = Math.floor(Math.random() * 4);
+      r.cooldown = Math.ceil(GRID / r.speed);
+    }
+  }
+
+  // --- Draw ---
+
+  function drawGrid() {
+    ctx.strokeStyle = rgba(CYAN, 0.1);
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    for (var x = 0; x <= W; x += GRID) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, H);
+    }
+    for (var y = 0; y <= H; y += GRID) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
+  }
+
+  function drawNodes(t) {
+    for (var n = 0; n < nodes.length; n++) {
+      var node = nodes[n];
+      var pulse = 0.5 + 0.35 * Math.sin(t * 0.0018 + n * 1.7);
+      var outerR = 11 + 4 * pulse;
+
+      // Glow halo
+      var grad = ctx.createRadialGradient(node.x, node.y, 3, node.x, node.y, outerR + 15);
+      grad.addColorStop(0, rgba(node.color, 0.25 * pulse));
+      grad.addColorStop(0.5, rgba(node.color, 0.08 * pulse));
+      grad.addColorStop(1, rgba(node.color, 0));
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, outerR + 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Outer ring
+      ctx.strokeStyle = rgba(node.color, 0.25 + 0.15 * pulse);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, outerR, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Dashed outer-outer ring
+      ctx.strokeStyle = rgba(node.color, 0.1 + 0.06 * pulse);
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, outerR + 5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Core dot
+      ctx.fillStyle = rgba(node.color, 0.6);
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Label below
+      ctx.fillStyle = rgba(node.color, 0.2);
+      ctx.font = '500 11px "Geist Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(node.label, node.x, node.y + outerR + 8);
+    }
+  }
+
+  function drawRiders() {
+    for (var r = 0; r < riders.length; r++) {
+      var rider = riders[r];
+      if (rider.trail.length < 2) continue;
+
+      var len = rider.trail.length;
+
+      // Draw trail segments with fading opacity
+      for (var i = 1; i < len; i++) {
+        var alpha = (i / len) * 0.3;
+        ctx.strokeStyle = rgba(rider.color, alpha);
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(rider.trail[i - 1].x, rider.trail[i - 1].y);
+        ctx.lineTo(rider.trail[i].x, rider.trail[i].y);
+        ctx.stroke();
+      }
+
+      // Bright glow at head
+      var hGrad = ctx.createRadialGradient(rider.x, rider.y, 0, rider.x, rider.y, 8);
+      hGrad.addColorStop(0, rgba(rider.color, 0.5));
+      hGrad.addColorStop(0.3, rgba(rider.color, 0.18));
+      hGrad.addColorStop(1, rgba(rider.color, 0));
+      ctx.fillStyle = hGrad;
+      ctx.beginPath();
+      ctx.arc(rider.x, rider.y, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // White-hot core
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath();
+      ctx.arc(rider.x, rider.y, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // --- Cursor (drawn on canvas, grid-aligned) ---
+  function drawCursor(t) {
+    var rows = Math.floor(H / GRID);
+    var cols = Math.floor(W / GRID);
+    // Position: 2nd column from left, 2nd row from bottom — centered in cell
+    var cx = 1 * GRID + GRID / 2;
+    var cy = (rows - 1) * GRID + GRID / 2;
+
+    var blink = Math.floor(t / 550) % 2 === 0; // ~550ms blink cycle
+
+    ctx.font = '400 16px "Geist Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    // Draw 4-grid-wide background, cursor in leftmost cell
+    var cellX = cx - GRID / 2;
+    var cellY = cy - GRID / 2;
+    ctx.fillStyle = 'rgba(10, 10, 25, 0.1)';
+    ctx.fillRect(cellX, cellY, GRID * 4, GRID);
+    ctx.strokeStyle = rgba(CYAN, 0.08);
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cellX + 0.5, cellY + 0.5, GRID * 4 - 1, GRID - 1);
+
+    // Measure to center horizontally in cell
+    var full = ctx.measureText('>_');
+    var startX = cx - full.width / 2;
+
+    ctx.fillStyle = rgba(CYAN, 0.55);
+    ctx.fillText('>', startX, cy);
+
+    if (blink) {
+      ctx.fillStyle = rgba(CYAN, 0.45);
+      var chevronW = ctx.measureText('>').width;
+      ctx.fillText('_', startX + chevronW, cy);
+    }
+  }
+
+  // --- Static render (reduced motion) ---
+  function drawStatic() {
+    ctx.clearRect(0, 0, W, H);
+    drawGrid();
+    drawNodes(0);
+    drawCursor(0);
+  }
+
+  // --- Animation loop ---
+  var animId;
+  function animate(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    drawGrid();
+    drawNodes(t);
+
+    for (var r = 0; r < riders.length; r++) {
+      moveRider(riders[r]);
+    }
+    drawRiders();
+    drawCursor(t);
+
+    animId = requestAnimationFrame(animate);
+  }
+
+  // Handle resize: recalculate nodes and reinit riders
+  window.addEventListener('resize', function() {
+    nodes = getNodes();
+    initRiders();
+  });
+
+  // --- Snap portal to grid ---
+  var portal = document.querySelector('.portal');
+  function snapPortal() {
+    // Reset any previous transform
+    portal.style.transform = '';
+    var rect = portal.getBoundingClientRect();
+    var offX = rect.left % GRID;
+    var offY = rect.top % GRID;
+    // Nudge to nearest grid intersection
+    var dx = offX < GRID / 2 ? -offX : GRID - offX;
+    var dy = offY < GRID / 2 ? -offY : GRID - offY;
+    portal.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  }
+  snapPortal();
+  window.addEventListener('resize', snapPortal);
+
+  // --- Size the portal dashed border SVG rect ---
+  var borderRect = document.querySelector('.portal__border-rect');
+  function sizePortalBorder() {
+    var p = document.querySelector('.portal');
+    if (p && borderRect) {
+      borderRect.setAttribute('width', p.offsetWidth - 1);
+      borderRect.setAttribute('height', p.offsetHeight - 1);
+    }
+  }
+  sizePortalBorder();
+  // Re-size after portal animation reveals it
+  setTimeout(sizePortalBorder, 100);
+  setTimeout(sizePortalBorder, 2000);
+  window.addEventListener('resize', sizePortalBorder);
+
+  if (reducedMotion) {
+    drawStatic();
+  } else {
+    initRiders();
+    animId = requestAnimationFrame(animate);
+  }
+
+  // React to reduced motion changes
+  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', function(e) {
+    if (e.matches) {
+      cancelAnimationFrame(animId);
+      drawStatic();
+    } else {
+      initRiders();
+      animId = requestAnimationFrame(animate);
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>

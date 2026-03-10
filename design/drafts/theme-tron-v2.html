@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme: TRON v2 — Grid Collapse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   Theme: TRON v2 — "GRID COLLAPSE"
+   Sharp digital precision. Perspective grid floor. Hexagonal frame.
+   steps() timing. Grid dots ignite in wave patterns.
+   No smooth easing — everything SNAPS.
+   ================================================================ */
+
+:root {
+  /* --- Midnight Neon Palette --- */
+  --bg-page: #1a1a2e;
+  --bg-surface: #212136;
+  --bg-elevated: #28283e;
+  --accent-primary: #00d4ff;
+  --accent-primary-hover: #33ddff;
+  --accent-primary-subtle: rgba(0, 212, 255, 0.08);
+  --accent-primary-glow: rgba(0, 212, 255, 0.4);
+  --accent-primary-glow-strong: rgba(0, 212, 255, 0.7);
+  --accent-secondary: #ff4d6a;
+  --accent-secondary-hover: #ff6b83;
+  --accent-secondary-subtle: rgba(255, 77, 106, 0.08);
+  --accent-secondary-glow: rgba(255, 77, 106, 0.35);
+  --text-primary: #f1f1f7;
+  --text-secondary: #d3d4d9;
+  --text-muted: #aaaab0;
+  --text-disabled: #55556a;
+  --border-default: #28283e;
+  --border-strong: #323349;
+  --terminal-bg: #12122a;
+
+  /* --- Typography --- */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --text-xs: 0.625rem;
+  --text-sm: 0.6875rem;
+  --text-base: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* --- Spacing --- */
+  --space-px: 1px;
+  --space-0_5: 2px;
+  --space-1: 4px;
+  --space-1_5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* --- Shape --- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* --- Animation --- */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-default: ease-out;
+  --snap-4: steps(4, end);
+  --snap-8: steps(8, end);
+  --snap-12: steps(12, end);
+  --snap-1: steps(1, end);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ================================================================
+   FULL PAGE LAYOUT
+   ================================================================ */
+
+.landing {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+.landing__main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ================================================================
+   HEADER — sharp, geometric, no curves
+   ================================================================ */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-6);
+  height: 48px;
+  background: var(--bg-surface);
+  position: relative;
+  z-index: 10;
+}
+
+/* Header bottom line: sharp segmented bar, not gradient */
+.app-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent-primary) 0px,
+    var(--accent-primary) 3px,
+    transparent 3px,
+    transparent 8px
+  );
+  opacity: 0.35;
+  box-shadow: 0 0 6px var(--accent-primary-glow);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Logo — hexagonal clip shape */
+.app-header__logo {
+  width: 28px;
+  height: 28px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  color: var(--accent-primary);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: box-shadow var(--duration-normal) var(--easing-default);
+}
+
+.app-header__brand:hover .app-header__logo {
+  box-shadow: 0 0 12px var(--accent-primary-glow);
+}
+
+.app-header__name {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+}
+
+/* Minimal button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0s;
+  border: 1px solid transparent;
+  background: transparent;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.btn--primary {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.btn--primary:hover {
+  background: var(--accent-primary);
+  color: var(--bg-page);
+}
+
+.btn--sm {
+  padding: var(--space-0_5) var(--space-2);
+  font-size: var(--text-xs);
+}
+
+/* ================================================================
+   PERSPECTIVE GRID FLOOR
+   ================================================================ */
+
+.grid-floor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  perspective: 800px;
+  overflow: hidden;
+}
+
+.grid-floor__plane {
+  position: absolute;
+  bottom: -20%;
+  left: -20%;
+  right: -20%;
+  height: 80%;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 59px,
+      rgba(0, 212, 255, 0.07) 59px,
+      rgba(0, 212, 255, 0.07) 60px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 59px,
+      rgba(0, 212, 255, 0.07) 59px,
+      rgba(0, 212, 255, 0.07) 60px
+    );
+  transform: rotateX(65deg);
+  transform-origin: center bottom;
+  opacity: 0;
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, transparent 80%);
+}
+
+/* Horizontal scan line that sweeps up the grid */
+.grid-floor__scan {
+  position: absolute;
+  bottom: -20%;
+  left: -20%;
+  right: -20%;
+  height: 80%;
+  transform: rotateX(65deg);
+  transform-origin: center bottom;
+  opacity: 0;
+}
+
+.grid-floor__scan::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-primary);
+  box-shadow: 0 0 20px var(--accent-primary-glow-strong),
+              0 0 60px var(--accent-primary-glow);
+  bottom: 0;
+}
+
+/* ================================================================
+   DOT MATRIX — 8x6 grid of dots that ignite in wave patterns
+   ================================================================ */
+
+.dot-matrix {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Individual dot — starts dark, ignites to cyan */
+.dot-matrix__dot {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 212, 255, 0.06);
+  border-radius: 0;
+  opacity: 0;
+}
+
+/* Dot positions — 8 columns x 6 rows, symmetric grid */
+/* Row 1 (top) */
+.dot-matrix__dot--r1c1 { top: 10%; left: 8%; }
+.dot-matrix__dot--r1c2 { top: 10%; left: 20%; }
+.dot-matrix__dot--r1c3 { top: 10%; left: 32%; }
+.dot-matrix__dot--r1c4 { top: 10%; left: 44%; }
+.dot-matrix__dot--r1c5 { top: 10%; left: 56%; }
+.dot-matrix__dot--r1c6 { top: 10%; left: 68%; }
+.dot-matrix__dot--r1c7 { top: 10%; left: 80%; }
+.dot-matrix__dot--r1c8 { top: 10%; left: 92%; }
+
+/* Row 2 */
+.dot-matrix__dot--r2c1 { top: 25%; left: 8%; }
+.dot-matrix__dot--r2c2 { top: 25%; left: 20%; }
+.dot-matrix__dot--r2c3 { top: 25%; left: 32%; }
+.dot-matrix__dot--r2c4 { top: 25%; left: 44%; }
+.dot-matrix__dot--r2c5 { top: 25%; left: 56%; }
+.dot-matrix__dot--r2c6 { top: 25%; left: 68%; }
+.dot-matrix__dot--r2c7 { top: 25%; left: 80%; }
+.dot-matrix__dot--r2c8 { top: 25%; left: 92%; }
+
+/* Row 3 */
+.dot-matrix__dot--r3c1 { top: 40%; left: 8%; }
+.dot-matrix__dot--r3c2 { top: 40%; left: 20%; }
+.dot-matrix__dot--r3c3 { top: 40%; left: 32%; }
+.dot-matrix__dot--r3c4 { top: 40%; left: 44%; }
+.dot-matrix__dot--r3c5 { top: 40%; left: 56%; }
+.dot-matrix__dot--r3c6 { top: 40%; left: 68%; }
+.dot-matrix__dot--r3c7 { top: 40%; left: 80%; }
+.dot-matrix__dot--r3c8 { top: 40%; left: 92%; }
+
+/* Row 4 */
+.dot-matrix__dot--r4c1 { top: 55%; left: 8%; }
+.dot-matrix__dot--r4c2 { top: 55%; left: 20%; }
+.dot-matrix__dot--r4c3 { top: 55%; left: 32%; }
+.dot-matrix__dot--r4c4 { top: 55%; left: 44%; }
+.dot-matrix__dot--r4c5 { top: 55%; left: 56%; }
+.dot-matrix__dot--r4c6 { top: 55%; left: 68%; }
+.dot-matrix__dot--r4c7 { top: 55%; left: 80%; }
+.dot-matrix__dot--r4c8 { top: 55%; left: 92%; }
+
+/* Row 5 */
+.dot-matrix__dot--r5c1 { top: 70%; left: 8%; }
+.dot-matrix__dot--r5c2 { top: 70%; left: 20%; }
+.dot-matrix__dot--r5c3 { top: 70%; left: 32%; }
+.dot-matrix__dot--r5c4 { top: 70%; left: 44%; }
+.dot-matrix__dot--r5c5 { top: 70%; left: 56%; }
+.dot-matrix__dot--r5c6 { top: 70%; left: 68%; }
+.dot-matrix__dot--r5c7 { top: 70%; left: 80%; }
+.dot-matrix__dot--r5c8 { top: 70%; left: 92%; }
+
+/* Row 6 (bottom) */
+.dot-matrix__dot--r6c1 { top: 85%; left: 8%; }
+.dot-matrix__dot--r6c2 { top: 85%; left: 20%; }
+.dot-matrix__dot--r6c3 { top: 85%; left: 32%; }
+.dot-matrix__dot--r6c4 { top: 85%; left: 44%; }
+.dot-matrix__dot--r6c5 { top: 85%; left: 56%; }
+.dot-matrix__dot--r6c6 { top: 85%; left: 68%; }
+.dot-matrix__dot--r6c7 { top: 85%; left: 80%; }
+.dot-matrix__dot--r6c8 { top: 85%; left: 92%; }
+
+/* ================================================================
+   ENERGY PULSE LINES — sharp horizontal/vertical lines that
+   snap between positions (no smooth travel)
+   ================================================================ */
+
+.pulse-line {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Horizontal pulse — thin bright bar */
+.pulse-line--h1 {
+  top: 30%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    transparent 20%,
+    var(--accent-primary) 20%,
+    var(--accent-primary) 22%,
+    transparent 22%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px var(--accent-primary-glow);
+}
+
+.pulse-line--h2 {
+  top: 70%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    transparent 65%,
+    var(--accent-primary) 65%,
+    var(--accent-primary) 68%,
+    transparent 68%,
+    transparent 100%
+  );
+  box-shadow: 0 0 8px var(--accent-primary-glow);
+}
+
+/* Vertical pulse */
+.pulse-line--v1 {
+  left: 25%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(0, 212, 255, 0.5) 40%,
+    rgba(0, 212, 255, 0.5) 43%,
+    transparent 43%,
+    transparent 100%
+  );
+  box-shadow: 0 0 6px var(--accent-primary-glow);
+}
+
+.pulse-line--v2 {
+  left: 75%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    transparent 55%,
+    rgba(0, 212, 255, 0.5) 55%,
+    rgba(0, 212, 255, 0.5) 58%,
+    transparent 58%,
+    transparent 100%
+  );
+  box-shadow: 0 0 6px var(--accent-primary-glow);
+}
+
+/* ================================================================
+   CONTENT OVERLAY
+   ================================================================ */
+
+.landing__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-8);
+  max-width: 560px;
+}
+
+/* ================================================================
+   DROP ZONE — HEXAGONAL FRAME
+   Materializes from an expanding light disc.
+   Hex clip-path with double-glow technique.
+   ================================================================ */
+
+.drop-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 52px 48px var(--space-8);
+  cursor: pointer;
+  background: rgba(18, 18, 42, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: visible;
+  opacity: 0;
+  /* Hexagonal clip — elongated horizontal hex */
+  clip-path: polygon(
+    8% 0%,
+    92% 0%,
+    100% 50%,
+    92% 100%,
+    8% 100%,
+    0% 50%
+  );
+}
+
+/* Inner hex border — mask-composite technique for true hex outline */
+.drop-zone__hex-border {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 212, 255, 0.35);
+  clip-path: polygon(
+    8% 0%,
+    92% 0%,
+    100% 50%,
+    92% 100%,
+    8% 100%,
+    0% 50%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15),
+              inset 0 0 12px rgba(0, 212, 255, 0.08);
+}
+
+.drop-zone__hex-border::before {
+  content: none;
+}
+
+/* Outer glow — diffuse bloom (double-glow technique) */
+.drop-zone__hex-glow {
+  position: absolute;
+  inset: -12px;
+  background: rgba(0, 212, 255, 0.06);
+  clip-path: polygon(
+    8% 0%,
+    92% 0%,
+    100% 50%,
+    92% 100%,
+    8% 100%,
+    0% 50%
+  );
+  filter: blur(16px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+}
+
+/* Hover: sharp snap, no transition */
+.drop-zone:hover {
+  background: rgba(18, 18, 42, 0.97);
+}
+
+.drop-zone:hover .drop-zone__hex-glow {
+  opacity: 1;
+  filter: blur(18px);
+}
+
+.drop-zone:hover .drop-zone__hex-border {
+  background: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.25),
+              inset 0 0 20px rgba(0, 212, 255, 0.1);
+}
+
+/* Focus visible */
+.drop-zone:focus-visible {
+  outline: 1px solid var(--accent-primary);
+  outline-offset: 6px;
+}
+
+/* --- Light disc materialization effect --- */
+.drop-zone__disc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
+
+/* --- Title bar --- */
+.drop-zone__titlebar {
+  position: absolute;
+  top: 0;
+  left: 6%;
+  right: 6%;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.06);
+  z-index: 3;
+}
+
+/* Title bar pips — small squares, TRON digital */
+.drop-zone__pip {
+  width: 5px;
+  height: 5px;
+  background: rgba(0, 212, 255, 0.2);
+}
+
+.drop-zone__pip:nth-child(2) {
+  background: rgba(255, 77, 106, 0.18);
+}
+
+.drop-zone__pip:nth-child(3) {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.drop-zone__titlebar-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: rgba(0, 212, 255, 0.25);
+  letter-spacing: 0.16em;
+  margin-left: auto;
+  text-transform: uppercase;
+}
+
+/* --- Hex grid overlay inside drop zone --- */
+.drop-zone__hex-grid {
+  position: absolute;
+  inset: 28px 6% 0 6%;
+  background:
+    linear-gradient(60deg, rgba(0, 212, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(-60deg, rgba(0, 212, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(rgba(0, 212, 255, 0.012) 1px, transparent 1px);
+  background-size: 20px 34.64px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Upload icon */
+.drop-zone__icon {
+  width: 44px;
+  height: 44px;
+  color: var(--accent-primary);
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 6px var(--accent-primary-glow));
+}
+
+.drop-zone__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Energy ring — hexagonal, pulses */
+.drop-zone__energy-ring {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+}
+
+/* Heading */
+.drop-zone__heading {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  line-height: 1.2;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+/* Subtitle */
+.drop-zone__subtitle {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  max-width: 400px;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.drop-zone__subtitle code {
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--accent-primary-subtle);
+  padding: 1px 5px;
+  border-radius: 0;
+}
+
+/* CTA button — sharp, no radius */
+.drop-zone__cta {
+  color: var(--accent-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-mono);
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0;
+  margin-top: var(--space-2);
+  position: relative;
+  z-index: 2;
+  padding: 8px 24px;
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 0;
+  background: transparent;
+  transition: all 0s;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Hover: instant state change, no transition */
+.drop-zone__cta:hover {
+  background: var(--accent-primary);
+  color: var(--bg-page);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 20px var(--accent-primary-glow),
+              0 0 60px rgba(0, 212, 255, 0.12);
+}
+
+/* AGR hint */
+.landing__hint {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.landing__hint a {
+  color: var(--accent-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.landing__hint a:hover {
+  border-bottom-color: var(--accent-secondary);
+}
+
+/* ================================================================
+   DATA STATUS READOUT — TRON terminal readout, top-right corner
+   ================================================================ */
+
+.data-readout {
+  position: absolute;
+  top: 8%;
+  right: 4%;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(0, 212, 255, 0.3);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 2;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.data-readout__line--active {
+  color: rgba(0, 212, 255, 0.5);
+}
+
+/* ================================================================
+   BLINKING CURSOR — lower-left, sharp steps
+   ================================================================ */
+
+.cursor-prompt {
+  position: absolute;
+  bottom: 8%;
+  left: 4%;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--accent-primary);
+  opacity: 0;
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 0 8px var(--accent-primary-glow);
+}
+
+.cursor-prompt__chevron {
+  opacity: 0.5;
+}
+
+.cursor-prompt__blink {
+  opacity: 0.6;
+}
+
+/* Footer */
+.landing__footer {
+  padding: var(--space-4) var(--space-6);
+  text-align: center;
+  opacity: 0;
+}
+
+.landing__tagline {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  line-height: 1.7;
+  letter-spacing: 0.08em;
+}
+
+/* ================================================================
+   KEYFRAMES — DIGITAL PRECISION
+   Everything uses steps() for sharp, digital snapping.
+   No smooth easing. Elements appear, they don't slide.
+   ================================================================ */
+
+/* Snap in — instant opacity switch */
+@keyframes snapIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Digital glitch reveal — text appears char by char feel */
+@keyframes digitalReveal {
+  0%   { opacity: 0; clip-path: inset(0 100% 0 0); }
+  100% { opacity: 1; clip-path: inset(0 0% 0 0); }
+}
+
+/* Grid floor fade + scan line sweep */
+@keyframes gridAppear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scanSweep {
+  0%   { opacity: 0; }
+  5%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes scanLineMove {
+  from { bottom: 0; }
+  to   { bottom: 100%; }
+}
+
+/* Dot ignite — sharp on/off with glow */
+@keyframes dotIgnite {
+  0%   { opacity: 0; background: rgba(0, 212, 255, 0.06); box-shadow: none; }
+  50%  { opacity: 1; background: var(--accent-primary); box-shadow: 0 0 8px var(--accent-primary-glow-strong); }
+  100% { opacity: 1; background: rgba(0, 212, 255, 0.12); box-shadow: 0 0 3px var(--accent-primary-glow); }
+}
+
+/* Dot pulse — ongoing after ignition */
+@keyframes dotPulse {
+  0%, 100% { background: rgba(0, 212, 255, 0.08); box-shadow: none; }
+  50%      { background: rgba(0, 212, 255, 0.2); box-shadow: 0 0 6px var(--accent-primary-glow); }
+}
+
+/* Dot pulse secondary — coral-pink accent (sparse) */
+@keyframes dotPulsePink {
+  0%, 100% { background: rgba(255, 77, 106, 0.06); box-shadow: none; }
+  50%      { background: rgba(255, 77, 106, 0.2); box-shadow: 0 0 6px var(--accent-secondary-glow); }
+}
+
+/* Pulse line snap — appears, holds, vanishes */
+@keyframes pulseSnap {
+  0%   { visibility: visible; opacity: 0; }
+  5%   { opacity: 0.6; }
+  15%  { opacity: 0.6; }
+  20%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Energy flow line for hex data paths — hidden initially */
+@keyframes energyFadeIn {
+  from { visibility: visible; opacity: 0; }
+  to   { visibility: visible; opacity: 0.5; }
+}
+
+/* Light disc expand — materialization */
+@keyframes discExpand {
+  0%   { width: 0; height: 0; opacity: 0.8; }
+  60%  { width: 300px; height: 300px; opacity: 0.4; }
+  100% { width: 400px; height: 400px; opacity: 0; }
+}
+
+/* Drop zone hex snap — appears instantly */
+@keyframes hexMaterialize {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Hex border energize — border brightens in segments */
+@keyframes hexBorderEnergize {
+  0%   { background: transparent; }
+  16%  { background: rgba(0, 212, 255, 0.15); }
+  33%  { background: rgba(0, 212, 255, 0.3); }
+  50%  { background: rgba(0, 212, 255, 0.45); }
+  66%  { background: rgba(0, 212, 255, 0.35); }
+  83%  { background: rgba(0, 212, 255, 0.25); }
+  100% { background: rgba(0, 212, 255, 0.35); }
+}
+
+/* Energy ring hex pulse */
+@keyframes hexRingPulse {
+  0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+  50%      { opacity: 0.35; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+/* Cursor blink — sharp step */
+@keyframes cursorBlink {
+  0%, 49.9% { opacity: 0.6; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Data readout typing effect */
+@keyframes readoutType {
+  from { clip-path: inset(0 100% 0 0); opacity: 1; }
+  to   { clip-path: inset(0 0% 0 0); opacity: 1; }
+}
+
+/* Hex glow breathe — very subtle */
+@keyframes hexGlowBreathe {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 0.6; }
+}
+
+/* ================================================================
+   REDUCED MOTION — show everything in final state
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-floor__plane { opacity: 1 !important; }
+  .grid-floor__scan { display: none !important; }
+  .dot-matrix__dot { opacity: 1 !important; background: rgba(0, 212, 255, 0.1) !important; }
+  .pulse-line { display: none !important; }
+  .drop-zone { opacity: 1 !important; }
+  .drop-zone__disc { display: none !important; }
+  .drop-zone__hex-glow { opacity: 0.3 !important; }
+  .drop-zone__icon { opacity: 1 !important; }
+  .drop-zone__energy-ring { opacity: 0.15 !important; }
+  .drop-zone__heading { opacity: 1 !important; }
+  .drop-zone__subtitle { opacity: 1 !important; }
+  .drop-zone__cta { opacity: 1 !important; }
+  .landing__hint { opacity: 1 !important; }
+  .landing__footer { opacity: 1 !important; }
+  .cursor-prompt { opacity: 1 !important; }
+  .cursor-prompt__blink { opacity: 0.6 !important; }
+  .data-readout { opacity: 1 !important; }
+}
+
+/* ================================================================
+   MOTION-ALLOWED ANIMATIONS
+   Everything digital. Everything snaps.
+   ================================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* 1. Grid floor appears — steps for digital feel */
+  .grid-floor__plane {
+    animation: gridAppear 0.6s steps(6, end) 0.2s forwards;
+  }
+
+  /* Scan line sweeps up the grid */
+  .grid-floor__scan {
+    animation: scanSweep 2.5s steps(1, end) 0.3s forwards;
+  }
+
+  .grid-floor__scan::before {
+    animation: scanLineMove 2.5s linear 0.3s forwards;
+  }
+
+  /* 2. Dot matrix ignition wave — diagonal cascade from top-left.
+     Each dot ignites with a sharp flash then settles to dim.
+     Timing: wave starts at 0.8s, 80ms between diagonal ranks. */
+
+  /* Diagonal rank 0 (top-left corner) */
+  .dot-matrix__dot--r1c1 {
+    animation: dotIgnite 0.3s steps(3, end) 0.8s forwards,
+               dotPulse 4s steps(4, end) 3.5s infinite;
+  }
+
+  /* Rank 1 */
+  .dot-matrix__dot--r1c2,
+  .dot-matrix__dot--r2c1 {
+    animation: dotIgnite 0.3s steps(3, end) 0.88s forwards,
+               dotPulse 4.2s steps(4, end) 3.7s infinite;
+  }
+
+  /* Rank 2 */
+  .dot-matrix__dot--r1c3,
+  .dot-matrix__dot--r2c2,
+  .dot-matrix__dot--r3c1 {
+    animation: dotIgnite 0.3s steps(3, end) 0.96s forwards,
+               dotPulse 3.8s steps(4, end) 3.9s infinite;
+  }
+
+  /* Rank 3 */
+  .dot-matrix__dot--r1c4,
+  .dot-matrix__dot--r2c3,
+  .dot-matrix__dot--r3c2,
+  .dot-matrix__dot--r4c1 {
+    animation: dotIgnite 0.3s steps(3, end) 1.04s forwards,
+               dotPulse 4.5s steps(4, end) 4.1s infinite;
+  }
+
+  /* Rank 4 */
+  .dot-matrix__dot--r1c5,
+  .dot-matrix__dot--r2c4,
+  .dot-matrix__dot--r3c3,
+  .dot-matrix__dot--r4c2,
+  .dot-matrix__dot--r5c1 {
+    animation: dotIgnite 0.3s steps(3, end) 1.12s forwards,
+               dotPulse 4.1s steps(4, end) 4.3s infinite;
+  }
+
+  /* Rank 5 */
+  .dot-matrix__dot--r1c6,
+  .dot-matrix__dot--r2c5,
+  .dot-matrix__dot--r3c4,
+  .dot-matrix__dot--r4c3,
+  .dot-matrix__dot--r5c2,
+  .dot-matrix__dot--r6c1 {
+    animation: dotIgnite 0.3s steps(3, end) 1.20s forwards,
+               dotPulse 3.6s steps(4, end) 4.5s infinite;
+  }
+
+  /* Rank 6 */
+  .dot-matrix__dot--r1c7,
+  .dot-matrix__dot--r2c6,
+  .dot-matrix__dot--r3c5,
+  .dot-matrix__dot--r4c4,
+  .dot-matrix__dot--r5c3,
+  .dot-matrix__dot--r6c2 {
+    animation: dotIgnite 0.3s steps(3, end) 1.28s forwards,
+               dotPulse 4.3s steps(4, end) 4.7s infinite;
+  }
+
+  /* Rank 7 */
+  .dot-matrix__dot--r1c8,
+  .dot-matrix__dot--r2c7,
+  .dot-matrix__dot--r3c6,
+  .dot-matrix__dot--r4c5,
+  .dot-matrix__dot--r5c4,
+  .dot-matrix__dot--r6c3 {
+    animation: dotIgnite 0.3s steps(3, end) 1.36s forwards,
+               dotPulse 3.9s steps(4, end) 4.9s infinite;
+  }
+
+  /* Rank 8 */
+  .dot-matrix__dot--r2c8,
+  .dot-matrix__dot--r3c7,
+  .dot-matrix__dot--r4c6,
+  .dot-matrix__dot--r5c5,
+  .dot-matrix__dot--r6c4 {
+    animation: dotIgnite 0.3s steps(3, end) 1.44s forwards,
+               dotPulse 4.6s steps(4, end) 5.1s infinite;
+  }
+
+  /* Rank 9 */
+  .dot-matrix__dot--r3c8,
+  .dot-matrix__dot--r4c7,
+  .dot-matrix__dot--r5c6,
+  .dot-matrix__dot--r6c5 {
+    animation: dotIgnite 0.3s steps(3, end) 1.52s forwards,
+               dotPulse 4.0s steps(4, end) 5.3s infinite;
+  }
+
+  /* Rank 10 */
+  .dot-matrix__dot--r4c8,
+  .dot-matrix__dot--r5c7,
+  .dot-matrix__dot--r6c6 {
+    animation: dotIgnite 0.3s steps(3, end) 1.60s forwards,
+               dotPulse 4.4s steps(4, end) 5.5s infinite;
+  }
+
+  /* Rank 11 */
+  .dot-matrix__dot--r5c8,
+  .dot-matrix__dot--r6c7 {
+    animation: dotIgnite 0.3s steps(3, end) 1.68s forwards,
+               dotPulse 3.7s steps(4, end) 5.7s infinite;
+  }
+
+  /* Rank 12 (bottom-right corner) */
+  .dot-matrix__dot--r6c8 {
+    animation: dotIgnite 0.3s steps(3, end) 1.76s forwards,
+               dotPulse 4.2s steps(4, end) 5.9s infinite;
+  }
+
+  /* Pink accent dots — sparse, override some dots */
+  .dot-matrix__dot--r2c6,
+  .dot-matrix__dot--r5c3 {
+    animation: dotIgnite 0.3s steps(3, end) 1.20s forwards,
+               dotPulsePink 5s steps(4, end) 5.0s infinite;
+  }
+
+  /* 3. Pulse lines snap across the viewport */
+  .pulse-line--h1 {
+    animation: pulseSnap 3s steps(4, end) 1.5s infinite;
+  }
+
+  .pulse-line--h2 {
+    animation: pulseSnap 3.5s steps(4, end) 2.8s infinite;
+  }
+
+  .pulse-line--v1 {
+    animation: pulseSnap 4s steps(4, end) 2.0s infinite;
+  }
+
+  .pulse-line--v2 {
+    animation: pulseSnap 4.5s steps(4, end) 3.2s infinite;
+  }
+
+  /* 4. Light disc materialization — expands then fades */
+  .drop-zone__disc {
+    animation: discExpand 1.2s steps(8, end) 1.6s forwards;
+  }
+
+  /* 5. Drop zone hex materializes AFTER disc flash */
+  .drop-zone {
+    animation: hexMaterialize 0.05s linear 2.0s forwards;
+  }
+
+  /* Hex border energizes */
+  .drop-zone__hex-border {
+    animation: hexBorderEnergize 2s steps(6, end) 2.2s forwards;
+  }
+
+  /* Hex glow fades in */
+  .drop-zone__hex-glow {
+    animation: snapIn 0.1s linear 2.3s forwards,
+               hexGlowBreathe 6s steps(8, end) 4s infinite;
+  }
+
+  /* Energy ring hex pulse */
+  .drop-zone__energy-ring {
+    animation: snapIn 0.08s linear 2.4s forwards,
+               hexRingPulse 4s steps(8, end) 4.5s infinite;
+  }
+
+  /* 6. Content elements snap in — digital reveal, no slide */
+  .drop-zone__icon {
+    animation: snapIn 0.05s linear 2.4s forwards;
+  }
+
+  .drop-zone__heading {
+    animation: digitalReveal 0.4s steps(8, end) 2.7s forwards;
+  }
+
+  .drop-zone__subtitle {
+    animation: digitalReveal 0.4s steps(8, end) 3.0s forwards;
+  }
+
+  .drop-zone__cta {
+    animation: snapIn 0.05s linear 3.3s forwards;
+  }
+
+  .landing__hint {
+    animation: snapIn 0.05s linear 3.6s forwards;
+  }
+
+  /* 7. Data readout types in */
+  .data-readout {
+    animation: readoutType 1.2s steps(12, end) 2.5s forwards;
+  }
+
+  /* 8. Cursor appears */
+  .cursor-prompt {
+    animation: snapIn 0.05s linear 3.0s forwards;
+  }
+
+  .cursor-prompt__blink {
+    animation: cursorBlink 1s steps(1, end) 3.2s infinite;
+  }
+
+  /* 9. Footer */
+  .landing__footer {
+    animation: snapIn 0.05s linear 4.0s forwards;
+  }
+}
+
+/* ================================================================
+   RESPONSIVE — Mobile
+   ================================================================ */
+
+@media (max-width: 768px) {
+  .landing__content {
+    padding: var(--space-4);
+    max-width: 100%;
+  }
+
+  .drop-zone {
+    padding: 44px 32px var(--space-6);
+    margin: 0 var(--space-4);
+  }
+
+  .drop-zone__heading {
+    font-size: var(--text-xl);
+  }
+
+  .drop-zone__subtitle {
+    font-size: var(--text-sm);
+  }
+
+  .data-readout {
+    display: none;
+  }
+
+  .cursor-prompt {
+    font-size: var(--text-xl);
+    bottom: 4%;
+    left: 4%;
+  }
+
+  .app-header__name {
+    letter-spacing: 0.04em;
+    font-size: var(--text-sm);
+  }
+
+  /* Simplify grid floor on mobile */
+  .grid-floor__plane {
+    background-size: 40px 40px;
+  }
+
+  /* Reduce dot matrix to 4x4 on mobile */
+  .dot-matrix__dot--r1c1,
+  .dot-matrix__dot--r1c4,
+  .dot-matrix__dot--r1c5,
+  .dot-matrix__dot--r1c8,
+  .dot-matrix__dot--r3c1,
+  .dot-matrix__dot--r3c4,
+  .dot-matrix__dot--r3c5,
+  .dot-matrix__dot--r3c8,
+  .dot-matrix__dot--r4c1,
+  .dot-matrix__dot--r4c4,
+  .dot-matrix__dot--r4c5,
+  .dot-matrix__dot--r4c8,
+  .dot-matrix__dot--r6c1,
+  .dot-matrix__dot--r6c4,
+  .dot-matrix__dot--r6c5,
+  .dot-matrix__dot--r6c8 {
+    /* Keep these visible */
+  }
+
+  .dot-matrix__dot--r1c2,
+  .dot-matrix__dot--r1c3,
+  .dot-matrix__dot--r1c6,
+  .dot-matrix__dot--r1c7,
+  .dot-matrix__dot--r2c1,
+  .dot-matrix__dot--r2c2,
+  .dot-matrix__dot--r2c3,
+  .dot-matrix__dot--r2c4,
+  .dot-matrix__dot--r2c5,
+  .dot-matrix__dot--r2c6,
+  .dot-matrix__dot--r2c7,
+  .dot-matrix__dot--r2c8,
+  .dot-matrix__dot--r3c2,
+  .dot-matrix__dot--r3c3,
+  .dot-matrix__dot--r3c6,
+  .dot-matrix__dot--r3c7,
+  .dot-matrix__dot--r4c2,
+  .dot-matrix__dot--r4c3,
+  .dot-matrix__dot--r4c6,
+  .dot-matrix__dot--r4c7,
+  .dot-matrix__dot--r5c1,
+  .dot-matrix__dot--r5c2,
+  .dot-matrix__dot--r5c3,
+  .dot-matrix__dot--r5c4,
+  .dot-matrix__dot--r5c5,
+  .dot-matrix__dot--r5c6,
+  .dot-matrix__dot--r5c7,
+  .dot-matrix__dot--r5c8,
+  .dot-matrix__dot--r6c2,
+  .dot-matrix__dot--r6c3,
+  .dot-matrix__dot--r6c6,
+  .dot-matrix__dot--r6c7 {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="landing">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="app-header__left">
+      <a href="#" class="app-header__brand">
+        <div class="app-header__logo">E</div>
+        <span class="app-header__name">Erika</span>
+      </a>
+    </div>
+    <div class="app-header__right">
+      <button class="btn btn--primary btn--sm">Upload</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="landing__main">
+
+    <!-- PERSPECTIVE GRID FLOOR -->
+    <div class="grid-floor">
+      <div class="grid-floor__plane"></div>
+      <div class="grid-floor__scan">
+        <!-- scan line sweeps up -->
+      </div>
+    </div>
+
+    <!-- DOT MATRIX — 8x6 grid -->
+    <div class="dot-matrix">
+      <!-- Row 1 -->
+      <div class="dot-matrix__dot dot-matrix__dot--r1c1"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c2"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c3"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c4"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c5"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c6"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c7"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r1c8"></div>
+      <!-- Row 2 -->
+      <div class="dot-matrix__dot dot-matrix__dot--r2c1"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c2"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c3"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c4"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c5"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c6"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c7"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r2c8"></div>
+      <!-- Row 3 -->
+      <div class="dot-matrix__dot dot-matrix__dot--r3c1"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c2"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c3"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c4"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c5"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c6"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c7"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r3c8"></div>
+      <!-- Row 4 -->
+      <div class="dot-matrix__dot dot-matrix__dot--r4c1"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c2"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c3"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c4"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c5"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c6"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c7"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r4c8"></div>
+      <!-- Row 5 -->
+      <div class="dot-matrix__dot dot-matrix__dot--r5c1"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c2"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c3"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c4"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c5"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c6"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c7"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r5c8"></div>
+      <!-- Row 6 -->
+      <div class="dot-matrix__dot dot-matrix__dot--r6c1"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c2"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c3"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c4"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c5"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c6"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c7"></div>
+      <div class="dot-matrix__dot dot-matrix__dot--r6c8"></div>
+    </div>
+
+    <!-- ENERGY PULSE LINES -->
+    <div class="pulse-line pulse-line--h1"></div>
+    <div class="pulse-line pulse-line--h2"></div>
+    <div class="pulse-line pulse-line--v1"></div>
+    <div class="pulse-line pulse-line--v2"></div>
+
+    <!-- DATA READOUT -->
+    <div class="data-readout">
+      <div>sys.grid // active</div>
+      <div class="data-readout__line--active">nodes // 48 online</div>
+      <div>latency // 0.003ms</div>
+      <div>protocol // tron.v2</div>
+      <div class="data-readout__line--active">status // awaiting input</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="landing__content">
+
+      <!-- DROP ZONE -->
+      <div class="drop-zone" tabindex="0" role="button" aria-label="Upload a terminal recording">
+
+        <!-- Light disc materialization -->
+        <div class="drop-zone__disc"></div>
+
+        <!-- Hex border overlay -->
+        <div class="drop-zone__hex-border"></div>
+
+        <!-- Outer hex glow -->
+        <div class="drop-zone__hex-glow"></div>
+
+        <!-- Title bar -->
+        <div class="drop-zone__titlebar">
+          <div class="drop-zone__pip"></div>
+          <div class="drop-zone__pip"></div>
+          <div class="drop-zone__pip"></div>
+          <span class="drop-zone__titlebar-label">grid.input</span>
+        </div>
+
+        <!-- Hex grid overlay -->
+        <div class="drop-zone__hex-grid"></div>
+
+        <!-- Energy ring -->
+        <div class="drop-zone__energy-ring"></div>
+
+        <!-- Upload icon -->
+        <div class="drop-zone__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter">
+            <path d="M12 16V4M12 4L7 9M12 4L17 9"/>
+            <path d="M3 17V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V17"/>
+          </svg>
+        </div>
+
+        <!-- Heading -->
+        <h1 class="drop-zone__heading">Initialize Grid</h1>
+
+        <!-- Subtitle -->
+        <p class="drop-zone__subtitle">
+          Drop a <code>.cast</code> or <code>.zip</code> terminal recording to begin analysis
+        </p>
+
+        <!-- CTA -->
+        <button class="drop-zone__cta">Select File</button>
+      </div>
+
+      <!-- Hint -->
+      <p class="landing__hint">
+        Record sessions with <a href="https://github.com/thiscantbeserious/agent-session-recorder" target="_blank">AGR</a>
+      </p>
+    </div>
+
+    <!-- CURSOR -->
+    <div class="cursor-prompt">
+      <span class="cursor-prompt__chevron">&#x276F;</span>
+      <span class="cursor-prompt__blink">&#x2588;</span>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="landing__footer">
+    <p class="landing__tagline">Reinforced Human Learning Platform</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
