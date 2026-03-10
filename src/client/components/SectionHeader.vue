@@ -60,6 +60,8 @@ defineEmits<{
   font-size: var(--text-sm);
   text-align: left;
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
   border: none;
   width: 100%;
   transition: background-color var(--duration-fast) var(--easing-default);

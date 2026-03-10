@@ -69,7 +69,6 @@ async function onDelete(id: string): Promise<void> {
 
 <style scoped>
 .landing-page {
-  max-width: var(--container-max);
   padding: var(--space-8) var(--container-padding);
 }
 

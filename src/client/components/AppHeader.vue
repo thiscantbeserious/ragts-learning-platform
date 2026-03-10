@@ -15,21 +15,23 @@
       </router-link>
       <nav class="app-header__nav">
         <router-link
+          v-slot="{ isExactActive }"
           to="/"
-          class="app-header__nav-link app-header__nav-link--active"
+          class="app-header__nav-link"
+          :class="{ 'app-header__nav-link--active': isExactActive }"
         >
           Sessions
         </router-link>
       </nav>
     </div>
     <div class="app-header__right">
-      <button
+      <router-link
+        to="/"
         class="btn btn--primary btn--sm"
-        @click="$router.push('/')"
       >
         <span class="icon icon--sm icon-upload" />
         Upload
-      </button>
+      </router-link>
     </div>
   </header>
 </template>

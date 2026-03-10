@@ -5,9 +5,9 @@ exports[`AppHeader component snapshots > brand link points to root 1`] = `
   <div data-v-49fcc50c="" class="app-header__left"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__brand">
       <div data-v-49fcc50c="" class="app-header__logo"> R </div><span data-v-49fcc50c="" class="app-header__name">RAGTS</span>
     </a>
-    <nav data-v-49fcc50c="" class="app-header__nav"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__nav-link app-header__nav-link--active"> Sessions </a></nav>
+    <nav data-v-49fcc50c="" class="app-header__nav"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__nav-link"> Sessions </a></nav>
   </div>
-  <div data-v-49fcc50c="" class="app-header__right"><button data-v-49fcc50c="" class="btn btn--primary btn--sm"><span data-v-49fcc50c="" class="icon icon--sm icon-upload"></span> Upload </button></div>
+  <div data-v-49fcc50c="" class="app-header__right"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active btn btn--primary btn--sm"><span data-v-49fcc50c="" class="icon icon--sm icon-upload"></span> Upload </a></div>
 </header>"
 `;
 
@@ -16,8 +16,8 @@ exports[`AppHeader component snapshots > default render 1`] = `
   <div data-v-49fcc50c="" class="app-header__left"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__brand">
       <div data-v-49fcc50c="" class="app-header__logo"> R </div><span data-v-49fcc50c="" class="app-header__name">RAGTS</span>
     </a>
-    <nav data-v-49fcc50c="" class="app-header__nav"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__nav-link app-header__nav-link--active"> Sessions </a></nav>
+    <nav data-v-49fcc50c="" class="app-header__nav"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__nav-link"> Sessions </a></nav>
   </div>
-  <div data-v-49fcc50c="" class="app-header__right"><button data-v-49fcc50c="" class="btn btn--primary btn--sm"><span data-v-49fcc50c="" class="icon icon--sm icon-upload"></span> Upload </button></div>
+  <div data-v-49fcc50c="" class="app-header__right"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active btn btn--primary btn--sm"><span data-v-49fcc50c="" class="icon icon--sm icon-upload"></span> Upload </a></div>
 </header>"
 `;

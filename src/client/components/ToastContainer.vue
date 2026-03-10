@@ -21,6 +21,7 @@ const emit = defineEmits<{
       <span class="toast__message">{{ toast.message }}</span>
       <button
         class="toast__close"
+        aria-label="Dismiss notification"
         @click="emit('dismiss', toast.id)"
       >
         <span class="icon icon--sm icon-close" />

@@ -60,7 +60,6 @@ const { sections, snapshot, loading, error, filename } = useSession(sessionId);
 
 <style scoped>
 .session-detail-page {
-  max-width: var(--container-max);
   padding: var(--space-6) var(--container-padding);
 }
 
