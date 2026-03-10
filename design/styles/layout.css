@@ -227,7 +227,12 @@ body { position: relative; width: 100%; min-height: 100%; }
 
 body {
   font-family: var(--font-body);
-  background: var(--bg-page);
+  background:
+    /* Grid — inline SVG pattern: 40×40 cyan lines + intersection dots */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cline x1='0' y1='0' x2='40' y2='0' stroke='%2300d4ff' stroke-width='0.3' opacity='0.12'/%3E%3Cline x1='0' y1='0' x2='0' y2='40' stroke='%2300d4ff' stroke-width='0.3' opacity='0.12'/%3E%3Ccircle cx='0' cy='0' r='0.6' fill='%2300d4ff' opacity='0.18'/%3E%3C/svg%3E"),
+    /* Gradient — deep navy to subtle pink tint */
+    linear-gradient(to bottom right, #1a1a2e 30%, #3a1a2e);
+  background-attachment: fixed, fixed;
   color: var(--text-primary);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
