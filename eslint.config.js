@@ -59,6 +59,7 @@ export default tseslint.config(
         HTMLInputElement: 'readonly',
         FileList: 'readonly',
         File: 'readonly',
+        document: 'readonly',
       },
     },
     rules: {
