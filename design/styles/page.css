@@ -257,10 +257,10 @@
    ================================================================ */
 @media (min-width: 1440px) {
   .page {
-    max-width: calc(var(--container-max) * 2 + var(--rhythm-2));
+    max-width: calc(var(--container-max) * 2 + var(--rhythm-4));
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: var(--rhythm-2);  /* 42px between columns */
+    column-gap: var(--rhythm-4);  /* 84px between columns — 4 baseline units */
   }
 
   /* Page header spans full width */

@@ -207,6 +207,7 @@
   --space-16: 64px;
 
   /* Rhythm-aligned vertical spacing (derived from --baseline) */
+  --rhythm-quarter: calc(var(--baseline) / 4);  /* 0.25 units (5.25px) — tight padding */
   --rhythm-half: calc(var(--baseline) / 2);    /* 0.5 units (10.5px) — compact padding */
   --rhythm-1: var(--baseline);                 /* 1 unit — standard gap */
   --rhythm-2: calc(var(--baseline) * 2);       /* 2 units — section spacing */
@@ -242,7 +243,7 @@
      btn-md / input-sm / input-md = 42px (2 units).
      btn-lg / input-lg = 63px (3 units).
      ============================================================ */
-  --btn-height-sm: var(--baseline);              /* 1 baseline unit */
+  --btn-height-sm: calc(var(--baseline) * 1.5);   /* 1.5 baseline units (31.5px) */
   --btn-height-md: var(--rhythm-2);              /* 2 baseline units */
   --btn-height-lg: var(--rhythm-3);              /* 3 baseline units */
   --input-height-sm: var(--rhythm-2);            /* 2 baseline units */
@@ -291,6 +292,7 @@
    RESET + BASE
    ================================================================ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+::selection { background: var(--status-success); color: var(--text-inverse); }
 html { position: relative; width: 100%; height: 100%; }
 body { position: relative; width: 100%; min-height: 100%; }
 
@@ -301,21 +303,21 @@ body {
       0deg,
       rgba(0, 212, 255, 0.06) 0px,
       rgba(0, 212, 255, 0.06) 1px,
-      transparent 1px,
+      transparent 0px,
       transparent 84px
     ),
     repeating-linear-gradient(
       90deg,
       rgba(0, 212, 255, 0.06) 0px,
       rgba(0, 212, 255, 0.06) 1px,
-      transparent 1px,
+      transparent 0px,
       transparent 84px
     ),
     var(--bg-page);
   /* Offset: header is 63px (3 baselines). The grid starts at the
      page top and the first visible line should appear at y=0.
      No vertical offset needed — grid lines at 0, 42, 84, ... */
-  background-position: 0 0, 0 0;
+  background-position: 0px, -2px, 0, 0;
   color: var(--text-primary);
   font-size: var(--text-base);
   line-height: var(--lh-base);
