@@ -101,13 +101,6 @@
       data-target-opacity="0.06"
     />
 
-    <!-- Full pipeline path: record -> validate -> detect -> replay -> ready -->
-    <!-- Copied from design/drafts/theme-tron-v1.html lines 1336-1337 -->
-    <path
-      class="landing-empty__path-segment landing-empty__path-segment--full"
-      d="M 160,160 C 220,160 320,400 400,400 C 480,400 560,160 640,160 C 720,160 800,400 880,400 C 960,400 1040,160 1120,160"
-    />
-
     <!-- PIPELINE NODES — 5 stages, TRON identity disc style -->
     <!-- Copied from design/drafts/theme-tron-v1.html lines 1349-1407 -->
 
@@ -474,13 +467,8 @@
   to   { visibility: visible; }
 }
 
-/* FIX 3: Path glow pulse — brighter TRON light trail breathing */
 @keyframes pathGlow {
-  0%, 100% {
-    filter: drop-shadow(0 0 6px var(--accent-primary-glow))
-            drop-shadow(0 0 14px rgba(0, 212, 255, 0.2));
-    stroke-opacity: 1;
-  }
+  0%, 100% { opacity: 1; }
   50% {
     filter: drop-shadow(0 0 3px rgba(0, 212, 255, 0.25))
             drop-shadow(0 0 8px rgba(0, 212, 255, 0.1));
@@ -516,11 +504,6 @@
   }
   .landing-empty__anchor-dot {
     animation: anchorFadeIn 1s ease-out 0.3s forwards;
-  }
-
-  /* Pipeline path glow after nodes appear */
-  .landing-empty__path-segment--full {
-    animation: pathGlow 5s ease-in-out 5s infinite;
   }
 
   /* Node 1: record (cyan) */

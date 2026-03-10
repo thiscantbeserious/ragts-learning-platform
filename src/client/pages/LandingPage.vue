@@ -73,8 +73,23 @@ function applyBodyClass(): void {
   }
 }
 
-onMounted(applyBodyClass);
-onUnmounted(() => document.body.classList.remove('no-body-grid'));
+/** Handles global upload trigger from header button. */
+function onGlobalUpload(): void {
+  if (isEmpty.value) {
+    triggerEmptyFileInput();
+  } else {
+    triggerFileInput();
+  }
+}
+
+onMounted(() => {
+  applyBodyClass();
+  document.addEventListener('app:upload', onGlobalUpload);
+});
+onUnmounted(() => {
+  document.body.classList.remove('no-body-grid');
+  document.removeEventListener('app:upload', onGlobalUpload);
+});
 watch(isEmpty, applyBodyClass);
 </script>
 

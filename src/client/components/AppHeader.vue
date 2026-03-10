@@ -1,4 +1,7 @@
 <script setup lang="ts">
+function triggerUpload(): void {
+  document.dispatchEvent(new CustomEvent('app:upload'));
+}
 </script>
 
 <template>
@@ -9,9 +12,9 @@
         class="app-header__brand"
       >
         <div class="app-header__logo">
-          R
+          E
         </div>
-        <span class="app-header__name">RAGTS</span>
+        <span class="app-header__name">Elise</span>
       </router-link>
       <nav class="app-header__nav">
         <router-link
@@ -25,13 +28,13 @@
       </nav>
     </div>
     <div class="app-header__right">
-      <router-link
-        to="/"
+      <button
         class="btn btn--primary btn--sm"
+        @click="triggerUpload"
       >
         <span class="icon icon--sm icon-upload" />
         Upload
-      </router-link>
+      </button>
     </div>
   </header>
 </template>

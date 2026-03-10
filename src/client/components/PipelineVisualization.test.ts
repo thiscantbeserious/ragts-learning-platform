@@ -145,8 +145,8 @@ describe('PipelineVisualization — cursor prompt', () => {
 });
 
 describe('PipelineVisualization — pipeline path', () => {
-  it('renders the full pipeline path segment', () => {
+  it('does NOT render the S-curve pipeline path (removed per user request)', () => {
     const wrapper = mountPipeline();
-    expect(wrapper.find('.landing-empty__path-segment--full').exists()).toBe(true);
+    expect(wrapper.find('.landing-empty__path-segment--full').exists()).toBe(false);
   });
 });
