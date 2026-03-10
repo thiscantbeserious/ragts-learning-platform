@@ -57,8 +57,11 @@ function showConnectionDot(): boolean {
       }"
     />
 
-    <!-- Terminal preview -->
-    <div class="landing__preview">
+    <!-- Terminal preview — only shown for processing/failed states -->
+    <div
+      v-if="isProcessing() || isFailed()"
+      class="landing__preview"
+    >
       <!-- Status badge overlay -->
       <div
         v-if="isProcessing()"
@@ -101,15 +104,6 @@ function showConnectionDot(): boolean {
       >
         <span class="icon icon--lg icon-error-circle" />
         <span class="landing__preview-failed-label">Parse failed</span>
-      </div>
-      <div
-        v-else-if="isReady()"
-        class="landing__preview-lines"
-      >
-        <div class="landing__preview-line">
-          <span class="landing__preview-prompt">$ </span>
-          <span class="landing__preview-cmd">{{ session.filename }}</span>
-        </div>
       </div>
     </div>
 

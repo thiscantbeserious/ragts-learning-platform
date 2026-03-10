@@ -100,10 +100,9 @@ describe('GalleryCard — ready state', () => {
     expect(wrapper.find('.gallery-card__connection-dot').exists()).toBe(false);
   });
 
-  it('renders preview titlebar with dots', () => {
+  it('does NOT render preview area for ready session (no terminal data available)', () => {
     const wrapper = mountCard(makeSession());
-    expect(wrapper.find('.landing__preview-titlebar').exists()).toBe(true);
-    expect(wrapper.findAll('.landing__preview-dot').length).toBeGreaterThanOrEqual(3);
+    expect(wrapper.find('.landing__preview').exists()).toBe(false);
   });
 });
 
