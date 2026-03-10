@@ -66,7 +66,7 @@
   letter-spacing: var(--tracking-tight);
   line-height: var(--lh-xl);      /* 21px — 1 baseline unit */
   color: var(--text-primary);
-  margin-bottom: var(--rhythm-1); /* 21px before description */
+  margin-bottom: calc(var(--rhythm-1) - 1px); /* 20px + 1px border = 21px total below text */
   padding-bottom: 0;
   border-bottom: 1px solid var(--border-default);
 }
@@ -93,7 +93,7 @@
 .divider {
   border: none;
   border-top: 1px solid var(--border-default);
-  margin: var(--rhythm-2) 0;      /* 42px above and below */
+  margin-block: calc(var(--rhythm-2) - 1px) var(--rhythm-2); /* 41px + 1px border + 42px = 84px total */
 }
 
 /* ================================================================

@@ -207,6 +207,7 @@
   --space-16: 64px;
 
   /* Rhythm-aligned vertical spacing (derived from --baseline) */
+  --rhythm-half: calc(var(--baseline) / 2);    /* 0.5 units (10.5px) — compact padding */
   --rhythm-1: var(--baseline);                 /* 1 unit — standard gap */
   --rhythm-2: calc(var(--baseline) * 2);       /* 2 units — section spacing */
   --rhythm-3: calc(var(--baseline) * 3);       /* 3 units — major section break */
