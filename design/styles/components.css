@@ -176,9 +176,9 @@
 }
 .btn--primary:active,
 .btn--primary-active {
-  background: var(--accent-primary-dim);
+  background: var(--accent-primary);
   color: var(--text-inverse);
-  border-color: var(--accent-primary-dim);
+  border-color: var(--accent-primary);
   box-shadow: none;
 }
 .btn--primary-disabled {
@@ -256,9 +256,9 @@
 }
 .btn--destructive:active,
 .btn--destructive-active {
-  background: var(--status-error-dim);
+  background: var(--accent-secondary);
   color: var(--text-inverse);
-  border-color: var(--status-error-dim);
+  border-color: var(--accent-secondary);
   box-shadow: none;
 }
 .btn--destructive-disabled {
@@ -1069,7 +1069,7 @@
 
 /* Uploading */
 .upload-zone--uploading {
-  border-color: var(--accent-primary-dim);
+  border-color: var(--accent-primary);
   border-style: solid;
 }
 
@@ -2206,7 +2206,7 @@ html:has(.modal-backdrop) body {
 
 /* Tool call highlight inside viewer content */
 .session-viewer__tool-call {
-  color: var(--accent-primary-dim);
+  color: var(--accent-primary);
 }
 
 .session-viewer__tool-name {
