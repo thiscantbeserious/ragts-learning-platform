@@ -53,8 +53,8 @@
   gap: var(--space-3);
   padding: var(--space-5);
   background: rgba(10, 10, 25, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgba(0, 212, 255, 0.25);
   border-radius: var(--radius-xl);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
@@ -486,8 +486,8 @@
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
   background: rgba(10, 10, 25, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgba(0, 212, 255, 0.25);
   border-radius: var(--radius-xl);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
@@ -572,8 +572,8 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   background: rgba(10, 10, 25, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid rgba(0, 212, 255, 0.25);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
               0 0 8px rgba(0, 212, 255, 0.15);
@@ -664,8 +664,8 @@
   justify-content: space-between;
   padding: var(--space-3) var(--space-6);
   background: rgba(33, 33, 54, 0.32);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-bottom: none;
   height: var(--header-height);
   position: relative;
@@ -1012,8 +1012,8 @@
   border: 1px solid rgba(0, 212, 255, 0.25);
   border-radius: var(--radius-xl);
   background: rgba(10, 10, 25, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
               0 0 8px rgba(0, 212, 255, 0.15),
               inset 0 0 8px rgba(0, 212, 255, 0.05);
@@ -1117,8 +1117,8 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   background: rgba(10, 10, 25, 0.55);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -1222,8 +1222,8 @@ html:has(.modal-backdrop) body {
 
 .modal {
   background: rgba(10, 10, 25, 0.92);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(calc(var(--glass-blur) * 2));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 2));
   border: 1px solid rgba(0, 212, 255, 0.25);
   border-radius: var(--radius-xl);
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.7),
@@ -1627,8 +1627,8 @@ html:has(.modal-backdrop) body {
   height: var(--input-height-sm);
   padding: var(--space-1) var(--space-3);
   background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -1693,8 +1693,8 @@ html:has(.modal-backdrop) body {
   right: 0;
   margin-top: var(--space-1);
   background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(calc(var(--glass-blur) * 2)) saturate(1.4);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 2)) saturate(1.4);
   border: 1px solid color-mix(in srgb, var(--border-strong) 60%, transparent);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-lg),
@@ -1915,8 +1915,8 @@ html:has(.modal-backdrop) body {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   background: rgba(33, 33, 54, 0.32);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-bottom: 1px solid var(--border-default);
 }
 
