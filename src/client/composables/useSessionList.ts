@@ -1,5 +1,5 @@
 import { ref, onMounted } from 'vue';
-import type { Session } from '../../shared/types';
+import type { Session } from '../../shared/types/session.js';
 
 export function useSessionList() {
   const sessions = ref<Session[]>([]);

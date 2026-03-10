@@ -83,6 +83,28 @@ Each public function/type should have 1-2 sentences covering:
 - Implementation details that may change
 - Redundant type information
 
+## Shared Code Organization (`src/shared/`)
+
+**All types shared between server and client live in `src/shared/types/`**
+
+Organize by domain:
+- `src/shared/types/session.ts` — session domain types
+- `src/shared/types/pipeline.ts` — pipeline events, stages, status
+- `src/shared/types/errors.ts` — error types used in API responses
+- `src/shared/types/index.ts` — barrel re-exports
+
+Rules:
+- If a type is used by both server and client, it MUST live in `src/shared/types/`
+- Never put shared types in `src/server/` or `src/client/`
+- Design types to be reusable — avoid server-only concerns (DB rows, adapter interfaces stay in server)
+- API response/request shapes belong in shared since both sides need them
+
+**Non-type shared code goes in purpose-based subfolders:**
+- `src/shared/parsers/` — parsing utilities (e.g., asciicast parser)
+- `src/shared/utils/` — general utilities
+
+Do NOT put loose files directly in `src/shared/` — always use a subfolder.
+
 ## Summary Checklist
 
 Before committing, verify:
@@ -92,3 +114,5 @@ Before committing, verify:
 - [ ] Each function has single responsibility
 - [ ] Nesting depth stays at 3 levels max
 - [ ] Public items have 1-2 sentence docs covering non-obvious details
+- [ ] Shared types live in `src/shared/types/`, not scattered in server/client
+- [ ] No loose files in `src/shared/` — use subfolders by purpose

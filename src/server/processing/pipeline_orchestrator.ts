@@ -14,7 +14,7 @@ import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
-import { PipelineStage, type PipelineEvent, type DetectionStatus } from '../../shared/pipeline_events.js';
+import { PipelineStage, type PipelineEvent, type DetectionStatus } from '../../shared/types/pipeline.js';
 import { validate } from './stages/validate.js';
 import { detect } from './stages/detect.js';
 import { replay } from './stages/replay.js';
@@ -201,17 +201,25 @@ export class PipelineOrchestrator {
 
   /** Mark the job as failed, update session status, and emit session.failed. */
   private async handleStageError(jobId: string, sessionId: string, error: unknown): Promise<void> {
-    const message = error instanceof Error ? error.message : String(error);
+    const rawMessage = error instanceof Error ? error.message : String(error);
     log.error({ sessionId, err: error }, 'Pipeline stage failed');
 
     try {
       const job = await this.jobQueue.findBySessionId(sessionId);
       const stage = job?.currentStage ?? PipelineStage.Validate;
-      await this.jobQueue.fail(jobId, message);
+      await this.jobQueue.fail(jobId, rawMessage);
       await this.deps.sessionRepository.updateDetectionStatus(sessionId, 'failed');
-      this.eventBus.emit({ type: 'session.failed', sessionId, stage, error: message });
+      this.eventBus.emit({ type: 'session.failed', sessionId, stage, error: sanitizeErrorMessage(error) });
     } catch (innerErr) {
       log.error({ sessionId, err: innerErr }, 'Failed to record stage error');
     }
   }
+}
+
+/** Produce a client-safe error message, stripping file paths and stack traces. */
+function sanitizeErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return 'Processing failed';
+  const msg = error.message;
+  const cleaned = msg.replaceAll(/\/[\w/.\\-]+/g, '<path>');
+  return cleaned.slice(0, 200);
 }

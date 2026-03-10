@@ -51,3 +51,13 @@ export type PipelineEventType = PipelineEvent['type'];
 
 /** Extract the payload type for a specific event type key. */
 export type PipelineEventPayload<T extends PipelineEventType> = Extract<PipelineEvent, { type: T }>;
+
+/**
+ * All pipeline event type strings as a runtime array.
+ * Used for registering event bus handlers across all pipeline events.
+ */
+export const ALL_PIPELINE_EVENT_TYPES: PipelineEventType[] = [
+  'session.uploaded', 'session.validated', 'session.detected',
+  'session.replayed', 'session.deduped', 'session.ready',
+  'session.failed', 'session.retrying',
+];

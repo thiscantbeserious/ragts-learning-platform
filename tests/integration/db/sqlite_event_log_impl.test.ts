@@ -5,14 +5,14 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
-import { SqliteDatabaseImpl, BASE_SCHEMA } from '../db/sqlite/sqlite_database_impl.js';
-import { migrate002Sections } from '../db/sqlite/migrations/002_sections.js';
-import { migrate003UnifiedSnapshot } from '../db/sqlite/migrations/003_unified_snapshot.js';
-import { migrate004PipelineJobsEvents } from '../db/sqlite/migrations/004_pipeline_jobs_events.js';
-import { SqliteEventLogImpl } from './sqlite_event_log_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import type { EventLogAdapter } from './event_log_adapter.js';
-import { createTestSession } from '../db/sqlite/test_fixtures.js';
+import { SqliteDatabaseImpl, BASE_SCHEMA } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import { migrate002Sections } from '../../../src/server/db/sqlite/migrations/002_sections.js';
+import { migrate003UnifiedSnapshot } from '../../../src/server/db/sqlite/migrations/003_unified_snapshot.js';
+import { migrate004PipelineJobsEvents } from '../../../src/server/db/sqlite/migrations/004_pipeline_jobs_events.js';
+import { SqliteEventLogImpl } from '../../../src/server/events/sqlite_event_log_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { EventLogAdapter } from '../../../src/server/events/event_log_adapter.js';
+import { createTestSession } from '../../../src/server/db/sqlite/test_fixtures.js';
 
 describe('SqliteEventLogImpl', () => {
   let ctx: DatabaseContext;

@@ -6,8 +6,8 @@ import {
   validateAsciicast,
   extractMarkers,
   computeCumulativeTimes,
-} from '../src/shared/asciicast';
-import type { AsciicastEvent, ParsedEvent } from '../src/shared/asciicast-types';
+} from '../src/shared/parsers/asciicast';
+import type { AsciicastEvent, ParsedEvent } from '../src/shared/types/asciicast';
 
 const fixturesPath = join(__dirname, 'fixtures');
 

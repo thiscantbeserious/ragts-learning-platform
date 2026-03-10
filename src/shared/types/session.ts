@@ -1,5 +1,5 @@
 /**
- * Shared types for RAGTS platform.
+ * Session domain types.
  * Used by both client and server for type safety across the stack.
  */
 

@@ -11,12 +11,12 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import type { SessionAdapter } from '../db/session_adapter.js';
-import { processSessionPipeline } from './session_pipeline.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { SessionAdapter } from '../../../src/server/db/session_adapter.js';
+import { processSessionPipeline } from '../../../src/server/processing/session_pipeline.js';
 import { initVt } from '#vt-wasm';
-import type { ProcessedSession } from './types.js';
+import type { ProcessedSession } from '../../../src/server/processing/types.js';
 
 /**
  * Creates a session adapter that delegates to a real adapter but intercepts completeProcessing.

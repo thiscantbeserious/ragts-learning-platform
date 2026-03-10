@@ -16,12 +16,12 @@
  */
 
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { Marker, AsciicastEvent, AsciicastHeader } from '../../shared/asciicast-types.js';
+import type { Marker, AsciicastEvent, AsciicastHeader } from '../../shared/types/asciicast.js';
 import type { CreateSectionInput } from '../db/section_adapter.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'pipeline' });
-import { normalizeHeader } from '../../shared/asciicast.js';
+import { normalizeHeader } from '../../shared/parsers/asciicast.js';
 import { NdjsonStream } from './ndjson_stream.js';
 import { SectionDetector, type SectionBoundary } from './section_detector.js';
 import { createVt, initVt, type TerminalSnapshot } from '#vt-wasm';

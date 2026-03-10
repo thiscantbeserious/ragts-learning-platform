@@ -3,9 +3,9 @@
  * This is the abstraction boundary — implementations can swap SQLite for PostgreSQL.
  */
 
-import type { Session, SessionCreate } from '../../shared/types.js';
+import type { Session, SessionCreate } from '../../shared/types/session.js';
 import type { ProcessedSession } from '../processing/types.js';
-import type { DetectionStatus } from '../../shared/pipeline_events.js';
+import type { DetectionStatus } from '../../shared/types/pipeline.js';
 
 /**
  * Adapter for managing session entities.

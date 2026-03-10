@@ -5,7 +5,7 @@
  * The queue supports retry and boot-time recovery of interrupted jobs.
  */
 
-import type { PipelineStage } from '../../shared/pipeline_events.js';
+import type { PipelineStage } from '../../shared/types/pipeline.js';
 
 /** A single processing job linked to one session. */
 export interface Job {

@@ -5,9 +5,9 @@
 
 import type Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
-import type { Session, SessionCreate } from '../../../shared/types.js';
+import type { Session, SessionCreate } from '../../../shared/types/session.js';
 import type { SessionAdapter } from '../session_adapter.js';
-import type { DetectionStatus } from '../../../shared/pipeline_events.js';
+import type { DetectionStatus } from '../../../shared/types/pipeline.js';
 import type { ProcessedSession } from '../../processing/types.js';
 
 /**

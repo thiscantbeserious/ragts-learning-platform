@@ -10,11 +10,11 @@ import { mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { initVt } from '#vt-wasm';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
-import { PipelineOrchestrator, type StageDependencies } from './pipeline_orchestrator.js';
-import { PipelineStage } from '../../shared/pipeline_events.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import { EmitterEventBusImpl } from '../../../src/server/events/emitter_event_bus_impl.js';
+import { PipelineOrchestrator, type StageDependencies } from '../../../src/server/processing/pipeline_orchestrator.js';
+import { PipelineStage } from '../../../src/shared/types/pipeline.js';
 
 function buildShortCast(): string {
   const header = JSON.stringify({ version: 3, term: { cols: 80, rows: 24 } });
@@ -300,6 +300,97 @@ describe('PipelineOrchestrator', () => {
 
     // If we reach here, the inner catch absorbed the secondary error without propagating
     expect(true).toBe(true);
+  });
+
+  it('emits session.failed when session is not found during runJob (line 154)', async () => {
+    // Create session and job, then make findById return null to simulate
+    // a session disappearing between job lookup and session lookup in runJob.
+    // (Direct deleteById would cascade-delete the job too, so we intercept findById instead.)
+    await orchestrator.stop();
+
+    const content = buildShortCast();
+    const { nanoid } = await import('nanoid');
+    const sessionId = nanoid();
+    const filepath = await ctx.storageAdapter.save(sessionId, content);
+    const session = await ctx.sessionRepository.createWithId(sessionId, {
+      filename: 'ghost.cast',
+      filepath,
+      size_bytes: content.length,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
+    });
+    await ctx.jobQueue.create(session.id);
+
+    // Intercept findById to return null — simulates session disappearing after job lookup
+    const origFindById = ctx.sessionRepository.findById.bind(ctx.sessionRepository);
+    let callCount = 0;
+    ctx.sessionRepository.findById = async (id: string) => {
+      // First call is the session existence check inside runJob (line 153)
+      // Return null to trigger the "Session not found" throw
+      callCount++;
+      if (callCount === 1 && id === session.id) return null;
+      return origFindById(id);
+    };
+
+    const ghostDeps: StageDependencies = {
+      sessionRepository: ctx.sessionRepository,
+      storageAdapter: ctx.storageAdapter,
+    };
+
+    const freshOrchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, ghostDeps);
+    await freshOrchestrator.start();
+
+    const failedPromise = waitForEvent(eventBus, 'session.failed');
+    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'ghost.cast' });
+
+    const failedEvent = await failedPromise as { type: string; sessionId: string };
+    expect(failedEvent.type).toBe('session.failed');
+    expect(failedEvent.sessionId).toBe(session.id);
+
+    await freshOrchestrator.stop();
+    ctx.sessionRepository.findById = origFindById;
+  });
+
+  it('re-throws unexpected errors from jobQueue.start (line 150)', async () => {
+    // Simulate a real error (not "not in pending state") from jobQueue.start
+    await orchestrator.stop();
+
+    const content = buildShortCast();
+    const { nanoid } = await import('nanoid');
+    const sessionId = nanoid();
+    const filepath = await ctx.storageAdapter.save(sessionId, content);
+    const session = await ctx.sessionRepository.createWithId(sessionId, {
+      filename: 'rethrow-test.cast',
+      filepath,
+      size_bytes: content.length,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
+    });
+    await ctx.jobQueue.create(session.id);
+
+    // Wrap start to throw a non-"pending state" error
+    const origStart = ctx.jobQueue.start.bind(ctx.jobQueue);
+    ctx.jobQueue.start = async (jobId: string) => {
+      if (jobId !== undefined) {
+        throw new Error('Unexpected DB constraint error');
+      }
+      return origStart(jobId);
+    };
+
+    const freshOrchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, deps);
+    await freshOrchestrator.start();
+
+    // The real error should propagate to handleStageError, marking the job failed
+    const failedPromise = waitForEvent(eventBus, 'session.failed');
+    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'rethrow-test.cast' });
+
+    const failedEvent = await failedPromise as { type: string; sessionId: string; error: string };
+    expect(failedEvent.type).toBe('session.failed');
+    expect(failedEvent.sessionId).toBe(session.id);
+    expect(failedEvent.error).toContain('Unexpected DB constraint error');
+
+    await freshOrchestrator.stop();
+    ctx.jobQueue.start = origStart;
   });
 
   it('drainPending picks up a deferred job after a slot frees', async () => {

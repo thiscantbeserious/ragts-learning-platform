@@ -9,15 +9,15 @@ import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { initVt } from '#vt-wasm';
-import { validate } from './validate.js';
-import { detect } from './detect.js';
-import { replay } from './replay.js';
-import { dedup } from './dedup.js';
-import { store } from './store.js';
-import { SqliteDatabaseImpl } from '../../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../../db/database_adapter.js';
-import type { AsciicastEvent, AsciicastHeader } from '../../../shared/asciicast-types.js';
-import type { SectionBoundary } from '../section_detector.js';
+import { validate } from '../../../src/server/processing/stages/validate.js';
+import { detect } from '../../../src/server/processing/stages/detect.js';
+import { replay } from '../../../src/server/processing/stages/replay.js';
+import { dedup } from '../../../src/server/processing/stages/dedup.js';
+import { store } from '../../../src/server/processing/stages/store.js';
+import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
+import type { AsciicastEvent, AsciicastHeader } from '../../../src/shared/types/asciicast.js';
+import type { SectionBoundary } from '../../../src/server/processing/section_detector.js';
 
 // --- Helpers ---
 
@@ -470,6 +470,69 @@ describe('dedup stage', () => {
     // alt-screen sections have null startLine/endLine (from snapshot path)
     expect(result.sections[0]!.startLine).toBeNull();
     expect(result.sections[0]!.endLine).toBeNull();
+  });
+
+  it('labels section as marker type when boundary has marker signal and snapshot exists (line 106)', () => {
+    const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
+    const events: AsciicastEvent[] = [
+      [0.1, 'o', '\x1b[?1049h'],
+      [0.2, 'o', 'tui content\r\n'],
+      [0.3, 'o', '\x1b[?1049l'],
+    ];
+    // Use a marker signal so isMarker=true is exercised in the snapshot path
+    const boundaries: SectionBoundary[] = [
+      { eventIndex: 0, score: 10, signals: ['marker'], label: 'My Marker' },
+    ];
+
+    const replayResult = replay(header, events, boundaries);
+
+    const result = dedup(
+      'session-marker-snapshot',
+      replayResult.rawSnapshot,
+      replayResult.sectionData,
+      replayResult.epochBoundaries,
+      boundaries,
+      events.length
+    );
+
+    expect(result.sections).toHaveLength(1);
+    // The boundary has marker signal, so type must be 'marker'
+    expect(result.sections[0]!.type).toBe('marker');
+    // alt-screen sections have null line range
+    expect(result.sections[0]!.startLine).toBeNull();
+    expect(result.sections[0]!.endLine).toBeNull();
+  });
+
+  it('uses rawSnapshot.lines.length when lineCount is null (line 118 null-coalescing path)', () => {
+    const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
+    const events: AsciicastEvent[] = [
+      [0.1, 'o', 'line 1\r\n'],
+      [0.2, 'o', 'line 2\r\n'],
+    ];
+    const boundaries: SectionBoundary[] = [
+      { eventIndex: 0, score: 10, signals: ['detected'], label: 'Section' },
+    ];
+
+    // Produce sectionData with snapshot=null and lineCount=null to force the ?? branch
+    const replayResult = replay(header, events, boundaries);
+    const nullLineCountSectionData = replayResult.sectionData.map(sd => ({
+      ...sd,
+      lineCount: null,
+      snapshot: null,
+    }));
+
+    const result = dedup(
+      'session-null-linecount',
+      replayResult.rawSnapshot,
+      nullLineCountSectionData,
+      replayResult.epochBoundaries,
+      boundaries,
+      events.length
+    );
+
+    expect(result.sections).toHaveLength(1);
+    // endLine should equal rawSnapshot.lines.length (fallback path)
+    expect(result.sections[0]!.endLine).toBe(replayResult.rawSnapshot.lines.length);
   });
 });
 

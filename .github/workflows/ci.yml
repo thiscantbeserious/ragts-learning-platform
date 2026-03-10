@@ -102,6 +102,28 @@ jobs:
 
       - run: npm run test:unit
 
+  test-integration:
+    name: Integration Tests
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - uses: actions/cache/restore@v4
+        id: node-modules
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('package-lock.json') }}
+
+      - if: steps.node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - run: npm run test:integration
+
   test-snapshot:
     name: Snapshot Tests
     needs: install

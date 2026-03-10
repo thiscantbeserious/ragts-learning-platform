@@ -5,7 +5,7 @@
  */
 
 // @vitest-environment node
-import type { SessionCreate } from '../../../shared/types.js';
+import type { SessionCreate } from '../../../shared/types/session.js';
 import type { CreateSectionInput } from '../section_adapter.js';
 
 /**

@@ -1,53 +1,8 @@
 import { ref, computed, watch, toValue, type MaybeRef } from 'vue';
-import type { AsciicastFile } from '../../shared/asciicast-types';
 import type { TerminalSnapshot } from '#vt-wasm/types';
+import type { Section, SessionDetailResponse } from '../../shared/types/index.js';
 
-/**
- * Client-side section interface.
- * Maps from the API section response shape.
- * Supports hybrid rendering:
- * - CLI sections: use session snapshot + startLine/endLine ranges
- * - TUI sections: use per-section viewport snapshot
- */
-export interface Section {
-  id: string;
-  type: 'marker' | 'detected';
-  label: string;
-  startEvent: number;
-  endEvent: number;
-  startLine: number | null;   // CLI sections — index into session snapshot
-  endLine: number | null;     // CLI sections — index into session snapshot
-  snapshot: TerminalSnapshot | null;  // TUI sections — per-section viewport
-}
-
-/**
- * API section response structure (camelCase from the route handler).
- * Includes both line-range fields (CLI) and snapshot (TUI).
- */
-interface ApiSection {
-  id: string;
-  type: 'marker' | 'detected';
-  label: string;
-  startEvent: number;
-  endEvent: number;
-  startLine: number | null;  // CLI sections — line range start
-  endLine: number | null;    // CLI sections — line range end
-  snapshot: TerminalSnapshot | null;  // Parsed by route handler (TUI sections)
-}
-
-/**
- * Session API response structure.
- * Includes session-level snapshot (unified terminal document)
- * plus sections with their individual snapshots or line ranges.
- */
-interface SessionResponse {
-  id: string;
-  filename: string;
-  content: AsciicastFile;
-  snapshot?: string | TerminalSnapshot | null;  // Session-level snapshot (JSON string or parsed)
-  sections: ApiSection[];
-  detection_status: 'pending' | 'processing' | 'completed' | 'failed';
-}
+export type { Section } from '../../shared/types/index.js';
 
 /**
  * Parse snapshot JSON string into TerminalSnapshot object.
@@ -67,30 +22,25 @@ function parseSnapshot(snapshotJson: string): TerminalSnapshot | null {
 }
 
 /**
- * Map API sections to client-side sections.
- * Preserves line ranges (CLI) and snapshots (TUI).
- * Backward compatible: if startLine/endLine are missing, section still works with snapshot.
+ * Normalise sections from the API response.
+ * Ensures null coercion on optional line-range fields.
  */
-function mapSections(apiSections: ApiSection[]): Section[] {
-  return apiSections.map((apiSection) => ({
-    id: apiSection.id,
-    type: apiSection.type,
-    label: apiSection.label,
-    startEvent: apiSection.startEvent,
-    endEvent: apiSection.endEvent,
-    startLine: apiSection.startLine ?? null,
-    endLine: apiSection.endLine ?? null,
-    snapshot: apiSection.snapshot ?? null,
+function mapSections(apiSections: Section[]): Section[] {
+  return apiSections.map((s) => ({
+    ...s,
+    startLine: s.startLine ?? null,
+    endLine: s.endLine ?? null,
+    snapshot: s.snapshot ?? null,
   }));
 }
 
 export function useSession(sessionId: MaybeRef<string>) {
-  const session = ref<SessionResponse | null>(null);
+  const session = ref<SessionDetailResponse | null>(null);
   const sections = ref<Section[]>([]);
   const snapshot = ref<TerminalSnapshot | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
-  const detectionStatus = ref<'pending' | 'processing' | 'completed' | 'failed'>('completed');
+  const detectionStatus = ref<SessionDetailResponse['detection_status']>('completed');
 
   const filename = computed(() => session.value?.filename ?? '');
 
@@ -110,7 +60,7 @@ export function useSession(sessionId: MaybeRef<string>) {
       if (!res.ok) {
         throw new Error(`Failed to load session (${res.status})`);
       }
-      const data = await res.json() as SessionResponse;
+      const data = await res.json() as SessionDetailResponse;
       session.value = data;
       detectionStatus.value = data.detection_status;
       sections.value = mapSections(data.sections);

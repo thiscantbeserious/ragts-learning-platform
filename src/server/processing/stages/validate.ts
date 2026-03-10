@@ -6,8 +6,8 @@
  * The orchestrator emits `session.validated` after this stage succeeds.
  */
 
-import type { AsciicastEvent, AsciicastHeader, Marker } from '../../../shared/asciicast-types.js';
-import { normalizeHeader } from '../../../shared/asciicast.js';
+import type { AsciicastEvent, AsciicastHeader, Marker } from '../../../shared/types/asciicast.js';
+import { normalizeHeader } from '../../../shared/parsers/asciicast.js';
 import { NdjsonStream } from '../ndjson_stream.js';
 import { logger } from '../../logger.js';
 

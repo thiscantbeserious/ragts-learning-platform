@@ -11,7 +11,7 @@
 import type Database from 'better-sqlite3';
 import { nanoid } from 'nanoid';
 import type { Job, JobQueueAdapter } from './job_queue_adapter.js';
-import { PipelineStage } from '../../shared/pipeline_events.js';
+import { PipelineStage } from '../../shared/types/pipeline.js';
 
 /** Maps a raw DB row to the typed Job interface. */
 function rowToJob(row: Record<string, unknown>): Job {

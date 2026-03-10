@@ -6,7 +6,7 @@
  * The orchestrator emits `session.detected` after this stage succeeds.
  */
 
-import type { AsciicastEvent, Marker } from '../../../shared/asciicast-types.js';
+import type { AsciicastEvent, Marker } from '../../../shared/types/asciicast.js';
 import { SectionDetector, type SectionBoundary } from '../section_detector.js';
 
 /** Output of the detect stage. */

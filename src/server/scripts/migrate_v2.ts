@@ -15,8 +15,8 @@ import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import { processSessionPipeline } from '../processing/session_pipeline.js';
 import { NdjsonStream } from '../processing/ndjson_stream.js';
-import { extractMarkers, computeCumulativeTimes } from '../../shared/asciicast.js';
-import type { AsciicastEvent, AsciicastHeader, Marker } from '../../shared/asciicast-types.js';
+import { extractMarkers, computeCumulativeTimes } from '../../shared/parsers/asciicast.js';
+import type { AsciicastEvent, AsciicastHeader, Marker } from '../../shared/types/asciicast.js';
 import { loadConfig } from '../config.js';
 
 /**
@@ -81,7 +81,7 @@ export async function migrateV2(
 }
 
 async function processPendingSessions(
-  sessions: import('../../shared/types.js').Session[],
+  sessions: import('../../shared/types/session.js').Session[],
   sessionRepo: SessionAdapter
 ): Promise<{ processed: number; failed: number }> {
   let processed = 0;

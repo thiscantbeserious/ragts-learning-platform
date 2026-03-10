@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * Integration tests for API routes.
  * Tests the full request/response cycle including file storage and DB operations.
@@ -8,22 +9,36 @@ import { mkdtempSync, rmSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { Hono } from 'hono';
-import { SqliteDatabaseImpl } from '../db/sqlite/sqlite_database_impl.js';
-import type { DatabaseContext } from '../db/database_adapter.js';
-import type { SessionAdapter } from '../db/session_adapter.js';
-import type { SectionAdapter } from '../db/section_adapter.js';
-import type { StorageAdapter } from '../storage/storage_adapter.js';
-import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
-import { EmitterEventBusImpl } from '../events/emitter_event_bus_impl.js';
-import { PipelineOrchestrator } from '../processing/pipeline_orchestrator.js';
-import { handleUpload } from './upload.js';
+import { SqliteDatabaseImpl } from '../../src/server/db/sqlite/sqlite_database_impl.js';
+import type { DatabaseContext } from '../../src/server/db/database_adapter.js';
+import type { SessionAdapter } from '../../src/server/db/session_adapter.js';
+import type { SectionAdapter } from '../../src/server/db/section_adapter.js';
+import type { StorageAdapter } from '../../src/server/storage/storage_adapter.js';
+import type { JobQueueAdapter } from '../../src/server/jobs/job_queue_adapter.js';
+import { EmitterEventBusImpl } from '../../src/server/events/emitter_event_bus_impl.js';
+import { PipelineOrchestrator } from '../../src/server/processing/pipeline_orchestrator.js';
+import {
+  UploadService,
+  SessionService,
+  StatusService,
+  RetryService,
+  EventLogService,
+} from '../../src/server/services/index.js';
+import { handleUpload } from '../../src/server/routes/upload.js';
 import {
   handleListSessions,
   handleGetSession,
   handleDeleteSession,
   handleRedetect,
-} from './sessions.js';
+} from '../../src/server/routes/sessions.js';
+import { handleGetStatus } from '../../src/server/routes/status.js';
+import { handleRetry } from '../../src/server/routes/retry.js';
+import { handleGetEventLog } from '../../src/server/routes/events.js';
+import { handleSseEvents } from '../../src/server/routes/sse.js';
+import { PipelineStage } from '../../src/shared/types/pipeline.js';
 import { initVt } from '#vt-wasm';
+
+const FIXTURES_DIR = join(new URL('.', import.meta.url).pathname, '..', 'fixtures');
 
 describe('API Routes', () => {
   let testDir: string;
@@ -37,12 +52,12 @@ describe('API Routes', () => {
   let orchestrator: PipelineOrchestrator;
 
   const validFixture = readFileSync(
-    join(__dirname, '../../..', 'tests', 'fixtures', 'valid-with-markers.cast'),
+    join(FIXTURES_DIR, 'valid-with-markers.cast'),
     'utf-8'
   );
 
   const invalidFixture = readFileSync(
-    join(__dirname, '../../..', 'tests', 'fixtures', 'invalid-version.cast'),
+    join(FIXTURES_DIR, 'invalid-version.cast'),
     'utf-8'
   );
 
@@ -65,19 +80,42 @@ describe('API Routes', () => {
     });
     await orchestrator.start();
 
+    const uploadService = new UploadService({
+      sessionRepository,
+      storageAdapter,
+      jobQueue,
+      eventBus,
+      maxFileSizeMB: 2,
+    });
+
+    const sessionService = new SessionService({
+      sessionRepository,
+      sectionRepository,
+      storageAdapter,
+      jobQueue,
+      eventBus,
+    });
+
+    const statusService = new StatusService({ sessionRepository, jobQueue });
+
+    const retryService = new RetryService({ sessionRepository, jobQueue, eventBus });
+
+    const eventLogService = new EventLogService({
+      sessionRepository,
+      eventLog: ctx.eventLog,
+    });
+
     app = new Hono();
-    app.post('/api/upload', (c) =>
-      handleUpload(c, sessionRepository, storageAdapter, 2, jobQueue, eventBus)
-    );
-    app.get('/api/sessions', (c) => handleListSessions(c, sessionRepository));
-    app.get('/api/sessions/:id', (c) =>
-      handleGetSession(c, sessionRepository, sectionRepository, storageAdapter)
-    );
-    app.delete('/api/sessions/:id', (c) =>
-      handleDeleteSession(c, sessionRepository, storageAdapter)
-    );
-    app.post('/api/sessions/:id/redetect', (c) =>
-      handleRedetect(c, sessionRepository, storageAdapter, jobQueue, eventBus)
+    app.post('/api/upload', (c) => handleUpload(c, uploadService));
+    app.get('/api/sessions', (c) => handleListSessions(c, sessionService));
+    app.get('/api/sessions/:id', (c) => handleGetSession(c, sessionService));
+    app.delete('/api/sessions/:id', (c) => handleDeleteSession(c, sessionService));
+    app.post('/api/sessions/:id/redetect', (c) => handleRedetect(c, sessionService));
+    app.get('/api/sessions/:id/status', (c) => handleGetStatus(c, statusService));
+    app.post('/api/sessions/:id/retry', (c) => handleRetry(c, retryService));
+    app.get('/api/events', (c) => handleGetEventLog(c, eventLogService));
+    app.get('/api/sessions/:id/events', (c) =>
+      handleSseEvents(c, sessionRepository, eventBus, ctx.eventLog)
     );
   });
 
@@ -536,7 +574,14 @@ describe('API Routes', () => {
       const failingRepo = {
         findAll: () => { throw new Error('DB connection lost'); },
       } as unknown as SessionAdapter;
-      failApp.get('/api/sessions', (c) => handleListSessions(c, failingRepo));
+      const failService = new SessionService({
+        sessionRepository: failingRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.get('/api/sessions', (c) => handleListSessions(c, failService));
 
       const res = await failApp.fetch(new Request('http://localhost/api/sessions'));
       expect(res.status).toBe(500);
@@ -557,9 +602,14 @@ describe('API Routes', () => {
       const failRepo = {
         findById: () => { throw new Error('DB connection failed'); },
       } as unknown as SessionAdapter;
-      failApp.get('/api/sessions/:id', (c) =>
-        handleGetSession(c, failRepo, sectionRepository, storageAdapter)
-      );
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.get('/api/sessions/:id', (c) => handleGetSession(c, failService));
 
       const res = await failApp.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`)
@@ -583,9 +633,14 @@ describe('API Routes', () => {
         findById: sessionRepository.findById.bind(sessionRepository),
         deleteById: async () => false,
       } as unknown as SessionAdapter;
-      failApp.delete('/api/sessions/:id', (c) =>
-        handleDeleteSession(c, failRepo, storageAdapter)
-      );
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
@@ -600,9 +655,14 @@ describe('API Routes', () => {
       const failRepo = {
         findById: () => { throw new Error('DB crashed'); },
       } as unknown as SessionAdapter;
-      failApp.delete('/api/sessions/:id', (c) =>
-        handleDeleteSession(c, failRepo, storageAdapter)
-      );
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
         new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' })
@@ -612,71 +672,97 @@ describe('API Routes', () => {
       expect(body.error).toBe('Failed to delete session');
     });
 
-    it('should use String(err) when non-Error is thrown from list sessions', async () => {
+    it('should return 500 without internal details when non-Error is thrown from list sessions', async () => {
       const failApp = new Hono();
       const failRepo = {
         findAll: () => { throw 'string error code'; },
       } as unknown as SessionAdapter;
-      failApp.get('/api/sessions', (c) => handleListSessions(c, failRepo));
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.get('/api/sessions', (c) => handleListSessions(c, failService));
 
       const res = await failApp.fetch(new Request('http://localhost/api/sessions'));
       expect(res.status).toBe(500);
       const body = await res.json();
-      expect(body.details).toBe('string error code');
+      expect(body.error).toBe('Failed to list sessions');
+      expect(body.details).toBeUndefined();
     });
 
-    it('should use String(err) when non-Error is thrown from get session', async () => {
+    it('should return 500 without internal details when non-Error is thrown from get session', async () => {
       const failApp = new Hono();
       const failRepo = {
         findById: () => { throw 'non-error-value'; },
       } as unknown as SessionAdapter;
-      failApp.get('/api/sessions/:id', (c) =>
-        handleGetSession(c, failRepo, sectionRepository, storageAdapter)
-      );
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.get('/api/sessions/:id', (c) => handleGetSession(c, failService));
 
       const res = await failApp.fetch(
         new Request('http://localhost/api/sessions/some-id')
       );
       expect(res.status).toBe(500);
       const body = await res.json();
-      expect(body.details).toBe('non-error-value');
+      expect(body.error).toBe('Failed to retrieve session');
+      expect(body.details).toBeUndefined();
     });
 
-    it('should use String(err) when non-Error is thrown from delete session', async () => {
+    it('should return 500 without internal details when non-Error is thrown from delete session', async () => {
       const failApp = new Hono();
       const failRepo = {
         findById: () => { throw 42; },
       } as unknown as SessionAdapter;
-      failApp.delete('/api/sessions/:id', (c) =>
-        handleDeleteSession(c, failRepo, storageAdapter)
-      );
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
         new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' })
       );
       expect(res.status).toBe(500);
       const body = await res.json();
-      expect(body.details).toBe('42');
+      expect(body.error).toBe('Failed to delete session');
+      expect(body.details).toBeUndefined();
     });
 
-    it('should use String(err) when non-Error is thrown from redetect', async () => {
+    it('should return 500 without internal details when non-Error is thrown from redetect', async () => {
       const failApp = new Hono();
       const failRepo = {
         findById: () => { throw 'redetect-error'; },
       } as unknown as SessionAdapter;
-      failApp.post('/api/sessions/:id/redetect', (c) =>
-        handleRedetect(c, failRepo, storageAdapter, jobQueue, eventBus)
-      );
+      const failService = new SessionService({
+        sessionRepository: failRepo,
+        sectionRepository,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+      });
+      failApp.post('/api/sessions/:id/redetect', (c) => handleRedetect(c, failService));
 
       const res = await failApp.fetch(
         new Request('http://localhost/api/sessions/any-id/redetect', { method: 'POST' })
       );
       expect(res.status).toBe(500);
       const body = await res.json();
-      expect(body.details).toBe('redetect-error');
+      expect(body.error).toBe('Failed to start re-detection');
+      expect(body.details).toBeUndefined();
     });
 
-    it('should use String(err) when non-Error is thrown from storage save during upload', async () => {
+    it('should return safe details when storage save fails during upload', async () => {
       const failApp = new Hono();
       const failStorage = {
         save: () => { throw 'disk-quota-exceeded'; },
@@ -684,9 +770,14 @@ describe('API Routes', () => {
         delete: storageAdapter.delete.bind(storageAdapter),
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
-      failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, failStorage, 250, jobQueue, eventBus)
-      );
+      const failUploadService = new UploadService({
+        sessionRepository,
+        storageAdapter: failStorage,
+        jobQueue,
+        eventBus,
+        maxFileSizeMB: 250,
+      });
+      failApp.post('/api/upload', (c) => handleUpload(c, failUploadService));
 
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -696,7 +787,7 @@ describe('API Routes', () => {
       expect(res.status).toBe(500);
       const body = await res.json();
       expect(body.error).toBe('Failed to save file');
-      expect(body.details).toBe('disk-quota-exceeded');
+      expect(body.details).toBe('Storage write failed');
     });
 
     it('should handle delete when file is already removed', async () => {
@@ -729,9 +820,14 @@ describe('API Routes', () => {
       const failStorage = {
         delete: () => { throw new Error('Permission denied'); },
       } as unknown as StorageAdapter;
-      failApp.delete('/api/sessions/:id', (c) =>
-        handleDeleteSession(c, sessionRepository, failStorage)
-      );
+      const failService = new SessionService({
+        sessionRepository,
+        sectionRepository,
+        storageAdapter: failStorage,
+        jobQueue,
+        eventBus,
+      });
+      failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
         new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
@@ -747,9 +843,14 @@ describe('API Routes', () => {
         delete: storageAdapter.delete.bind(storageAdapter),
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
-      failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, failStorage, 250, jobQueue, eventBus)
-      );
+      const failUploadService = new UploadService({
+        sessionRepository,
+        storageAdapter: failStorage,
+        jobQueue,
+        eventBus,
+        maxFileSizeMB: 250,
+      });
+      failApp.post('/api/upload', (c) => handleUpload(c, failUploadService));
 
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -762,7 +863,6 @@ describe('API Routes', () => {
     });
 
     it('should return 500 when job queue fails after DB insert — updateDetectionStatus succeeds', async () => {
-      // Covers upload.ts lines 94-99: jobQueue.create throws, updateDetectionStatus is called best-effort
       const failApp = new Hono();
       const failJobQueue = {
         create: () => { throw new Error('Queue unavailable'); },
@@ -774,9 +874,14 @@ describe('API Routes', () => {
         fail: jobQueue.fail.bind(jobQueue),
         recoverInterrupted: jobQueue.recoverInterrupted.bind(jobQueue),
       } as unknown as JobQueueAdapter;
-      failApp.post('/api/upload', (c) =>
-        handleUpload(c, sessionRepository, storageAdapter, 250, failJobQueue, eventBus)
-      );
+      const failUploadService = new UploadService({
+        sessionRepository,
+        storageAdapter,
+        jobQueue: failJobQueue,
+        eventBus,
+        maxFileSizeMB: 250,
+      });
+      failApp.post('/api/upload', (c) => handleUpload(c, failUploadService));
 
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -789,7 +894,6 @@ describe('API Routes', () => {
     });
 
     it('should return 500 when job queue fails and updateDetectionStatus also fails (best-effort catch)', async () => {
-      // Covers upload.ts lines 94-99: both jobQueue.create and updateDetectionStatus throw
       const failApp = new Hono();
       const failJobQueue = {
         create: () => { throw new Error('Queue unavailable'); },
@@ -798,9 +902,14 @@ describe('API Routes', () => {
         createWithId: sessionRepository.createWithId.bind(sessionRepository),
         updateDetectionStatus: () => { throw new Error('DB gone during status update'); },
       } as unknown as SessionAdapter;
-      failApp.post('/api/upload', (c) =>
-        handleUpload(c, failRepo, storageAdapter, 250, failJobQueue, eventBus)
-      );
+      const failUploadService = new UploadService({
+        sessionRepository: failRepo,
+        storageAdapter,
+        jobQueue: failJobQueue,
+        eventBus,
+        maxFileSizeMB: 250,
+      });
+      failApp.post('/api/upload', (c) => handleUpload(c, failUploadService));
 
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -817,9 +926,14 @@ describe('API Routes', () => {
       const failRepo = {
         createWithId: () => { throw new Error('UNIQUE constraint failed'); },
       } as unknown as SessionAdapter;
-      failApp.post('/api/upload', (c) =>
-        handleUpload(c, failRepo, storageAdapter, 250, jobQueue, eventBus)
-      );
+      const failUploadService = new UploadService({
+        sessionRepository: failRepo,
+        storageAdapter,
+        jobQueue,
+        eventBus,
+        maxFileSizeMB: 250,
+      });
+      failApp.post('/api/upload', (c) => handleUpload(c, failUploadService));
 
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -842,9 +956,14 @@ describe('API Routes', () => {
         delete: () => { throw new Error('Permission denied on cleanup'); },
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
-      failApp.post('/api/upload', (c) =>
-        handleUpload(c, failRepo, failStorage, 250, jobQueue, eventBus)
-      );
+      const failUploadService = new UploadService({
+        sessionRepository: failRepo,
+        storageAdapter: failStorage,
+        jobQueue,
+        eventBus,
+        maxFileSizeMB: 250,
+      });
+      failApp.post('/api/upload', (c) => handleUpload(c, failUploadService));
 
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
@@ -854,6 +973,219 @@ describe('API Routes', () => {
       expect(res.status).toBe(500);
       const body = await res.json();
       expect(body.error).toBe('Internal server error');
+    });
+  });
+
+  // ------------------------------------------------------------------ //
+  // New Stage 4+5 routes
+  // ------------------------------------------------------------------ //
+
+  describe('GET /api/sessions/:id/status', () => {
+    it('returns 200 with completed status when no job exists', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const { id } = await uploadRes.json();
+      await orchestrator.waitForPending();
+
+      const res = await app.fetch(new Request(`http://localhost/api/sessions/${id}/status`));
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.sessionId).toBe(id);
+      expect(['completed', 'pending', 'running']).toContain(body.status);
+    });
+
+    it('returns 404 for non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/nonexistent/status')
+      );
+      expect(res.status).toBe(404);
+      const body = await res.json();
+      expect(body.error).toContain('not found');
+    });
+  });
+
+  describe('POST /api/sessions/:id/retry', () => {
+    it('returns 200 and restarts a failed job', async () => {
+      // Create a session directly (not via upload) so we can control the job state
+      const session = await sessionRepository.createWithId('retry-test-session', {
+        filename: 'retry-test.cast',
+        filepath: '/tmp/retry-test.cast',
+        size_bytes: 100,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+      const job = await jobQueue.create(session.id);
+      await jobQueue.start(job.id);
+      await jobQueue.fail(job.id, 'Simulated pipeline failure');
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' })
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body.sessionId).toBe(session.id);
+      expect(body.message).toContain('Retry started');
+    });
+
+    it('returns 400 when no job exists', async () => {
+      // Create a raw session without a job
+      const session = await sessionRepository.createWithId('no-job-session', {
+        filename: 'test.cast',
+        filepath: '/tmp/test.cast',
+        size_bytes: 100,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' })
+      );
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBeDefined();
+    });
+
+    it('returns 409 when job is already running', async () => {
+      const session = await sessionRepository.createWithId('running-job-session', {
+        filename: 'test.cast',
+        filepath: '/tmp/test.cast',
+        size_bytes: 100,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+      const job = await jobQueue.create(session.id);
+      await jobQueue.start(job.id);
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' })
+      );
+      expect(res.status).toBe(409);
+    });
+
+    it('returns 404 for non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/nonexistent/retry', { method: 'POST' })
+      );
+      expect(res.status).toBe(404);
+      const body = await res.json();
+      expect(body.error).toContain('not found');
+    });
+  });
+
+  describe('GET /api/events', () => {
+    it('returns 200 with empty array for session with no events', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const { id } = await uploadRes.json();
+      await orchestrator.waitForPending();
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/events?sessionId=${id}`)
+      );
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(Array.isArray(body)).toBe(true);
+    });
+
+    it('returns 400 when sessionId query param is missing', async () => {
+      const res = await app.fetch(new Request('http://localhost/api/events'));
+      expect(res.status).toBe(400);
+      const body = await res.json();
+      expect(body.error).toBeDefined();
+    });
+
+    it('returns 404 for non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/events?sessionId=nonexistent')
+      );
+      expect(res.status).toBe(404);
+      const body = await res.json();
+      expect(body.error).toContain('not found');
+    });
+  });
+
+  describe('GET /api/sessions/:id/events (SSE)', () => {
+    it('returns 200 with text/event-stream content type', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const { id } = await uploadRes.json();
+
+      // Emit terminal event so stream closes immediately
+      setImmediate(() => {
+        eventBus.emit({ type: 'session.ready', sessionId: id });
+      });
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${id}/events`)
+      );
+      expect(res.status).toBe(200);
+      expect(res.headers.get('content-type')).toContain('text/event-stream');
+      await res.text();
+    });
+
+    it('returns 404 for non-existent session', async () => {
+      const res = await app.fetch(
+        new Request('http://localhost/api/sessions/nonexistent/events')
+      );
+      expect(res.status).toBe(404);
+      const body = await res.json();
+      expect(body.error).toContain('not found');
+    });
+
+    it('streams pipeline events for the session and closes on terminal event', async () => {
+      const formData = new FormData();
+      formData.append('file', new File([validFixture], 'test.cast'));
+      const uploadRes = await app.fetch(
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+      );
+      const { id } = await uploadRes.json();
+
+      setImmediate(() => {
+        eventBus.emit({ type: 'session.validated', sessionId: id, eventCount: 5 });
+        eventBus.emit({ type: 'session.ready', sessionId: id });
+      });
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${id}/events`)
+      );
+      expect(res.status).toBe(200);
+      const text = await res.text();
+      expect(text).toContain('session.ready');
+    });
+
+    it('closes stream on session.failed terminal event', async () => {
+      const session = await sessionRepository.createWithId('fail-sse-test', {
+        filename: 'test.cast',
+        filepath: '/tmp/test.cast',
+        size_bytes: 100,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
+      });
+
+      setImmediate(() => {
+        eventBus.emit({
+          type: 'session.failed',
+          sessionId: session.id,
+          stage: PipelineStage.Validate,
+          error: 'Test failure',
+        });
+      });
+
+      const res = await app.fetch(
+        new Request(`http://localhost/api/sessions/${session.id}/events`)
+      );
+      expect(res.status).toBe(200);
+      const text = await res.text();
+      expect(text).toContain('session.failed');
     });
   });
 });

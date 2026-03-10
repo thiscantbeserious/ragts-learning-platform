@@ -10,7 +10,7 @@
 
 import type Database from 'better-sqlite3';
 import type { EventLogAdapter, EventLogEntry } from './event_log_adapter.js';
-import type { PipelineEvent } from '../../shared/pipeline_events.js';
+import type { PipelineEvent } from '../../shared/types/pipeline.js';
 
 /** Extract the stage field from events that have one; returns null otherwise. */
 function extractStage(event: PipelineEvent): string | null {
@@ -24,6 +24,8 @@ function extractStage(event: PipelineEvent): string | null {
 export class SqliteEventLogImpl implements EventLogAdapter {
   private readonly insertStmt: Database.Statement;
   private readonly findBySessionIdStmt: Database.Statement;
+  private readonly findAfterIdStmt: Database.Statement;
+  private readonly deleteOlderThanStmt: Database.Statement;
 
   constructor(db: Database.Database) {
     this.insertStmt = db.prepare(`
@@ -37,6 +39,15 @@ export class SqliteEventLogImpl implements EventLogAdapter {
       WHERE session_id = ?
       ORDER BY id ASC
     `);
+
+    this.findAfterIdStmt = db.prepare(`
+      SELECT id, session_id, event_type, stage, payload, created_at
+      FROM events
+      WHERE session_id = ? AND id > ?
+      ORDER BY id ASC
+    `);
+
+    this.deleteOlderThanStmt = db.prepare('DELETE FROM events WHERE created_at < ?');
   }
 
   /**
@@ -44,16 +55,38 @@ export class SqliteEventLogImpl implements EventLogAdapter {
    * Stores the full event as JSON payload alongside extracted metadata.
    */
   async log(event: PipelineEvent): Promise<void> {
+    this.logSync(event);
+  }
+
+  /**
+   * Synchronously persist a pipeline event and return the inserted row ID.
+   * Allows callers to attach the log ID to the event before other
+   * synchronous event bus handlers fire.
+   */
+  logSync(event: PipelineEvent): number {
     const sessionId = event.sessionId;
     const stage = extractStage(event);
     const payload = JSON.stringify(event);
-    this.insertStmt.run(sessionId, event.type, stage, payload);
+    const result = this.insertStmt.run(sessionId, event.type, stage, payload);
+    return Number(result.lastInsertRowid);
   }
 
   /** Find all logged events for a session ordered by insertion. */
   async findBySessionId(sessionId: string): Promise<EventLogEntry[]> {
     const rows = this.findBySessionIdStmt.all(sessionId) as Array<Record<string, unknown>>;
     return rows.map(rowToEntry);
+  }
+
+  /** Find events for a session with id strictly greater than afterId, ordered by id ASC. */
+  async findBySessionIdAfterId(sessionId: string, afterId: number): Promise<EventLogEntry[]> {
+    const rows = this.findAfterIdStmt.all(sessionId, afterId) as Array<Record<string, unknown>>;
+    return rows.map(rowToEntry);
+  }
+
+  /** Delete events older than the given cutoff date. Returns the count of deleted rows. */
+  async deleteOlderThan(cutoff: Date): Promise<number> {
+    const result = this.deleteOlderThanStmt.run(cutoff.toISOString());
+    return result.changes;
   }
 }
 

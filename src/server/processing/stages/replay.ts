@@ -9,7 +9,7 @@
  * WASM guard: vt.free() is always called via try/finally, preventing WASM memory leaks.
  */
 
-import type { AsciicastEvent, AsciicastHeader } from '../../../shared/asciicast-types.js';
+import type { AsciicastEvent, AsciicastHeader } from '../../../shared/types/asciicast.js';
 import { createVt, type TerminalSnapshot } from '#vt-wasm';
 import type { SectionBoundary } from '../section_detector.js';
 import type { EpochBoundary } from '../scrollback_dedup.js';

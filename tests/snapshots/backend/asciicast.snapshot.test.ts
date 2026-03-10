@@ -9,8 +9,8 @@ import {
   parseAsciicast,
   normalizeHeader,
   computeCumulativeTimes,
-} from '../../../src/shared/asciicast.js';
-import type { AsciicastEvent } from '../../../src/shared/asciicast-types.js';
+} from '../../../src/shared/parsers/asciicast.js';
+import type { AsciicastEvent } from '../../../src/shared/types/asciicast.js';
 
 const fixturesDir = join(__dirname, '../../fixtures');
 

@@ -16,7 +16,7 @@
  * 6. Generate labels
  */
 
-import type { AsciicastEvent, Marker } from '../../shared/asciicast-types.js';
+import type { AsciicastEvent, Marker } from '../../shared/types/asciicast.js';
 
 export interface SectionBoundary {
   eventIndex: number; // 0-based event index where boundary occurs

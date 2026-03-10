@@ -11,7 +11,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { SectionDetector } from './section_detector.js';
-import type { AsciicastEvent } from '../../shared/asciicast-types.js';
+import type { AsciicastEvent } from '../../shared/types/asciicast.js';
 
 describe('SectionDetector', () => {
   describe('basic scenarios', () => {

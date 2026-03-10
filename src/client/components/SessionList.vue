@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Session } from '../../shared/types';
+import type { Session } from '../../shared/types/session.js';
 
 defineProps<{
   sessions: Session[];

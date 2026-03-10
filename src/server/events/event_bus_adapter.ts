@@ -8,7 +8,7 @@
  * assumptions.
  */
 
-import type { PipelineEvent, PipelineEventType, PipelineEventPayload } from '../../shared/pipeline_events.js';
+import type { PipelineEvent, PipelineEventType, PipelineEventPayload } from '../../shared/types/pipeline.js';
 
 /** Handler function for a specific event type — receives the narrowed payload. */
 export type EventHandler<T extends PipelineEventType> = (event: PipelineEventPayload<T>) => void;
