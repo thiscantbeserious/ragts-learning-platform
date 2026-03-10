@@ -1014,13 +1014,17 @@
     margin-left: var(--space-2);
   }
 
+  .app-header__search .search-bar {
+    height: var(--btn-height-sm);
+    margin-top: var(--rhythm-quarter);
+    margin-bottom: var(--rhythm-quarter);
+  }
+
   .app-header__search .search-bar__input {
     font-size: var(--text-sm);
     height: var(--btn-height-sm);
     padding-left: var(--space-6);
     padding-right: var(--space-2);
-    margin-top: var(--rhythm-quarter);
-    margin-bottom: var(--rhythm-quarter);
   }
 
   .app-header__search .search-bar__icon {
@@ -1054,6 +1058,8 @@
   position: relative;
   display: flex;
   align-items: center;
+  /* Match input height so TRON trail follows the visible border exactly */
+  height: var(--input-height-sm);
 }
 
 .search-bar__icon {
