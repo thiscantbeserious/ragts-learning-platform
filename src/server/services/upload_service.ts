@@ -138,7 +138,7 @@ export class UploadService {
 /** Sanitize an uploaded filename: keep only safe characters, enforce max length. */
 function sanitizeFilename(name: string): string {
   const base = name.split(/[/\\]/).pop() ?? 'unnamed.cast';
-  const clean = base.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const clean = base.replaceAll(/[^a-zA-Z0-9._-]/g, '_');
   const trimmed = clean.slice(0, 255);
   return trimmed || 'unnamed.cast';
 }

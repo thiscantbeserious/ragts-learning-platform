@@ -220,6 +220,6 @@ export class PipelineOrchestrator {
 function sanitizeErrorMessage(error: unknown): string {
   if (!(error instanceof Error)) return 'Processing failed';
   const msg = error.message;
-  const cleaned = msg.replace(/\/[\w/.\\-]+/g, '<path>');
+  const cleaned = msg.replaceAll(/\/[\w/.\\-]+/g, '<path>');
   return cleaned.slice(0, 200);
 }
