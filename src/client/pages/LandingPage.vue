@@ -34,7 +34,7 @@ async function onDelete(id: string): Promise<void> {
 </script>
 
 <template>
-  <div class="landing-page">
+  <div class="landing-page container">
     <main class="landing-page__content">
       <UploadZone
         :uploading="uploading"
@@ -48,7 +48,9 @@ async function onDelete(id: string): Promise<void> {
       />
 
       <section class="landing-page__sessions">
-        <h2>Sessions</h2>
+        <h2 class="section__title">
+          Sessions
+        </h2>
         <SessionList
           :sessions="sessions"
           :loading="loading"
@@ -67,21 +69,13 @@ async function onDelete(id: string): Promise<void> {
 
 <style scoped>
 .landing-page {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+  max-width: var(--container-max);
+  padding: var(--space-8) var(--container-padding);
 }
 
 .landing-page__content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-}
-
-.landing-page__sessions h2 {
-  font-size: 1.1rem;
-  color: #b0b0b0;
-  margin-bottom: 0.75rem;
-  font-weight: 500;
+  gap: var(--space-8);
 }
 </style>

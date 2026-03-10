@@ -106,11 +106,11 @@ const preambleLines = computed(() => {
 </template>
 
 <style scoped>
+/* .terminal-chrome base styles come from design/styles/components.css */
 .terminal-chrome {
-  background: #0d0d0d;
-  border-radius: 8px;
+  font-family: var(--font-mono);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
 }
 
 .terminal-scroll {
@@ -122,16 +122,16 @@ const preambleLines = computed(() => {
 }
 
 .section-empty {
-  padding: 1rem;
-  color: #555;
+  padding: var(--space-4);
+  color: var(--text-muted);
   font-style: italic;
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
 }
 
 .terminal-empty {
-  padding: 2rem;
+  padding: var(--space-8);
   text-align: center;
-  color: #555;
+  color: var(--text-disabled);
   font-style: italic;
 }
 </style>

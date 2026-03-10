@@ -56,7 +56,7 @@ function confirmDelete(id: string, filename: string): void {
     </div>
     <div
       v-else
-      class="session-list__grid"
+      class="session-list__grid grid"
     >
       <router-link
         v-for="session in sessions"
@@ -71,20 +71,20 @@ function confirmDelete(id: string, filename: string): void {
             title="Delete session"
             @click.prevent.stop="confirmDelete(session.id, session.filename)"
           >
-            ×
+            <span class="icon icon--sm icon-trash" />
           </button>
         </div>
         <div class="session-card__meta">
-          <span class="session-card__size">{{ formatSize(session.size_bytes) }}</span>
+          <span class="session-card__meta-item">{{ formatSize(session.size_bytes) }}</span>
           <span
             v-if="session.marker_count > 0"
-            class="session-card__markers"
+            class="badge badge--sm badge--accent"
           >
             {{ session.marker_count }} marker{{ session.marker_count !== 1 ? 's' : '' }}
           </span>
         </div>
-        <div class="session-card__date">
-          {{ formatDate(session.uploaded_at) }}
+        <div class="session-card__footer">
+          <span class="session-list__date">{{ formatDate(session.uploaded_at) }}</span>
         </div>
       </router-link>
     </div>
@@ -92,103 +92,65 @@ function confirmDelete(id: string, filename: string): void {
 </template>
 
 <style scoped>
-.session-list__loading,
-.session-list__error {
+/* session-card styles come from design/styles/components.css */
+
+.session-list__loading {
   text-align: center;
-  padding: 2rem;
-  color: #808080;
+  padding: var(--space-8);
+  color: var(--text-muted);
 }
 
 .session-list__error {
-  color: #ff5050;
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--status-error);
 }
 
 .session-list__empty {
   text-align: center;
-  padding: 2rem;
-  color: #666;
+  padding: var(--space-8);
+  color: var(--text-muted);
 }
 
 .session-list__empty-hint {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: #555;
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-disabled);
 }
 
 .session-list__empty-hint code {
-  color: #4a9eff;
-  background: rgba(74, 158, 255, 0.1);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
   padding: 0.1em 0.4em;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
 }
 
 .session-list__grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.session-card {
-  display: block;
-  padding: 1rem 1.25rem;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.2s, background-color 0.2s;
-}
-
-.session-card:hover {
-  border-color: #4a9eff;
-  background: #1e1e1e;
-}
-
-.session-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.session-card__filename {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 0.95rem;
-  color: #e0e0e0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: grid;
+  gap: var(--grid-gap);
 }
 
 .session-card__delete {
   background: none;
   border: none;
-  color: #666;
+  color: var(--text-muted);
   cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0 0.25rem;
+  padding: var(--space-1);
   line-height: 1;
-  transition: color 0.2s;
+  transition: color var(--duration-fast) var(--easing-default);
+  display: flex;
+  align-items: center;
 }
 
 .session-card__delete:hover {
-  color: #ff5050;
+  color: var(--status-error);
 }
 
-.session-card__meta {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.8rem;
-  color: #808080;
-  margin-bottom: 0.25rem;
-}
-
-.session-card__markers {
-  color: #4a9eff;
-}
-
-.session-card__date {
-  font-size: 0.75rem;
-  color: #555;
+.session-list__date {
+  font-size: var(--text-xs);
+  color: var(--text-disabled);
+  font-family: var(--font-mono);
+  letter-spacing: var(--tracking-wider);
 }
 </style>

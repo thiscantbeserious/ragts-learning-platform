@@ -3,33 +3,44 @@
 
 <template>
   <header class="app-header">
-    <router-link
-      to="/"
-      class="app-header__brand"
-    >
-      RAGTS
-    </router-link>
+    <div class="app-header__left">
+      <router-link
+        to="/"
+        class="app-header__brand"
+      >
+        <div class="app-header__logo">
+          R
+        </div>
+        <span class="app-header__name">RAGTS</span>
+      </router-link>
+      <nav class="app-header__nav">
+        <router-link
+          to="/"
+          class="app-header__nav-link app-header__nav-link--active"
+        >
+          Sessions
+        </router-link>
+      </nav>
+    </div>
+    <div class="app-header__right" />
   </header>
 </template>
 
 <style scoped>
+/* app-header layout and sub-elements come from design/styles/components.css */
+/* The following adds fixed-height enforcement per design system contract */
 .app-header {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid #1a1a1a;
-  background: #0f0f0f;
+  height: var(--header-height);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.app-header__brand {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #4a9eff;
-  text-decoration: none;
-  letter-spacing: 0.08em;
-}
-
-.app-header__brand:hover {
-  opacity: 0.8;
+.app-header__logo {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-sm);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
 }
 </style>

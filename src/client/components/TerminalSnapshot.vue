@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SnapshotLine } from '#vt-wasm/types';
-import './terminal-colors.css';
+/* terminal ANSI color tokens are now in design/styles/layout.css :root */
 
 const props = withDefaults(defineProps<{
   lines: SnapshotLine[];
@@ -110,15 +110,15 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
 
 <style scoped>
 .terminal-snapshot {
-  font-size: 0.875rem;
-  line-height: 1.4;
-  padding: 0.75rem 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-mono);
+  padding: var(--space-3) 0;
   white-space: pre;
 }
 
 .terminal-line {
   display: flex;
-  min-height: 1.4em; /* Preserve empty lines */
+  min-height: var(--leading-mono);
 }
 
 .terminal-line__number {
@@ -127,10 +127,10 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
   min-width: 5ch;
   text-align: right;
   padding-right: 1ch;
-  color: #444;
+  color: var(--text-muted);
   user-select: none;
   flex-shrink: 0;
-  border-right: 1px solid #222;
+  border-right: 1px solid var(--border-default);
   margin-right: 1ch;
 }
 

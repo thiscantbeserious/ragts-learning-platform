@@ -10,37 +10,42 @@ const { sections, snapshot, loading, error, filename } = useSession(sessionId);
 </script>
 
 <template>
-  <div class="session-detail-page">
+  <div class="session-detail-page container">
     <header class="session-detail-page__header">
-      <router-link
-        to="/"
-        class="session-detail-page__back"
-      >
-        &larr; Back
-      </router-link>
-      <h1
-        v-if="filename"
-        class="session-detail-page__title"
-      >
-        {{ filename }}
-      </h1>
+      <nav class="breadcrumb">
+        <router-link
+          to="/"
+          class="breadcrumb__link"
+        >
+          Sessions
+        </router-link>
+        <span class="breadcrumb__separator">
+          <span class="icon icon--xs icon-chevron-right" />
+        </span>
+        <span
+          v-if="filename"
+          class="breadcrumb__current"
+        >
+          {{ filename }}
+        </span>
+      </nav>
     </header>
 
     <div
       v-if="loading"
-      class="session-detail-page__loading"
+      class="session-detail-page__state"
     >
       Loading session...
     </div>
     <div
       v-else-if="error"
-      class="session-detail-page__error"
+      class="session-detail-page__state session-detail-page__state--error"
     >
       {{ error }}
     </div>
     <div
       v-else-if="sections.length === 0 && !snapshot"
-      class="session-detail-page__empty"
+      class="session-detail-page__state"
     >
       This session has no content.
     </div>
@@ -55,49 +60,21 @@ const { sections, snapshot, loading, error, filename } = useSession(sessionId);
 
 <style scoped>
 .session-detail-page {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1.5rem;
+  max-width: var(--container-max);
+  padding: var(--space-6) var(--container-padding);
 }
 
 .session-detail-page__header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-6);
 }
 
-.session-detail-page__back {
-  color: #4a9eff;
-  text-decoration: none;
-  font-size: 0.9rem;
-  flex-shrink: 0;
-}
-
-.session-detail-page__back:hover {
-  text-decoration: underline;
-}
-
-.session-detail-page__title {
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 1.1rem;
-  color: #e0e0e0;
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.session-detail-page__loading,
-.session-detail-page__empty {
+.session-detail-page__state {
   text-align: center;
-  padding: 3rem;
-  color: #808080;
+  padding: var(--space-12);
+  color: var(--text-muted);
 }
 
-.session-detail-page__error {
-  text-align: center;
-  padding: 3rem;
-  color: #ff5050;
+.session-detail-page__state--error {
+  color: var(--status-error);
 }
 </style>

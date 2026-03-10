@@ -21,19 +21,19 @@ function mountZone(props = {}) {
 describe('UploadZone', () => {
   it('renders upload area when not uploading', () => {
     const wrapper = mountZone();
-    expect(wrapper.find('.upload-zone__text').exists()).toBe(true);
-    expect(wrapper.find('.upload-zone__spinner').exists()).toBe(false);
+    expect(wrapper.find('.upload-zone__title').exists()).toBe(true);
+    expect(wrapper.find('.upload-zone__spinner-text').exists()).toBe(false);
   });
 
   it('renders spinner when uploading', () => {
     const wrapper = mountZone({ uploading: true });
-    expect(wrapper.find('.upload-zone__spinner').exists()).toBe(true);
-    expect(wrapper.find('.upload-zone__text').exists()).toBe(false);
+    expect(wrapper.find('.upload-zone__spinner-text').exists()).toBe(true);
+    expect(wrapper.find('.upload-zone__title').exists()).toBe(false);
   });
 
   it('applies dragging class when isDragging is true', () => {
     const wrapper = mountZone({ isDragging: true });
-    expect(wrapper.find('.upload-zone--dragging').exists()).toBe(true);
+    expect(wrapper.find('.upload-zone--drag-over').exists()).toBe(true);
   });
 
   it('applies uploading class when uploading is true', () => {
@@ -43,13 +43,13 @@ describe('UploadZone', () => {
 
   it('shows error message when error is set', () => {
     const wrapper = mountZone({ error: 'Upload failed' });
-    expect(wrapper.find('.upload-zone__error').exists()).toBe(true);
+    expect(wrapper.find('.upload-zone__error-bar').exists()).toBe(true);
     expect(wrapper.text()).toContain('Upload failed');
   });
 
   it('does not show error section when error is null', () => {
     const wrapper = mountZone({ error: null });
-    expect(wrapper.find('.upload-zone__error').exists()).toBe(false);
+    expect(wrapper.find('.upload-zone__error-bar').exists()).toBe(false);
   });
 
   it('emits dragover when dragover event fires', async () => {

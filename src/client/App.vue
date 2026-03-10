@@ -10,23 +10,13 @@ import AppHeader from './components/AppHeader.vue';
 </script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #0f0f0f;
-  color: #e0e0e0;
-}
-
-#app {
-  min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
 }
 
 a {
-  color: #4a9eff;
+  color: var(--accent-primary);
 }
 </style>
