@@ -45,7 +45,10 @@
             class="sidebar__session-item"
             role="listitem"
           >
-            <span class="sidebar__session-filename">{{ session.filename }}</span>
+            <SessionCard
+              :session="session"
+              :is-selected="session.id === currentSessionId"
+            />
           </li>
         </ul>
 
@@ -93,8 +96,10 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { inject, ref, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import SkeletonSidebar from './SkeletonSidebar.vue';
+import SessionCard from './SessionCard.vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import type { SessionListState } from '../composables/useSessionList.js';
 
@@ -112,6 +117,13 @@ if (!_injectedSessionList) {
   );
 }
 const sessionList: SessionListState = _injectedSessionList;
+
+const route = useRoute();
+
+/** The currently selected session ID, derived from route params. */
+const currentSessionId = computed<string>(() =>
+  typeof route.params.id === 'string' ? route.params.id : '',
+);
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
@@ -205,25 +217,8 @@ function clearFilters(): void {
 }
 
 .sidebar__session-item {
-  padding: var(--rhythm-quarter) var(--space-3);
-  cursor: pointer;
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  font-family: var(--font-mono);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar__session-item:hover {
-  background: var(--accent-primary-subtle);
-}
-
-.sidebar__session-filename {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Padding and hover handled by SessionCard internally. */
+  list-style: none;
 }
 
 .sidebar__empty-state {

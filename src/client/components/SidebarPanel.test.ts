@@ -2,15 +2,26 @@
  * Tests for SidebarPanel component — Stage 6 full implementation.
  *
  * Covers: skeleton loading, search input, filter pills, session list,
- * empty state, "+ New Session" button, and safe inject guard.
+ * empty state, "+ New Session" button, SessionCard integration, and safe inject guard.
  */
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { createRouter, createMemoryHistory } from 'vue-router';
 import { provide, defineComponent, ref, computed } from 'vue';
 import type { Session } from '../../shared/types/session.js';
 import SidebarPanel from './SidebarPanel.vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import type { SessionListState } from '../composables/useSessionList.js';
+
+function createTestRouter() {
+  return createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/session/:id', component: { template: '<div />' } },
+    ],
+  });
+}
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -46,8 +57,10 @@ function makeSessionListState(overrides: Partial<SessionListState> = {}): Sessio
   };
 }
 
-/** Mounts SidebarPanel with an injected session list state. */
-function mountWithState(state: SessionListState) {
+/** Mounts SidebarPanel with an injected session list state and a test router. */
+async function mountWithState(state: SessionListState) {
+  const router = createTestRouter();
+  await router.push('/');
   const Wrapper = defineComponent({
     components: { SidebarPanel },
     setup() {
@@ -56,36 +69,36 @@ function mountWithState(state: SessionListState) {
     },
     template: '<SidebarPanel />',
   });
-  return mount(Wrapper);
+  return mount(Wrapper, { global: { plugins: [router] } });
 }
 
 describe('SidebarPanel', () => {
   describe('sidebar grid area', () => {
-    it('renders inside the sidebar grid area element', () => {
+    it('renders inside the sidebar grid area element', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.find('.spatial-shell__sidebar').exists()).toBe(true);
     });
   });
 
   describe('skeleton loading', () => {
-    it('shows skeleton while loading is true', () => {
+    it('shows skeleton while loading is true', async () => {
       const state = makeSessionListState({ loading: ref(true) });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.find('.skeleton-sidebar').exists()).toBe(true);
     });
 
-    it('hides skeleton when loading is false', () => {
+    it('hides skeleton when loading is false', async () => {
       const state = makeSessionListState({ loading: ref(false) });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.find('.skeleton-sidebar').exists()).toBe(false);
     });
   });
 
   describe('search input', () => {
-    it('renders a search input with correct placeholder', () => {
+    it('renders a search input with correct placeholder', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const input = wrapper.find('.sidebar__search-input');
       expect(input.exists()).toBe(true);
       expect((input.element as HTMLInputElement).placeholder).toBe('Filter sessions...');
@@ -93,7 +106,7 @@ describe('SidebarPanel', () => {
 
     it('updates searchQuery when user types in search input', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const input = wrapper.find('.sidebar__search-input');
       await input.setValue('my query');
       expect(state.searchQuery.value).toBe('my query');
@@ -101,16 +114,16 @@ describe('SidebarPanel', () => {
   });
 
   describe('filter pills', () => {
-    it('renders filter pills group with role="group"', () => {
+    it('renders filter pills group with role="group"', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const group = wrapper.find('[role="group"]');
       expect(group.exists()).toBe(true);
     });
 
-    it('renders four filter pills: All, Processing, Ready, Failed', () => {
+    it('renders four filter pills: All, Processing, Ready, Failed', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const pills = wrapper.findAll('[aria-pressed]');
       const labels = pills.map(p => p.text());
       expect(labels).toContain('All');
@@ -119,23 +132,23 @@ describe('SidebarPanel', () => {
       expect(labels).toContain('Failed');
     });
 
-    it('marks the "All" pill as pressed when statusFilter is "all"', () => {
+    it('marks the "All" pill as pressed when statusFilter is "all"', async () => {
       const state = makeSessionListState({ statusFilter: ref('all') });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const allPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'All');
       expect(allPill?.attributes('aria-pressed')).toBe('true');
     });
 
-    it('marks the "Ready" pill as pressed when statusFilter is "ready"', () => {
+    it('marks the "Ready" pill as pressed when statusFilter is "ready"', async () => {
       const state = makeSessionListState({ statusFilter: ref('ready') });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const readyPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'Ready');
       expect(readyPill?.attributes('aria-pressed')).toBe('true');
     });
 
     it('updates statusFilter when a pill is clicked', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const processingPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'Processing');
       await processingPill?.trigger('click');
       expect(state.statusFilter.value).toBe('processing');
@@ -143,7 +156,7 @@ describe('SidebarPanel', () => {
 
     it('resets statusFilter to "all" when "All" pill is clicked', async () => {
       const state = makeSessionListState({ statusFilter: ref('ready') });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const allPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'All');
       await allPill?.trigger('click');
       expect(state.statusFilter.value).toBe('all');
@@ -151,18 +164,18 @@ describe('SidebarPanel', () => {
   });
 
   describe('session list', () => {
-    it('renders a <ul> with role="list" when sessions exist', () => {
+    it('renders a <ul> with role="list" when sessions exist', async () => {
       const sessions = [makeSession({ id: '1', filename: 'alpha.cast' })];
       const state = makeSessionListState({
         sessions: ref(sessions),
         filteredSessions: computed(() => sessions),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const list = wrapper.find('ul[role="list"]');
       expect(list.exists()).toBe(true);
     });
 
-    it('renders a <li> with role="listitem" for each filtered session', () => {
+    it('renders a <li> with role="listitem" for each filtered session', async () => {
       const sessions = [
         makeSession({ id: '1', filename: 'alpha.cast' }),
         makeSession({ id: '2', filename: 'beta.cast' }),
@@ -171,31 +184,69 @@ describe('SidebarPanel', () => {
         sessions: ref(sessions),
         filteredSessions: computed(() => sessions),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const items = wrapper.findAll('li[role="listitem"]');
       expect(items).toHaveLength(2);
     });
 
-    it('shows session filename in each list item', () => {
+    it('shows session filename in each list item', async () => {
       const sessions = [makeSession({ filename: 'my-recording.cast' })];
       const state = makeSessionListState({
         sessions: ref(sessions),
         filteredSessions: computed(() => sessions),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.text()).toContain('my-recording.cast');
+    });
+
+    it('renders SessionCard components for each session', async () => {
+      const sessions = [
+        makeSession({ id: '1', filename: 'alpha.cast' }),
+        makeSession({ id: '2', filename: 'beta.cast' }),
+      ];
+      const state = makeSessionListState({
+        sessions: ref(sessions),
+        filteredSessions: computed(() => sessions),
+      });
+      const wrapper = await mountWithState(state);
+      const cards = wrapper.findAll('.session-card');
+      expect(cards).toHaveLength(2);
+    });
+
+    it('marks the session matching the current route as selected', async () => {
+      const sessions = [
+        makeSession({ id: 'sel-1', filename: 'selected.cast' }),
+        makeSession({ id: 'other', filename: 'other.cast' }),
+      ];
+      const state = makeSessionListState({
+        sessions: ref(sessions),
+        filteredSessions: computed(() => sessions),
+      });
+      const router = createTestRouter();
+      await router.push('/session/sel-1');
+      const Wrapper = defineComponent({
+        components: { SidebarPanel },
+        setup() {
+          provide(sessionListKey, state);
+          return {};
+        },
+        template: '<SidebarPanel />',
+      });
+      const wrapper = mount(Wrapper, { global: { plugins: [router] } });
+      const selectedCards = wrapper.findAll('.session-card--selected');
+      expect(selectedCards).toHaveLength(1);
     });
   });
 
   describe('empty state', () => {
-    it('shows empty state when filteredSessions is empty and sessions exist', () => {
+    it('shows empty state when filteredSessions is empty and sessions exist', async () => {
       const allSessions = [makeSession({ filename: 'alpha.cast' })];
       const state = makeSessionListState({
         sessions: ref(allSessions),
         filteredSessions: computed(() => []),
         searchQuery: ref('zzz-no-match'),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.find('.sidebar__empty-state').exists()).toBe(true);
     });
 
@@ -206,7 +257,7 @@ describe('SidebarPanel', () => {
         filteredSessions: computed(() => []),
         searchQuery: ref('no-match'),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const clearBtn = wrapper.find('.sidebar__empty-state button');
       expect(clearBtn.exists()).toBe(true);
     });
@@ -219,42 +270,44 @@ describe('SidebarPanel', () => {
         searchQuery: ref('no-match'),
         statusFilter: ref('ready'),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const clearBtn = wrapper.find('.sidebar__empty-state button');
       await clearBtn.trigger('click');
       expect(state.searchQuery.value).toBe('');
       expect(state.statusFilter.value).toBe('all');
     });
 
-    it('does not show empty state when there are no sessions at all', () => {
+    it('does not show empty state when there are no sessions at all', async () => {
       const state = makeSessionListState({
         sessions: ref([]),
         filteredSessions: computed(() => []),
       });
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.find('.sidebar__empty-state').exists()).toBe(false);
     });
   });
 
   describe('+ New Session button', () => {
-    it('renders a "+ New Session" button', () => {
+    it('renders a "+ New Session" button', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       expect(wrapper.find('.sidebar__new-session-btn').exists()).toBe(true);
     });
 
-    it('renders a hidden file input accepting .cast files', () => {
+    it('renders a hidden file input accepting .cast files', async () => {
       const state = makeSessionListState();
-      const wrapper = mountWithState(state);
+      const wrapper = await mountWithState(state);
       const fileInput = wrapper.find('input[type="file"][accept=".cast"]');
       expect(fileInput.exists()).toBe(true);
     });
   });
 
   describe('inject guard', () => {
-    it('throws a clear error when sessionListKey is not provided', () => {
+    it('throws a clear error when sessionListKey is not provided', async () => {
+      const router = createTestRouter();
+      await router.push('/');
       // Mount without any provider — inject will return undefined.
-      expect(() => mount(SidebarPanel)).toThrow();
+      expect(() => mount(SidebarPanel, { global: { plugins: [router] } })).toThrow();
     });
   });
 });
