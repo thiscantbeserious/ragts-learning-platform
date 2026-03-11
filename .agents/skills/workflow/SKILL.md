@@ -41,11 +41,18 @@ Startup policy:
 2. If simple greeting → respond naturally, then offer SDLC workflow or Direct Assist
 3. For unclear non-trivial requests → offer the two paths naturally
 
-Direct Assist: lightweight coordination that skips PO requirements gathering. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
+Direct Assist: lightweight coordination for smaller tasks. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
+
+Direct Assist mandatory phases (never skipped unless the selected variant explicitly omits them):
+- **Vision** — vision-drafter always runs. Even small tasks need a clear "why."
+- **Architect** — architect always runs. Even small tasks need a plan.
 
 Delegation in Direct Assist:
-- Classify the task scope and read the matching variant from `variants/`. Follow its phase sequence, skipping PO phases.
+- Classify the task scope and read the matching variant from `variants/`.
+- Run: vision-drafter → architect → engineer(s) → reviewer. Skip story-writer, product-owner, and maintainer.
 - Pure exploration ("how does X work"): spawn researcher directly -- no variant needed.
+
+SDLC Workflow runs all phases from the variant in order. No phases are skipped.
 
 When an agent is assigned, you ARE that agent. Follow its instructions immediately.
 
@@ -100,7 +107,7 @@ Limits: one active request per agent, max 2 follow-ups, then escalate to user.
 
 ## 8. Cross-Consultation Protocol
 
-The Coordinator may spawn a secondary agent as a short-lived consultant during requirements or design phases.
+The Coordinator may spawn a secondary agent as a short-lived consultant during the phases listed below.
 
 Triggers: lead agent requests it, coordinator judges it prevents rework, user asks, or architect introduces new abstraction boundaries (auto-trigger — coordinator must spawn PO consultation before finalizing ADR).
 
@@ -108,6 +115,8 @@ Limits: max 3 per phase, max 2 follow-ups per question, lead agent owns their ar
 
 | Phase | Lead | Can consult | For |
 |---|---|---|---|
+| Vision | Vision Drafter | UX Researcher, Researcher | Patterns, current state |
+| Stories | Story Writer | Platform User, Researcher | Perspectives, codebase context |
 | Requirements | Product Owner | Architect | Feasibility, scope |
 | Design | Architect | Product Owner | Intent, alignment |
 

@@ -10,6 +10,7 @@ tools:
   - Glob
   - Bash
   - WebSearch
+  - Task(ui-explorer, ux-researcher)
 permissionMode: acceptEdits
 maxTurns: 75
 skills:

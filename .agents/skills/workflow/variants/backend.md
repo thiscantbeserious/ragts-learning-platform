@@ -4,7 +4,8 @@ For tasks scoped to server-side code.
 
 ```mermaid
 graph TD
-    SW[story-writer] --> PO1[product-owner]
+    VD[vision-drafter] --> SW[story-writer]
+    SW --> PO1[product-owner]
     PO1 --> Arch[architect]
     Arch --> BE[backend-engineer + pair-reviewer]
     BE -->|all stages done| Rev[reviewer]
@@ -17,13 +18,14 @@ graph TD
 
 | # | Agent | Gate |
 |---|-------|------|
-| 0 | `story-writer` | User approves or modifies stories |
-| 1 | `product-owner` | REQUIREMENTS.md signed off |
-| 2 | `architect` | ADR.md + PLAN.md approved |
-| 3 | `backend-engineer` + `pair-reviewer` | Per stage: implement → pair review → fix blocking → next stage. All stages complete. |
-| 4 | `reviewer` | No blocking findings (includes triage of CodeRabbit/external findings when available) |
-| 5 | `product-owner` | Validates against REQUIREMENTS.md |
-| 6 | `maintainer` | CI green, all approvals |
+| 0 | `vision-drafter` | User approves VISION_STEP.md |
+| 1 | `story-writer` | User approves or modifies stories |
+| 2 | `product-owner` | REQUIREMENTS.md signed off |
+| 3 | `architect` | ADR.md + PLAN.md approved |
+| 4 | `backend-engineer` + `pair-reviewer` | Per stage: implement → pair review → fix blocking → next stage. All stages complete. |
+| 5 | `reviewer` | No blocking findings (includes triage of CodeRabbit/external findings when available) |
+| 6 | `product-owner` | Validates against REQUIREMENTS.md |
+| 7 | `maintainer` | CI green, all approvals |
 
 ## Git Contract
 

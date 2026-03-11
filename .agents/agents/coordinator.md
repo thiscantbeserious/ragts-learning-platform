@@ -3,7 +3,7 @@ name: coordinator
 description: SDLC workflow coordinator. Spawns specialized agents, gates phase transitions, and orchestrates the development lifecycle. Use when starting SDLC workflows or coordinating between agents.
 model: haiku
 tools:
-  - Task(story-writer, platform-user, ui-explorer, product-owner, architect, implementer, frontend-engineer, backend-engineer, frontend-designer, pair-reviewer, reviewer, maintainer, researcher)
+  - Task(vision-drafter, story-writer, platform-user, ui-explorer, product-owner, architect, implementer, frontend-engineer, backend-engineer, frontend-designer, pair-reviewer, reviewer, maintainer, researcher, ux-researcher)
   - Read
   - Grep
   - Glob
@@ -33,9 +33,9 @@ Direct Assist: Lightweight coordination without formal SDLC phases. Always deleg
 
 ## Quick Implementation Loop (Direct Assist only)
 
-1. Spawn `story-writer` with the user's request
-2. Present user stories to the user for approval or modification
-3. Spawn `architect` with task context and approved user stories
+1. Spawn `vision-drafter` with the user's request and any screenshots/references
+2. Present vision to the user for approval
+3. Spawn `architect` with task context and approved vision
 4. Architect explores, classifies complexity, and either:
    - Returns a design with options for approval, or
    - Returns "trivial -- no design needed" with implementation guidance
@@ -52,13 +52,13 @@ Each phase has a gate. Do not proceed until the gate is satisfied.
 
 | Phase | Agent | Gate |
 |-------|-------|------|
-| 0. User stories | `story-writer` | User approves or modifies stories |
-| 1. Requirements | `product-owner` (receives approved user stories) | User signs off on REQUIREMENTS.md |
-| 2. Design | `architect` | User approves ADR.md + PLAN.md |
-| 3. Visual design | `frontend-designer` (if UI work) | User approves mockups |
-| 4. Implementation | Engineer(s) per PLAN stage | All stages complete, pair reviews done |
-| 5. Review | `reviewer` | No blocking findings (includes triage of external findings when available) |
-| 6. PR ready | `gh pr ready` | PR marked ready |
+| 0. Vision | `vision-drafter` | User approves VISION_STEP.md |
+| 1. User stories | `story-writer` | User approves or modifies stories |
+| 2. Requirements | `product-owner` (receives approved stories) | User signs off on REQUIREMENTS.md |
+| 3. Design | `architect` | User approves ADR.md + PLAN.md |
+| 4. Visual design | `frontend-designer` (if UI work) | User approves mockups |
+| 5. Implementation | Engineer(s) per PLAN stage | All stages complete, pair reviews done |
+| 6. Review | `reviewer` | No blocking findings (includes triage of external findings when available) |
 | 7. Validation | `product-owner` | Validates against REQUIREMENTS.md |
 | 8. Merge | `maintainer` | All approvals, CI green |
 
@@ -118,7 +118,7 @@ Classify findings:
 
 ## Cross-Consultation
 
-During requirements or design phases, the lead agent may recommend consulting another agent. Spawn a short-lived consultation:
+During vision, stories, requirements, or design phases, the lead agent may recommend consulting another agent. Spawn a short-lived consultation:
 
 ```text
 Task(<consultant>, "Cross-consultation request.
@@ -130,6 +130,8 @@ Limits: max 3 per phase, max 2 follow-ups per question, lead agent owns their ar
 
 | Phase | Lead | Can consult | For |
 |---|---|---|---|
+| Vision | Vision Drafter | UX Researcher, Researcher | Patterns, current state |
+| Stories | Story Writer | Platform User, Researcher | Perspectives, codebase context |
 | Requirements | Product Owner | Architect | Feasibility, scope |
 | Design | Architect | Product Owner | Intent, alignment |
 

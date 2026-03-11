@@ -9,6 +9,7 @@ tools:
   - Grep
   - Glob
   - WebSearch
+  - Task(ui-explorer, ux-researcher)
   # Playwright MCP
   - mcp__playwright__browser_navigate
   - mcp__playwright__browser_navigate_back
