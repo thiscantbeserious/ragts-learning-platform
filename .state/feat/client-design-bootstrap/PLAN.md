@@ -75,17 +75,17 @@ Goal: Create the pure CSS grid shell and update the HTML loading model. After th
 
 Owner: frontend-engineer
 
-- [x] Add `--sidebar-width: 260px` token to `:root` in `design/styles/layout.css`
-- [x] Create `design/styles/shell.css` with the spatial grid template (6 named areas, 3 columns, 3 rows)
-- [x] Grid: `aside` column at `0fr`, `bottom` row at `0fr`
-- [x] Grid area assignment classes: `.spatial-shell__brand`, `__header`, `__sidebar`, `__main`, `__aside`, `__bottom`
-- [x] Responsive rule: below 768px, collapse to single-column (sidebar hidden, main fills width)
-- [x] Transition rule for `grid-template-columns` (175ms, ease-out) for sidebar toggle animation
-- [x] Update `index.html`: add blocking `<link>` for `layout.css` and `shell.css` before the script tag
-- [x] Update `index.html`: rename `<title>` from "RAGTS" to "Erika"
-- [x] Update `main.ts`: remove `layout.css` import (now loaded via `<link>`)
-- [x] Verify: grid areas visible in DevTools at first paint before Vue mounts
-- [x] Verify: adding `<div style="grid-area: aside">test</div>` shows content in correct position
+- [ ] Add `--sidebar-width: 260px` token to `:root` in `design/styles/layout.css`
+- [ ] Create `design/styles/shell.css` with the spatial grid template (6 named areas, 3 columns, 3 rows)
+- [ ] Grid: `aside` column at `0fr`, `bottom` row at `0fr`
+- [ ] Grid area assignment classes: `.spatial-shell__brand`, `__header`, `__sidebar`, `__main`, `__aside`, `__bottom`
+- [ ] Responsive rule: below 768px, collapse to single-column (sidebar hidden, main fills width)
+- [ ] Transition rule for `grid-template-columns` (150-200ms, ease-out) for sidebar toggle animation
+- [ ] Update `index.html`: add blocking `<link>` for `layout.css` and `shell.css` before the script tag
+- [ ] Update `index.html`: rename `<title>` from "RAGTS" to "Erika"
+- [ ] Update `main.ts`: remove `layout.css` import (now loaded via `<link>`)
+- [ ] Verify: grid areas visible in DevTools at first paint before Vue mounts
+- [ ] Verify: adding `<div style="grid-area: aside">test</div>` shows content in correct position
 
 Files: `design/styles/shell.css` (new), `design/styles/layout.css` (token addition), `index.html`, `src/client/main.ts`
 Depends on: Stage 0 (baseline tokens must be finalized)
@@ -131,11 +131,11 @@ Goal: Create skeleton loader components that match final component dimensions. W
 
 Owner: frontend-engineer
 
-- [x] Create `src/client/components/SkeletonSidebar.vue` -- 3-5 shimmer cards at session-card height
-- [x] Create `src/client/components/SkeletonMain.vue` -- breadcrumb placeholder + section header placeholders + terminal shimmer
-- [x] Skeleton card dimensions must match the session card height from the baseline decision
-- [x] Wire skeletons into `SidebarPanel.vue` (show while `loading` is true)
-- [x] Wire skeleton into main area (show while session detail is loading)
+- [ ] Create `src/client/components/SkeletonSidebar.vue` -- 3-5 shimmer cards at session-card height
+- [ ] Create `src/client/components/SkeletonMain.vue` -- breadcrumb placeholder + section header placeholders + terminal shimmer
+- [ ] Skeleton card dimensions must match the session card height from the baseline decision
+- [ ] Wire skeletons into `SidebarPanel.vue` (show while `loading` is true)
+- [ ] Wire skeleton into main area (show while session detail is loading)
 - [ ] Verify: skeletons appear in correct grid areas before data arrives
 - [ ] Verify: no layout shift when real content replaces skeletons (measure CLS)
 
@@ -175,15 +175,15 @@ Goal: Build the persistent sidebar with brand mark, session list, search, filter
 
 Owner: frontend-engineer (design from frontend-designer in Stage 1 verdicts)
 
-- [x] Enhance `useSessionList.ts`: add `searchQuery`, `statusFilter`, `filteredSessions` computed
-- [x] Build `SidebarPanel.vue` with full structure: brand area, search input, filter pills, session card list, "+ New Session" button
-- [x] Search input: filters session list in real time (client-side, case-insensitive substring match on filename)
-- [x] Filter pills: All / Processing / Ready / Failed with `role="group"`, `aria-pressed`
-- [x] Session list: `<ul>` / `<li>` structure with `role="list"` / `role="listitem"`
-- [x] "+ New Session" button opens system file picker for `.cast` files
-- [x] "No results" empty state when filters produce zero results, with clear-filters action
+- [ ] Enhance `useSessionList.ts`: add `searchQuery`, `statusFilter`, `filteredSessions` computed
+- [ ] Build `SidebarPanel.vue` with full structure: brand area, search input, filter pills, session card list, "+ New Session" button
+- [ ] Search input: filters session list in real time (client-side, case-insensitive substring match on filename)
+- [ ] Filter pills: All / Processing / Ready / Failed with `role="group"`, `aria-pressed`
+- [ ] Session list: `<ul>` / `<li>` structure with `role="list"` / `role="listitem"`
+- [ ] "+ New Session" button opens system file picker for `.cast` files
+- [ ] "No results" empty state when filters produce zero results, with clear-filters action
 - [ ] Wire `useLayout()` for sidebar open/close state (CSS class toggle on grid container)
-- [x] Sidebar width governed by `--sidebar-width` CSS custom property
+- [ ] Sidebar width governed by `--sidebar-width` CSS custom property
 - [ ] Verify: sidebar persists across route changes
 - [ ] Verify: search + filter compose correctly
 - [ ] Verify: sidebar open/closed state persists across page reload
@@ -204,18 +204,18 @@ Goal: Build the session card component for the sidebar list. Status indicator wi
 
 Owner: frontend-engineer (design from frontend-designer)
 
-- [x] Create `src/client/components/SessionCard.vue`
-- [x] Card shows: session name (truncated with ellipsis), status indicator dot, metadata row (section count, age in human-readable format)
-- [x] Card height within the target range from the baseline decision
-- [x] Selected state: 2px left border in `--accent-primary`, background shift to `--accent-primary-subtle`
-- [x] Status indicator: processing = CSS pulse animation (cyan); ready/completed = steady green dot; failed/interrupted = error color, no animation
-- [x] Each status indicator has `aria-label` with human-readable text
-- [x] Initial status sourced from `detection_status` field
-- [x] Click handler: `router.push('/session/' + session.id)`
-- [x] After click on desktop: focus remains in sidebar (do not auto-move to main)
-- [x] Verify: card renders at correct height
-- [x] Verify: status dot animates for processing state
-- [x] Verify: selected state visual is correct
+- [ ] Create `src/client/components/SessionCard.vue`
+- [ ] Card shows: session name (truncated with ellipsis), status indicator dot, metadata row (section count, age in human-readable format)
+- [ ] Card height within the target range from the baseline decision
+- [ ] Selected state: 2px left border in `--accent-primary`, background shift to `--accent-primary-subtle`
+- [ ] Status indicator: processing = CSS pulse animation (cyan); ready/completed = steady green dot; failed/interrupted = error color, no animation
+- [ ] Each status indicator has `aria-label` with human-readable text
+- [ ] Initial status sourced from `detection_status` field
+- [ ] Click handler: `router.push('/session/' + session.id)`
+- [ ] After click on desktop: focus remains in sidebar (do not auto-move to main)
+- [ ] Verify: card renders at correct height
+- [ ] Verify: status dot animates for processing state
+- [ ] Verify: selected state visual is correct
 
 Files: `src/client/components/SessionCard.vue` (new), `src/client/components/SidebarPanel.vue`
 Depends on: Stage 6 (sidebar must exist), Stage 0 (baseline for card height)
@@ -233,14 +233,14 @@ Goal: Build the cognitive start page shown in the `main` area when no session is
 
 Owner: frontend-engineer (design from frontend-designer)
 
-- [x] Create `src/client/pages/StartPage.vue` (replaces LandingPage.vue as the `/` route child)
-- [x] Drop zone with dashed border and "Browse Files" CTA button
-- [x] CTA button opens system file picker for `.cast` files
-- [x] Animated background: extract and adapt from `references/theme-tron-v1.html` (5 orbiting dots: Record, Detect, Curate, Validate, Replay)
-- [x] Animation is low-opacity background element, does not compete with drop zone or CTA
-- [x] `prefers-reduced-motion`: replace animation with static graphic
-- [x] Start page also serves as the "no session selected" state (when navigating to `/`)
-- [x] Drop zone has `aria-dropeffect="copy"`
+- [ ] Create `src/client/pages/StartPage.vue` (replaces LandingPage.vue as the `/` route child)
+- [ ] Drop zone with dashed border and "Browse Files" CTA button
+- [ ] CTA button opens system file picker for `.cast` files
+- [ ] Animated background: extract and adapt from `references/theme-tron-v1.html` (5 orbiting dots: Record, Detect, Curate, Validate, Replay)
+- [ ] Animation is low-opacity background element, does not compete with drop zone or CTA
+- [ ] `prefers-reduced-motion`: replace animation with static graphic
+- [ ] Start page also serves as the "no session selected" state (when navigating to `/`)
+- [ ] Drop zone has `aria-dropeffect="copy"`
 - [ ] Verify: a user unfamiliar with Erika can identify what to do within 5 seconds
 - [ ] Verify: animation does not play when `prefers-reduced-motion` is set
 
@@ -260,13 +260,13 @@ Goal: Adapt or rebuild SessionDetailPage for the main grid area. Breadcrumb move
 
 Owner: frontend-engineer (verdict from Stage 1)
 
-- [x] Create `src/client/pages/SessionDetailView.vue` (or refactor `SessionDetailPage.vue` per designer verdict)
-- [x] Remove container wrapper and standalone breadcrumb -- breadcrumb now rendered by `ShellHeader.vue` based on current route
-- [x] Content fills the `main` grid area directly
-- [x] Loading state uses `SkeletonMain.vue`
-- [x] Error state styled within the main area
-- [x] Component responsive to width changes (for future `aside` panel activation)
-- [x] Wire `ShellHeader.vue` to display breadcrumb: "Sessions > {filename}" when on `/session/:id`
+- [ ] Create `src/client/pages/SessionDetailView.vue` (or refactor `SessionDetailPage.vue` per designer verdict)
+- [ ] Remove container wrapper and standalone breadcrumb -- breadcrumb now rendered by `ShellHeader.vue` based on current route
+- [ ] Content fills the `main` grid area directly
+- [ ] Loading state uses `SkeletonMain.vue`
+- [ ] Error state styled within the main area
+- [ ] Component responsive to width changes (for future `aside` panel activation)
+- [ ] Wire `ShellHeader.vue` to display breadcrumb: "Sessions > {filename}" when on `/session/:id`
 - [ ] Verify: session detail renders correctly in the main grid area
 - [ ] Verify: breadcrumb appears in the header area
 - [ ] Verify: switching sessions updates main content without sidebar change
@@ -287,15 +287,15 @@ Goal: System-wide drag target. Immediate sidebar entry creation on upload. Wire 
 
 Owner: frontend-engineer
 
-- [x] Create `src/client/components/DropOverlay.vue` -- fixed-position viewport overlay
-- [x] Register `dragenter`/`dragleave`/`drop` handlers at the `SpatialShell.vue` level (viewport-wide)
-- [x] Use the dragenter counter pattern to handle nested elements (increment on enter, decrement on leave, show overlay when > 0)
-- [x] Receiving state: visible border glow + centered overlay confirming drop target, within 100ms of `dragenter`
-- [x] Drop: initiate upload to `POST /api/upload`; immediately insert optimistic sidebar entry in `uploading` state
-- [x] Wire "+ New Session" button in sidebar to open file picker
-- [x] Wire CTA button on start page to open file picker
-- [x] `prefers-reduced-motion`: static border change instead of animated glow
-- [x] `aria-dropeffect="copy"` on the drop overlay
+- [ ] Create `src/client/components/DropOverlay.vue` -- fixed-position viewport overlay
+- [ ] Register `dragenter`/`dragleave`/`drop` handlers at the `SpatialShell.vue` level (viewport-wide)
+- [ ] Use the dragenter counter pattern to handle nested elements (increment on enter, decrement on leave, show overlay when > 0)
+- [ ] Receiving state: visible border glow + centered overlay confirming drop target, within 100ms of `dragenter`
+- [ ] Drop: initiate upload to `POST /api/upload`; immediately insert optimistic sidebar entry in `uploading` state
+- [ ] Wire "+ New Session" button in sidebar to open file picker
+- [ ] Wire CTA button on start page to open file picker
+- [ ] `prefers-reduced-motion`: static border change instead of animated glow
+- [ ] `aria-dropeffect="copy"` on the drop overlay
 - [ ] Verify: dragging a file anywhere over the viewport triggers the receiving state
 - [ ] Verify: new sidebar entry appears immediately before server responds
 - [ ] Verify: upload success refreshes session list
@@ -316,17 +316,17 @@ Goal: Build `useSSE()` composable. Per-session connections for active processing
 
 Owner: frontend-engineer
 
-- [x] Create `src/client/composables/useSSE.ts`
-- [x] Composable takes a reactive session ID and current status
-- [x] Opens `EventSource` to `/api/sessions/:id/events` when status is active
-- [x] Returns reactive `status` ref and `isConnected` boolean
-- [x] Closes connection on terminal event, session ID change, or unmount
-- [x] Connection budget: max 3 concurrent SSE connections (module-level tracking)
+- [ ] Create `src/client/composables/useSSE.ts`
+- [ ] Composable takes a reactive session ID and current status
+- [ ] Opens `EventSource` to `/api/sessions/:id/events` when status is active
+- [ ] Returns reactive `status` ref and `isConnected` boolean
+- [ ] Closes connection on terminal event, session ID change, or unmount
+- [ ] Connection budget: max 3 concurrent SSE connections (module-level tracking)
 - [ ] Priority: selected session first, then most recent uploads
-- [x] Fallback: sessions beyond budget use polling (10s interval)
-- [x] Wire into `SessionCard.vue`: status indicator driven by SSE status ref
-- [x] ARIA live region (`role="status"`) for processing updates, `role="alert"` for errors
-- [x] Status transition animations: pulse for active, glow burst for completion, static for error
+- [ ] Fallback: sessions beyond budget use polling (10s interval)
+- [ ] Wire into `SessionCard.vue`: status indicator driven by SSE status ref
+- [ ] ARIA live region (`role="status"`) for processing updates, `role="alert"` for errors
+- [ ] Status transition animations: pulse for active, glow burst for completion, static for error
 - [ ] Verify: upload a session and watch the card transition through states without refresh
 - [ ] Verify: SSE connection closes after terminal event
 - [ ] Verify: screen reader announces status changes
@@ -372,16 +372,16 @@ Goal: Sidebar collapses on mobile. Hamburger toggle. Overlay with focus trap and
 
 Owner: frontend-engineer
 
-- [x] Add hamburger toggle button to `ShellHeader.vue` (visible only < 768px)
-- [x] Create `src/client/components/MobileSidebarOverlay.vue` -- overlay wrapper with backdrop
-- [x] Sidebar slides in: `translateX(-100%)` -> `translateX(0)`, 150-200ms ease-out
-- [x] Backdrop dims main content while sidebar is open
-- [x] `aria-modal="true"` on overlay
-- [x] Focus trap: Tab cycles sidebar controls only while overlay is open
-- [x] Escape closes overlay, returns focus to hamburger toggle
-- [x] Tapping a session card closes overlay and shows session detail
-- [x] Filter pills meet 44px minimum touch target height (padding compensation)
-- [x] `useLayout()` tracks mobile vs desktop sidebar state separately
+- [ ] Add hamburger toggle button to `ShellHeader.vue` (visible only < 768px)
+- [ ] Create `src/client/components/MobileSidebarOverlay.vue` -- overlay wrapper with backdrop
+- [ ] Sidebar slides in: `translateX(-100%)` -> `translateX(0)`, 150-200ms ease-out
+- [ ] Backdrop dims main content while sidebar is open
+- [ ] `aria-modal="true"` on overlay
+- [ ] Focus trap: Tab cycles sidebar controls only while overlay is open
+- [ ] Escape closes overlay, returns focus to hamburger toggle
+- [ ] Tapping a session card closes overlay and shows session detail
+- [ ] Filter pills meet 44px minimum touch target height (padding compensation)
+- [ ] `useLayout()` tracks mobile vs desktop sidebar state separately
 - [ ] Verify: on mobile viewport, hamburger opens sidebar overlay
 - [ ] Verify: Escape closes and returns focus
 - [ ] Verify: selecting a session closes overlay
@@ -497,19 +497,19 @@ Updated by implementer as work progresses.
 
 | Stage | Status | Notes |
 |-------|--------|-------|
-| 0 | complete | Baseline grid decision — Path C (18px) chosen |
-| 1 | complete | Design review verdicts — documented in DESIGN_VERDICTS.md |
-| 2 | complete | CSS Grid shell |
-| 3 | complete | Route restructure — SpatialShell.vue, layout route wrapper, useLayout |
-| 4 | complete | Skeleton loaders |
-| 5 | complete | Branding rename — all user-facing "RAGTS" replaced with "Erika" |
-| 6 | complete | Sidebar panel — core done; layout toggle deferred to Stage 13 |
-| 7 | complete | Session card |
-| 8 | complete | Start page — StartPage.vue implemented; router updated to route name 'home' |
-| 9 | complete | Session detail layout — SessionDetailView.vue created, ShellHeader breadcrumb wired |
-| 10 | complete | Upload flow — DropOverlay, drag handlers, optimistic entries, file picker wired |
-| 11 | complete | SSE status updates — useSSE composable + SessionCard wired |
-| 12 | complete | Toast system |
-| 13 | complete | Mobile overlay — hamburger, focus trap, backdrop, slide-in animation, route-close |
+| 0 | pending | Baseline grid decision |
+| 1 | pending | Design review verdicts |
+| 2 | pending | CSS Grid shell |
+| 3 | pending | Route restructure |
+| 4 | pending | Skeleton loaders |
+| 5 | pending | Branding rename |
+| 6 | pending | Sidebar panel |
+| 7 | pending | Session card |
+| 8 | pending | Start page |
+| 9 | pending | Session detail layout |
+| 10 | pending | Upload flow |
+| 11 | pending | SSE status updates |
+| 12 | pending | Toast system |
+| 13 | pending | Mobile overlay |
 | 14 | pending | Accessibility pass |
 | 15 | pending | Design token audit |
