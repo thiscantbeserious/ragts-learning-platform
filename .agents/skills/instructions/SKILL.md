@@ -22,7 +22,5 @@ Before taking action, check if a reference file matches by name (e.g., git → g
 | Understanding codebase | `project.md` |
 | State file management | `state.md` |
 | SDLC process | `sdlc.md` |
-
-## 4. Templates
-
-State file templates are in `templates/`.
+| Visual design work | `visual-design-harmony.md` |
+| HTML/CSS design patterns | `html-css-design-utilities.md` |

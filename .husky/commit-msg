@@ -8,7 +8,7 @@ REPO_ROOT=$(git rev-parse --show-toplevel)
 # Parses "| Commit scopes | `scope1`, `scope2` |" lines
 VALID_SCOPES=()
 VARIANT_MAP=""
-for variant in "$REPO_ROOT"/agents/skills/workflow/variants/*.md; do
+for variant in "$REPO_ROOT"/.agents/skills/workflow/variants/*.md; do
   [ -f "$variant" ] || continue
   name=$(basename "$variant" .md)
   scopes=$(grep -i 'commit scopes' "$variant" | grep -oE '`[a-z0-9-]+`' | tr -d '`' | tr '\n' ' ')

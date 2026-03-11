@@ -7,10 +7,6 @@
 ├── <branch>/                # Per-branch SDLC files (REQUIREMENTS/ADR/PLAN)
 └── ...                      # Additional branch-scoped artifacts as needed
 
-agents/skills/instructions/templates/  # Templates for state files
-├── current-phase.md
-├── phase-progress.md
-
 .archive/                    # Historical archives
 └── state/                   # Archived state snapshots
     └── YYYY-MM-DD-HHMMSS/   # Timestamped folders

@@ -6,7 +6,7 @@ data/
 *.db-shm
 *.db-wal
 .DS_Store
-agents/settings.local.json
+.agents/settings.local.json
 test-results/
 playwright-report/
 tests/.test-data/

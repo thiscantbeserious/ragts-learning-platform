@@ -4,7 +4,9 @@ data/
 .state/
 .research/
 design/drafts/
-agents/
+.agents/
+.codex/
+.gemini/
 *.md
 .claude/
 coverage/

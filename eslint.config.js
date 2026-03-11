@@ -11,7 +11,7 @@ export default tseslint.config(
       'node_modules/**',
       'packages/vt-wasm/pkg/**',
       'design/**',
-      'agents/scripts/**',
+      '.agents/scripts/**',
       '.state/**',
     ],
   },

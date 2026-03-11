@@ -15,6 +15,12 @@ maxTurns: 15
 skills:
   - workflow
   - instructions
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: ".agents/scripts/limit-bash-readonly.sh"
 ---
 
 # Pair Reviewer

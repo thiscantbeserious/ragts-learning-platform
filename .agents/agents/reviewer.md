@@ -16,6 +16,13 @@ maxTurns: 40
 skills:
   - workflow
   - instructions
+  - templates
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: ".agents/scripts/limit-bash-readonly.sh"
 ---
 
 # Reviewer
@@ -39,7 +46,7 @@ Before submitting:
 - `verification.md` -- full verification checklist
 
 Templates:
-- `templates/REVIEW.md` -- review output format
+- `REVIEW.md` template (from the `templates` skill in the project)
 
 ## Mindset
 

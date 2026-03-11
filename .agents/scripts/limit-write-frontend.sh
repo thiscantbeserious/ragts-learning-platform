@@ -1,0 +1,35 @@
+#!/bin/bash
+# Restricts Write/Edit to frontend-scoped paths only.
+# Allowed: src/client/, src/shared/, tests/, .state/, and root config files
+
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Resolve repo root and canonicalize the target path
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || realpath -m .)
+RESOLVED=$(realpath -m "$FILE_PATH")
+
+# Must be inside the repo and under an allowed directory
+if [[ "$RESOLVED" == "$REPO_ROOT/src/client/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/src/shared/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/tests/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
+  exit 0
+fi
+
+# Allow root config files the frontend engineer may need to touch
+FILENAME=$(basename "$RESOLVED")
+case "$FILENAME" in
+  vite.config.ts|tsconfig.json|tsconfig.build.json|eslint.config.js|playwright.config.ts)
+    if [[ "$RESOLVED" == "$REPO_ROOT/$FILENAME" ]]; then
+      exit 0
+    fi
+    ;;
+esac
+
+echo "Blocked: Frontend engineer may only write to src/client/, src/shared/, tests/, .state/, and root config files." >&2
+exit 2

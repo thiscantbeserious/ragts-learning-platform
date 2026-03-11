@@ -7,7 +7,7 @@
  * extends past the viewport edge.
  *
  * Usage:
- *   node agents/scripts/overflow-audit.mjs [options]
+ *   node .agents/scripts/overflow-audit.mjs [options]
  *
  * Options:
  *   --url <base>       Base URL (default: http://localhost:3333)
