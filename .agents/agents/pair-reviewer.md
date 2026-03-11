@@ -20,7 +20,7 @@ hooks:
     - matcher: "Bash"
       hooks:
         - type: command
-          command: ".agents/scripts/validate-reviewer-bash.sh"
+          command: ".agents/scripts/limit-bash-reviewer.sh"
 ---
 
 # Pair Reviewer

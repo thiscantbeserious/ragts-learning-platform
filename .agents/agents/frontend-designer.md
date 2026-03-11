@@ -40,7 +40,7 @@ hooks:
     - matcher: "Write"
       hooks:
         - type: command
-          command: ".agents/scripts/validate-write-designer.sh"
+          command: ".agents/scripts/limit-write-designer.sh"
 ---
 
 # Frontend Designer

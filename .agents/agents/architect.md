@@ -22,11 +22,11 @@ hooks:
     - matcher: "Write"
       hooks:
         - type: command
-          command: ".agents/scripts/validate-write-state-only.sh"
+          command: ".agents/scripts/limit-write-state-only.sh"
     - matcher: "Bash"
       hooks:
         - type: command
-          command: ".agents/scripts/validate-reviewer-bash.sh"
+          command: ".agents/scripts/limit-bash-reviewer.sh"
 ---
 
 # Architect

@@ -19,7 +19,7 @@ hooks:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: ".agents/scripts/validate-write-backend.sh"
+          command: ".agents/scripts/limit-write-backend.sh"
 ---
 
 # Backend Engineer

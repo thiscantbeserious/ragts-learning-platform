@@ -20,7 +20,7 @@ hooks:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: ".agents/scripts/validate-write-frontend.sh"
+          command: ".agents/scripts/limit-write-frontend.sh"
 ---
 
 # Frontend Engineer
