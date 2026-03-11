@@ -9,7 +9,7 @@
         class="app-header__brand"
       >
         <div class="app-header__logo">
-          R
+          E
         </div>
         <span class="app-header__name">Erika</span>
       </router-link>

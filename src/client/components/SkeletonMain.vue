@@ -1,6 +1,7 @@
 <template>
   <div
     class="skeleton-main"
+    role="status"
     aria-busy="true"
     aria-label="Loading session"
   >
@@ -42,7 +43,7 @@ const sectionCount = 2;
 
 /* Breadcrumb row — matches the ~18px single-line height of the real breadcrumb */
 .skeleton-main__breadcrumb {
-  height: 18px;
+  height: var(--rhythm-1);
   display: flex;
   align-items: center;
 }
@@ -55,7 +56,7 @@ const sectionCount = 2;
 
 /* Section header placeholder — matches section-header component height */
 .skeleton-main__section-header {
-  height: 36px;
+  height: var(--rhythm-2);
   display: flex;
   align-items: center;
   border-radius: var(--radius-md);
@@ -71,7 +72,7 @@ const sectionCount = 2;
 
 /* Terminal body shimmer — fixed height approximating a compact terminal block */
 .skeleton-main__terminal {
-  height: 240px;
+  height: 240px; /* ~13 baseline units, approximating terminal content area */
   border-radius: var(--radius-lg);
 }
 </style>

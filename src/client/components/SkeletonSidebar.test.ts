@@ -14,11 +14,10 @@ describe('SkeletonSidebar', () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it('renders between 3 and 5 skeleton cards', () => {
+  it('renders exactly 4 skeleton cards', () => {
     const wrapper = mount(SkeletonSidebar);
     const cards = wrapper.findAll('.skeleton--card');
-    expect(cards.length).toBeGreaterThanOrEqual(3);
-    expect(cards.length).toBeLessThanOrEqual(5);
+    expect(cards.length).toBe(4);
   });
 
   it('each skeleton card contains two skeleton shimmer rows', () => {
