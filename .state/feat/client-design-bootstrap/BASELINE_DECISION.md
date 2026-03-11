@@ -26,9 +26,10 @@ One additional change:
 | Search bar | 42px -- above comparable tools (Linear: ~36px, VS Code compact: ~36px) |
 | Filter pills | 31.5px -- tall for compact chips (Linear: ~24-28px) |
 | Prototype alignment | Gemini screenshots show spacing closer to 18px rhythm, not 21px |
+| Subpixel profile | **3 fractional values:** rhythm-quarter (5.25px), rhythm-half (10.5px), btn-height-sm (31.5px) |
 | Implementation cost | Zero changes required |
 
-Path A was designed for a reading-focused page layout. The spatial application shell demands higher information density in the sidebar and chrome regions. The component math consistently produces values above industry comparables.
+Path A produces the most fractional pixel values of any path. The heavily-used `--rhythm-half` (10.5px) — the standard compact padding token — means every sidebar card, list item, and filter pill inherits subpixel rendering issues. Path A was designed for a reading-focused page layout. The spatial application shell demands higher information density in the sidebar and chrome regions. The component math consistently produces values above industry comparables.
 
 ### Path B: Dual-Rhythm 21px/8px (Not Recommended)
 
@@ -37,10 +38,11 @@ Path A was designed for a reading-focused page layout. The spatial application s
 | Density benefit | Achieves sidebar density through scoped token overrides |
 | Complexity cost | Requires maintaining two spacing contexts (`--density: compact` scope + scoped tokens) |
 | Developer overhead | Engineers must track which context they are working in at all times |
+| Subpixel profile | 3 fractional values in content zones (inherits Path A); 0 in compact zones (8px grid) |
 | Philosophical fit | Contradicts the design system's single-source simplicity |
 | User testing | Not tested; Path C was tested and accepted |
 
-Path B is a defensible engineering compromise for a mature product with frozen layouts. For Erika in active design evolution, the complexity cost is not justified when Path C delivers the same density benefit at near-zero implementation cost.
+Path B solves the density problem in compact zones by switching to an 8px grid, which eliminates fractional values there. But it inherits all of Path A's subpixel issues in content zones (rhythm-quarter 5.25px, rhythm-half 10.5px, btn-height-sm 31.5px). The dual-system approach is a defensible engineering compromise for a mature product with frozen layouts. For Erika in active design evolution, the complexity cost is not justified when Path C delivers the same density benefit with a cleaner subpixel profile at near-zero implementation cost.
 
 ### Path C: 18px/36px (Adopted)
 
@@ -57,9 +59,30 @@ Path B is a defensible engineering compromise for a mature product with frozen l
 | 4px sub-grid | 36px / 4 = 9 (clean). LCM of 18 and 4 is 36 -- both grids sync at every 36px boundary |
 | 8px coexistence | LCM of 18 and 8 is 72 -- perfect alignment at `--rhythm-4` |
 
-## Derived Token Values at 18px
+## Subpixel Comparison Across All Paths
 
-All values are whole pixels. No subpixel rendering issues.
+The critical factor: how many derived tokens produce fractional pixel values?
+
+| Token | Path A (21px) | Path B content (21px) | Path B compact (8px) | Path C (18px) |
+|---|---|---|---|---|
+| `--rhythm-quarter` | **5.25px** | **5.25px** | 2px | **4.5px** |
+| `--rhythm-half` | **10.5px** | **10.5px** | 4px | 9px |
+| `--btn-height-sm` (×1.5) | **31.5px** | **31.5px** | 12px | 27px |
+| `--btn-height-md` | 42px | 42px | 16px | 36px |
+| `--btn-height-lg` | 63px | 63px | 24px | 54px |
+| `--input-height-sm` | 42px | 42px | 16px | 36px |
+| `--header-height` | 63px | 63px | n/a | 54px |
+| **Fractional count** | **3** | **3** | **0** | **1** |
+
+**Path A** produces 3 fractional values. `--rhythm-half` at 10.5px is especially problematic — it is the standard compact padding token, used everywhere in sidebar cards, list items, and filter pills. Every compact component inherits subpixel rendering.
+
+**Path B** inherits Path A's 3 fractional values in content zones, but eliminates them in compact zones by switching to an 8px grid. The cost: maintaining two parallel spacing systems (`--density: compact` scoped overrides), which engineers must track at all times.
+
+**Path C** has exactly 1 fractional value: `--rhythm-quarter` at 4.5px. This token is used only for tight internal padding (e.g., card vertical padding). On 2x displays (which are standard in 2026), 4.5px renders as exactly 9 device pixels — clean. On the rare 1x display, browsers round to 4px or 5px — visually indistinguishable from intentional 4px padding. Path A's `--rhythm-quarter` at 5.25px is strictly worse: on 2x displays it becomes 10.5 device pixels, which is STILL fractional.
+
+**Verdict:** Path C has the cleanest subpixel profile of any single-system approach. Path B achieves zero fractional values in compact zones, but only by paying the complexity tax of dual systems — and it still has 3 fractional values in content zones.
+
+## Derived Token Values at 18px
 
 | Token | Formula | Value |
 |---|---|---|
@@ -83,9 +106,9 @@ All values are whole pixels. No subpixel rendering issues.
 
 ## Key Observations
 
-### rhythm-quarter at 4.5px
+### rhythm-quarter at 4.5px — the one fractional value
 
-This is the only fractional value in the system. It is acceptable: CSS handles half-pixels correctly on modern displays (all standard displays are 2x or higher density). At 1x displays, browsers round to 4px or 5px depending on element position -- visually indistinguishable from a 4px padding. This is the same situation as Path A's `rhythm-quarter` at 5.25px.
+Path C's single fractional token. See the subpixel comparison table above for the full cross-path analysis. Summary: Path A has 3 fractional values (including the heavily-used `--rhythm-half` at 10.5px), Path B has 3 in content zones, Path C has only this one. On 2x displays (standard in 2026), 4.5px = 9 device pixels (clean). On 1x displays, browsers round to 4px or 5px. Path A's equivalent (`5.25px`) is worse — 10.5 device pixels on 2x, still fractional.
 
 ### btn-height-sm at 27px
 
