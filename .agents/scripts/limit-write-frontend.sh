@@ -1,6 +1,6 @@
 #!/bin/bash
 # Restricts Write/Edit to frontend-scoped paths only.
-# Allowed: src/client/, src/shared/, tests/, .state/, and root config files
+# Allowed: src/client/, src/shared/, design/, tests/, .state/, index.html, and root config files
 
 # Portable realpath -m (works on macOS + Linux)
 _resolve() { python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$1"; }
@@ -19,6 +19,7 @@ RESOLVED=$(_resolve "$FILE_PATH")
 # Must be inside the repo and under an allowed directory
 if [[ "$RESOLVED" == "$REPO_ROOT/src/client/"* ]] ||
    [[ "$RESOLVED" == "$REPO_ROOT/src/shared/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/design/"* ]] ||
    [[ "$RESOLVED" == "$REPO_ROOT/tests/"* ]] ||
    [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
   exit 0
@@ -27,12 +28,12 @@ fi
 # Allow root config files the frontend engineer may need to touch
 FILENAME=$(basename "$RESOLVED")
 case "$FILENAME" in
-  vite.config.ts|tsconfig.json|tsconfig.build.json|eslint.config.js|playwright.config.ts)
+  index.html|vite.config.ts|tsconfig.json|tsconfig.build.json|eslint.config.js|playwright.config.ts)
     if [[ "$RESOLVED" == "$REPO_ROOT/$FILENAME" ]]; then
       exit 0
     fi
     ;;
 esac
 
-echo "Blocked: Frontend engineer may only write to src/client/, src/shared/, tests/, .state/, and root config files." >&2
+echo "Blocked: Frontend engineer may only write to src/client/, src/shared/, design/, tests/, .state/, index.html, and root config files." >&2
 exit 2

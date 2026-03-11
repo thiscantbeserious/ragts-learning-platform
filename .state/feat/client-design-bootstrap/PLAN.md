@@ -131,11 +131,11 @@ Goal: Create skeleton loader components that match final component dimensions. W
 
 Owner: frontend-engineer
 
-- [ ] Create `src/client/components/SkeletonSidebar.vue` -- 3-5 shimmer cards at session-card height
-- [ ] Create `src/client/components/SkeletonMain.vue` -- breadcrumb placeholder + section header placeholders + terminal shimmer
-- [ ] Skeleton card dimensions must match the session card height from the baseline decision
-- [ ] Wire skeletons into `SidebarPanel.vue` (show while `loading` is true)
-- [ ] Wire skeleton into main area (show while session detail is loading)
+- [x] Create `src/client/components/SkeletonSidebar.vue` -- 3-5 shimmer cards at session-card height
+- [x] Create `src/client/components/SkeletonMain.vue` -- breadcrumb placeholder + section header placeholders + terminal shimmer
+- [x] Skeleton card dimensions must match the session card height from the baseline decision
+- [x] Wire skeletons into `SidebarPanel.vue` (show while `loading` is true)
+- [x] Wire skeleton into main area (show while session detail is loading)
 - [ ] Verify: skeletons appear in correct grid areas before data arrives
 - [ ] Verify: no layout shift when real content replaces skeletons (measure CLS)
 
@@ -501,7 +501,7 @@ Updated by implementer as work progresses.
 | 1 | pending | Design review verdicts |
 | 2 | complete | CSS Grid shell |
 | 3 | pending | Route restructure |
-| 4 | pending | Skeleton loaders |
+| 4 | complete | Skeleton loaders |
 | 5 | pending | Branding rename |
 | 6 | pending | Sidebar panel |
 | 7 | pending | Session card |
