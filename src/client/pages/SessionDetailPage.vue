@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import SessionContent from '../components/SessionContent.vue';
+import SkeletonMain from '../components/SkeletonMain.vue';
 import { useSession } from '../composables/useSession';
 
 const route = useRoute();
@@ -31,12 +32,7 @@ const { sections, snapshot, loading, error, filename } = useSession(sessionId);
       </nav>
     </header>
 
-    <div
-      v-if="loading"
-      class="session-detail-page__state"
-    >
-      Loading session...
-    </div>
+    <SkeletonMain v-if="loading" />
     <div
       v-else-if="error"
       class="session-detail-page__state session-detail-page__state--error"

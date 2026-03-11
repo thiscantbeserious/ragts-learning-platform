@@ -38,7 +38,7 @@ describe('AppHeader component snapshots', () => {
     });
     const link = wrapper.find('.app-header__brand');
     expect(link.attributes('href')).toBe('/');
-    expect(link.text()).toContain('RAGTS');
+    expect(link.text()).toContain('Erika');
     expect(wrapper.html()).toMatchSnapshot();
   });
 });

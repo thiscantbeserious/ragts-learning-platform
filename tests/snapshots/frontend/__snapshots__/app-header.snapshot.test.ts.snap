@@ -3,7 +3,7 @@
 exports[`AppHeader component snapshots > brand link points to root 1`] = `
 "<header data-v-49fcc50c="" class="app-header">
   <div data-v-49fcc50c="" class="app-header__left"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__brand">
-      <div data-v-49fcc50c="" class="app-header__logo"> R </div><span data-v-49fcc50c="" class="app-header__name">RAGTS</span>
+      <div data-v-49fcc50c="" class="app-header__logo"> R </div><span data-v-49fcc50c="" class="app-header__name">Erika</span>
     </a>
     <nav data-v-49fcc50c="" class="app-header__nav"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__nav-link"> Sessions </a></nav>
   </div>
@@ -14,7 +14,7 @@ exports[`AppHeader component snapshots > brand link points to root 1`] = `
 exports[`AppHeader component snapshots > default render 1`] = `
 "<header data-v-49fcc50c="" class="app-header">
   <div data-v-49fcc50c="" class="app-header__left"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__brand">
-      <div data-v-49fcc50c="" class="app-header__logo"> R </div><span data-v-49fcc50c="" class="app-header__name">RAGTS</span>
+      <div data-v-49fcc50c="" class="app-header__logo"> R </div><span data-v-49fcc50c="" class="app-header__name">Erika</span>
     </a>
     <nav data-v-49fcc50c="" class="app-header__nav"><a data-v-49fcc50c="" aria-current="page" href="/" class="router-link-active router-link-exact-active app-header__nav-link"> Sessions </a></nav>
   </div>
