@@ -76,8 +76,12 @@ describe('shell.css structural requirements', () => {
   });
 
   it('defines all six grid-template-areas', () => {
-    expect(css).toContain('"brand');
-    expect(css).toContain('"sidebar');
+    expect(css).toContain('brand');
+    expect(css).toContain('header');
+    expect(css).toContain('sidebar');
+    expect(css).toContain('main');
+    expect(css).toContain('aside');
+    expect(css).toContain('bottom');
   });
 
   it('uses --sidebar-width token for column sizing', () => {
@@ -118,8 +122,7 @@ describe('shell.css structural requirements', () => {
   });
 
   it('has transition on grid-template-columns for panel animation', () => {
-    expect(css).toContain('grid-template-columns');
-    expect(css).toContain('transition');
+    expect(css).toMatch(/transition:\s*grid-template-columns/);
   });
 
   it('does not use repeat() in the grid-template-columns value (interpolation bug prevention)', () => {

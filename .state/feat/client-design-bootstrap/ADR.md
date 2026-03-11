@@ -143,12 +143,14 @@ Grid template:
   grid-template-areas:
     "brand   header  header"
     "sidebar main    aside"
-    "sidebar bottom  bottom";
+    "sidebar bottom  aside";
   grid-template-columns: var(--sidebar-width) 1fr 0fr;
   grid-template-rows: var(--header-height) 1fr 0fr;
   min-height: 100vh;
   /* Note: 3 columns, not 4. The header spans columns 2-3.
-     aside shares its column track with header's third position.
+     aside spans full height (rows 2-3) for a right-panel use case —
+     the aside track is shared by both content rows, allowing a
+     right panel to occupy the full content height when activated.
      When aside activates, it gets its own width. */
 }
 ```

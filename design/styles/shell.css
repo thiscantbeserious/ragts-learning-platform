@@ -46,7 +46,14 @@
 
   /* Sidebar toggle animation.
      Transition only grid-template-columns to animate sidebar
-     open/close. ease-out feels instant at start, settles smoothly. */
+     open/close. ease-out feels instant at start, settles smoothly.
+     IMPORTANT (Stage 3): CSS can only interpolate grid track sizes
+     between concrete pixel values. var() resolving to "0fr" is NOT
+     interpolatable from/to a pixel value. The sidebar toggle in
+     Stage 3 must set grid-template-columns to explicit pixel values
+     (e.g. "0px 1fr 0fr" when closed, "260px 1fr 0fr" when open)
+     rather than swapping var(--sidebar-width) for 0fr, otherwise
+     the transition will snap instead of animate. */
   transition: grid-template-columns 175ms ease-out;
 }
 
