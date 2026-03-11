@@ -175,15 +175,15 @@ Goal: Build the persistent sidebar with brand mark, session list, search, filter
 
 Owner: frontend-engineer (design from frontend-designer in Stage 1 verdicts)
 
-- [ ] Enhance `useSessionList.ts`: add `searchQuery`, `statusFilter`, `filteredSessions` computed
-- [ ] Build `SidebarPanel.vue` with full structure: brand area, search input, filter pills, session card list, "+ New Session" button
-- [ ] Search input: filters session list in real time (client-side, case-insensitive substring match on filename)
-- [ ] Filter pills: All / Processing / Ready / Failed with `role="group"`, `aria-pressed`
-- [ ] Session list: `<ul>` / `<li>` structure with `role="list"` / `role="listitem"`
-- [ ] "+ New Session" button opens system file picker for `.cast` files
-- [ ] "No results" empty state when filters produce zero results, with clear-filters action
+- [x] Enhance `useSessionList.ts`: add `searchQuery`, `statusFilter`, `filteredSessions` computed
+- [x] Build `SidebarPanel.vue` with full structure: brand area, search input, filter pills, session card list, "+ New Session" button
+- [x] Search input: filters session list in real time (client-side, case-insensitive substring match on filename)
+- [x] Filter pills: All / Processing / Ready / Failed with `role="group"`, `aria-pressed`
+- [x] Session list: `<ul>` / `<li>` structure with `role="list"` / `role="listitem"`
+- [x] "+ New Session" button opens system file picker for `.cast` files
+- [x] "No results" empty state when filters produce zero results, with clear-filters action
 - [ ] Wire `useLayout()` for sidebar open/close state (CSS class toggle on grid container)
-- [ ] Sidebar width governed by `--sidebar-width` CSS custom property
+- [x] Sidebar width governed by `--sidebar-width` CSS custom property
 - [ ] Verify: sidebar persists across route changes
 - [ ] Verify: search + filter compose correctly
 - [ ] Verify: sidebar open/closed state persists across page reload
@@ -503,7 +503,7 @@ Updated by implementer as work progresses.
 | 3 | pending | Route restructure |
 | 4 | complete | Skeleton loaders |
 | 5 | pending | Branding rename |
-| 6 | pending | Sidebar panel |
+| 6 | in progress | Sidebar panel — core implementation done; layout toggle wiring deferred to Stage 13 |
 | 7 | pending | Session card |
 | 8 | pending | Start page |
 | 9 | pending | Session detail layout |
