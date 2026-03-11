@@ -6,6 +6,7 @@
 - `.state/feat/client-design-bootstrap/UX_RESEARCH.md` — Full UX research report: competitor analysis, accessibility requirements, panel architecture patterns, and all source URLs.
 - `.state/feat/client-design-bootstrap/UX_RESEARCH_BASELINE.md` — Supplemental research validating the 18px/36px baseline grid against the current design system, Gemini prototype screenshots, and industry patterns. Recommends Path C adoption.
 - `.state/feat/client-design-bootstrap/references/` — Gemini prototype screenshots (session detail + start page).
+- `.state/feat/client-design-bootstrap/references/theme-tron-v1.html` — **Primary visual reference for the start page.** The original design draft with the animated background (5 orbiting dots: Record, Detect, Curate, Validate, Replay), empty session state, and drop zone. This is the reference background for the cognitive start page — all start page work should build from this file.
 
 ## Core Intent
 
