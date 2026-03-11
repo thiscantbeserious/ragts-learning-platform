@@ -18,5 +18,5 @@ Project file templates. Copy the relevant template to the target location when s
 ## Usage
 
 1. Read the template file from this skill directory
-2. Copy it to `.state/feat/<branch-name>/`
+2. Copy it to `.state/<branch-name>/`
 3. Fill in the placeholders
