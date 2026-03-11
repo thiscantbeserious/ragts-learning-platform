@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baseline Verification — Path C (18px)</title>
+  <link rel="stylesheet" href="../styles/layout.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <style>
+    body { padding: 24px; }
+    .verify-section { margin-bottom: 36px; }
+    .verify-section h2 {
+      font-size: var(--text-lg);
+      line-height: var(--lh-lg);
+      color: var(--accent-primary);
+      margin-bottom: 9px;
+      font-weight: var(--weight-semibold);
+    }
+    .verify-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .verify-label {
+      width: 200px;
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .verify-value {
+      font-size: var(--text-sm);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+    .verify-bar {
+      height: 18px;
+      background: var(--accent-primary-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+    }
+    /* Component demos */
+    .demo-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .demo-label {
+      width: 160px;
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      padding-top: 4px;
+      flex-shrink: 0;
+    }
+    /* Session card mock */
+    .mock-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: var(--rhythm-quarter) var(--rhythm-half);
+      width: 260px;
+    }
+    .mock-card__row1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--text-base);
+      line-height: var(--lh-base);
+      color: var(--text-primary);
+    }
+    .mock-card__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--status-success);
+      flex-shrink: 0;
+    }
+    .mock-card__dot--processing {
+      background: var(--accent-primary);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .mock-card__row2 {
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-muted);
+    }
+    .mock-card--selected {
+      border-left: 2px solid var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+    /* Sidebar mock */
+    .mock-sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-default);
+      padding: var(--rhythm-half);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .mock-sidebar__brand {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      padding: var(--rhythm-quarter) 0;
+    }
+    .mock-sidebar__cards {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+    /* Filter pills */
+    .mock-pills {
+      display: flex;
+      gap: var(--space-1);
+    }
+    .mock-pill {
+      height: var(--btn-height-sm);
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-default);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .mock-pill--active {
+      background: var(--accent-primary-subtle);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+  </style>
+</head>
+<body>
+  <h1 style="font-size: var(--text-2xl); line-height: var(--lh-2xl); margin-bottom: 18px; color: var(--text-primary);">
+    Baseline Verification: Path C (18px)
+  </h1>
+
+  <div class="verify-section">
+    <h2>Token Values</h2>
+    <div class="verify-row">
+      <span class="verify-label">--baseline</span>
+      <div class="verify-bar" style="width: 18px;"></div>
+      <span class="verify-value">18px</span>
+    </div>
+    <div class="verify-row">
+      <span class="verify-label">--rhythm-2</span>
+      <div class="verify-bar" style="width: 36px;"></div>
+      <span class="verify-value">36px</span>
+    </div>
+    <div class="verify-row">
+      <span class="verify-label">--rhythm-3</span>
+      <div class="verify-bar" style="width: 54px;"></div>
+      <span class="verify-value">54px</span>
+    </div>
+    <div class="verify-row">
+      <span class="verify-label">--rhythm-4</span>
+      <div class="verify-bar" style="width: 72px;"></div>
+      <span class="verify-value">72px</span>
+    </div>
+    <div class="verify-row">
+      <span class="verify-label">--btn-height-sm</span>
+      <div class="verify-bar" style="width: 27px;"></div>
+      <span class="verify-value">27px</span>
+    </div>
+    <div class="verify-row">
+      <span class="verify-label">--btn-height-md</span>
+      <div class="verify-bar" style="width: 36px;"></div>
+      <span class="verify-value">36px</span>
+    </div>
+    <div class="verify-row">
+      <span class="verify-label">--header-height</span>
+      <div class="verify-bar" style="width: 54px;"></div>
+      <span class="verify-value">54px</span>
+    </div>
+  </div>
+
+  <div class="verify-section">
+    <h2>Component Demos</h2>
+
+    <div class="demo-row">
+      <span class="demo-label">Button (md) 36px</span>
+      <button class="btn btn--primary" style="height: var(--btn-height-md);">Browse Files</button>
+    </div>
+
+    <div class="demo-row">
+      <span class="demo-label">Button (sm) 27px</span>
+      <button class="btn btn--outline btn--sm" style="height: var(--btn-height-sm);">Filter</button>
+    </div>
+
+    <div class="demo-row">
+      <span class="demo-label">Input (sm) 36px</span>
+      <input class="input" placeholder="Search sessions..." style="height: var(--input-height-sm); width: 260px;">
+    </div>
+
+    <div class="demo-row">
+      <span class="demo-label">Filter pills 27px</span>
+      <div class="mock-pills">
+        <button class="mock-pill mock-pill--active">All</button>
+        <button class="mock-pill">Proc</button>
+        <button class="mock-pill">Ready</button>
+        <button class="mock-pill">Fail</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-section">
+    <h2>Session Card Variants</h2>
+
+    <div class="demo-row">
+      <span class="demo-label">Card (compact)</span>
+      <div class="mock-card">
+        <div class="mock-card__row1">
+          <span>claude-session-1.cast</span>
+          <span class="mock-card__dot"></span>
+        </div>
+        <div class="mock-card__row2">5 sections &middot; 2h ago</div>
+      </div>
+    </div>
+
+    <div class="demo-row">
+      <span class="demo-label">Card (selected)</span>
+      <div class="mock-card mock-card--selected">
+        <div class="mock-card__row1">
+          <span>refactor-auth-module.cast</span>
+          <span class="mock-card__dot mock-card__dot--processing"></span>
+        </div>
+        <div class="mock-card__row2">3 sections &middot; 5m ago</div>
+      </div>
+    </div>
+
+    <div class="demo-row">
+      <span class="demo-label">Card (error)</span>
+      <div class="mock-card">
+        <div class="mock-card__row1">
+          <span>broken-upload.cast</span>
+          <span class="mock-card__dot" style="background: var(--status-error);"></span>
+        </div>
+        <div class="mock-card__row2">0 sections &middot; 1d ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-section">
+    <h2>Sidebar Mock (260px)</h2>
+    <div class="mock-sidebar" style="height: 500px;">
+      <div class="mock-sidebar__brand">Erika</div>
+      <button class="btn btn--primary btn--sm" style="width: 100%;">+ New Session</button>
+      <input class="input" placeholder="Search sessions..." style="height: var(--input-height-sm); width: 100%;">
+      <div class="mock-pills">
+        <button class="mock-pill mock-pill--active">All</button>
+        <button class="mock-pill">Proc</button>
+        <button class="mock-pill">Ready</button>
+        <button class="mock-pill">Fail</button>
+      </div>
+      <div class="mock-sidebar__cards">
+        <div class="mock-card mock-card--selected" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>leanest-working-session.cast</span>
+            <span class="mock-card__dot mock-card__dot--processing"></span>
+          </div>
+          <div class="mock-card__row2">5 sections &middot; 2h ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>fixture-rename-template.cast</span>
+            <span class="mock-card__dot"></span>
+          </div>
+          <div class="mock-card__row2">3 sections &middot; 4h ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>regex-is-plsff-fast-snapshot.cast</span>
+            <span class="mock-card__dot"></span>
+          </div>
+          <div class="mock-card__row2">8 sections &middot; 6h ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>main-Oxt9zM.cast</span>
+            <span class="mock-card__dot" style="background: var(--status-error);"></span>
+          </div>
+          <div class="mock-card__row2">0 sections &middot; 8h ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>refactor-sdlc-OxdJhsg.cast</span>
+            <span class="mock-card__dot"></span>
+          </div>
+          <div class="mock-card__row2">12 sections &middot; 1d ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>main-OxtA8R.cast</span>
+            <span class="mock-card__dot"></span>
+          </div>
+          <div class="mock-card__row2">4 sections &middot; 1d ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>env-ng-fit-initial-prototype.cast</span>
+            <span class="mock-card__dot"></span>
+          </div>
+          <div class="mock-card__row2">7 sections &middot; 2d ago</div>
+        </div>
+        <div class="mock-card" style="width: 100%;">
+          <div class="mock-card__row1">
+            <span>cursor-pattern-analysis.cast</span>
+            <span class="mock-card__dot"></span>
+          </div>
+          <div class="mock-card__row2">2 sections &middot; 3d ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="verify-section">
+    <h2>Monospace Line Height (--lh-mono: 20px)</h2>
+    <div style="background: var(--terminal-bg); padding: 16px; border-radius: var(--radius-lg); font-family: var(--font-mono); font-size: var(--text-base); line-height: var(--lh-mono); color: var(--terminal-text); max-width: 700px;">
+      <div>$ npm run dev:server</div>
+      <div style="color: var(--accent-primary);">Server running on http://localhost:3000</div>
+      <div>$ curl -s http://localhost:3000/api/health | jq .</div>
+      <div>{</div>
+      <div>&nbsp;&nbsp;"status": "ok",</div>
+      <div>&nbsp;&nbsp;"version": "0.9.0",</div>
+      <div>&nbsp;&nbsp;"uptime": 12345</div>
+      <div>}</div>
+      <div>$ echo "Terminal output at 14px/20px line-height"</div>
+      <div>Terminal output at 14px/20px line-height</div>
+      <div style="color: var(--status-success);">Process exited with code 0</div>
+    </div>
+  </div>
+</body>
+</html>
