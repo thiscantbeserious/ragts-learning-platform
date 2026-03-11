@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import SpatialShell from './components/SpatialShell.vue';
-import LandingPage from './pages/LandingPage.vue';
+import StartPage from './pages/StartPage.vue';
 import SessionDetailPage from './pages/SessionDetailPage.vue';
 
 const router = createRouter({
@@ -13,8 +13,8 @@ const router = createRouter({
       children: [
         {
           path: '',
-          name: 'landing',
-          component: LandingPage,
+          name: 'home',
+          component: StartPage,
         },
         {
           path: 'session/:id',

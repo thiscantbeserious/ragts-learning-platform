@@ -55,6 +55,7 @@ export default tseslint.config(
       globals: {
         DragEvent: 'readonly',
         Event: 'readonly',
+        KeyboardEvent: 'readonly',
         confirm: 'readonly',
         HTMLInputElement: 'readonly',
         FileList: 'readonly',

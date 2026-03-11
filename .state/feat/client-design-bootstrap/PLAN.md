@@ -233,14 +233,14 @@ Goal: Build the cognitive start page shown in the `main` area when no session is
 
 Owner: frontend-engineer (design from frontend-designer)
 
-- [ ] Create `src/client/pages/StartPage.vue` (replaces LandingPage.vue as the `/` route child)
-- [ ] Drop zone with dashed border and "Browse Files" CTA button
-- [ ] CTA button opens system file picker for `.cast` files
-- [ ] Animated background: extract and adapt from `references/theme-tron-v1.html` (5 orbiting dots: Record, Detect, Curate, Validate, Replay)
-- [ ] Animation is low-opacity background element, does not compete with drop zone or CTA
-- [ ] `prefers-reduced-motion`: replace animation with static graphic
-- [ ] Start page also serves as the "no session selected" state (when navigating to `/`)
-- [ ] Drop zone has `aria-dropeffect="copy"`
+- [x] Create `src/client/pages/StartPage.vue` (replaces LandingPage.vue as the `/` route child)
+- [x] Drop zone with dashed border and "Browse Files" CTA button
+- [x] CTA button opens system file picker for `.cast` files
+- [x] Animated background: extract and adapt from `references/theme-tron-v1.html` (5 orbiting dots: Record, Detect, Curate, Validate, Replay)
+- [x] Animation is low-opacity background element, does not compete with drop zone or CTA
+- [x] `prefers-reduced-motion`: replace animation with static graphic
+- [x] Start page also serves as the "no session selected" state (when navigating to `/`)
+- [x] Drop zone has `aria-dropeffect="copy"`
 - [ ] Verify: a user unfamiliar with Erika can identify what to do within 5 seconds
 - [ ] Verify: animation does not play when `prefers-reduced-motion` is set
 
@@ -505,7 +505,7 @@ Updated by implementer as work progresses.
 | 5 | pending | Branding rename |
 | 6 | in progress | Sidebar panel — core implementation done; layout toggle wiring deferred to Stage 13 |
 | 7 | complete | Session card |
-| 8 | pending | Start page |
+| 8 | complete | Start page — StartPage.vue implemented; router updated to route name 'home' |
 | 9 | pending | Session detail layout |
 | 10 | pending | Upload flow |
 | 11 | pending | SSE status updates |

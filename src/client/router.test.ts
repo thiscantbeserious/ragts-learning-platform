@@ -21,10 +21,10 @@ describe('router configuration', () => {
       expect(shellRoute).toBeDefined();
     });
 
-    it('has a child route for landing page at exact path "/"', () => {
+    it('has a child route for home (start) page at exact path "/"', () => {
       const routes = router.getRoutes();
-      const landingRoute = routes.find((r) => r.name === 'landing');
-      expect(landingRoute).toBeDefined();
+      const homeRoute = routes.find((r) => r.name === 'home');
+      expect(homeRoute).toBeDefined();
     });
 
     it('has a child route for session detail at path "/session/:id"', () => {
@@ -34,12 +34,12 @@ describe('router configuration', () => {
       expect(sessionRoute?.path).toBe('/session/:id');
     });
 
-    it('landing route is a child of the shell route', () => {
+    it('home route is a child of the shell route', () => {
       const routes = router.getRoutes();
       const shellRoute = routes.find((r) => r.name === 'shell');
       // Verify via shell's children list
       const childNames = shellRoute?.children?.map((c) => c.name) ?? [];
-      expect(childNames).toContain('landing');
+      expect(childNames).toContain('home');
     });
 
     it('session-detail route is a child of the shell route', () => {
@@ -52,9 +52,9 @@ describe('router configuration', () => {
   });
 
   describe('navigation', () => {
-    it('resolves "/" to landing name', () => {
+    it('resolves "/" to home name', () => {
       const resolved = router.resolve('/');
-      expect(resolved.name).toBe('landing');
+      expect(resolved.name).toBe('home');
     });
 
     it('resolves "/session/abc123" to session-detail name', () => {
