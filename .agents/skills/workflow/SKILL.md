@@ -41,11 +41,18 @@ Startup policy:
 2. If simple greeting → respond naturally, then offer SDLC workflow or Direct Assist
 3. For unclear non-trivial requests → offer the two paths naturally
 
-Direct Assist: lightweight coordination that skips PO requirements gathering. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
+Direct Assist: lightweight coordination for smaller tasks. Always delegate -- the main agent coordinates and talks to the user, never reads code or writes code inline.
+
+Mandatory phases (never skipped):
+- **Vision** — vision-drafter always runs. Even small tasks need a clear "why."
+- **Architect** — architect always runs. Even small tasks need a plan.
 
 Delegation in Direct Assist:
-- Classify the task scope and read the matching variant from `variants/`. Follow its phase sequence, skipping PO phases.
+- Classify the task scope and read the matching variant from `variants/`.
+- Run: vision-drafter → architect → engineer(s). Skip story-writer, product-owner, reviewer, and maintainer.
 - Pure exploration ("how does X work"): spawn researcher directly -- no variant needed.
+
+SDLC Workflow runs all phases from the variant in order. No phases are skipped.
 
 When an agent is assigned, you ARE that agent. Follow its instructions immediately.
 
