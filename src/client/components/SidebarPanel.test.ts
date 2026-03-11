@@ -2,7 +2,7 @@
  * Tests for SidebarPanel component — Stage 6 full implementation.
  *
  * Covers: skeleton loading, search input, filter pills, session list,
- * empty state, and "+ New Session" button.
+ * empty state, "+ New Session" button, and safe inject guard.
  */
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -248,6 +248,13 @@ describe('SidebarPanel', () => {
       const wrapper = mountWithState(state);
       const fileInput = wrapper.find('input[type="file"][accept=".cast"]');
       expect(fileInput.exists()).toBe(true);
+    });
+  });
+
+  describe('inject guard', () => {
+    it('throws a clear error when sessionListKey is not provided', () => {
+      // Mount without any provider — inject will return undefined.
+      expect(() => mount(SidebarPanel)).toThrow();
     });
   });
 });

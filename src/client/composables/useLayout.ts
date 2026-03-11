@@ -1,4 +1,4 @@
-import { ref, readonly } from 'vue';
+import { ref, readonly, onScopeDispose, getCurrentScope } from 'vue';
 import type { InjectionKey, Ref } from 'vue';
 
 const STORAGE_KEY = 'erika:layout:sidebar-open';
@@ -32,23 +32,41 @@ function readStoredSidebarOpen(): boolean {
   }
 }
 
-/** Checks whether the current viewport matches the mobile breakpoint (< 768px). */
-function checkIsMobile(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-}
-
 /**
  * Manages sidebar open/close state with localStorage persistence.
  * Provides `isSidebarOpen`, `toggleSidebar`, and `isMobile`.
+ * `isMobile` is reactive — it updates when the viewport crosses the 768px breakpoint.
  * Use `provide(layoutKey, useLayout())` in SpatialShell to share state with children.
  */
 export function useLayout(): LayoutState {
   const isSidebarOpen = ref(readStoredSidebarOpen());
-  const isMobile = ref(checkIsMobile());
+
+  const mq = typeof window !== 'undefined'
+    ? window.matchMedia('(max-width: 767px)')
+    : null;
+
+  const isMobile = ref(mq?.matches ?? false);
+
+  /** Updates isMobile when the viewport crosses the mobile breakpoint. */
+  function onMediaChange(e: MediaQueryListEvent): void {
+    isMobile.value = e.matches;
+  }
+
+  if (mq) {
+    mq.addEventListener('change', onMediaChange);
+    // Only register dispose if there is an active effect scope (e.g. a Vue component or effectScope()).
+    if (getCurrentScope()) {
+      onScopeDispose(() => mq.removeEventListener('change', onMediaChange));
+    }
+  }
 
   function toggleSidebar(): void {
     isSidebarOpen.value = !isSidebarOpen.value;
-    localStorage.setItem(STORAGE_KEY, String(isSidebarOpen.value));
+    try {
+      localStorage.setItem(STORAGE_KEY, String(isSidebarOpen.value));
+    } catch {
+      // Persistence is best-effort; silently swallow storage errors (e.g. quota exceeded).
+    }
   }
 
   return {

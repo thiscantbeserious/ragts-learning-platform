@@ -2,9 +2,10 @@
  * Tests for useLayout composable.
  *
  * Covers sidebar state management, localStorage persistence,
- * and invalid JSON handling.
+ * invalid JSON handling, isMobile reactivity, and localStorage error resilience.
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { effectScope } from 'vue';
 import { useLayout } from './useLayout.js';
 
 const STORAGE_KEY = 'erika:layout:sidebar-open';
@@ -100,6 +101,65 @@ describe('useLayout()', () => {
     it('exposes isMobile as a ref', () => {
       const { isMobile } = useLayout();
       expect(typeof isMobile.value).toBe('boolean');
+    });
+
+    it('updates isMobile ref when matchMedia change event fires', async () => {
+      // Simulate a narrow viewport (mobile).
+      let changeHandler: ((e: MediaQueryListEvent) => void) | null = null;
+      const mqStub = {
+        matches: false,
+        addEventListener: vi.fn((_type: string, handler: (e: MediaQueryListEvent) => void) => {
+          changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+      };
+      vi.spyOn(window, 'matchMedia').mockReturnValue(mqStub as unknown as MediaQueryList);
+
+      const scope = effectScope();
+      let isMobile: ReturnType<typeof useLayout>['isMobile'] | undefined;
+      scope.run(() => {
+        ({ isMobile } = useLayout());
+      });
+
+      expect(isMobile?.value).toBe(false);
+
+      // Simulate viewport narrowing to mobile width.
+      mqStub.matches = true;
+      if (changeHandler) {
+        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({ matches: true } as MediaQueryListEvent);
+      }
+
+      expect(isMobile?.value).toBe(true);
+
+      scope.stop();
+    });
+
+    it('removes matchMedia listener when scope is disposed', () => {
+      let changeHandler: ((e: MediaQueryListEvent) => void) | null = null;
+      const mqStub = {
+        matches: false,
+        addEventListener: vi.fn((_type: string, handler: (e: MediaQueryListEvent) => void) => {
+          changeHandler = handler;
+        }),
+        removeEventListener: vi.fn(),
+      };
+      vi.spyOn(window, 'matchMedia').mockReturnValue(mqStub as unknown as MediaQueryList);
+
+      const scope = effectScope();
+      scope.run(() => { useLayout(); });
+      scope.stop();
+
+      expect(mqStub.removeEventListener).toHaveBeenCalledWith('change', changeHandler);
+    });
+  });
+
+  describe('localStorage resilience', () => {
+    it('toggleSidebar does not throw when localStorage.setItem throws', () => {
+      localStorageStub.setItem.mockImplementation(() => { throw new Error('quota exceeded'); });
+      const { toggleSidebar, isSidebarOpen } = useLayout();
+      expect(() => toggleSidebar()).not.toThrow();
+      // State still flips even though persistence failed.
+      expect(isSidebarOpen.value).toBe(false);
     });
   });
 
