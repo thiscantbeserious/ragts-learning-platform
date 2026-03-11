@@ -2,7 +2,10 @@
 
 > Transform Erika from a page-based prototype into a spatial application where sessions are always present, the system is always alive, and the user never feels lost.
 
-**Companion research:** `.state/feat/client-design-bootstrap/UX_RESEARCH.md` contains the full UX research report with sourced competitor analysis, accessibility requirements, and pattern evidence. This vision document is self-contained -- UX_RESEARCH.md provides additional depth and all source URLs.
+**Companion research:**
+- `.state/feat/client-design-bootstrap/UX_RESEARCH.md` — Full UX research report: competitor analysis, accessibility requirements, panel architecture patterns, and all source URLs.
+- `.state/feat/client-design-bootstrap/UX_RESEARCH_BASELINE.md` — Supplemental research validating the 18px/36px baseline grid against the current design system, Gemini prototype screenshots, and industry patterns. Recommends Path C adoption.
+- `.state/feat/client-design-bootstrap/references/` — Gemini prototype screenshots (session detail + start page).
 
 ## Core Intent
 
@@ -108,9 +111,9 @@ This is where the vision challenges an existing design decision.
 
 - **Path B (Adaptive dual-rhythm):** Keep the 21px baseline for the main content area (terminal output, section headers, reading surfaces). Adopt an 8px spatial grid for sidebar and chrome components. A CSS custom property override on the sidebar region (`--density: compact`) switches spacing tokens. This is how VS Code works -- the editor area has its own type scale separate from the UI chrome. Session cards at 32-48px, comparable to Linear and Figma. Requires adding density-scoped token overrides to the design system.
 
-- **Path C (Tighter universal baseline -- user-tested):** Adopt an 18px baseline with a 36px grid. At 14px base font, 18px line-height gives a ~1.286 ratio -- tighter than 1.5 but still readable. This produces more granular increments than 21px while maintaining a consistent vertical rhythm system: 36px (2x), 54px (3x), 72px (4x). A session card at 2x baseline = 36px, close to comparable tools. The 36px grid unit (2 baselines) replaces the current 42px (2 x 21px) as the major rhythm interval. This path has been **visually tested by the user** against the existing design system mockups with acceptable results. It preserves the philosophy of baseline rhythm without the density penalty of 21px, and avoids the complexity of maintaining two spacing systems. Requires updating `--baseline`, `--lh-*`, and `--rhythm-*` tokens in `layout.css`.
+- **Path C (Tighter universal baseline -- user-tested):** Adopt an 18px baseline with a 36px grid. At 14px base font, 18px line-height gives a ~1.286 ratio -- tighter than 1.5 but still readable. This produces more granular increments than 21px while maintaining a consistent vertical rhythm system: 36px (2x), 54px (3x), 72px (4x). A session card at 2x baseline = 36px, close to comparable tools. **Key structural advantage: 36px and 18px are divisible by 4** (36/4 = 9, 18/4 = 4.5 at base but 36/4 = 9 clean), enabling alignment with a 4px sub-grid. The current 21px/42px baseline does NOT divide evenly by 4 or 8 (21/4 = 5.25, 42/4 = 10.5, 21/8 = 2.625, 42/8 = 5.25) — so Path C actually achieves better sub-grid alignment than Path A. The LCM of 18 and 4 is 36, meaning both grids sync at every 36px boundary. This path has been **visually tested by the user** against the existing design system mockups with acceptable results. It preserves the philosophy of baseline rhythm without the density penalty of 21px, and avoids the complexity of maintaining two spacing systems. Per the baseline research (see UX_RESEARCH_BASELINE.md), adoption requires updating only `--baseline` in `layout.css` -- all 16 derived tokens recalculate automatically via `calc()`. Requires updating `--baseline`, `--lh-*`, and `--rhythm-*` tokens in `layout.css`.
 
-The frontend-designer must evaluate all three paths through mockup iteration. The grid architecture works regardless of which baseline ships -- this decision affects component sizing within panels, not the panel structure itself. The vision recommends Path B or Path C based on the evidence, but does not mandate either.
+The frontend-designer must evaluate all three paths through mockup iteration. The grid architecture works regardless of which baseline ships -- this decision affects component sizing within panels, not the panel structure itself. The baseline research (UX_RESEARCH_BASELINE.md) strongly recommends **Path C** based on: user visual testing, 4px sub-grid alignment advantage, one-token migration cost, and prototype screenshot analysis showing the Gemini prototype already uses spacing closer to 18px than 21px.
 
 ## Current State
 
