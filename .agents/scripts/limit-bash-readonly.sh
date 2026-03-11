@@ -10,8 +10,13 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# Extract the first command token (handles pipes, &&, ;, etc.)
-# We check ALL tokens in the command to prevent chaining bypasses.
+# Block subshell injection and redirections that can embed arbitrary commands.
+# Catches: $(...), `...`, > file, >> file
+if echo "$COMMAND" | grep -qE '\$\(|`|>[^&]|>>'; then
+  echo "Blocked: Subshell expansion (\$(), backticks) and file redirections (>, >>) are not allowed." >&2
+  exit 2
+fi
+
 # Split on pipe, &&, ;, || and check each segment's first word.
 SEGMENTS=$(echo "$COMMAND" | grep -oE '[^|&;]+')
 
@@ -22,14 +27,14 @@ while IFS= read -r segment; do
   [ -z "$TOKEN" ] && continue
 
   case "$TOKEN" in
-    # Read-only git (validated further below)
+    # Read-only git
     git)
       SUBCOMMAND=$(echo "$segment" | sed 's/^[[:space:]]*//' | awk '{print $2}')
       case "$SUBCOMMAND" in
-        diff|log|show|status|branch|ls-tree|ls-files|rev-parse|describe|shortlog|name-rev)
+        diff|log|show|status|ls-tree|ls-files|rev-parse|describe|shortlog|name-rev)
           ;; # allowed
         *)
-          echo "Blocked: Only read-only git commands allowed (diff, log, show, status, branch, ls-tree, ls-files)." >&2
+          echo "Blocked: Only read-only git commands allowed (diff, log, show, status, ls-tree, ls-files, rev-parse, describe)." >&2
           exit 2
           ;;
       esac
@@ -52,10 +57,10 @@ while IFS= read -r segment; do
       case "$SUBCOMMAND" in
         run)
           case "$SCRIPT" in
-            lint|lint:fix|test|test:unit|test:integration|test:snapshot|test:visual|test:all|test:migrations)
+            lint|test|test:unit|test:integration|test:snapshot|test:visual|test:all|test:migrations)
               ;; # allowed
             *)
-              echo "Blocked: npm run only allowed for: lint, lint:fix, test, test:unit, test:integration, test:snapshot, test:visual, test:all, test:migrations." >&2
+              echo "Blocked: npm run only allowed for: lint, test, test:unit, test:integration, test:snapshot, test:visual, test:all, test:migrations." >&2
               exit 2
               ;;
           esac

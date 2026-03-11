@@ -9,10 +9,16 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-# Canonicalize to prevent ../ traversal bypasses
+# Resolve repo root and canonicalize the target path
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || realpath -m .)
 RESOLVED=$(realpath -m "$FILE_PATH")
 
-if echo "$RESOLVED" | grep -qE '(^|/)(src/server/|src/shared/|packages/|tests/|\.state/)'; then
+# Must be inside the repo and under an allowed directory
+if [[ "$RESOLVED" == "$REPO_ROOT/src/server/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/src/shared/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/packages/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/tests/"* ]] ||
+   [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
   exit 0
 fi
 

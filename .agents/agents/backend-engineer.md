@@ -20,6 +20,10 @@ hooks:
       hooks:
         - type: command
           command: ".agents/scripts/limit-write-backend.sh"
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: ".agents/scripts/limit-bash-engineer.sh"
 ---
 
 # Backend Engineer

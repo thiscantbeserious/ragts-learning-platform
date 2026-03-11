@@ -21,6 +21,10 @@ hooks:
       hooks:
         - type: command
           command: ".agents/scripts/limit-write-frontend.sh"
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: ".agents/scripts/limit-bash-engineer.sh"
 ---
 
 # Frontend Engineer

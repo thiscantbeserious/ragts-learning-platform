@@ -9,12 +9,14 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-# Canonicalize to prevent ../ traversal bypasses
+# Resolve repo root and canonicalize the target path
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || realpath -m .)
 RESOLVED=$(realpath -m "$FILE_PATH")
 
-if echo "$RESOLVED" | grep -qE '(^|/)\.state/'; then
+# Must be inside the repo and under .state/
+if [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
   exit 0
 fi
 
-echo "Blocked: Write is restricted to .state/ directories." >&2
+echo "Blocked: Write is restricted to .state/ directories within the repo." >&2
 exit 2
