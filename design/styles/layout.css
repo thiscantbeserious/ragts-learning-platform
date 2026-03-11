@@ -18,15 +18,15 @@
    Stage-specific CSS goes in <style> within each HTML file.
 
    Baseline rhythm:
-     Base font: 14px, line-height: 1.5 = 21px baseline unit.
+     Base font: 14px, line-height: 18px baseline unit.
      ALL vertical spacing, component heights, and line-heights
-     resolve to multiples of 21px. The background grid uses 42px
-     (2 x baseline) for a clean visual cadence.
+     resolve to multiples of 18px. The background grid uses 72px
+     (4 x baseline) for a clean visual cadence.
 
    Layout classes:
 
      .container              — max-width 960px, centered, 24px inline padding
-     .grid                   — display:grid, gap 21px (1 baseline unit)
+     .grid                   — display:grid, gap 18px (1 baseline unit)
      .grid.grid--auto-fill   — repeat(auto-fill, minmax(200px, 1fr))
      .grid.grid--2col        — repeat(2, 1fr)
      .grid.grid--3col        — repeat(3, 1fr)
@@ -46,9 +46,11 @@
      (line-heights, component heights, vertical spacing, margins)
      MUST resolve to a multiple of this value.
 
-     Derivation: 14px base font x 1.5 line-height = 21px
+     Derivation: 14px base font, 18px line-height (ratio 1.286).
+     Path C adopted per BASELINE_DECISION.md — tighter density
+     for the spatial application shell while preserving rhythm.
      ============================================================ */
-  --baseline: 21px;
+  --baseline: 18px;
 
   /* ============================================================
      COLORS — Midnight Neon palette
@@ -128,18 +130,18 @@
      TYPOGRAPHY — Minor Third (1.2) from 14px base
      ============================================================
      Line heights are absolute px values that are exact multiples
-     of --baseline (21px). This guarantees every text element
+     of --baseline (18px). This guarantees every text element
      occupies whole baseline units regardless of font size.
 
      Font size  | line-height | Baseline units
      -----------|-------------|---------------
-     10px (xs)  |    21px     | 1
-     12px (sm)  |    21px     | 1
-     14px (base)|    21px     | 1
-     17px (lg)  |    21px     | 1
-     20px (xl)  |    21px     | 1
-     24px (2xl) |    42px     | 2
-     29px (3xl) |    42px     | 2
+     10px (xs)  |    18px     | 1
+     12px (sm)  |    18px     | 1
+     14px (base)|    18px     | 1
+     17px (lg)  |    18px     | 1
+     20px (xl)  |    18px     | 1
+     24px (2xl) |    36px     | 2
+     29px (3xl) |    36px     | 2
      ============================================================ */
 
   /* Font families */
@@ -165,7 +167,7 @@
   --lh-xl: var(--baseline);                    /* 20px text: 1 baseline unit */
   --lh-2xl: calc(var(--baseline) * 2);         /* 24px text: 2 baseline units */
   --lh-3xl: calc(var(--baseline) * 2);         /* 29px text: 2 baseline units */
-  --lh-mono: var(--baseline);                  /* monospace at any body size */
+  --lh-mono: 20px;                             /* monospace: hardcoded for terminal reading comfort (1.43 ratio at 14px) */
 
   /* Legacy ratio tokens — kept for compatibility, but prefer --lh-* */
   --leading-tight: 1.3125;   /* 21px/16px approximation for headings */
@@ -191,7 +193,7 @@
      ============================================================
      Horizontal spacing remains on the 4px grid.
      Vertical spacing tokens that affect rhythm use baseline
-     multiples: 21px, 42px, 63px, 84px.
+     multiples: 18px, 36px, 54px, 72px.
 
      The --space-N tokens are kept for horizontal use and for
      fine internal adjustments. For vertical rhythm, use --rhythm-*.
@@ -209,8 +211,8 @@
   --space-16: 64px;
 
   /* Rhythm-aligned vertical spacing (derived from --baseline) */
-  --rhythm-quarter: calc(var(--baseline) / 4);  /* 0.25 units (5.25px) — tight padding */
-  --rhythm-half: calc(var(--baseline) / 2);    /* 0.5 units (10.5px) — compact padding */
+  --rhythm-quarter: calc(var(--baseline) / 4);  /* 0.25 units (4.5px) — tight padding */
+  --rhythm-half: calc(var(--baseline) / 2);    /* 0.5 units (9px) — compact padding */
   --rhythm-1: var(--baseline);                 /* 1 unit — standard gap */
   --rhythm-2: calc(var(--baseline) * 2);       /* 2 units — section spacing */
   --rhythm-3: calc(var(--baseline) * 3);       /* 3 units — major section break */
@@ -238,14 +240,14 @@
   /* ============================================================
      COMPONENT SIZING — baseline-snapped heights
      ============================================================
-     All interactive component heights are multiples of 21px
+     All interactive component heights are multiples of 18px
      so they occupy whole baseline units in vertical flow.
 
-     btn-sm kept at 21px (1 unit) — compact inline actions.
-     btn-md / input-sm / input-md = 42px (2 units).
-     btn-lg / input-lg = 63px (3 units).
+     btn-sm = 27px (1.5 units) — compact inline actions.
+     btn-md / input-sm / input-md = 36px (2 units).
+     btn-lg / input-lg = 54px (3 units).
      ============================================================ */
-  --btn-height-sm: calc(var(--baseline) * 1.5);   /* 1.5 baseline units (31.5px) */
+  --btn-height-sm: calc(var(--baseline) * 1.5);   /* 1.5 baseline units (27px) */
   --btn-height-md: var(--rhythm-2);              /* 2 baseline units */
   --btn-height-lg: var(--rhythm-3);              /* 3 baseline units */
   --input-height-sm: var(--rhythm-2);            /* 2 baseline units */
@@ -306,19 +308,17 @@ body {
       rgba(0, 212, 255, 0.06) 0px,
       rgba(0, 212, 255, 0.06) 1px,
       transparent 0px,
-      transparent 84px
+      transparent 72px
     ),
     repeating-linear-gradient(
       90deg,
       rgba(0, 212, 255, 0.06) 0px,
       rgba(0, 212, 255, 0.06) 1px,
       transparent 0px,
-      transparent 84px
+      transparent 72px
     ),
     var(--bg-page);
-  /* Offset: header is 63px (3 baselines). The grid starts at the
-     page top and the first visible line should appear at y=0.
-     No vertical offset needed — grid lines at 0, 42, 84, ... */
+  /* Background grid at 72px (4 baselines). Grid lines at 0, 72, 144, ... */
   background-position: 0px, -2px, 0, 0;
   color: var(--text-primary);
   font-size: var(--text-base);

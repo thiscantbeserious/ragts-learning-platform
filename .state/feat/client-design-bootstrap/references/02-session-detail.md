@@ -1,0 +1,15 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "R RAGTS" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: R
+        - generic [ref=e8]: RAGTS
+      - navigation [ref=e9]:
+        - link "Sessions" [ref=e10] [cursor=pointer]:
+          - /url: /
+  - banner [ref=e223]:
+    - navigation [ref=e224]:
+      - link "Sessions" [ref=e225] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e228]: agnt-ses-rec_260204_002834.cast
