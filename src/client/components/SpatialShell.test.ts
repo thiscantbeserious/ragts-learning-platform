@@ -3,8 +3,9 @@
  *
  * Verifies that the shell renders child components, exposes the router-view
  * for page content, and provides layout state to children via inject.
+ * Also verifies that the data-hydrating attribute is removed after mount.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { defineComponent, inject } from 'vue';
@@ -99,5 +100,43 @@ describe('SpatialShell', () => {
     expect(injectedLayout).toHaveProperty('isSidebarOpen');
     expect(injectedLayout).toHaveProperty('toggleSidebar');
     expect(injectedLayout).toHaveProperty('isMobile');
+  });
+
+  describe('hydration transition suppression', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('removes data-hydrating attribute from .spatial-shell after mount', async () => {
+      // Simulate the #app element having data-hydrating set (as index.html does).
+      const shellEl = document.createElement('div');
+      shellEl.classList.add('spatial-shell');
+      shellEl.setAttribute('data-hydrating', '');
+      document.body.appendChild(shellEl);
+
+      const captured: { cb: FrameRequestCallback | null } = { cb: null };
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb) => {
+        captured.cb = cb;
+        return 0;
+      });
+
+      const router = createTestRouter();
+      await router.push('/');
+      mount(SpatialShell, {
+        global: { plugins: [router] },
+        attachTo: shellEl,
+      });
+
+      // Attribute still present before rAF fires
+      expect(shellEl.hasAttribute('data-hydrating')).toBe(true);
+
+      // Fire the rAF callback
+      if (captured.cb) captured.cb(0);
+
+      // Attribute must be gone
+      expect(shellEl.hasAttribute('data-hydrating')).toBe(false);
+
+      document.body.removeChild(shellEl);
+    });
   });
 });

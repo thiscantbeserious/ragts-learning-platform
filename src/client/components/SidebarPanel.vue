@@ -104,7 +104,14 @@ import type { SessionListState } from '../composables/useSessionList.js';
  * Renders skeleton while loading, then search/filters/list/button.
  */
 
-const sessionList = inject(sessionListKey) as SessionListState;
+const _injectedSessionList = inject(sessionListKey);
+if (!_injectedSessionList) {
+  throw new Error(
+    'SidebarPanel: sessionListKey not provided. ' +
+    'Ensure SpatialShell (or a parent component) calls provide(sessionListKey, useSessionList()).'
+  );
+}
+const sessionList: SessionListState = _injectedSessionList;
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 

@@ -57,6 +57,13 @@
   transition: grid-template-columns 175ms ease-out;
 }
 
+/* Suppress all transitions during the hydration phase (before Vue mounts).
+   The data-hydrating attribute is set statically in index.html and removed
+   by SpatialShell.vue's onMounted hook via requestAnimationFrame. */
+.spatial-shell[data-hydrating] {
+  transition: none !important;
+}
+
 /* ----------------------------------------------------------------
    Grid area assignments
    Each class maps a child element to its named grid area.
