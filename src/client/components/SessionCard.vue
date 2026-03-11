@@ -176,8 +176,8 @@ function handleClick(): void {
 /* Status indicator dot */
 .session-card__status-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: var(--space-2);
+  height: var(--space-2);
   border-radius: var(--radius-full);
   flex-shrink: 0;
 }

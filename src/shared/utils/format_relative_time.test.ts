@@ -96,4 +96,23 @@ describe('formatRelativeTime', () => {
     const dateStr = new Date(NOW.getTime() - 5 * 60 * 1000).toISOString();
     expect(formatRelativeTime(dateStr)).toBe('5m ago');
   });
+
+  it('returns "unknown" for an invalid date input', () => {
+    expect(formatRelativeTime('not-a-date')).toBe('unknown');
+  });
+
+  it('returns "just now" for a future date (handles clock skew)', () => {
+    const date = new Date(NOW.getTime() + 60 * 1000);
+    expect(formatRelativeTime(date)).toBe('just now');
+  });
+
+  it('returns "1y ago" for 365 days ago', () => {
+    const date = new Date(NOW.getTime() - 365 * 24 * 60 * 60 * 1000);
+    expect(formatRelativeTime(date)).toBe('1y ago');
+  });
+
+  it('returns "2y ago" for 730 days ago', () => {
+    const date = new Date(NOW.getTime() - 730 * 24 * 60 * 60 * 1000);
+    expect(formatRelativeTime(date)).toBe('2y ago');
+  });
 });
