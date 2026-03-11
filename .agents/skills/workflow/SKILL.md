@@ -108,6 +108,8 @@ Limits: max 3 per phase, max 2 follow-ups per question, lead agent owns their ar
 
 | Phase | Lead | Can consult | For |
 |---|---|---|---|
+| Vision | Vision Drafter | UX Researcher, Researcher | Patterns, current state |
+| Stories | Story Writer | Platform User, Researcher | Perspectives, codebase context |
 | Requirements | Product Owner | Architect | Feasibility, scope |
 | Design | Architect | Product Owner | Intent, alignment |
 
