@@ -75,17 +75,17 @@ Goal: Create the pure CSS grid shell and update the HTML loading model. After th
 
 Owner: frontend-engineer
 
-- [ ] Add `--sidebar-width: 260px` token to `:root` in `design/styles/layout.css`
-- [ ] Create `design/styles/shell.css` with the spatial grid template (6 named areas, 3 columns, 3 rows)
-- [ ] Grid: `aside` column at `0fr`, `bottom` row at `0fr`
-- [ ] Grid area assignment classes: `.spatial-shell__brand`, `__header`, `__sidebar`, `__main`, `__aside`, `__bottom`
-- [ ] Responsive rule: below 768px, collapse to single-column (sidebar hidden, main fills width)
-- [ ] Transition rule for `grid-template-columns` (150-200ms, ease-out) for sidebar toggle animation
-- [ ] Update `index.html`: add blocking `<link>` for `layout.css` and `shell.css` before the script tag
-- [ ] Update `index.html`: rename `<title>` from "RAGTS" to "Erika"
-- [ ] Update `main.ts`: remove `layout.css` import (now loaded via `<link>`)
-- [ ] Verify: grid areas visible in DevTools at first paint before Vue mounts
-- [ ] Verify: adding `<div style="grid-area: aside">test</div>` shows content in correct position
+- [x] Add `--sidebar-width: 260px` token to `:root` in `design/styles/layout.css`
+- [x] Create `design/styles/shell.css` with the spatial grid template (6 named areas, 3 columns, 3 rows)
+- [x] Grid: `aside` column at `0fr`, `bottom` row at `0fr`
+- [x] Grid area assignment classes: `.spatial-shell__brand`, `__header`, `__sidebar`, `__main`, `__aside`, `__bottom`
+- [x] Responsive rule: below 768px, collapse to single-column (sidebar hidden, main fills width)
+- [x] Transition rule for `grid-template-columns` (175ms, ease-out) for sidebar toggle animation
+- [x] Update `index.html`: add blocking `<link>` for `layout.css` and `shell.css` before the script tag
+- [x] Update `index.html`: rename `<title>` from "RAGTS" to "Erika"
+- [x] Update `main.ts`: remove `layout.css` import (now loaded via `<link>`)
+- [x] Verify: grid areas visible in DevTools at first paint before Vue mounts
+- [x] Verify: adding `<div style="grid-area: aside">test</div>` shows content in correct position
 
 Files: `design/styles/shell.css` (new), `design/styles/layout.css` (token addition), `index.html`, `src/client/main.ts`
 Depends on: Stage 0 (baseline tokens must be finalized)
@@ -499,7 +499,7 @@ Updated by implementer as work progresses.
 |-------|--------|-------|
 | 0 | pending | Baseline grid decision |
 | 1 | pending | Design review verdicts |
-| 2 | pending | CSS Grid shell |
+| 2 | complete | CSS Grid shell |
 | 3 | pending | Route restructure |
 | 4 | pending | Skeleton loaders |
 | 5 | pending | Branding rename |

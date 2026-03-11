@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RAGTS - Reinforced Human Learning Platform</title>
+    <title>Erika</title>
+    <!-- Blocking stylesheets: layout tokens + spatial grid shell.
+         Loaded before the Vite script so the six grid areas exist at
+         first paint, before any JavaScript runs (CLS prevention). -->
+    <link rel="stylesheet" href="/design/styles/layout.css" />
+    <link rel="stylesheet" href="/design/styles/shell.css" />
   </head>
   <body>
-    <div id="app"></div>
+    <!-- .spatial-shell is applied statically so the grid exists before Vue mounts. -->
+    <div id="app" class="spatial-shell"></div>
     <script type="module" src="/src/client/main.ts"></script>
   </body>
 </html>

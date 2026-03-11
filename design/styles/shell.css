@@ -1,0 +1,122 @@
+/* Erika Design System — Copyright (c) 2026 Simon Sanladerer
+   The visual design, composition, layout patterns, token values, and
+   individual styles in this file are protected creative work.
+   Licensed under the Elastic License 2.0 — see LICENSE in this directory. */
+
+/* ================================================================
+   Erika Spatial Shell — CSS Grid Structure
+   ================================================================
+   Defines the six-area application shell grid.
+   Loaded as a blocking <link> after layout.css so all tokens
+   (--sidebar-width, --header-height, --rhythm-*) are available
+   at first paint before any JavaScript runs.
+
+   Grid areas:
+     brand   | header  header
+     sidebar | main    aside
+     sidebar | bottom  aside
+
+   Column tracks: var(--sidebar-width) 1fr 0fr
+     - sidebar: fixed 260px
+     - main:    fills remaining space
+     - aside:   0fr (collapsed, reserved for future activation)
+
+   Row tracks: var(--header-height) 1fr 0fr
+     - header:  fixed 54px (3 baseline units)
+     - main:    fills remaining viewport height
+     - bottom:  0fr (collapsed, reserved for future activation)
+
+   NOTE: Do not use repeat() in grid-template-columns.
+   Individually-specified tracks are required for CSS transition
+   interpolation to work when toggling sidebar open/closed.
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   Shell container
+   ---------------------------------------------------------------- */
+.spatial-shell {
+  display: grid;
+  grid-template-areas:
+    "brand  header header"
+    "sidebar main   aside"
+    "sidebar bottom aside";
+  grid-template-columns: var(--sidebar-width) 1fr 0fr;
+  grid-template-rows: var(--header-height) 1fr 0fr;
+  min-height: 100dvh;
+
+  /* Sidebar toggle animation.
+     Transition only grid-template-columns to animate sidebar
+     open/close. ease-out feels instant at start, settles smoothly. */
+  transition: grid-template-columns 175ms ease-out;
+}
+
+/* ----------------------------------------------------------------
+   Grid area assignments
+   Each class maps a child element to its named grid area.
+   Applied by the Vue component tree (SpatialShell.vue children),
+   but defined here so the mapping is readable in isolation.
+   ---------------------------------------------------------------- */
+
+/** Brand mark: top-left corner, above the sidebar. */
+.spatial-shell__brand {
+  grid-area: brand;
+}
+
+/** Primary header bar: spans the two right columns. */
+.spatial-shell__header {
+  grid-area: header;
+}
+
+/** Persistent sidebar panel: spans both content rows on the left. */
+.spatial-shell__sidebar {
+  grid-area: sidebar;
+}
+
+/** Main content area: primary viewport for page content. */
+.spatial-shell__main {
+  grid-area: main;
+  /* Prevent content from breaking out of the grid track. */
+  min-width: 0;
+}
+
+/** Aside panel: right column, collapsed (0fr) until activated. */
+.spatial-shell__aside {
+  grid-area: aside;
+  overflow: hidden;
+}
+
+/** Bottom panel: bottom row, collapsed (0fr) until activated. */
+.spatial-shell__bottom {
+  grid-area: bottom;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------------
+   Responsive: below 768px, collapse to single-column layout.
+   Sidebar hides (0fr) and main fills the full width.
+   The mobile sidebar overlay (Stage 13) replaces the inline sidebar.
+   ---------------------------------------------------------------- */
+@media (max-width: 767px) {
+  .spatial-shell {
+    grid-template-areas:
+      "header"
+      "main"
+      "bottom";
+    grid-template-columns: 1fr;
+    grid-template-rows: var(--header-height) 1fr 0fr;
+    /* No transition needed for mobile — sidebar is an overlay, not a grid track. */
+    transition: none;
+  }
+
+  .spatial-shell__brand {
+    display: none;
+  }
+
+  .spatial-shell__sidebar {
+    display: none;
+  }
+
+  .spatial-shell__aside {
+    display: none;
+  }
+}

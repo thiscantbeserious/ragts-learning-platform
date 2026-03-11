@@ -1,4 +1,4 @@
-import '../../design/styles/layout.css';
+// layout.css is loaded as a blocking <link> in index.html — do not re-import here.
 import '../../design/styles/components.css';
 import '../../design/styles/page.css';
 import '../../design/styles/icons.css';

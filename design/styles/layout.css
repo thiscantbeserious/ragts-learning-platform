@@ -229,6 +229,7 @@
   --container-padding: var(--space-6);
   --grid-gap: var(--rhythm-1);                   /* 1 baseline unit */
   --header-height: var(--rhythm-3);              /* 3 baseline units */
+  --sidebar-width: 260px;                        /* spatial shell sidebar column */
 
   /* Breakpoints (documented as tokens; used as raw values in @media) */
   --breakpoint-sm: 640px;
