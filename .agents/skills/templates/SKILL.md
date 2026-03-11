@@ -5,7 +5,7 @@ description: Project file templates. Load this skill to know which templates are
 
 ## Access pattern
 
-Templates are in `references/`. Read the one matching your output file by name (e.g., need to create `STORIES.md` → read `references/STORIES.md`).
+Templates are in `references/`. When you need to create a file (e.g., `STORIES.md`, `ADR.md`, `REQUIREMENTS.md`), a template with the same name should exist at `references/<filename>`. Read it before creating your output.
 
 ## Usage
 
