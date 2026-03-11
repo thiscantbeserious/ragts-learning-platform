@@ -35,6 +35,7 @@
    Shell container
    ---------------------------------------------------------------- */
 .spatial-shell {
+  background: var(--bg-page);
   display: grid;
   grid-template-areas:
     "brand  header header"
