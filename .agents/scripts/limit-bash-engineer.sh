@@ -33,14 +33,14 @@ while IFS= read -r segment; do
   case "$TOKEN" in
     # Block in-place file editors
     sed)
-      if echo "$TRIMMED" | grep -qE '\s-i'; then
-        echo "Blocked: 'sed -i' modifies files in-place. Use the Edit tool instead." >&2
+      if echo "$TRIMMED" | grep -qE '\s-i|\s--in-place'; then
+        echo "Blocked: 'sed -i/--in-place' modifies files in-place. Use the Edit tool instead." >&2
         exit 2
       fi
       ;;
     perl)
-      if echo "$TRIMMED" | grep -qE '\s-[a-zA-Z]*p[a-zA-Z]*i|\s-[a-zA-Z]*i[a-zA-Z]*p'; then
-        echo "Blocked: 'perl -pi' modifies files in-place. Use the Edit tool instead." >&2
+      if echo "$TRIMMED" | grep -qE '\s-[a-zA-Z]*p[a-zA-Z]*i|\s-[a-zA-Z]*i[a-zA-Z]*p|\s--inplace'; then
+        echo "Blocked: 'perl -pi/--inplace' modifies files in-place. Use the Edit tool instead." >&2
         exit 2
       fi
       ;;

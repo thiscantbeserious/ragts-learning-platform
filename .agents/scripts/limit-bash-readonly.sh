@@ -34,7 +34,7 @@ while IFS= read -r segment; do
         diff|log|show|status|ls-tree|ls-files|rev-parse|describe|shortlog|name-rev)
           ;; # allowed
         *)
-          echo "Blocked: Only read-only git commands allowed (diff, log, show, status, ls-tree, ls-files, rev-parse, describe)." >&2
+          echo "Blocked: Only read-only git commands allowed (diff, log, show, status, ls-tree, ls-files, rev-parse, describe, shortlog, name-rev)." >&2
           exit 2
           ;;
       esac
