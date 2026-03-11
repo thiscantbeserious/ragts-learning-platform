@@ -13,16 +13,21 @@ import BrandMark from './BrandMark.vue';
 import ShellHeader from './ShellHeader.vue';
 import SidebarPanel from './SidebarPanel.vue';
 import { useLayout, layoutKey } from '../composables/useLayout.js';
+import { useSessionList, sessionListKey } from '../composables/useSessionList.js';
 
 /**
  * SpatialShell is the layout route parent.
  * It renders the permanent shell fixtures (brand, header, sidebar) and
- * provides layout state to children via provide/inject.
+ * provides layout state and session list state to children via provide/inject.
  * The main area hosts the active child route via <router-view>.
  */
 
 const layout = useLayout();
 provide(layoutKey, layout);
+
+/** Session list is provided at shell level so sidebar and header can share it. */
+const sessionList = useSessionList();
+provide(sessionListKey, sessionList);
 
 /** Suppress layout transition flash on first paint. */
 onMounted(() => {
