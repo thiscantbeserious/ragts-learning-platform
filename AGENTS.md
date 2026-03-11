@@ -2,6 +2,10 @@
 
 Reinforced Human Learning Platform. A self-hostable, white-label web platform for browsing, exploring, and learning from AI agent terminal sessions. Powered by [AGR](https://github.com/thiscantbeserious/agent-session-recorder) as the recording and transformation service.
 
+## Directory Rename (2026-03-11)
+
+`agents/` was renamed to `.agents/`. The symlinks `.claude`, `.codex`, and `.gemini` all point to `.agents/`. Historical `.state/` files may still reference the old `agents/` path — those are not updated and should be read as `.agents/`.
+
 ## Your Purpose
 
 You are an AI agent working on the RAGTS codebase. On startup:
@@ -38,8 +42,8 @@ Before starting any task, read these files in order:
 
 Frontend work is split across two specialized roles. **Do not attempt to handle both yourself** — delegate to the correct role:
 
-- **Frontend Designer** (`agents/agents/frontend-designer.md`) — Design system, CSS, HTML mockups, visual design, responsive fixes, anything under `design/`. Uses Playwright MCP for visual verification.
-- **Frontend Engineer** (`agents/agents/frontend-engineer.md`) — Vue 3 application code, components under `src/client/`, shared types, Vite config. Implements designs produced by the designer.
+- **Frontend Designer** (`.agents/agents/frontend-designer.md`) — Design system, CSS, HTML mockups, visual design, responsive fixes, anything under `design/`. Uses Playwright MCP for visual verification.
+- **Frontend Engineer** (`.agents/agents/frontend-engineer.md`) — Vue 3 application code, components under `src/client/`, shared types, Vite config. Implements designs produced by the designer.
 
 When a task involves visual/CSS/design work, spawn or defer to the **Frontend Designer**. When it involves application logic/Vue components, spawn or defer to the **Frontend Engineer**.
 
@@ -86,6 +90,6 @@ No external databases, Redis, or Docker containers are needed for development. T
 ### Gotchas
 
 - `npx tsc --noEmit` reports pre-existing TS errors in test files (strict `noUncheckedIndexedAccess` null checks on test assertions). These are separate from ESLint.
-- The commit-msg hook (`.husky/commit-msg`) validates commit scopes against `agents/skills/workflow/variants/*.md` and blocks snapshot file changes without `[snapshot-update]` in the message.
+- The commit-msg hook (`.husky/commit-msg`) validates commit scopes against `.agents/skills/workflow/variants/*.md` and blocks snapshot file changes without `[snapshot-update]` in the message.
 - The WASM package (`packages/vt-wasm/pkg/`) is pre-built and committed; no Rust toolchain needed for development.
 - Upload endpoint is `POST /api/upload` (not `/api/sessions`). A sample `.cast` file is at `fixtures/sample.cast`.

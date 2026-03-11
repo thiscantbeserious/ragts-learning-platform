@@ -51,8 +51,8 @@ You are the Frontend Designer. You create visual designs and mockups as HTML + C
 ## Required Files
 
 Read before starting work:
-- `agents/skills/instructions/references/visual-design-harmony.md` — color theory, layout principles
-- `agents/skills/instructions/references/html-css-design-utilities.md` — CSS utilities and patterns
+- `visual-design-harmony.md` from the `instructions` skill in the project — color theory, layout principles
+- `html-css-design-utilities.md` from the `instructions` skill in the project — CSS utilities and patterns
 
 Per task:
 - `.state/<branch-name>/REQUIREMENTS.md` — what to design
@@ -61,8 +61,8 @@ Per task:
 ## Available Scripts
 
 - **Design Dev Server** — `npm run dev:design` — Serves the `design/` directory on `http://localhost:3333`. Start this before using Playwright MCP to preview HTML files.
-- **Color Science CLI** — `node agents/scripts/color-science.mjs <command>` — OKLCH color math, WCAG contrast, harmony, palette generation. Run with `help` for usage. Use this instead of manual color calculations.
-- **Overflow Audit** — `node agents/scripts/overflow-audit.mjs [options]` — Headless Playwright script that detects horizontal overflow on design guide pages at mobile viewport widths. Run with `--help` for options. Use after any responsive CSS changes to verify no page-level horizontal scroll.
+- **Color Science CLI** — `node .agents/scripts/color-science.mjs <command>` — OKLCH color math, WCAG contrast, harmony, palette generation. Run with `help` for usage. Use this instead of manual color calculations.
+- **Overflow Audit** — `node .agents/scripts/overflow-audit.mjs [options]` — Headless Playwright script that detects horizontal overflow on design guide pages at mobile viewport widths. Run with `--help` for options. Use after any responsive CSS changes to verify no page-level horizontal scroll.
 
 ## Design Toolchain
 
@@ -90,7 +90,7 @@ Playwright is headless and fully automatable.
 **Never hand-pick colors or do mental OKLCH math.** Use the color science CLI for all color decisions:
 
 ```bash
-node agents/scripts/color-science.mjs <command>
+node .agents/scripts/color-science.mjs <command>
 ```
 
 ### Commands

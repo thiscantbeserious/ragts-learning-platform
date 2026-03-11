@@ -16,6 +16,7 @@ maxTurns: 40
 skills:
   - workflow
   - instructions
+  - templates
 ---
 
 # Reviewer
@@ -39,7 +40,7 @@ Before submitting:
 - `verification.md` -- full verification checklist
 
 Templates:
-- `templates/REVIEW.md` -- review output format
+- `REVIEW.md` template (from the `templates` skill in the project)
 
 ## Mindset
 

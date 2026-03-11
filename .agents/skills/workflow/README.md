@@ -8,7 +8,7 @@ Agents separate concerns across the SDLC. Each agent has a distinct responsibili
 
 ## Architecture
 
-Each agent is defined as a single agent file in `agents/agents/`. The agent file contains:
+Each agent is defined as a single agent file in `.agents/agents/`. The agent file contains:
 
 1. **YAML frontmatter** — configuration (model, tools, permissions, skills, maxTurns)
 2. **Markdown body** — agent-specific behavioral instructions, workflow, and output format
@@ -238,7 +238,7 @@ echo 'feat(invalid): test' | bash .husky/commit-msg /dev/stdin
 
 ## Reviewer Agents
 
-Two reviewer agents with distinct roles, each a standalone agent file in `agents/agents/`.
+Two reviewer agents with distinct roles, each a standalone agent file in `.agents/agents/`.
 
 - **pair-reviewer:** Collaborative review during implementation (per stage). Uses questions/observations/flags format. Spawned by Coordinator after each PLAN stage completion.
 - **reviewer:** Adversarial review after full implementation. Uses severity-classified findings. Optionally triages external inputs (pair review observations, CodeRabbit, SonarCloud) when coordinator provides them. Spawned before PR is marked ready.

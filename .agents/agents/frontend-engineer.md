@@ -9,6 +9,7 @@ tools:
   - Grep
   - Glob
   - Bash
+  - WebSearch
 permissionMode: acceptEdits
 maxTurns: 75
 skills:
