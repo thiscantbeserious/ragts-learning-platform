@@ -97,4 +97,11 @@
 .brand-mark__logotype:hover .brand-mark__name {
   text-shadow: 0 0 24px rgba(0, 212, 255, 0.3);
 }
+
+/* Mobile: brand mark is hidden (single-column layout, no sidebar). */
+@media (max-width: 767px) {
+  .brand-mark {
+    display: none;
+  }
+}
 </style>
