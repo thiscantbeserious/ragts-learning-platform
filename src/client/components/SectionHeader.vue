@@ -33,23 +33,19 @@ defineEmits<{
       />
     </div>
     <span class="section-header__label">{{ section.label }}</span>
-    <span class="section-header__right">
-      <span
-        class="badge badge--sm"
-        :class="section.type === 'marker' ? 'badge--secondary' : 'badge--accent'"
-      >
-        {{ section.type === 'marker' ? 'Marker' : 'Detected' }}
-      </span>
-      <span
-        v-if="section.startLine != null && section.endLine != null"
-        class="section-header__range"
-      >
-        L{{ section.startLine + 1 }}&ndash;L{{ section.endLine }} ({{ lineCount }} lines)
-      </span>
-      <span
-        v-else-if="lineCount > 0"
-        class="section-header__range"
-      >{{ lineCount }} lines (viewport)</span>
+    <span
+      v-if="section.startLine != null && section.endLine != null"
+      class="section-header__range"
+    >L{{ section.startLine + 1 }}&ndash;L{{ section.endLine }} ({{ lineCount }}&nbsp;lines)</span>
+    <span
+      v-else-if="lineCount > 0"
+      class="section-header__range"
+    >{{ lineCount }}&nbsp;lines (viewport)</span>
+    <span
+      class="badge badge--sm section-header__badge"
+      :class="section.type === 'marker' ? 'badge--secondary' : 'badge--accent'"
+    >
+      {{ section.type === 'marker' ? 'Marker' : 'Detected' }}
     </span>
   </button>
 </template>
@@ -81,17 +77,20 @@ defineEmits<{
   white-space: nowrap;
 }
 
-/* Group badge + range together, always flush-right regardless of label width. */
-.section-header__right {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+/* Range: fixed-width right-aligned slot */
+.section-header__range {
   flex-shrink: 0;
-  margin-left: auto;
+  min-width: 18ch;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
 }
 
-/* Prevent range text from shrinking */
-.section-header__range {
+/* Badge pinned to far right edge */
+.section-header__badge {
+  margin-left: auto;
   flex-shrink: 0;
 }
 </style>
