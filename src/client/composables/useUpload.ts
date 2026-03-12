@@ -1,4 +1,20 @@
 import { ref } from 'vue';
+import type { Session } from '../../shared/types/session.js';
+
+/** Shape of the upload response from POST /api/upload. */
+export interface UploadResponse {
+  id?: string;
+  error?: string;
+  details?: string;
+}
+
+/** Callbacks for optimistic upload flow. */
+export interface OptimisticCallbacks {
+  /** Called immediately when upload starts with a temporary session entry. */
+  onOptimisticInsert: (tempSession: Session) => void;
+  /** Called after upload succeeds; removes the optimistic entry and refreshes. */
+  onUploadSuccess: (tempId: string) => Promise<void>;
+}
 
 export function useUpload(onSuccess?: () => void) {
   const uploading = ref(false);
@@ -23,7 +39,7 @@ export function useUpload(onSuccess?: () => void) {
         body: formData,
       });
 
-      const data = await res.json() as { error?: string; details?: string };
+      const data = await res.json() as UploadResponse;
 
       if (!res.ok) {
         error.value = data.error || `Upload failed (${res.status})`;
@@ -36,6 +52,67 @@ export function useUpload(onSuccess?: () => void) {
       onSuccess?.();
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Upload failed';
+    } finally {
+      uploading.value = false;
+    }
+  }
+
+  /**
+   * Uploads a file with optimistic UI: inserts a temporary session entry
+   * immediately, then swaps it with real data (or removes on failure).
+   * Uses the OptimisticCallbacks to manage sidebar state externally.
+   */
+  async function uploadFileWithOptimistic(
+    file: File,
+    callbacks: OptimisticCallbacks,
+  ): Promise<void> {
+    error.value = null;
+
+    if (!file.name.endsWith('.cast')) {
+      error.value = 'Only .cast files are supported';
+      return;
+    }
+
+    const tempId = `uploading-${Date.now()}`;
+    const tempSession: Session = {
+      id: tempId,
+      filename: file.name,
+      filepath: '',
+      size_bytes: file.size,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      detection_status: 'pending',
+    };
+
+    callbacks.onOptimisticInsert(tempSession);
+
+    uploading.value = true;
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json() as UploadResponse;
+
+      if (!res.ok) {
+        error.value = data.error || `Upload failed (${res.status})`;
+        if (data.details) {
+          error.value += `: ${data.details}`;
+        }
+        await callbacks.onUploadSuccess(tempId);
+        return;
+      }
+
+      await callbacks.onUploadSuccess(tempId);
+      onSuccess?.();
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Upload failed';
+      await callbacks.onUploadSuccess(tempId);
     } finally {
       uploading.value = false;
     }
@@ -76,6 +153,7 @@ export function useUpload(onSuccess?: () => void) {
     error,
     isDragging,
     uploadFile,
+    uploadFileWithOptimistic,
     handleDrop,
     handleDragOver,
     handleDragLeave,

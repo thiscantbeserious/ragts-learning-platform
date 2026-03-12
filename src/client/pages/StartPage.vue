@@ -9,22 +9,38 @@
  */
 import { ref, inject, computed } from 'vue';
 import { sessionListKey } from '../composables/useSessionList.js';
+import { useUpload } from '../composables/useUpload.js';
+import type { Session } from '../../shared/types/session.js';
 
 const sessionList = inject(sessionListKey, null);
 const hasSessions = computed(() => (sessionList?.sessions.value.length ?? 0) > 0);
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const { uploadFileWithOptimistic } = useUpload();
 
 /** Opens the system file picker. Upload zone, browse link, and keyboard trigger this. */
 function openFilePicker(): void {
   fileInputRef.value?.click();
 }
 
-/** Reset the file input after selection (upload flow wired in Stage 10). */
-function handleFileChange(): void {
+/** Handles file selection — uses optimistic upload flow when sessionList is available. */
+function handleFileChange(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (fileInputRef.value) {
     fileInputRef.value.value = '';
   }
+  if (!file || !sessionList) return;
+
+  uploadFileWithOptimistic(file, {
+    onOptimisticInsert: (tempSession: Session) => {
+      sessionList.sessions.value = [tempSession, ...sessionList.sessions.value];
+    },
+    onUploadSuccess: async (tempId: string) => {
+      sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
+      await sessionList.fetchSessions();
+    },
+  });
 }
 
 /** Keyboard handler for upload zone: Enter and Space open file picker. */
@@ -141,7 +157,7 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
         @keydown="handleDropZoneKeydown"
       >
         <div class="upload-zone__icon">
-          <div class="upload-zone__disc-ring" aria-hidden="true"></div>
+          <div class="upload-zone__disc-ring" aria-hidden="true" />
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M14 30V36H34V30"/>
             <path d="M24 12V30"/>

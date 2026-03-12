@@ -287,15 +287,15 @@ Goal: System-wide drag target. Immediate sidebar entry creation on upload. Wire 
 
 Owner: frontend-engineer
 
-- [ ] Create `src/client/components/DropOverlay.vue` -- fixed-position viewport overlay
-- [ ] Register `dragenter`/`dragleave`/`drop` handlers at the `SpatialShell.vue` level (viewport-wide)
-- [ ] Use the dragenter counter pattern to handle nested elements (increment on enter, decrement on leave, show overlay when > 0)
-- [ ] Receiving state: visible border glow + centered overlay confirming drop target, within 100ms of `dragenter`
-- [ ] Drop: initiate upload to `POST /api/upload`; immediately insert optimistic sidebar entry in `uploading` state
-- [ ] Wire "+ New Session" button in sidebar to open file picker
-- [ ] Wire CTA button on start page to open file picker
-- [ ] `prefers-reduced-motion`: static border change instead of animated glow
-- [ ] `aria-dropeffect="copy"` on the drop overlay
+- [x] Create `src/client/components/DropOverlay.vue` -- fixed-position viewport overlay
+- [x] Register `dragenter`/`dragleave`/`drop` handlers at the `SpatialShell.vue` level (viewport-wide)
+- [x] Use the dragenter counter pattern to handle nested elements (increment on enter, decrement on leave, show overlay when > 0)
+- [x] Receiving state: visible border glow + centered overlay confirming drop target, within 100ms of `dragenter`
+- [x] Drop: initiate upload to `POST /api/upload`; immediately insert optimistic sidebar entry in `uploading` state
+- [x] Wire "+ New Session" button in sidebar to open file picker
+- [x] Wire CTA button on start page to open file picker
+- [x] `prefers-reduced-motion`: static border change instead of animated glow
+- [x] `aria-dropeffect="copy"` on the drop overlay
 - [ ] Verify: dragging a file anywhere over the viewport triggers the receiving state
 - [ ] Verify: new sidebar entry appears immediately before server responds
 - [ ] Verify: upload success refreshes session list
@@ -507,7 +507,7 @@ Updated by implementer as work progresses.
 | 7 | complete | Session card |
 | 8 | complete | Start page — StartPage.vue implemented; router updated to route name 'home' |
 | 9 | complete | Session detail layout — SessionDetailView.vue created, ShellHeader breadcrumb wired |
-| 10 | pending | Upload flow |
+| 10 | complete | Upload flow — DropOverlay, drag handlers, optimistic entries, file picker wired |
 | 11 | pending | SSE status updates |
 | 12 | pending | Toast system |
 | 13 | pending | Mobile overlay |

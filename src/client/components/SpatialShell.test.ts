@@ -4,8 +4,9 @@
  * Verifies that the shell renders child components, exposes the router-view
  * for page content, and provides layout state to children via inject.
  * Also verifies that the data-hydrating attribute is removed after mount.
+ * Stage 10: drag handlers, overlay visibility, and optimistic upload integration.
  */
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { defineComponent, inject } from 'vue';
@@ -100,6 +101,61 @@ describe('SpatialShell', () => {
     expect(injectedLayout).toHaveProperty('isSidebarOpen');
     expect(injectedLayout).toHaveProperty('toggleSidebar');
     expect(injectedLayout).toHaveProperty('isMobile');
+  });
+
+  describe('DropOverlay integration', () => {
+    it('renders DropOverlay component', async () => {
+      const router = createTestRouter();
+      await router.push('/');
+      const wrapper = mount(SpatialShell, {
+        global: { plugins: [router] },
+      });
+      expect(wrapper.find('.drop-overlay').exists()).toBe(true);
+    });
+
+    it('DropOverlay is not visible by default', async () => {
+      const router = createTestRouter();
+      await router.push('/');
+      const wrapper = mount(SpatialShell, {
+        global: { plugins: [router] },
+      });
+      const overlay = wrapper.find('.drop-overlay');
+      expect(overlay.classes()).not.toContain('drop-overlay--visible');
+    });
+  });
+
+  describe('drag event handlers', () => {
+    let shellEl: HTMLElement;
+
+    beforeEach(() => {
+      shellEl = document.createElement('div');
+      shellEl.classList.add('spatial-shell');
+      document.body.appendChild(shellEl);
+    });
+
+    afterEach(() => {
+      if (shellEl.parentNode) {
+        shellEl.parentNode.removeChild(shellEl);
+      }
+      vi.restoreAllMocks();
+    });
+
+    it('registers drag event listeners on the .spatial-shell element after mount', async () => {
+      const addEventListenerSpy = vi.spyOn(shellEl, 'addEventListener');
+      const router = createTestRouter();
+      await router.push('/');
+
+      mount(SpatialShell, {
+        global: { plugins: [router] },
+        attachTo: shellEl,
+      });
+
+      const eventNames = addEventListenerSpy.mock.calls.map(call => call[0]);
+      expect(eventNames).toContain('dragenter');
+      expect(eventNames).toContain('dragleave');
+      expect(eventNames).toContain('dragover');
+      expect(eventNames).toContain('drop');
+    });
   });
 
   describe('hydration transition suppression', () => {

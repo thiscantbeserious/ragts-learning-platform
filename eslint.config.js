@@ -58,8 +58,13 @@ export default tseslint.config(
         KeyboardEvent: 'readonly',
         confirm: 'readonly',
         HTMLInputElement: 'readonly',
+        HTMLElement: 'readonly',
         FileList: 'readonly',
         File: 'readonly',
+        document: 'readonly',
+        requestAnimationFrame: 'readonly',
+        FormData: 'readonly',
+        fetch: 'readonly',
       },
     },
     rules: {

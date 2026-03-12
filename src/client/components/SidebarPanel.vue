@@ -102,6 +102,8 @@ import SkeletonSidebar from './SkeletonSidebar.vue';
 import SessionCard from './SessionCard.vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import type { SessionListState } from '../composables/useSessionList.js';
+import { useUpload } from '../composables/useUpload.js';
+import type { Session } from '../../shared/types/session.js';
 
 /**
  * SidebarPanel occupies the sidebar grid area.
@@ -126,6 +128,7 @@ const currentSessionId = computed<string>(() =>
 );
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
+const { uploadFileWithOptimistic } = useUpload();
 
 interface FilterPill {
   label: string;
@@ -144,13 +147,22 @@ function openFilePicker(): void {
   fileInputRef.value?.click();
 }
 
-/** Handles file selection from the hidden file input. */
+/** Handles file selection from the hidden file input. Uses optimistic upload flow. */
 function handleFileInputChange(event: Event): void {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
-  // Upload flow handled by Stage 10 — for now just reset the input.
   input.value = '';
+
+  uploadFileWithOptimistic(file, {
+    onOptimisticInsert: (tempSession: Session) => {
+      sessionList.sessions.value = [tempSession, ...sessionList.sessions.value];
+    },
+    onUploadSuccess: async (tempId: string) => {
+      sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
+      await sessionList.fetchSessions();
+    },
+  });
 }
 
 /** Clears both search query and status filter. */
