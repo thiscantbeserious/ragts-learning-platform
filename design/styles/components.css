@@ -2443,6 +2443,42 @@ html:has(.modal-backdrop) body {
   color: var(--text-secondary);
 }
 
+/* ======================
+   Scrollbar — TRON utility (.scrollbar-tron)
+   ======================
+   Apply to any overflow-y:auto/scroll container.
+   Thin cyan-accented thumb with subtle glow, near-invisible track.
+   ====================== */
+
+.scrollbar-tron {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 212, 255, 0.25) transparent;
+}
+
+.scrollbar-tron::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-tron::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-tron::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.2);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 4px rgba(0, 212, 255, 0.15);
+}
+
+.scrollbar-tron::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
+}
+
+.scrollbar-tron::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 212, 255, 0.55);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
 /* ================================================================
    RESPONSIVE — COMPONENT OVERRIDES
    ================================================================
