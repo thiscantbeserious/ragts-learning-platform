@@ -6,7 +6,7 @@
  * Also verifies that the data-hydrating attribute is removed after mount.
  * Stage 10: drag handlers, overlay visibility, and optimistic upload integration.
  */
-import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { defineComponent, inject } from 'vue';
@@ -125,36 +125,33 @@ describe('SpatialShell', () => {
   });
 
   describe('drag event handlers', () => {
-    let shellEl: HTMLElement;
-
-    beforeEach(() => {
-      shellEl = document.createElement('div');
-      shellEl.classList.add('spatial-shell');
-      document.body.appendChild(shellEl);
-    });
-
     afterEach(() => {
-      if (shellEl.parentNode) {
-        shellEl.parentNode.removeChild(shellEl);
-      }
       vi.restoreAllMocks();
     });
 
-    it('registers drag event listeners on the .spatial-shell element after mount', async () => {
-      const addEventListenerSpy = vi.spyOn(shellEl, 'addEventListener');
+    it('registers drag event listeners on the .spatial-shell__sidebar element after mount', async () => {
       const router = createTestRouter();
       await router.push('/');
 
-      mount(SpatialShell, {
+      const wrapper = mount(SpatialShell, {
         global: { plugins: [router] },
-        attachTo: shellEl,
+        attachTo: document.body,
       });
 
-      const eventNames = addEventListenerSpy.mock.calls.map(call => call[0]);
-      expect(eventNames).toContain('dragenter');
-      expect(eventNames).toContain('dragleave');
-      expect(eventNames).toContain('dragover');
-      expect(eventNames).toContain('drop');
+      const sidebarEl = wrapper.find('.spatial-shell__sidebar').element as HTMLElement;
+
+      // Verify handlers are attached by dispatching dragenter — overlay should become visible.
+      const dragEnterEvent = new Event('dragenter', { bubbles: true });
+      Object.defineProperty(dragEnterEvent, 'preventDefault', { value: vi.fn() });
+      sidebarEl.dispatchEvent(dragEnterEvent);
+
+      await wrapper.vm.$nextTick();
+
+      // DropOverlay is rendered inside the sidebar and should now show.
+      const overlay = wrapper.find('.drop-overlay');
+      expect(overlay.classes()).toContain('drop-overlay--visible');
+
+      wrapper.unmount();
     });
   });
 

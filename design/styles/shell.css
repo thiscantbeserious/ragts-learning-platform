@@ -87,6 +87,7 @@
   grid-area: sidebar;
   overflow: hidden;
   min-height: 0;
+  position: relative; /* containment for drop overlay */
 }
 
 /** Main content area: primary viewport for page content. */

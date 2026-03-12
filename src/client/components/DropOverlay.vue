@@ -16,9 +16,9 @@
 
 <script setup lang="ts">
 /**
- * DropOverlay — full-viewport drag target shown during file drag.
+ * DropOverlay — sidebar-scoped drag target shown during file drag.
  *
- * Rendered by SpatialShell when a file drag enters the viewport.
+ * Rendered inside the sidebar by SpatialShell when a file drag enters the sidebar.
  * Uses the dragenter counter pattern for accurate show/hide.
  * Respects prefers-reduced-motion: animated border glow replaced with static border.
  */
@@ -27,7 +27,7 @@ withDefaults(defineProps<{ visible?: boolean }>(), { visible: false });
 
 <style scoped>
 .drop-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 200;
   background: var(--bg-overlay);
@@ -44,21 +44,21 @@ withDefaults(defineProps<{ visible?: boolean }>(), { visible: false });
   opacity: 1;
 }
 
-/* Centered drop target frame */
 .drop-overlay__frame {
   border: 2px dashed var(--accent-primary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-10) var(--space-12);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
   text-align: center;
+  margin: var(--space-3);
   box-shadow:
-    0 0 20px 4px var(--accent-primary-glow, rgba(0, 212, 255, 0.3)),
-    inset 0 0 20px 4px rgba(0, 212, 255, 0.06);
+    0 0 16px 3px var(--accent-primary-glow, rgba(0, 212, 255, 0.3)),
+    inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
   animation: dropOverlayGlow 2s ease-in-out infinite;
 }
 
 .drop-overlay__message {
   font-family: var(--font-mono);
-  font-size: var(--text-lg);
+  font-size: var(--text-sm);
   color: var(--accent-primary);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
@@ -70,27 +70,25 @@ withDefaults(defineProps<{ visible?: boolean }>(), { visible: false });
   color: var(--accent-primary);
 }
 
-/* Animated border glow — pulses in/out */
 @keyframes dropOverlayGlow {
   0%, 100% {
     box-shadow:
-      0 0 20px 4px rgba(0, 212, 255, 0.3),
-      inset 0 0 20px 4px rgba(0, 212, 255, 0.06);
+      0 0 16px 3px rgba(0, 212, 255, 0.25),
+      inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
   }
   50% {
     box-shadow:
-      0 0 40px 10px rgba(0, 212, 255, 0.55),
-      inset 0 0 30px 6px rgba(0, 212, 255, 0.12);
+      0 0 30px 8px rgba(0, 212, 255, 0.45),
+      inset 0 0 24px 5px rgba(0, 212, 255, 0.1);
   }
 }
 
-/* Reduced motion: static border glow, no animation */
 @media (prefers-reduced-motion: reduce) {
   .drop-overlay__frame {
     animation: none;
     box-shadow:
-      0 0 20px 4px rgba(0, 212, 255, 0.3),
-      inset 0 0 20px 4px rgba(0, 212, 255, 0.06);
+      0 0 16px 3px rgba(0, 212, 255, 0.25),
+      inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
   }
 }
 </style>

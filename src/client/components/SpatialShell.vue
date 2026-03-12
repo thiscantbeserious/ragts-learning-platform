@@ -1,13 +1,16 @@
 <template>
   <BrandMark />
   <ShellHeader />
-  <div class="spatial-shell__sidebar">
+  <div
+    ref="sidebarRef"
+    class="spatial-shell__sidebar"
+  >
     <SidebarPanel />
+    <DropOverlay :visible="isDragOver" />
   </div>
   <div class="spatial-shell__main">
     <router-view />
   </div>
-  <DropOverlay :visible="isDragOver" />
 </template>
 
 <script setup lang="ts">
@@ -26,7 +29,7 @@ import type { Session } from '../../shared/types/session.js';
  * It renders the permanent shell fixtures (brand, header, sidebar) and
  * provides layout state and session list state to children via provide/inject.
  * The main area hosts the active child route via <router-view>.
- * Also registers viewport-wide drag handlers for the system drop overlay.
+ * Also registers sidebar-scoped drag handlers for the drop overlay.
  */
 
 const layout = useLayout();
@@ -37,6 +40,9 @@ const sessionList = useSessionList();
 provide(sessionListKey, sessionList);
 
 const { uploadFileWithOptimistic } = useUpload();
+
+/** Template ref for the sidebar element — drag handlers attach here. */
+const sidebarRef = ref<HTMLElement | null>(null);
 
 /** Suppress layout transition flash on first paint. */
 onMounted(() => {
@@ -56,15 +62,14 @@ onMounted(() => {
 let dragCounter = 0;
 const isDragOver = ref(false);
 
-/** Attach drag event handlers to the .spatial-shell root element after mount. */
+/** Attach drag event handlers to the sidebar element after mount. */
 onMounted(() => {
-  const shell = document.querySelector('.spatial-shell');
-  if (!shell) return;
+  if (!sidebarRef.value) return;
 
-  shell.addEventListener('dragenter', handleDragEnter);
-  shell.addEventListener('dragleave', handleDragLeave);
-  shell.addEventListener('dragover', handleDragOver);
-  shell.addEventListener('drop', handleDrop);
+  sidebarRef.value.addEventListener('dragenter', handleDragEnter);
+  sidebarRef.value.addEventListener('dragleave', handleDragLeave);
+  sidebarRef.value.addEventListener('dragover', handleDragOver);
+  sidebarRef.value.addEventListener('drop', handleDrop);
 });
 
 function handleDragEnter(event: Event): void {
