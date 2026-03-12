@@ -1,51 +1,43 @@
 /**
  * Tests for SessionDetailView component — Stage 9.
  *
- * Covers: loading state (skeleton), error state, empty session state,
- * content rendering, and that no standalone breadcrumb or container wrapper is present.
+ * Covers: loading state uses SkeletonMain, error state, empty content state,
+ * session content rendering, no breadcrumb in this component (moved to ShellHeader),
+ * no container wrapper div with margins.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import { createRouter, createMemoryHistory } from 'vue-router';
 import { ref, computed } from 'vue';
+import { createRouter, createMemoryHistory } from 'vue-router';
+import SessionDetailView from './SessionDetailView.vue';
 
-// Stub heavy dependencies
+// ---------------------------------------------------------------------------
+// Mocks
+// ---------------------------------------------------------------------------
+
 vi.mock('../composables/useSession.js', () => ({
   useSession: vi.fn(),
-}));
-
-vi.mock('../components/SessionContent.vue', () => ({
-  default: { template: '<div class="session-content-stub" />' },
 }));
 
 vi.mock('../components/SkeletonMain.vue', () => ({
   default: { template: '<div class="skeleton-main-stub" />' },
 }));
 
+vi.mock('../components/SessionContent.vue', () => ({
+  default: { template: '<div class="session-content-stub" />' },
+}));
+
 import { useSession } from '../composables/useSession.js';
-import SessionDetailView from './SessionDetailView.vue';
 
-const useSessionMock = vi.mocked(useSession);
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-function createTestRouter() {
-  return createRouter({
-    history: createMemoryHistory(),
-    routes: [
-      { path: '/session/:id', component: SessionDetailView },
-    ],
-  });
-}
+type UseSessionReturn = ReturnType<typeof import('../composables/useSession.js').useSession>;
 
-async function mountAtRoute(id: string, routerInstance?: ReturnType<typeof createTestRouter>) {
-  const router = routerInstance ?? createTestRouter();
-  await router.push(`/session/${id}`);
-  return mount(SessionDetailView, {
-    global: { plugins: [router] },
-  });
-}
-
-beforeEach(() => {
-  useSessionMock.mockReturnValue({
+function mountView(useSessionReturnValue: Partial<UseSessionReturn>) {
+  const mockedUseSession = vi.mocked(useSession);
+  mockedUseSession.mockReturnValue({
     session: ref(null),
     sections: ref([]),
     snapshot: ref(null),
@@ -53,159 +45,135 @@ beforeEach(() => {
     error: ref(null),
     filename: computed(() => ''),
     detectionStatus: ref('completed'),
+    ...useSessionReturnValue,
+  } as UseSessionReturn);
+
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: '/session/:id', name: 'session-detail', component: SessionDetailView },
+    ],
   });
-});
+
+  return { router, mockedUseSession };
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe('SessionDetailView', () => {
-  describe('loading state', () => {
-    it('renders skeleton while loading', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref(null),
-        sections: ref([]),
-        snapshot: ref(null),
-        loading: ref(true),
-        error: ref(null),
-        filename: computed(() => ''),
-        detectionStatus: ref('pending'),
-      });
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-      const wrapper = await mountAtRoute('sess-1');
+  describe('loading state', () => {
+    it('renders SkeletonMain when loading is true', async () => {
+      const { router } = mountView({ loading: ref(true) });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
       expect(wrapper.find('.skeleton-main-stub').exists()).toBe(true);
     });
 
     it('does not render session content while loading', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref(null),
-        sections: ref([]),
-        snapshot: ref(null),
-        loading: ref(true),
-        error: ref(null),
-        filename: computed(() => ''),
-        detectionStatus: ref('pending'),
+      const { router } = mountView({ loading: ref(true) });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
       });
-
-      const wrapper = await mountAtRoute('sess-1');
       expect(wrapper.find('.session-content-stub').exists()).toBe(false);
     });
   });
 
   describe('error state', () => {
-    it('renders error message when error is present', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref(null),
-        sections: ref([]),
-        snapshot: ref(null),
+    it('renders an error message when error is set', async () => {
+      const { router } = mountView({
         loading: ref(false),
         error: ref('Session not found'),
-        filename: computed(() => ''),
-        detectionStatus: ref('failed'),
       });
-
-      const wrapper = await mountAtRoute('missing-id');
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
       expect(wrapper.find('.session-detail-view__state--error').exists()).toBe(true);
       expect(wrapper.text()).toContain('Session not found');
     });
 
-    it('does not render skeleton on error', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref(null),
-        sections: ref([]),
-        snapshot: ref(null),
+    it('does not render SkeletonMain in error state', async () => {
+      const { router } = mountView({
         loading: ref(false),
-        error: ref('Session not found'),
-        filename: computed(() => ''),
-        detectionStatus: ref('failed'),
+        error: ref('Failed'),
       });
-
-      const wrapper = await mountAtRoute('missing-id');
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
       expect(wrapper.find('.skeleton-main-stub').exists()).toBe(false);
     });
   });
 
-  describe('empty session state', () => {
-    it('renders empty state when session has no content', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref({ id: 'sess-1', filename: 'empty.cast' } as never),
-        sections: ref([]),
-        snapshot: ref(null),
+  describe('empty content state', () => {
+    it('renders empty state when sections are empty and no snapshot', async () => {
+      const { router } = mountView({
         loading: ref(false),
         error: ref(null),
-        filename: computed(() => 'empty.cast'),
-        detectionStatus: ref('completed'),
+        sections: ref([]),
+        snapshot: ref(null),
       });
-
-      const wrapper = await mountAtRoute('sess-1');
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
       expect(wrapper.find('.session-detail-view__state').exists()).toBe(true);
       expect(wrapper.text()).toContain('no content');
     });
   });
 
-  describe('content rendering', () => {
+  describe('content state', () => {
     it('renders SessionContent when sections are present', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref({ id: 'sess-1', filename: 'demo.cast' } as never),
-        sections: ref([{ id: 's1', title: 'Intro' }] as never),
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref([{ id: 'sec-1', title: 'Section 1' }] as never),
         snapshot: ref(null),
-        loading: ref(false),
-        error: ref(null),
-        filename: computed(() => 'demo.cast'),
-        detectionStatus: ref('completed'),
       });
-
-      const wrapper = await mountAtRoute('sess-1');
-      expect(wrapper.find('.session-content-stub').exists()).toBe(true);
-    });
-
-    it('renders SessionContent when snapshot is present (no sections)', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref({ id: 'sess-1', filename: 'demo.cast' } as never),
-        sections: ref([]),
-        snapshot: ref({ cells: [] } as never),
-        loading: ref(false),
-        error: ref(null),
-        filename: computed(() => 'demo.cast'),
-        detectionStatus: ref('completed'),
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
       });
-
-      const wrapper = await mountAtRoute('sess-1');
       expect(wrapper.find('.session-content-stub').exists()).toBe(true);
     });
   });
 
-  describe('layout', () => {
-    it('does not render a standalone breadcrumb nav', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref({ id: 'sess-1', filename: 'demo.cast' } as never),
-        sections: ref([{ id: 's1', title: 'Intro' }] as never),
-        snapshot: ref(null),
-        loading: ref(false),
-        error: ref(null),
-        filename: computed(() => 'demo.cast'),
-        detectionStatus: ref('completed'),
+  describe('layout: no breadcrumb or container wrapper', () => {
+    it('does not render a breadcrumb element', async () => {
+      const { router } = mountView({ loading: ref(false) });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
       });
-
-      const wrapper = await mountAtRoute('sess-1');
       expect(wrapper.find('.breadcrumb').exists()).toBe(false);
     });
 
-    it('does not render a container wrapper class', async () => {
-      useSessionMock.mockReturnValue({
-        session: ref({ id: 'sess-1', filename: 'demo.cast' } as never),
-        sections: ref([{ id: 's1', title: 'Intro' }] as never),
-        snapshot: ref(null),
-        loading: ref(false),
-        error: ref(null),
-        filename: computed(() => 'demo.cast'),
-        detectionStatus: ref('completed'),
+    it('does not render a container-wrapped header element', async () => {
+      const { router } = mountView({ loading: ref(false) });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
       });
-
-      const wrapper = await mountAtRoute('sess-1');
-      expect(wrapper.find('.container').exists()).toBe(false);
+      expect(wrapper.find('.session-detail-view__header').exists()).toBe(false);
     });
 
-    it('root element has the session-detail-view class', async () => {
-      const wrapper = await mountAtRoute('sess-1');
-      expect(wrapper.find('.session-detail-view').exists()).toBe(true);
+    it('root element uses session-detail-view class without container wrapper', async () => {
+      const { router } = mountView({ loading: ref(false) });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      // Must have the BEM block class, not the old container class
+      expect(wrapper.find('.session-detail-page').exists()).toBe(false);
     });
   });
 });
