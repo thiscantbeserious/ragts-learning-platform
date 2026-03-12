@@ -4,7 +4,7 @@
  * Verifies that the shell renders child components, exposes the router-view
  * for page content, and provides layout state to children via inject.
  * Also verifies that the data-hydrating attribute is removed after mount.
- * Stage 10: drag handlers, overlay visibility, and optimistic upload integration.
+ * Drag handling has been moved to SidebarPanel (Variant E).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -101,58 +101,6 @@ describe('SpatialShell', () => {
     expect(injectedLayout).toHaveProperty('isSidebarOpen');
     expect(injectedLayout).toHaveProperty('toggleSidebar');
     expect(injectedLayout).toHaveProperty('isMobile');
-  });
-
-  describe('DropOverlay integration', () => {
-    it('renders DropOverlay component', async () => {
-      const router = createTestRouter();
-      await router.push('/');
-      const wrapper = mount(SpatialShell, {
-        global: { plugins: [router] },
-      });
-      expect(wrapper.find('.drop-overlay').exists()).toBe(true);
-    });
-
-    it('DropOverlay is not visible by default', async () => {
-      const router = createTestRouter();
-      await router.push('/');
-      const wrapper = mount(SpatialShell, {
-        global: { plugins: [router] },
-      });
-      const overlay = wrapper.find('.drop-overlay');
-      expect(overlay.classes()).not.toContain('drop-overlay--visible');
-    });
-  });
-
-  describe('drag event handlers', () => {
-    afterEach(() => {
-      vi.restoreAllMocks();
-    });
-
-    it('registers drag event listeners on the .spatial-shell__sidebar element after mount', async () => {
-      const router = createTestRouter();
-      await router.push('/');
-
-      const wrapper = mount(SpatialShell, {
-        global: { plugins: [router] },
-        attachTo: document.body,
-      });
-
-      const sidebarEl = wrapper.find('.spatial-shell__sidebar').element as HTMLElement;
-
-      // Verify handlers are attached by dispatching dragenter — overlay should become visible.
-      const dragEnterEvent = new Event('dragenter', { bubbles: true });
-      Object.defineProperty(dragEnterEvent, 'preventDefault', { value: vi.fn() });
-      sidebarEl.dispatchEvent(dragEnterEvent);
-
-      await wrapper.vm.$nextTick();
-
-      // DropOverlay is rendered inside the sidebar and should now show.
-      const overlay = wrapper.find('.drop-overlay');
-      expect(overlay.classes()).toContain('drop-overlay--visible');
-
-      wrapper.unmount();
-    });
   });
 
   describe('hydration transition suppression', () => {

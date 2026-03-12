@@ -310,4 +310,96 @@ describe('SidebarPanel', () => {
       expect(() => mount(SidebarPanel, { global: { plugins: [router] } })).toThrow();
     });
   });
+
+  describe('drag handling', () => {
+    it('shows drop zone when dragenter fires on the sidebar', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__drop-zone').exists()).toBe(true);
+    });
+
+    it('hides session list when drop zone is visible', async () => {
+      const sessions = [makeSession({ id: '1', filename: 'alpha.cast' })];
+      const state = makeSessionListState({
+        sessions: ref(sessions),
+        filteredSessions: computed(() => sessions),
+      });
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__list-region').exists()).toBe(false);
+    });
+
+    it('hides drop zone after dragleave when counter reaches zero', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__drop-zone').exists()).toBe(true);
+      await sidebar.trigger('dragleave');
+      expect(wrapper.find('.sidebar__drop-zone').exists()).toBe(false);
+    });
+
+    it('hides drop zone after drop event', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__drop-zone').exists()).toBe(true);
+      await sidebar.trigger('drop', { dataTransfer: { files: [] } });
+      expect(wrapper.find('.sidebar__drop-zone').exists()).toBe(false);
+    });
+
+    it('changes footer button text to "or browse files" during drag', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      const btn = wrapper.find('.sidebar__new-session-btn');
+      expect(btn.text()).toBe('or browse files');
+    });
+
+    it('footer button shows "+ New Session" when not dragging', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const btn = wrapper.find('.sidebar__new-session-btn');
+      expect(btn.text()).toBe('+ New Session');
+    });
+
+    it('applies sidebar__dimmed to search wrap during drag', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__search-wrap').classes()).toContain('sidebar__dimmed');
+    });
+
+    it('applies sidebar__dimmed to filter pills during drag', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__filters').classes()).toContain('sidebar__dimmed');
+    });
+
+    it('drop zone has correct aria-label', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      const dropZone = wrapper.find('.sidebar__drop-zone');
+      expect(dropZone.attributes('aria-label')).toBe('Drop .cast file to upload');
+    });
+
+    it('drop zone contains drop icon and text', async () => {
+      const state = makeSessionListState();
+      const wrapper = await mountWithState(state);
+      const sidebar = wrapper.find('.spatial-shell__sidebar');
+      await sidebar.trigger('dragenter');
+      expect(wrapper.find('.sidebar__drop-text').text()).toBe('Drop .cast file');
+      expect(wrapper.find('.sidebar__drop-hint').text()).toBe('to start a new session');
+    });
+  });
 });

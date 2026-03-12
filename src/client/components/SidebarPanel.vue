@@ -1,9 +1,18 @@
 <template>
-  <div class="spatial-shell__sidebar sidebar-panel">
+  <div
+    class="spatial-shell__sidebar sidebar-panel"
+    @dragenter.prevent="onDragEnter"
+    @dragover.prevent
+    @dragleave="onDragLeave"
+    @drop.prevent="onDrop"
+  >
     <SkeletonSidebar v-if="sessionList.loading.value" />
     <template v-else>
       <!-- Search input -->
-      <div class="sidebar__search-wrap">
+      <div
+        class="sidebar__search-wrap"
+        :class="{ 'sidebar__dimmed': isDragOver }"
+      >
         <input
           v-model="sessionList.searchQuery.value"
           type="search"
@@ -16,6 +25,7 @@
       <!-- Filter pills -->
       <div
         class="sidebar__filters filter-pills"
+        :class="{ 'sidebar__dimmed': isDragOver }"
         role="group"
         aria-label="Filter by status"
       >
@@ -32,8 +42,8 @@
         </button>
       </div>
 
-      <!-- Session list -->
-      <div class="sidebar__list-region">
+      <!-- Session list (hidden during drag) -->
+      <div v-if="!isDragOver" class="sidebar__list-region">
         <ul
           v-if="sessionList.filteredSessions.value.length > 0"
           class="sidebar__session-list"
@@ -72,7 +82,43 @@
         </div>
       </div>
 
-      <!-- + New Session button -->
+      <!-- Drop zone (shown during drag, replaces list) -->
+      <div
+        v-else
+        class="sidebar__drop-zone"
+        role="button"
+        aria-label="Drop .cast file to upload"
+      >
+        <div class="sidebar__drop-zone-content">
+          <svg
+            class="sidebar__drop-icon"
+            width="40"
+            height="40"
+            viewBox="0 0 40 40"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M20 6v20M12 14l8-8 8 8"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M6 28v4a2 2 0 002 2h24a2 2 0 002-2v-4"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <p class="sidebar__drop-text">Drop .cast file</p>
+          <p class="sidebar__drop-hint">to start a new session</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
       <div class="sidebar__footer">
         <input
           ref="fileInputRef"
@@ -84,11 +130,12 @@
           @change="handleFileInputChange"
         />
         <button
-          class="sidebar__new-session-btn btn btn--primary btn--sm"
+          class="sidebar__new-session-btn btn btn--sm"
+          :class="isDragOver ? 'sidebar__browse-fallback' : 'btn--primary'"
           type="button"
           @click="openFilePicker"
         >
-          + New Session
+          {{ isDragOver ? 'or browse files' : '+ New Session' }}
         </button>
       </div>
     </template>
@@ -109,6 +156,8 @@ import type { Session } from '../../shared/types/session.js';
  * SidebarPanel occupies the sidebar grid area.
  * Injects sessionListKey to access shared session state.
  * Renders skeleton while loading, then search/filters/list/button.
+ * Handles drag-and-drop: the session list is replaced with a drop zone
+ * while a file is dragged over the sidebar.
  */
 
 const _injectedSessionList = inject(sessionListKey);
@@ -141,6 +190,45 @@ const FILTER_PILLS: FilterPill[] = [
   { label: 'Ready', value: 'ready' },
   { label: 'Failed', value: 'failed' },
 ];
+
+/**
+ * Drag counter for the dragenter/dragleave pattern.
+ * Prevents false hides when dragging over nested elements.
+ */
+let dragCounter = 0;
+const isDragOver = ref(false);
+
+/** Increments counter and shows drop zone on dragenter. */
+function onDragEnter(): void {
+  dragCounter++;
+  isDragOver.value = true;
+}
+
+/** Decrements counter and hides drop zone when drag leaves the sidebar entirely. */
+function onDragLeave(): void {
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    isDragOver.value = false;
+  }
+}
+
+/** Handles file drop: resets drag state and initiates optimistic upload. */
+function onDrop(event: DragEvent): void {
+  dragCounter = 0;
+  isDragOver.value = false;
+  const file = event.dataTransfer?.files?.[0];
+  if (!file) return;
+  uploadFileWithOptimistic(file, {
+    onOptimisticInsert: (tempSession: Session) => {
+      sessionList.sessions.value = [tempSession, ...sessionList.sessions.value];
+    },
+    onUploadSuccess: async (tempId: string) => {
+      sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
+      await sessionList.fetchSessions();
+    },
+  });
+}
 
 /** Opens the system file picker for .cast files. */
 function openFilePicker(): void {
@@ -317,5 +405,55 @@ function clearFilters(): void {
 .sidebar__new-session-btn {
   width: 100%;
   justify-content: center;
+}
+
+/* Dimmed state for search/filters during drag */
+.sidebar__dimmed {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+/* Drop zone — replaces session list during drag */
+.sidebar__drop-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  border-radius: var(--radius-md);
+  margin: var(--space-2) var(--space-3);
+  background: rgba(0, 212, 255, 0.02);
+}
+
+.sidebar__drop-zone-content {
+  text-align: center;
+}
+
+.sidebar__drop-icon {
+  color: rgba(0, 212, 255, 0.7);
+  margin-bottom: var(--space-3);
+}
+
+.sidebar__drop-text {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-1) 0;
+}
+
+.sidebar__drop-hint {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Footer browse fallback during drag */
+.sidebar__browse-fallback {
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
 }
 </style>
