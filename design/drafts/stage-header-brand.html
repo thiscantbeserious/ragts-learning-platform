@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erika — Header + Brand Design</title>
+  <link rel="stylesheet" href="../styles/layout.css">
+  <link rel="stylesheet" href="../styles/shell.css">
+  <style>
+    /* ================================================================
+       BrandMark — .brand-mark
+       ================================================================
+       Top-left corner of the spatial shell (260px x 54px).
+       Contains the "Erika" logotype in monospace with a subtle
+       cyan glow treatment. Acts as the visual "cap" of the sidebar.
+       ================================================================ */
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);               /* 54px */
+      padding-inline: var(--space-4);              /* 16px — matches sidebar content padding */
+      background: var(--bg-surface);
+      position: relative;
+      /* Subtle inner shadow at the right edge to soften the junction with header */
+      box-shadow: inset -1px 0 0 var(--border-default);
+    }
+
+    /* Bottom border — gradient line that aligns with the header's bottom border.
+       Uses the same gradient treatment as the header for visual continuity. */
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--accent-primary) 40%,
+        var(--accent-primary) 100%
+      );
+      opacity: 0.6;
+    }
+
+    /* Logotype container */
+    .brand-mark__logotype {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);                         /* 8px gap between icon and name */
+    }
+
+    /* Monogram / icon square */
+    .brand-mark__icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);             /* 4px */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);                   /* 12px */
+      font-weight: var(--weight-bold);
+      color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.06);
+      /* Subtle glow on the icon border */
+      box-shadow: 0 0 8px rgba(0, 212, 255, 0.15),
+                  inset 0 0 6px rgba(0, 212, 255, 0.08);
+      transition: box-shadow var(--duration-normal) var(--easing-default);
+      flex-shrink: 0;
+    }
+
+    /* Hover: intensify the glow */
+    .brand-mark__logotype:hover .brand-mark__icon {
+      box-shadow: 0 0 14px rgba(0, 212, 255, 0.35),
+                  inset 0 0 8px rgba(0, 212, 255, 0.12);
+    }
+
+    /* Brand name text */
+    .brand-mark__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);                   /* 17px */
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);        /* 0.06em — slightly spaced for the tech feel */
+      color: var(--text-primary);
+      line-height: var(--lh-lg);
+      /* Subtle text shadow for depth */
+      text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+      transition: text-shadow var(--duration-normal) var(--easing-default);
+    }
+
+    .brand-mark__logotype:hover .brand-mark__name {
+      text-shadow: 0 0 24px rgba(0, 212, 255, 0.3);
+    }
+
+
+    /* ================================================================
+       ShellHeader — .shell-header
+       ================================================================
+       Primary header bar spanning the two right columns.
+       Clean, minimal. The gradient bottom border is the main
+       visual element — a TRON light-trail that runs across
+       the full width from the brand mark junction to the right edge.
+       ================================================================ */
+
+    .shell-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--header-height);                /* 54px */
+      padding-inline: var(--space-6);              /* 24px */
+      background: var(--bg-surface);
+      position: relative;
+    }
+
+    /* TRON gradient bottom border — the signature visual element.
+       Runs from cyan (left, connecting to brand) through to pink (right).
+       The glow makes it feel like a light trail. */
+    .shell-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        var(--accent-primary) 0%,
+        var(--accent-primary) 40%,
+        var(--accent-secondary) 85%,
+        transparent 100%
+      );
+      opacity: 0.7;
+      box-shadow: 0 0 8px var(--accent-primary-glow),
+                  0 0 20px rgba(0, 212, 255, 0.12);
+    }
+
+    /* Left section — will hold breadcrumbs in Stage 9 */
+    .shell-header__left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      min-width: 0;
+      flex: 1;
+    }
+
+    /* Placeholder content for the empty header state.
+       A subtle horizontal line suggests where content will go. */
+    .shell-header__placeholder {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);                   /* 10px */
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+    }
+
+    /* Right section — will hold global actions */
+    .shell-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+
+    /* ================================================================
+       Demo-specific styles — not part of the design handoff
+       ================================================================ */
+
+    /* Simulated sidebar content for context */
+    .demo-sidebar {
+      background: var(--bg-surface);
+      padding: var(--space-4);
+      border-right: 1px solid var(--border-default);
+      overflow-y: auto;
+    }
+
+    .demo-sidebar__search {
+      width: 100%;
+      height: var(--rhythm-2);                     /* 36px */
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding-inline: var(--space-3);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      margin-bottom: var(--rhythm-half);
+    }
+
+    .demo-sidebar__pills {
+      display: flex;
+      gap: var(--space-1);
+      margin-bottom: var(--rhythm-1);
+    }
+
+    .demo-sidebar__pill {
+      padding: var(--space-0\.5) var(--space-2);
+      font-size: var(--text-xs);
+      border-radius: var(--radius-full);
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-default);
+      cursor: pointer;
+    }
+
+    .demo-sidebar__pill--active {
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      border-color: var(--accent-primary);
+    }
+
+    .demo-card {
+      padding: var(--space-3) var(--space-3);
+      border-radius: var(--radius-md);
+      margin-bottom: 2px;
+      cursor: pointer;
+      transition: background var(--duration-fast) var(--easing-default);
+    }
+
+    .demo-card:hover {
+      background: var(--bg-elevated);
+    }
+
+    .demo-card--selected {
+      background: var(--accent-primary-subtle);
+      border-left: 2px solid var(--accent-primary);
+      padding-left: calc(var(--space-3) - 2px);
+    }
+
+    .demo-card__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .demo-card__meta {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .demo-card__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .demo-card__dot--ready {
+      background: var(--status-success);
+    }
+
+    .demo-card__dot--processing {
+      background: var(--accent-primary);
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+      50% { opacity: 0.6; box-shadow: 0 0 6px 2px rgba(0, 212, 255, 0.2); }
+    }
+
+    /* Simulated main content area */
+    .demo-main {
+      background: var(--bg-page);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-disabled);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      letter-spacing: var(--tracking-wide);
+    }
+  </style>
+</head>
+<body>
+  <div class="spatial-shell">
+
+    <!-- ============================================================
+         BRAND MARK — design target
+         ============================================================ -->
+    <div class="spatial-shell__brand brand-mark">
+      <a href="/" class="brand-mark__logotype" style="text-decoration: none; color: inherit;">
+        <div class="brand-mark__icon">E</div>
+        <span class="brand-mark__name">Erika</span>
+      </a>
+    </div>
+
+    <!-- ============================================================
+         SHELL HEADER — design target
+         ============================================================ -->
+    <div class="spatial-shell__header shell-header">
+      <div class="shell-header__left">
+        <!-- Empty for now — breadcrumbs will go here in Stage 9 -->
+      </div>
+      <div class="shell-header__right">
+        <!-- Future: global actions, user menu -->
+      </div>
+    </div>
+
+    <!-- Sidebar: demo content for context -->
+    <div class="spatial-shell__sidebar demo-sidebar">
+      <div class="demo-sidebar__search">Filter sessions...</div>
+      <div class="demo-sidebar__pills">
+        <button class="demo-sidebar__pill demo-sidebar__pill--active">All</button>
+        <button class="demo-sidebar__pill">Processing</button>
+        <button class="demo-sidebar__pill">Ready</button>
+        <button class="demo-sidebar__pill">Failed</button>
+      </div>
+      <div class="demo-card demo-card--selected">
+        <div class="demo-card__name">agnt-ses-rec_260204_0028...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--ready"></span>
+          <span>0 sections</span>
+          <span>yesterday</span>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card__name">lennart-working-session-...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--processing"></span>
+          <span>10 sections</span>
+          <span>yesterday</span>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card__name">agnt-ses-rec_feature--im...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--ready"></span>
+          <span>0 sections</span>
+          <span>yesterday</span>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card__name">ragts-le_platf_feat--sna...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--ready"></span>
+          <span>0 sections</span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card__name">ragts-le_platf_feat--sna...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--ready"></span>
+          <span>0 sections</span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card__name">agnt-ses-rec_refactor-sd...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--ready"></span>
+          <span>1 section</span>
+          <span>2 days ago</span>
+        </div>
+      </div>
+      <div class="demo-card">
+        <div class="demo-card__name">agnt-ses-rec_main__0ta83...</div>
+        <div class="demo-card__meta">
+          <span class="demo-card__dot demo-card__dot--ready"></span>
+          <span>0 sections</span>
+          <span>yesterday</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main: placeholder for context -->
+    <div class="spatial-shell__main demo-main">
+      <span>// main content area</span>
+    </div>
+
+  </div>
+</body>
+</html>

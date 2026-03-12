@@ -1,0 +1,10 @@
+feat(client): implement BrandMark and ShellHeader components with design tokens
+
+Replaces placeholder components with full implementations matching the
+designer's stage-header-brand spec. BrandMark renders the Erika logotype
+(icon + name) with cyan glow treatment and gradient bottom border.
+ShellHeader renders the TRON light-trail gradient bottom border spanning
+both right columns. Both carry their CSS grid area class on the root element.
+Adds 15 tests covering structure, content, grid area classes, and accessibility.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
