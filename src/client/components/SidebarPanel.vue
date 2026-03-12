@@ -43,7 +43,7 @@
       </div>
 
       <!-- Session list (hidden during drag) -->
-      <div v-show="!isDragOver" class="sidebar__list-region scrollbar">
+      <OverlayScrollbar v-show="!isDragOver" class="sidebar__list-region">
         <ul
           v-if="sessionList.filteredSessions.value.length > 0"
           class="sidebar__session-list"
@@ -80,7 +80,7 @@
             Clear filters
           </button>
         </div>
-      </div>
+      </OverlayScrollbar>
 
       <!-- Drop zone (shown during drag, replaces list) -->
       <div
@@ -144,6 +144,7 @@ import { inject, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import SkeletonSidebar from './SkeletonSidebar.vue';
 import SessionCard from './SessionCard.vue';
+import OverlayScrollbar from './OverlayScrollbar.vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import type { SessionListState } from '../composables/useSessionList.js';
 import { useUpload } from '../composables/useUpload.js';
@@ -329,40 +330,9 @@ function clearFilters(): void {
 }
 
 .sidebar__list-region {
+  /* Layout only — overflow and scrollbar rendering handled by OverlayScrollbar component. */
   flex: 1;
-  overflow-y: auto;
   min-height: 0;
-  /* Duplicate webkit scrollbar rules from .scrollbar utility class.
-     The global .scrollbar::-webkit-scrollbar-* selectors do not reliably
-     penetrate Vue scoped attribute selectors in WebKit/Blink browsers.
-     Firefox uses scrollbar-width/scrollbar-color (from .scrollbar global class),
-     which are unaffected by scoping. */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 212, 255, 0.25) transparent;
-}
-
-.sidebar__list-region::-webkit-scrollbar {
-  width: 5px;
-}
-
-.sidebar__list-region::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar__list-region::-webkit-scrollbar-thumb {
-  background: rgba(0, 212, 255, 0.2);
-  border-radius: var(--radius-full);
-  box-shadow: 0 0 4px rgba(0, 212, 255, 0.15);
-}
-
-.sidebar__list-region::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 212, 255, 0.4);
-  box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
-}
-
-.sidebar__list-region::-webkit-scrollbar-thumb:active {
-  background: rgba(0, 212, 255, 0.55);
-  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
 }
 
 .sidebar__session-list {
