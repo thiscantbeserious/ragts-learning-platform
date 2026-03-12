@@ -4,6 +4,7 @@ import type { TerminalSnapshot } from '#vt-wasm/types';
 import type { Section } from '../composables/useSession';
 import TerminalSnapshotComponent from './TerminalSnapshot.vue';
 import SectionHeader from './SectionHeader.vue';
+import OverlayScrollbar from './OverlayScrollbar.vue';
 
 const props = withDefaults(defineProps<{
   snapshot: TerminalSnapshot | null;
@@ -46,7 +47,7 @@ const preambleLines = computed(() => {
 
 <template>
   <div class="terminal-chrome">
-    <div
+    <OverlayScrollbar
       v-if="snapshot || sections.length > 0"
       class="terminal-scroll"
     >
@@ -93,7 +94,7 @@ const preambleLines = computed(() => {
           </div>
         </div>
       </template>
-    </div>
+    </OverlayScrollbar>
 
     <!-- Loading / empty states -->
     <div
@@ -111,10 +112,15 @@ const preambleLines = computed(() => {
   font-family: var(--font-mono);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .terminal-scroll {
-  overflow-x: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .section-content {

@@ -123,10 +123,14 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
 
 .terminal-line__number {
   display: inline-block;
-  width: 5ch;
-  min-width: 5ch;
+  /* box-sizing: content-box so width is the character area and padding is additive.
+     4-digit numbers need 4ch minimum; 4ch + left/right padding fits up to 9999. */
+  box-sizing: content-box;
+  width: 4ch;
+  min-width: 4ch;
   text-align: right;
   padding-right: 1ch;
+  padding-left: var(--space-3);
   color: var(--text-muted);
   user-select: none;
   flex-shrink: 0;
