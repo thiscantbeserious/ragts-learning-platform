@@ -43,7 +43,7 @@
       </div>
 
       <!-- Session list (hidden during drag) -->
-      <div v-show="!isDragOver" class="sidebar__list-region">
+      <div v-show="!isDragOver" class="sidebar__list-region scrollbar-tron">
         <ul
           v-if="sessionList.filteredSessions.value.length > 0"
           class="sidebar__session-list"
@@ -332,26 +332,6 @@ function clearFilters(): void {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  /* Custom thin scrollbar for dark theme */
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
-}
-
-.sidebar__list-region::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar__list-region::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar__list-region::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-full);
-}
-
-.sidebar__list-region::-webkit-scrollbar-thumb:hover {
-  background: var(--text-disabled);
 }
 
 .sidebar__session-list {
