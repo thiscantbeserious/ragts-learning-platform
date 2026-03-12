@@ -5,10 +5,11 @@
  * status indicator states (processing/ready/failed), aria-labels,
  * and click handler navigation.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import type { Session } from '../../shared/types/session.js';
 import SessionCard from './SessionCard.vue';
+import { resetConnectionBudget } from '../composables/useSSE.js';
 
 // Mock vue-router
 const mockPush = vi.fn();
@@ -16,6 +17,20 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
   useRoute: () => ({ params: { id: '' } }),
 }));
+
+/**
+ * Stub EventSource so useSSE composable does not throw in happy-dom
+ * test environment where EventSource is unavailable.
+ */
+class StubEventSource {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(_url: string) {}
+  onopen: null = null;
+  onerror: null = null;
+  addEventListener() {}
+  removeEventListener() {}
+  close() {}
+}
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -41,6 +56,13 @@ function mountCard(session: Session, isSelected = false) {
 describe('SessionCard', () => {
   beforeEach(() => {
     mockPush.mockReset();
+    vi.stubGlobal('EventSource', StubEventSource);
+    resetConnectionBudget();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    resetConnectionBudget();
   });
 
   describe('rendering', () => {

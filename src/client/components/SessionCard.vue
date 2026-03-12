@@ -24,19 +24,29 @@
       <span class="session-card__sections">{{ sectionText }}</span>
       <span class="session-card__age">{{ relativeAge }}</span>
     </div>
+
+    <!-- ARIA live region: announces real-time status updates to screen readers -->
+    <span
+      class="session-card__live-region"
+      :role="liveRole"
+      aria-atomic="true"
+      :aria-live="liveAriaPoliteness"
+    >{{ liveAnnouncement }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Session } from '../../shared/types/session.js';
 import { formatRelativeTime } from '../../shared/utils/format_relative_time.js';
+import { useSSE } from '../composables/useSSE.js';
 
 /**
  * SessionCard renders a single session entry in the sidebar list.
  * Shows filename (truncated), status indicator dot, section count, and relative age.
  * Navigates to /session/:id on click while keeping focus in the sidebar.
+ * Status transitions are driven by SSE (or polling fallback) via useSSE.
  */
 
 interface Props {
@@ -51,6 +61,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const router = useRouter();
 
+// SSE reactive status — drives the status indicator dot
+const sessionId = computed(() => props.session.id);
+const initialStatus = computed(() => props.session.detection_status);
+const { status: liveStatus } = useSSE(sessionId, initialStatus);
+
 /** Maps detection_status to one of three display groups. */
 type StatusGroup = 'ready' | 'processing' | 'failed';
 
@@ -59,13 +74,16 @@ const PROCESSING_STATUSES = new Set<Session['detection_status']>([
   'detecting', 'replaying', 'deduplicating', 'storing',
 ]);
 
-/** Derives the display group from the session's detection_status. */
+/** Derives the display group from the live (SSE-updated) status. */
 const statusGroup = computed<StatusGroup>(() => {
-  const s = props.session.detection_status;
+  const s = liveStatus.value;
   if (s === 'failed' || s === 'interrupted') return 'failed';
   if (s !== undefined && PROCESSING_STATUSES.has(s)) return 'processing';
   return 'ready';
 });
+
+/** Whether the session just completed (for glow animation trigger). */
+const justCompleted = ref(false);
 
 /** CSS classes for the status indicator dot. */
 const statusDotClasses = computed(() => ({
@@ -73,6 +91,7 @@ const statusDotClasses = computed(() => ({
   'session-card__status-dot--processing': statusGroup.value === 'processing',
   'session-card__status-dot--failed': statusGroup.value === 'failed',
   'session-card__status-dot--pulse': statusGroup.value === 'processing',
+  'session-card__status-dot--glow': justCompleted.value,
 }));
 
 /** Human-readable aria-label for the status dot. */
@@ -80,6 +99,27 @@ const statusLabel = computed<string>(() => {
   if (statusGroup.value === 'processing') return 'Processing';
   if (statusGroup.value === 'failed') return 'Failed';
   return 'Ready';
+});
+
+/**
+ * ARIA live region role — "alert" for errors (assertive), "status" for processing
+ * updates (polite). Errors get immediate announcement.
+ */
+const liveRole = computed<'status' | 'alert'>(() =>
+  statusGroup.value === 'failed' ? 'alert' : 'status',
+);
+
+/** aria-live politeness derived from role. */
+const liveAriaPoliteness = computed<'polite' | 'assertive'>(() =>
+  liveRole.value === 'alert' ? 'assertive' : 'polite',
+);
+
+/** Text announced to screen readers when status changes. */
+const liveAnnouncement = computed<string>(() => {
+  const name = props.session.filename;
+  if (statusGroup.value === 'processing') return `${name}: processing`;
+  if (statusGroup.value === 'failed') return `${name}: failed`;
+  return `${name}: ready`;
 });
 
 /** Formatted section count text. */
@@ -105,6 +145,7 @@ function handleClick(): void {
   display: flex;
   flex-direction: column;
   gap: 1px; /* tighter row gap -- sub-token value */
+  position: relative;
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -221,10 +262,35 @@ function handleClick(): void {
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
+/* Glow burst animation for completion transition */
+.session-card__status-dot--glow {
+  animation: status-glow 0.6s ease-out forwards;
+}
+
+@keyframes status-glow {
+  0% { box-shadow: 0 0 0 0 var(--status-success); transform: scale(1); }
+  50% { box-shadow: 0 0 0 4px rgba(0, 255, 128, 0.4); transform: scale(1.2); }
+  100% { box-shadow: 0 0 0 0 transparent; transform: scale(1); }
+}
+
 /* Respect prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
-  .session-card__status-dot--pulse {
+  .session-card__status-dot--pulse,
+  .session-card__status-dot--glow {
     animation: none;
   }
+}
+
+/* ARIA live region: visually hidden but accessible to screen readers */
+.session-card__live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 </style>

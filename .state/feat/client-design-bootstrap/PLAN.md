@@ -316,17 +316,17 @@ Goal: Build `useSSE()` composable. Per-session connections for active processing
 
 Owner: frontend-engineer
 
-- [ ] Create `src/client/composables/useSSE.ts`
-- [ ] Composable takes a reactive session ID and current status
-- [ ] Opens `EventSource` to `/api/sessions/:id/events` when status is active
-- [ ] Returns reactive `status` ref and `isConnected` boolean
-- [ ] Closes connection on terminal event, session ID change, or unmount
-- [ ] Connection budget: max 3 concurrent SSE connections (module-level tracking)
+- [x] Create `src/client/composables/useSSE.ts`
+- [x] Composable takes a reactive session ID and current status
+- [x] Opens `EventSource` to `/api/sessions/:id/events` when status is active
+- [x] Returns reactive `status` ref and `isConnected` boolean
+- [x] Closes connection on terminal event, session ID change, or unmount
+- [x] Connection budget: max 3 concurrent SSE connections (module-level tracking)
 - [ ] Priority: selected session first, then most recent uploads
-- [ ] Fallback: sessions beyond budget use polling (10s interval)
-- [ ] Wire into `SessionCard.vue`: status indicator driven by SSE status ref
-- [ ] ARIA live region (`role="status"`) for processing updates, `role="alert"` for errors
-- [ ] Status transition animations: pulse for active, glow burst for completion, static for error
+- [x] Fallback: sessions beyond budget use polling (10s interval)
+- [x] Wire into `SessionCard.vue`: status indicator driven by SSE status ref
+- [x] ARIA live region (`role="status"`) for processing updates, `role="alert"` for errors
+- [x] Status transition animations: pulse for active, glow burst for completion, static for error
 - [ ] Verify: upload a session and watch the card transition through states without refresh
 - [ ] Verify: SSE connection closes after terminal event
 - [ ] Verify: screen reader announces status changes
@@ -508,7 +508,7 @@ Updated by implementer as work progresses.
 | 8 | complete | Start page — StartPage.vue implemented; router updated to route name 'home' |
 | 9 | complete | Session detail layout — SessionDetailView.vue created, ShellHeader breadcrumb wired |
 | 10 | complete | Upload flow — DropOverlay, drag handlers, optimistic entries, file picker wired |
-| 11 | pending | SSE status updates |
+| 11 | complete | SSE status updates — useSSE composable + SessionCard wired |
 | 12 | pending | Toast system |
 | 13 | pending | Mobile overlay |
 | 14 | pending | Accessibility pass |
