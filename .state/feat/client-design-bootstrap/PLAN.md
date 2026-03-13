@@ -509,7 +509,7 @@ Updated by implementer as work progresses.
 | 9 | complete | Session detail layout — SessionDetailView.vue created, ShellHeader breadcrumb wired |
 | 10 | complete | Upload flow — DropOverlay, drag handlers, optimistic entries, file picker wired |
 | 11 | complete | SSE status updates — useSSE composable + SessionCard wired |
-| 12 | pending | Toast system |
+| 12 | complete | Toast system |
 | 13 | pending | Mobile overlay + sidebar toggle |
 | 14 | pending | Accessibility pass |
 | 15 | pending | Design token audit |

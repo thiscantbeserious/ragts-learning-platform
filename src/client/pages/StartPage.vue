@@ -10,7 +10,6 @@
 import { ref, inject, computed } from 'vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import { useUpload } from '../composables/useUpload.js';
-import { useToast } from '../composables/useToast.js';
 import type { Session } from '../../shared/types/session.js';
 
 const sessionList = inject(sessionListKey, null);
@@ -18,7 +17,6 @@ const hasSessions = computed(() => (sessionList?.sessions.value.length ?? 0) > 0
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const { uploadFileWithOptimistic } = useUpload();
-const { addToast } = useToast();
 
 /** Opens the system file picker. Upload zone, browse link, and keyboard trigger this. */
 function openFilePicker(): void {
@@ -41,12 +39,6 @@ function handleFileChange(event: Event): void {
       onUploadComplete: async (tempId: string) => {
         sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
         await sessionList.fetchSessions();
-      },
-      onUploadSuccess: (filename: string) => {
-        addToast(`${filename} uploaded — processing started`, 'success');
-      },
-      onUploadError: (message: string) => {
-        addToast(`Upload failed: ${message}`, 'error');
       },
     });
   }

@@ -22,6 +22,9 @@ let nextId = 0;
 /** Shared reactive toast list — module-level singleton so any composable can add toasts. */
 const toasts = ref<Toast[]>([]);
 
+/** Tracks active auto-dismiss timers by toast id so they can be cancelled on manual dismiss. */
+const timers = new Map<number, ReturnType<typeof setTimeout>>();
+
 /**
  * Provides access to the global toast list and helpers to add/remove toasts.
  * All callers share the same reactive state, so toasts added from upload or SSE
@@ -46,13 +49,17 @@ export function useToast() {
     toasts.value.push({ id, message, type, role });
 
     if (duration > 0) {
-      setTimeout(() => {
-        removeToast(id);
-      }, duration);
+      timers.set(id, setTimeout(() => { removeToast(id); }, duration));
     }
   }
 
+  /** Removes a toast by id and cancels its auto-dismiss timer if one is pending. */
   function removeToast(id: number): void {
+    const timer = timers.get(id);
+    if (timer !== undefined) {
+      clearTimeout(timer);
+      timers.delete(id);
+    }
     toasts.value = toasts.value.filter((t) => t.id !== id);
   }
 

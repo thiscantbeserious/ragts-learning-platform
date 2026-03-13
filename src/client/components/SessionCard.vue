@@ -103,7 +103,7 @@ const justCompleted = ref(false);
  * Fires a success toast when processing completes, or an error toast when it fails.
  */
 watch(liveStatus, (next, prev) => {
-  if (prev === undefined || next === undefined) return;
+  if (prev === next) return;
   if (next === 'completed') {
     justCompleted.value = true;
     addToast(`${props.session.filename} is ready`, 'success');

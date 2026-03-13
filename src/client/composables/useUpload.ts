@@ -1,5 +1,6 @@
 import { ref } from 'vue';
 import type { Session } from '../../shared/types/session.js';
+import { useToast } from './useToast.js';
 
 /** Shape of the upload response from POST /api/upload. */
 export interface UploadResponse {
@@ -14,16 +15,13 @@ export interface OptimisticCallbacks {
   onOptimisticInsert: (tempSession: Session) => void;
   /** Called after upload completes (success or failure); removes the optimistic entry and refreshes. */
   onUploadComplete: (tempId: string) => Promise<void>;
-  /** Optional: called with the filename after a successful upload for toast notification. */
-  onUploadSuccess?: (filename: string) => void;
-  /** Optional: called with the error message after a failed upload for toast notification. */
-  onUploadError?: (message: string) => void;
 }
 
 export function useUpload(onSuccess?: () => void) {
   const uploading = ref(false);
   const error = ref<string | null>(null);
   const isDragging = ref(false);
+  const { addToast } = useToast();
 
   async function uploadFile(file: File): Promise<void> {
     error.value = null;
@@ -107,17 +105,17 @@ export function useUpload(onSuccess?: () => void) {
         const msg = data.error || `Upload failed (${res.status})`;
         error.value = data.details ? `${msg}: ${data.details}` : msg;
         await callbacks.onUploadComplete(tempId);
-        callbacks.onUploadError?.(error.value);
+        addToast(`Upload failed: ${error.value}`, 'error');
         return;
       }
 
       await callbacks.onUploadComplete(tempId);
-      callbacks.onUploadSuccess?.(file.name);
+      addToast(`${file.name} uploaded — processing started`, 'success');
       onSuccess?.();
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Upload failed';
       await callbacks.onUploadComplete(tempId);
-      callbacks.onUploadError?.(error.value ?? 'Upload failed');
+      addToast(`Upload failed: ${error.value ?? 'Upload failed'}`, 'error');
     } finally {
       uploading.value = false;
     }
