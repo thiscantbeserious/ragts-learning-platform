@@ -39,8 +39,8 @@ test.describe('Landing Page', () => {
     }
 
     await page.goto('/');
-    await page.waitForSelector('.session-card', { timeout: 10000 });
-    const cards = page.locator('.session-card');
+    await page.waitForSelector('.spatial-shell__sidebar .session-card', { timeout: 10000 });
+    const cards = page.locator('.spatial-shell__sidebar .session-card');
     await expect(cards).toHaveCount(3);
     await expect(page).toHaveScreenshot('landing-three-sessions.png', {
       mask: [page.locator('.session-card__age')],
