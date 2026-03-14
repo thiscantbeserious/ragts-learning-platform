@@ -14,6 +14,11 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
+# Allow git commands that use subshells for commit messages (heredoc pattern)
+if echo "$COMMAND" | grep -qE '^git\s+(commit|tag)'; then
+  exit 0
+fi
+
 # Block subshell injection and redirections
 if echo "$COMMAND" | grep -qE '\$\(|`|>[^&]|>>'; then
   echo "Blocked: Subshell expansion (\$(), backticks) and file redirections (>, >>) are not allowed. Use Write/Edit tools for file modifications." >&2

@@ -14,6 +14,7 @@ tools:
   - mcp__playwright__browser_tabs
   - mcp__playwright__browser_resize
   - mcp__playwright__browser_console_messages
+  - mcp__playwright__browser_evaluate
 disallowedTools:
   - Edit
   - Write
@@ -28,7 +29,7 @@ disallowedTools:
   - mcp__playwright__browser_run_code
   - mcp__playwright__browser_handle_dialog
 permissionMode: default
-maxTurns: 15
+maxTurns: 25
 skills: []
 ---
 
