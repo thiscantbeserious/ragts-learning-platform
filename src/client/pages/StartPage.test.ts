@@ -2,16 +2,26 @@
  * Tests for StartPage component — Stage 8.
  *
  * Covers: rendering (upload zone, title, browse link, AGR hint, SVG pipeline,
- * file input), accessibility attributes, keyboard interaction, and file picker
- * trigger behavior.
+ * file input), accessibility attributes, keyboard interaction, file picker
+ * trigger behavior, and handleFileChange upload flow.
  */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { ref, computed } from 'vue';
 import StartPage from './StartPage.vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import type { SessionListState } from '../composables/useSessionList.js';
 import type { Session } from '../../shared/types/session.js';
+
+// Shared mock function for uploadFileWithOptimistic — used by both component and tests.
+const mockUploadFileWithOptimistic = vi.fn();
+
+// Mock useUpload so file-change tests don't hit fetch
+vi.mock('../composables/useUpload.js', () => ({
+  useUpload: () => ({
+    uploadFileWithOptimistic: mockUploadFileWithOptimistic,
+  }),
+}));
 
 /** Minimal mock of SessionListState for injection. */
 function mockSessionListState(sessions: Session[] = []): SessionListState {
@@ -176,6 +186,147 @@ describe('StartPage', () => {
       await wrapper.find('.upload-zone').trigger('keydown', { key: ' ' });
 
       expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it('pressing Tab on the upload zone does not trigger the file input click', async () => {
+      const wrapper = mount(StartPage);
+      const input = wrapper.find('input[type="file"]');
+      const clickSpy = vi.spyOn(input.element as HTMLInputElement, 'click');
+
+      await wrapper.find('.upload-zone').trigger('keydown', { key: 'Tab' });
+
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleFileChange', () => {
+    beforeEach(() => {
+      mockUploadFileWithOptimistic.mockReset();
+    });
+
+    it('calls uploadFileWithOptimistic for each selected file when sessionList is injected', async () => {
+      const sessionState = mockSessionListState([]);
+      const wrapper = mount(StartPage, {
+        global: {
+          provide: {
+            [sessionListKey as symbol]: sessionState,
+          },
+        },
+      });
+
+      const input = wrapper.find('input[type="file"]');
+      const file1 = new File(['content'], 'session1.cast', { type: '' });
+      const file2 = new File(['content'], 'session2.cast', { type: '' });
+
+      // Simulate the change event with a FileList-like object
+      Object.defineProperty(input.element, 'files', {
+        value: [file1, file2],
+        writable: false,
+        configurable: true,
+      });
+
+      await input.trigger('change');
+
+      expect(mockUploadFileWithOptimistic).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not call uploadFileWithOptimistic when no sessionList is provided', async () => {
+      const wrapper = mount(StartPage);
+
+      const input = wrapper.find('input[type="file"]');
+      const file = new File(['content'], 'session.cast', { type: '' });
+
+      Object.defineProperty(input.element, 'files', {
+        value: [file],
+        writable: false,
+        configurable: true,
+      });
+
+      await input.trigger('change');
+
+      expect(mockUploadFileWithOptimistic).not.toHaveBeenCalled();
+    });
+
+    it('does not call uploadFileWithOptimistic when files list is empty', async () => {
+      const sessionState = mockSessionListState([]);
+      const wrapper = mount(StartPage, {
+        global: {
+          provide: {
+            [sessionListKey as symbol]: sessionState,
+          },
+        },
+      });
+
+      const input = wrapper.find('input[type="file"]');
+      Object.defineProperty(input.element, 'files', {
+        value: [],
+        writable: false,
+        configurable: true,
+      });
+
+      await input.trigger('change');
+
+      expect(mockUploadFileWithOptimistic).not.toHaveBeenCalled();
+    });
+
+    it('onOptimisticInsert prepends the temp session to the sessions list', async () => {
+      const sessionState = mockSessionListState([]);
+      const wrapper = mount(StartPage, {
+        global: {
+          provide: {
+            [sessionListKey as symbol]: sessionState,
+          },
+        },
+      });
+
+      const input = wrapper.find('input[type="file"]');
+      const file = new File(['content'], 'session.cast', { type: '' });
+
+      Object.defineProperty(input.element, 'files', {
+        value: [file],
+        writable: false,
+        configurable: true,
+      });
+
+      await input.trigger('change');
+
+      // Extract the onOptimisticInsert callback and call it
+      const callbacks = mockUploadFileWithOptimistic.mock.calls[0]?.[1];
+      const tempSession = { id: 'temp-1', filename: 'session.cast' } as Session;
+      callbacks?.onOptimisticInsert(tempSession);
+
+      expect(sessionState.sessions.value[0]).toEqual(tempSession);
+    });
+
+    it('onUploadComplete removes the temp session and calls fetchSessions', async () => {
+      const tempSession = { id: 'temp-1', filename: 'session.cast' } as Session;
+      const sessionState = mockSessionListState([tempSession]);
+
+      const wrapper = mount(StartPage, {
+        global: {
+          provide: {
+            [sessionListKey as symbol]: sessionState,
+          },
+        },
+      });
+
+      const input = wrapper.find('input[type="file"]');
+      const file = new File(['content'], 'session.cast', { type: '' });
+
+      Object.defineProperty(input.element, 'files', {
+        value: [file],
+        writable: false,
+        configurable: true,
+      });
+
+      await input.trigger('change');
+
+      // Extract the onUploadComplete callback and call it
+      const callbacks = mockUploadFileWithOptimistic.mock.calls[0]?.[1];
+      await callbacks?.onUploadComplete('temp-1');
+
+      expect(sessionState.sessions.value.find((s) => s.id === 'temp-1')).toBeUndefined();
+      expect(sessionState.fetchSessions).toHaveBeenCalled();
     });
   });
 });

@@ -10,6 +10,16 @@
         ]
       }
     ],
-    "PreToolUse": []
+    "PreToolUse": [
+      {
+        "matcher": "mcp__playwright__browser_take_screenshot",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "filename=$(echo \"$CLAUDE_TOOL_INPUT\" | jq -r '.filename // \"\"'); if [ -z \"$filename\" ] || ! echo \"$filename\" | grep -q '/'; then echo 'BLOCKED: Screenshot filename must include a directory path (e.g. .state/screenshots/name.png). Root-level screenshots are not allowed.' >&2; exit 1; fi"
+          }
+        ]
+      }
+    ]
   }
 }

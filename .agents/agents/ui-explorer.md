@@ -57,9 +57,9 @@ Another agent will tell you what to look at. This could be:
 
 ## Screenshots
 
-Save all screenshots to `/tmp/ui-explorer/<branch-name>/`. Use descriptive filenames:
-- `/tmp/ui-explorer/feat/auth/sessions-list.png`
-- `/tmp/ui-explorer/fix/upload-bug/session-detail-sections.png`
+Save all screenshots to `.state/<branch-name>/screenshots/`. **ALWAYS include the directory path in the filename parameter** — never save to the repo root. Use descriptive filenames:
+- `.state/feat/auth/screenshots/sessions-list.png`
+- `.state/fix/upload-bug/screenshots/session-detail-sections.png`
 
 The branch name is provided in your spawn prompt. Always include the full file path in your output so callers and the user can find them.
 

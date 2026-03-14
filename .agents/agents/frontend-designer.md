@@ -145,8 +145,10 @@ Research → Propose → Iterate → Approve
 ## Design Handoff
 
 When the user approves a design:
-1. Final HTML + CSS files stay in `.state/design/<branch-name>/`
-2. Save screenshots to `.state/<branch-name>/designs/`
+1. Final HTML + CSS files stay in `.state/<branch-name>/designs/`
+2. Save screenshots to `.state/<branch-name>/screenshots/`
+   - Always include a directory path in the filename parameter (e.g. `.state/feat/my-branch/screenshots/screenshot.png`).
+   - Never save screenshots to the repo root — a pre-commit hook will reject them.
 3. Update PLAN.md with:
    - Screenshot references
    - Key measurements (spacing, colors, typography)

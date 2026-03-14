@@ -145,6 +145,21 @@ describe('SessionDetailView', () => {
       });
       expect(wrapper.find('.session-content-stub').exists()).toBe(true);
     });
+
+    it('renders SessionContent when snapshot is set but sections are empty', async () => {
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref([]),
+        snapshot: ref({ screen: [], cursor: { x: 0, y: 0, visible: true } } as never),
+      });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      // hasContent is true when snapshot is non-null, even with no sections
+      expect(wrapper.find('.session-content-stub').exists()).toBe(true);
+    });
   });
 
   describe('layout: no breadcrumb or container wrapper', () => {
