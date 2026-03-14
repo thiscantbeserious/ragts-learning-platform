@@ -2,7 +2,8 @@
   <BrandMark />
   <ShellHeader />
   <div class="spatial-shell__sidebar">
-    <SidebarPanel />
+    <!-- Only render SidebarPanel in the grid when not on mobile; the overlay owns it on mobile. -->
+    <SidebarPanel v-if="!isMobile" />
   </div>
   <div class="spatial-shell__main">
     <router-view />
@@ -37,6 +38,8 @@ import { useToast } from '../composables/useToast.js';
 
 const layout = useLayout();
 provide(layoutKey, layout);
+
+const { isMobile } = layout;
 
 /** Session list is provided at shell level so sidebar and header can share it. */
 const sessionList = useSessionList();

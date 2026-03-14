@@ -600,6 +600,8 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   z-index: 0;
   line-height: 1;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
   /*text-shadow: 0 0 60px rgba(53, 89, 152, 0.3);*/
 }
 

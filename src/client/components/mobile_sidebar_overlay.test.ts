@@ -123,6 +123,7 @@ function q(selector: string): Element | null {
 
 afterEach(() => {
   // Clean up any Teleport-appended elements after each test.
+  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach(el => el.remove());
   document.querySelectorAll('.mobile-sidebar-overlay__backdrop').forEach(el => el.remove());
   document.querySelectorAll('.mobile-sidebar-overlay__panel').forEach(el => el.remove());
 });
@@ -203,11 +204,11 @@ describe('MobileSidebarOverlay', () => {
   });
 
   describe('animation class', () => {
-    it('applies the open modifier class to the panel when open', async () => {
+    it('renders the panel when open (Transition handles animation via CSS classes)', async () => {
       await mountOverlay({ isMobileOverlayOpen: true });
       await nextTick();
       const panel = q('.mobile-sidebar-overlay__panel');
-      expect(panel?.classList.contains('mobile-sidebar-overlay__panel--open')).toBe(true);
+      expect(panel).not.toBeNull();
     });
   });
 

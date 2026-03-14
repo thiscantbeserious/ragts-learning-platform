@@ -188,7 +188,7 @@ defineExpose({ hamburgerRef });
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-1);
   width: 44px; /* 44px min touch target */
   height: 44px;
   padding: var(--space-3);
