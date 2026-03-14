@@ -17,20 +17,6 @@ function makeErrorResponse(status: number, body: object): Response {
   } as unknown as Response;
 }
 
-function makeDragEvent(files?: File[]): DragEvent {
-  return {
-    dataTransfer: files !== undefined ? { files } : undefined,
-  } as unknown as DragEvent;
-}
-
-function makeInputEvent(file?: File): Event {
-  const input = {
-    files: file !== undefined ? [file] : null,
-    value: 'some-path',
-  };
-  return { target: input } as unknown as Event;
-}
-
 describe('useUpload', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
@@ -112,52 +98,6 @@ describe('useUpload', () => {
       vi.mocked(fetch).mockResolvedValue(makeOkResponse({}));
       const { uploadFile } = useUpload();
       await expect(uploadFile(new File(['data'], 'session.cast'))).resolves.toBeUndefined();
-    });
-  });
-
-  describe('handleDrop', () => {
-    it('calls uploadFile for the first file in dataTransfer', async () => {
-      vi.mocked(fetch).mockResolvedValue(makeOkResponse({}));
-      const { handleDrop, isDragging } = useUpload();
-      isDragging.value = true;
-      const file = new File(['data'], 'session.cast');
-      handleDrop(makeDragEvent([file]));
-      expect(isDragging.value).toBe(false);
-      // Allow async uploadFile to complete
-      await vi.waitFor(() => expect(fetch).toHaveBeenCalledOnce());
-    });
-
-    it('sets isDragging to false when dataTransfer is undefined', () => {
-      const { handleDrop, isDragging } = useUpload();
-      isDragging.value = true;
-      handleDrop(makeDragEvent(undefined));
-      expect(isDragging.value).toBe(false);
-      expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('does not call uploadFile when dataTransfer files is empty', () => {
-      const { handleDrop } = useUpload();
-      handleDrop(makeDragEvent([]));
-      expect(fetch).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('handleFileInput', () => {
-    it('calls uploadFile and clears input value when file is selected', async () => {
-      vi.mocked(fetch).mockResolvedValue(makeOkResponse({}));
-      const { handleFileInput } = useUpload();
-      const file = new File(['data'], 'session.cast');
-      const event = makeInputEvent(file);
-      handleFileInput(event);
-      const input = event.target as HTMLInputElement;
-      await vi.waitFor(() => expect(fetch).toHaveBeenCalledOnce());
-      expect(input.value).toBe('');
-    });
-
-    it('does not call uploadFile when no file is selected', () => {
-      const { handleFileInput } = useUpload();
-      handleFileInput(makeInputEvent(undefined));
-      expect(fetch).not.toHaveBeenCalled();
     });
   });
 

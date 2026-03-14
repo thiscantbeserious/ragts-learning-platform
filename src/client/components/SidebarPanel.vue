@@ -168,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, computed } from 'vue';
+import { inject, ref, computed, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import SkeletonSidebar from './SkeletonSidebar.vue';
 import SessionCard from './SessionCard.vue';
@@ -220,6 +220,10 @@ const { uploadFileWithOptimistic } = useUpload();
 /** Screen reader announcement text for upload actions — cleared after 4 seconds. */
 const uploadStatusMessage = ref('');
 let uploadStatusTimer: ReturnType<typeof setTimeout> | null = null;
+
+onUnmounted(() => {
+  if (uploadStatusTimer !== null) clearTimeout(uploadStatusTimer);
+});
 
 /** Sets the upload status message and schedules a clear after 4 seconds. */
 function announceUploadStatus(message: string): void {

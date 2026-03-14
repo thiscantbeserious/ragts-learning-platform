@@ -5,8 +5,26 @@
  * and composition of search + status filters together.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { createApp } from 'vue';
 import { useSessionList } from './useSessionList.js';
 import type { Session } from '../../shared/types/session.js';
+
+/**
+ * Runs a composable inside a real Vue app so that lifecycle hooks (e.g. onMounted) fire.
+ * Returns the composable's return value. The app is unmounted after the returned promise settles.
+ */
+function withSetup<T>(composable: () => T): { result: T; unmount: () => void } {
+  let result!: T;
+  const app = createApp({
+    setup() {
+      result = composable();
+      return () => null;
+    },
+  });
+  const root = document.createElement('div');
+  app.mount(root);
+  return { result, unmount: () => app.unmount() };
+}
 
 function makeSession(overrides: Partial<Session> = {}): Session {
   return {
@@ -96,6 +114,14 @@ describe('useSessionList()', () => {
       const { error, fetchSessions } = useSessionList();
       await fetchSessions();
       expect(error.value).toBe('Network down');
+    });
+
+    it('calls fetchSessions automatically on mount', async () => {
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse([]));
+      const { unmount } = withSetup(() => useSessionList());
+      // Allow the microtask queue to flush so the fetch resolves
+      await vi.waitFor(() => expect(fetch).toHaveBeenCalledOnce());
+      unmount();
     });
   });
 

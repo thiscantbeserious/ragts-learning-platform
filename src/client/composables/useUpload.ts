@@ -121,30 +121,12 @@ export function useUpload(onSuccess?: () => void) {
     }
   }
 
-  function handleDrop(event: DragEvent): void {
-    isDragging.value = false;
-    const files = event.dataTransfer?.files;
-    const file = files?.[0];
-    if (file !== undefined) {
-      uploadFile(file);
-    }
-  }
-
   function handleDragOver(): void {
     isDragging.value = true;
   }
 
   function handleDragLeave(): void {
     isDragging.value = false;
-  }
-
-  function handleFileInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file !== undefined) {
-      uploadFile(file);
-      input.value = '';
-    }
   }
 
   function clearError(): void {
@@ -157,10 +139,8 @@ export function useUpload(onSuccess?: () => void) {
     isDragging,
     uploadFile,
     uploadFileWithOptimistic,
-    handleDrop,
     handleDragOver,
     handleDragLeave,
-    handleFileInput,
     clearError,
   };
 }

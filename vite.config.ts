@@ -2,11 +2,31 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import type { Plugin } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+/**
+ * Appends a build-time content hash query param to blocking design CSS paths
+ * so browsers always fetch fresh styles after a deployment.
+ * Only affects the production build output — dev server is unchanged.
+ */
+function cssCacheBust(): Plugin {
+  return {
+    name: 'css-cache-bust',
+    apply: 'build',
+    transformIndexHtml(html) {
+      const hash = Date.now().toString(36);
+      return html.replace(
+        /href="(\/design\/styles\/[^"]+\.css)"/g,
+        `href="$1?v=${hash}"`,
+      );
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [vue(), cssCacheBust()],
   resolve: {
     alias: {
       '@client': path.resolve(__dirname, './src/client'),

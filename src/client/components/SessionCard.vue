@@ -307,7 +307,7 @@ function handleClick(): void {
 
 @keyframes status-glow {
   0% { box-shadow: 0 0 0 0 var(--status-success); transform: scale(1); }
-  50% { box-shadow: 0 0 0 4px rgba(0, 255, 128, 0.4); transform: scale(1.2); }
+  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--status-success) 40%, transparent); transform: scale(1.2); }
   100% { box-shadow: 0 0 0 0 transparent; transform: scale(1); }
 }
 

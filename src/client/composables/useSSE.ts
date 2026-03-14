@@ -116,6 +116,8 @@ export function useSSE(
   let eventSource: EventSource | null = null;
   let pollTimer: ReturnType<typeof setInterval> | null = null;
   let currentSessionId = '';
+  /** Set to true when an SSE event updates status; prevents stale sync-on-open overwrite. */
+  let sseEventReceived = false;
 
   /** Close SSE connection and release budget slot. */
   function closeSSE(): void {
@@ -157,6 +159,7 @@ export function useSSE(
 
   /** Handle an SSE message — update status and close on terminal event. */
   function handleSSEMessage(type: string, _e: MessageEvent): void {
+    sseEventReceived = true;
     if (type === 'session.ready') {
       status.value = 'completed';
       closeSSE();
@@ -178,6 +181,7 @@ export function useSSE(
    * If the server reports a terminal status (already completed/failed before the client
    * connected), update liveStatus and close the SSE connection immediately so the card
    * stops showing "Processing" indefinitely.
+   * Skips applying the fetched status if an SSE event has already provided a more recent value.
    */
   async function syncStatusOnOpen(id: string): Promise<void> {
     try {
@@ -185,6 +189,8 @@ export function useSSE(
       if (!res.ok) return;
       const data = await res.json() as SessionPollResponse;
       if (data.detection_status === undefined) return;
+      // If an SSE event already updated status, skip applying the potentially stale fetch result
+      if (sseEventReceived) return;
       status.value = data.detection_status;
       if (TERMINAL_STATUSES.has(data.detection_status)) {
         closeSSE();
@@ -243,6 +249,7 @@ export function useSSE(
   function connect(id: string): void {
     teardown();
     currentSessionId = id;
+    sseEventReceived = false;
     status.value = detectionStatus.value;
 
     const currentStatus = status.value;

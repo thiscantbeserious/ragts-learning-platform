@@ -31,6 +31,17 @@ const toasts = ref<Toast[]>([]);
 const timers = new Map<number, ReturnType<typeof setTimeout>>();
 
 /**
+ * Resets module-level singleton state between tests.
+ * Only for use in test files — do not call in production code.
+ */
+export function resetToastState(): void {
+  nextId = 0;
+  toasts.value = [];
+  timers.forEach(clearTimeout);
+  timers.clear();
+}
+
+/**
  * Provides access to the global toast list and helpers to add/remove toasts.
  * All callers share the same reactive state, so toasts added from upload or SSE
  * are displayed by the single ToastContainer rendered in SpatialShell.
