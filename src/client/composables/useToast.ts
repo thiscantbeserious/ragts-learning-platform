@@ -4,8 +4,10 @@ export type ToastRole = 'status' | 'alert';
 
 export interface Toast {
   id: number;
+  /** Optional short heading displayed above the message. */
+  title?: string;
   message: string;
-  type: 'success' | 'error' | 'info';
+  type: 'success' | 'error' | 'info' | 'warning';
   /** ARIA role: 'alert' for errors (assertive), 'status' for informational (polite). */
   role: ToastRole;
 }
@@ -14,6 +16,7 @@ export interface Toast {
 const DISMISS_DURATION: Record<Toast['type'], number> = {
   success: 5000,
   info: 5000,
+  warning: 6000,
   error: 8000,
 };
 
@@ -34,19 +37,22 @@ export function useToast() {
   /**
    * Adds a toast notification. Auto-dismisses after durationMs (defaults by type).
    * @param message - Toast body text.
-   * @param type - Visual variant: 'success' | 'info' | 'error'.
-   * @param durationMs - Override auto-dismiss time in ms. Pass 0 to disable auto-dismiss.
+   * @param type - Visual variant: 'success' | 'info' | 'warning' | 'error'.
+   * @param options - Optional title and durationMs override.
    */
   function addToast(
     message: string,
     type: Toast['type'] = 'info',
-    durationMs?: number,
+    options?: { title?: string; durationMs?: number } | number,
   ): void {
     const id = nextId++;
     const role: ToastRole = type === 'error' ? 'alert' : 'status';
-    const duration = durationMs ?? DISMISS_DURATION[type];
+    // Support legacy numeric third argument for backward compat
+    const opts = typeof options === 'number' ? { durationMs: options } : (options ?? {});
+    const duration = opts.durationMs ?? DISMISS_DURATION[type];
+    const title = opts.title;
 
-    toasts.value.push({ id, message, type, role });
+    toasts.value.push({ id, title, message, type, role });
 
     if (duration > 0) {
       timers.set(id, setTimeout(() => { removeToast(id); }, duration));

@@ -105,17 +105,17 @@ export function useUpload(onSuccess?: () => void) {
         const msg = data.error || `Upload failed (${res.status})`;
         error.value = data.details ? `${msg}: ${data.details}` : msg;
         await callbacks.onUploadComplete(tempId);
-        addToast(`Upload failed: ${error.value}`, 'error');
+        addToast(error.value ?? 'Upload failed', 'error', { title: 'Upload failed' });
         return;
       }
 
       await callbacks.onUploadComplete(tempId);
-      addToast(`${file.name} uploaded — processing started`, 'success');
+      addToast(`${file.name} has been uploaded`, 'success', { title: 'Session uploaded' });
       onSuccess?.();
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Upload failed';
       await callbacks.onUploadComplete(tempId);
-      addToast(`Upload failed: ${error.value ?? 'Upload failed'}`, 'error');
+      addToast(error.value ?? 'Upload failed', 'error', { title: 'Upload failed' });
     } finally {
       uploading.value = false;
     }
