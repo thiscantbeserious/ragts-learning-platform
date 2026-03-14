@@ -1,9 +1,0 @@
-fix(design): enforce consistent toast min-height with vertical centering
-
-Set min-height: 76px on .toast so single-line toasts match two-line
-toast height. Add align-self: center to .toast__content and
-.toast__close so both are vertically centered regardless of toast
-height, while the icon continues to stretch full height for the
-colored sidebar effect.
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
