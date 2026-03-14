@@ -187,32 +187,32 @@ watch(() => route.fullPath, (newPath, oldPath) => {
    Leave: backdrop fades out, panel slides out to left.
    ============================================================ */
 
-.overlay-enter-active .mobile-sidebar-overlay__panel,
-.overlay-leave-active .mobile-sidebar-overlay__panel {
+:global(.overlay-enter-active .mobile-sidebar-overlay__panel),
+:global(.overlay-leave-active .mobile-sidebar-overlay__panel) {
   transition: transform 175ms ease-out;
 }
 
-.overlay-enter-from .mobile-sidebar-overlay__panel,
-.overlay-leave-to .mobile-sidebar-overlay__panel {
+:global(.overlay-enter-from .mobile-sidebar-overlay__panel),
+:global(.overlay-leave-to .mobile-sidebar-overlay__panel) {
   transform: translateX(-100%);
 }
 
-.overlay-enter-active .mobile-sidebar-overlay__backdrop,
-.overlay-leave-active .mobile-sidebar-overlay__backdrop {
+:global(.overlay-enter-active .mobile-sidebar-overlay__backdrop),
+:global(.overlay-leave-active .mobile-sidebar-overlay__backdrop) {
   transition: opacity 175ms ease-out;
 }
 
-.overlay-enter-from .mobile-sidebar-overlay__backdrop,
-.overlay-leave-to .mobile-sidebar-overlay__backdrop {
+:global(.overlay-enter-from .mobile-sidebar-overlay__backdrop),
+:global(.overlay-leave-to .mobile-sidebar-overlay__backdrop) {
   opacity: 0;
 }
 
 /* Respect prefers-reduced-motion: skip slide/fade animation. */
 @media (prefers-reduced-motion: reduce) {
-  .overlay-enter-active .mobile-sidebar-overlay__panel,
-  .overlay-leave-active .mobile-sidebar-overlay__panel,
-  .overlay-enter-active .mobile-sidebar-overlay__backdrop,
-  .overlay-leave-active .mobile-sidebar-overlay__backdrop {
+  :global(.overlay-enter-active .mobile-sidebar-overlay__panel),
+  :global(.overlay-leave-active .mobile-sidebar-overlay__panel),
+  :global(.overlay-enter-active .mobile-sidebar-overlay__backdrop),
+  :global(.overlay-leave-active .mobile-sidebar-overlay__backdrop) {
     transition: none;
   }
 }
