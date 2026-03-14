@@ -1,9 +1,8 @@
 /**
- * Tests for ShellHeader hamburger button — Stage 13.
+ * Tests for ShellHeader hamburger button — hex gate icon.
  *
- * Covers: hamburger button rendered on mobile (with layout injection),
- * hamburger calls openMobileOverlay, hamburger has accessible label,
- * hamburger button not visible when layout is desktop.
+ * Covers: hex gate rendered on mobile, toggling open/close state,
+ * aria-expanded binding, toggle semantics, desktop hidden.
  */
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -25,14 +24,15 @@ function createTestRouter() {
   });
 }
 
-function makeLayoutState(isMobile: boolean) {
+function makeLayoutState(isMobile: boolean, isMobileOverlayOpen = false) {
   const openMobileOverlay = vi.fn();
+  const closeMobileOverlay = vi.fn();
   return {
     isSidebarOpen: ref(true),
     isMobile: ref(isMobile),
-    isMobileOverlayOpen: ref(false),
+    isMobileOverlayOpen: ref(isMobileOverlayOpen),
     openMobileOverlay,
-    closeMobileOverlay: vi.fn(),
+    closeMobileOverlay,
     toggleSidebar: vi.fn(),
   };
 }
@@ -51,10 +51,10 @@ function makeSessionListState(): SessionListState {
   };
 }
 
-async function mountHeader(isMobile: boolean, path = '/') {
+async function mountHeader(isMobile: boolean, isMobileOverlayOpen = false, path = '/') {
   const router = createTestRouter();
   await router.push(path);
-  const layout = makeLayoutState(isMobile);
+  const layout = makeLayoutState(isMobile, isMobileOverlayOpen);
   const sessionList = makeSessionListState();
 
   const wrapper = mount(ShellHeader, {
@@ -70,7 +70,7 @@ async function mountHeader(isMobile: boolean, path = '/') {
   return { wrapper, layout };
 }
 
-describe('ShellHeader — hamburger button (Stage 13)', () => {
+describe('ShellHeader — hex gate hamburger button', () => {
   describe('on mobile viewport', () => {
     it('renders the hamburger button when isMobile is true', async () => {
       const { wrapper } = await mountHeader(true);
@@ -83,16 +83,87 @@ describe('ShellHeader — hamburger button (Stage 13)', () => {
       expect(btn.attributes('aria-label')).toBeTruthy();
     });
 
-    it('clicking hamburger calls openMobileOverlay', async () => {
-      const { wrapper, layout } = await mountHeader(true);
-      await wrapper.find('.shell-header__hamburger').trigger('click');
-      expect(layout.openMobileOverlay).toHaveBeenCalledOnce();
-    });
-
     it('hamburger has type="button" to prevent form submission', async () => {
       const { wrapper } = await mountHeader(true);
       const btn = wrapper.find('.shell-header__hamburger');
       expect(btn.attributes('type')).toBe('button');
+    });
+
+    it('renders hex gate box container', async () => {
+      const { wrapper } = await mountHeader(true);
+      expect(wrapper.find('.shell-header__hex-box').exists()).toBe(true);
+    });
+
+    it('renders hex gate inner container', async () => {
+      const { wrapper } = await mountHeader(true);
+      expect(wrapper.find('.shell-header__hex-inner').exists()).toBe(true);
+    });
+
+    it('renders exactly 5 hex segments', async () => {
+      const { wrapper } = await mountHeader(true);
+      const segs = wrapper.findAll('.shell-header__hex-seg');
+      expect(segs).toHaveLength(5);
+    });
+
+    it('renders each of the 5 numbered segment modifier classes', async () => {
+      const { wrapper } = await mountHeader(true);
+      for (let i = 1; i <= 5; i++) {
+        expect(wrapper.find(`.shell-header__hex-seg--${i}`).exists()).toBe(true);
+      }
+    });
+
+    it('hex segments have aria-hidden="true"', async () => {
+      const { wrapper } = await mountHeader(true);
+      const inner = wrapper.find('.shell-header__hex-inner');
+      expect(inner.attributes('aria-hidden')).toBe('true');
+    });
+
+    it('has aria-expanded="false" when overlay is closed', async () => {
+      const { wrapper } = await mountHeader(true, false);
+      const btn = wrapper.find('.shell-header__hamburger');
+      expect(btn.attributes('aria-expanded')).toBe('false');
+    });
+
+    it('has aria-expanded="true" when overlay is open', async () => {
+      const { wrapper } = await mountHeader(true, true);
+      const btn = wrapper.find('.shell-header__hamburger');
+      expect(btn.attributes('aria-expanded')).toBe('true');
+    });
+
+    it('adds is-open class to button when overlay is open', async () => {
+      const { wrapper } = await mountHeader(true, true);
+      const btn = wrapper.find('.shell-header__hamburger');
+      expect(btn.classes()).toContain('is-open');
+    });
+
+    it('does not have is-open class when overlay is closed', async () => {
+      const { wrapper } = await mountHeader(true, false);
+      const btn = wrapper.find('.shell-header__hamburger');
+      expect(btn.classes()).not.toContain('is-open');
+    });
+
+    it('clicking when closed calls openMobileOverlay', async () => {
+      const { wrapper, layout } = await mountHeader(true, false);
+      await wrapper.find('.shell-header__hamburger').trigger('click');
+      expect(layout.openMobileOverlay).toHaveBeenCalledOnce();
+      expect(layout.closeMobileOverlay).not.toHaveBeenCalled();
+    });
+
+    it('clicking when open calls closeMobileOverlay', async () => {
+      const { wrapper, layout } = await mountHeader(true, true);
+      await wrapper.find('.shell-header__hamburger').trigger('click');
+      expect(layout.closeMobileOverlay).toHaveBeenCalledOnce();
+      expect(layout.openMobileOverlay).not.toHaveBeenCalled();
+    });
+
+    it('does not render old hamburger-bar spans', async () => {
+      const { wrapper } = await mountHeader(true);
+      expect(wrapper.find('.shell-header__hamburger-bar').exists()).toBe(false);
+    });
+
+    it('does not render old hamburger-icon wrapper', async () => {
+      const { wrapper } = await mountHeader(true);
+      expect(wrapper.find('.shell-header__hamburger-icon').exists()).toBe(false);
     });
   });
 
