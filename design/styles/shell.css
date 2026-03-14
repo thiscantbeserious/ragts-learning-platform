@@ -32,6 +32,33 @@
    ================================================================ */
 
 /* ----------------------------------------------------------------
+   Skip link — visually hidden until focused, allows keyboard users
+   to bypass navigation and jump to the main content landmark.
+   ---------------------------------------------------------------- */
+.skip-link {
+  position: fixed;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 9999;
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-elevated);
+  color: var(--accent-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transform: translateY(-200%);
+  opacity: 0;
+  transition: transform var(--duration-fast) ease, opacity var(--duration-fast) ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ----------------------------------------------------------------
    Shell container
    ---------------------------------------------------------------- */
 .spatial-shell {
@@ -95,6 +122,11 @@
   /* Prevent content from breaking out of the grid track. */
   min-width: 0;
   overflow-y: auto;
+}
+
+/* Suppress focus ring when skip link programmatically focuses main. */
+.spatial-shell__main:focus {
+  outline: none;
 }
 
 /** Aside panel: right column, collapsed (0fr) until activated. */

@@ -1,6 +1,7 @@
 <template>
-  <div
+  <nav
     class="spatial-shell__sidebar sidebar-panel"
+    aria-label="Session list"
     @dragenter.prevent="onDragEnter"
     @dragover.prevent
     @dragleave="onDragLeave"
@@ -153,7 +154,7 @@
         </button>
       </div>
     </template>
-  </div>
+  </nav>
 </template>
 
 <script setup lang="ts">
