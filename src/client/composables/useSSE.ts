@@ -219,11 +219,9 @@ export function useSSE(
       void syncStatusOnOpen(id);
     };
     es.onerror = () => {
-      // Release the budget slot and clean up state on connection error so
-      // subsequent sessions can acquire the slot without a stale entry.
-      isConnected.value = false;
-      releaseSlot(id);
-      eventSource = null;
+      // Close the EventSource first to prevent automatic reconnection,
+      // then release the budget slot and clean up state.
+      closeSSE();
     };
 
     attachEventListeners(es);
