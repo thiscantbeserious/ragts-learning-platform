@@ -5,11 +5,6 @@
     aria-busy="true"
     aria-label="Loading session"
   >
-    <!-- Breadcrumb placeholder -->
-    <div class="skeleton-main__breadcrumb">
-      <div class="skeleton skeleton--text skeleton-main__breadcrumb-text" />
-    </div>
-
     <!-- Section header placeholders -->
     <div
       v-for="n in sectionCount"
@@ -27,7 +22,7 @@
 <script setup lang="ts">
 /**
  * SkeletonMain renders shimmer placeholders for the session detail main area.
- * Matches the breadcrumb + section header + terminal layout to prevent CLS.
+ * Matches the section header + terminal layout to prevent CLS.
  */
 
 const sectionCount = 2;
@@ -39,19 +34,6 @@ const sectionCount = 2;
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-4) var(--space-6);
-}
-
-/* Breadcrumb row — matches the ~18px single-line height of the real breadcrumb */
-.skeleton-main__breadcrumb {
-  height: var(--rhythm-1);
-  display: flex;
-  align-items: center;
-}
-
-.skeleton-main__breadcrumb-text {
-  width: 180px;
-  height: var(--space-3);
-  margin-bottom: 0;
 }
 
 /* Section header placeholder — matches section-header component height */

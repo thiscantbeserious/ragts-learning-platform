@@ -1,7 +1,7 @@
 /**
  * Tests for SkeletonMain component.
  *
- * Verifies that the main area skeleton renders breadcrumb, section header,
+ * Verifies that the main area skeleton renders section header
  * and terminal shimmer placeholders at the correct dimensions.
  */
 import { describe, it, expect } from 'vitest';
@@ -17,17 +17,6 @@ describe('SkeletonMain', () => {
   it('renders inside the skeleton-main root element', () => {
     const wrapper = mount(SkeletonMain);
     expect(wrapper.find('.skeleton-main').exists()).toBe(true);
-  });
-
-  it('renders a breadcrumb placeholder region', () => {
-    const wrapper = mount(SkeletonMain);
-    expect(wrapper.find('.skeleton-main__breadcrumb').exists()).toBe(true);
-  });
-
-  it('breadcrumb placeholder contains at least one skeleton shimmer', () => {
-    const wrapper = mount(SkeletonMain);
-    const breadcrumb = wrapper.find('.skeleton-main__breadcrumb');
-    expect(breadcrumb.find('.skeleton').exists()).toBe(true);
   });
 
   it('renders at least one section header placeholder', () => {
