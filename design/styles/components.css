@@ -723,6 +723,7 @@
               0 0 8px rgba(0, 212, 255, 0.15);
   min-width: var(--toast-min-width);
   max-width: var(--toast-max-width);
+  min-height: 76px;
   overflow: hidden;
 }
 
@@ -739,6 +740,7 @@
   flex: 1;
   min-width: 0;
   padding: var(--rhythm-half) var(--space-4);
+  align-self: center;
 }
 
 .toast__title {
@@ -761,7 +763,8 @@
   justify-content: center;
   width: var(--space-5);
   height: var(--space-5);
-  margin: var(--rhythm-half) var(--space-3) auto auto;
+  margin: 0 var(--space-3) 0 0;
+  align-self: center;
   background: none;
   border: none;
   color: var(--text-muted);
