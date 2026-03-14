@@ -22,7 +22,7 @@ test.describe('Session Detail Page', () => {
     await page.waitForSelector('.section-header', { timeout: 5000 });
 
     await expect(page).toHaveScreenshot('session-detail-loaded.png', {
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 
@@ -44,7 +44,7 @@ test.describe('Session Detail Page', () => {
 
     await expect(firstHeader).toHaveClass(/section-header--collapsed/);
     await expect(page).toHaveScreenshot('session-detail-section-collapsed.png', {
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 
@@ -58,7 +58,7 @@ test.describe('Session Detail Page', () => {
     await expect(firstHeader).not.toHaveClass(/section-header--collapsed/);
 
     await expect(page).toHaveScreenshot('session-detail-section-expanded.png', {
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 
@@ -103,7 +103,7 @@ test.describe('Session Detail Page', () => {
 
     await expect(page).toHaveScreenshot('session-detail-full-layout.png', {
       fullPage: true,
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 

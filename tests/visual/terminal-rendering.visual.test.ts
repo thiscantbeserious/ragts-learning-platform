@@ -61,10 +61,10 @@ test.describe('Terminal Rendering', () => {
 
   test('empty terminal state message', async ({ page }) => {
     await page.goto('/session/nonexistent-id-12345');
-    await page.waitForSelector('.session-detail-page__state--error', { timeout: 10000 });
+    await page.waitForSelector('.session-detail-view__state--error', { timeout: 10000 });
 
     await expect(page).toHaveScreenshot('terminal-error-state.png', {
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 

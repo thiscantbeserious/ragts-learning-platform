@@ -1,5 +1,5 @@
 /**
- * Visual regression tests for the landing page.
+ * Visual regression tests for the landing page (StartPage within SpatialShell).
  * Covers empty state, populated states, upload interactions, and session management.
  */
 import { test, expect } from '@playwright/test';
@@ -14,9 +14,9 @@ test.describe('Landing Page', () => {
 
   test('empty state — no sessions', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.session-list__empty', { timeout: 10000 });
+    await page.waitForSelector('.upload-zone', { timeout: 10000 });
     await expect(page).toHaveScreenshot('landing-empty-state.png', {
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 
@@ -27,7 +27,7 @@ test.describe('Landing Page', () => {
     await page.goto('/');
     await page.waitForSelector('.session-card', { timeout: 10000 });
     await expect(page).toHaveScreenshot('landing-one-session.png', {
-      mask: [page.locator('.session-list__date')],
+      mask: [page.locator('.session-card__age')],
     });
   });
 
@@ -43,7 +43,7 @@ test.describe('Landing Page', () => {
     const cards = page.locator('.session-card');
     await expect(cards).toHaveCount(3);
     await expect(page).toHaveScreenshot('landing-three-sessions.png', {
-      mask: [page.locator('.session-list__date')],
+      mask: [page.locator('.session-card__age')],
     });
   });
 
@@ -53,9 +53,9 @@ test.describe('Landing Page', () => {
     await expect(page.locator('.upload-zone')).toHaveScreenshot('upload-zone-default.png');
   });
 
-  test('upload in progress — spinner visible', async ({ page }) => {
+  test('upload in progress — optimistic card visible', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.upload-zone', { timeout: 10000 });
+    await page.waitForSelector('.start-page__file-input', { timeout: 10000 });
 
     // Mock slow upload by intercepting
     await page.route('**/api/upload', async (route) => {
@@ -63,17 +63,18 @@ test.describe('Landing Page', () => {
       await route.continue();
     });
 
-    // Trigger file upload via input
-    const fileInput = page.locator('.upload-zone__input');
+    // Trigger file upload via hidden input
+    const fileInput = page.locator('.start-page__file-input');
     await fileInput.setInputFiles({
       name: 'test.cast',
       mimeType: 'application/octet-stream',
       buffer: Buffer.from('{"version":3,"term":{"cols":80,"rows":24}}\n[0.1,"o","hello\\n"]\n'),
     });
 
-    const spinner = page.locator('.upload-zone__spinner-text');
-    await expect(spinner).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('.upload-zone')).toHaveScreenshot('upload-zone-uploading.png');
+    // Wait for optimistic card to appear in the sidebar
+    const processingCard = page.locator('.session-card--processing');
+    await expect(processingCard).toBeVisible({ timeout: 3000 });
+    await expect(page.locator('.sidebar-panel')).toHaveScreenshot('upload-zone-uploading.png');
   });
 
   test('session card hover', async ({ page }) => {
@@ -83,7 +84,7 @@ test.describe('Landing Page', () => {
     const card = page.locator('.session-card').first();
     await card.hover();
     await expect(page).toHaveScreenshot('landing-card-hover.png', {
-      mask: [page.locator('.session-list__date')],
+      mask: [page.locator('.session-card__age')],
     });
   });
 
@@ -93,22 +94,20 @@ test.describe('Landing Page', () => {
     await page.goto('/');
     await page.waitForSelector('.session-card', { timeout: 10000 });
 
-    // Accept the confirmation dialog
-    page.on('dialog', dialog => dialog.accept());
+    // Delete session via API (no delete UI button in new sidebar design)
+    await deleteAllSessions();
 
-    // Click delete button
-    await page.locator('.session-card__delete').first().click();
-
-    // Wait for card to disappear
-    await page.waitForSelector('.session-list__empty', { timeout: 10000 });
+    // Navigate again to see empty state
+    await page.goto('/');
+    await page.waitForSelector('.upload-zone', { timeout: 10000 });
     await expect(page).toHaveScreenshot('landing-after-delete.png', {
-      mask: [page.locator('.app-header')],
+      mask: [page.locator('.shell-header')],
     });
   });
 
-  test('page header renders correctly', async ({ page }) => {
+  test('shell header renders correctly', async ({ page }) => {
     await page.goto('/');
-    await page.waitForSelector('.app-header', { timeout: 10000 });
-    await expect(page.locator('.app-header')).toHaveScreenshot('app-header.png');
+    await page.waitForSelector('.shell-header', { timeout: 10000 });
+    await expect(page.locator('.shell-header')).toHaveScreenshot('shell-header.png');
   });
 });
