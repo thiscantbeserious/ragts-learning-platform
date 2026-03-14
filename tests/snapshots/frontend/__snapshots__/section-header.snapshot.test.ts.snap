@@ -2,30 +2,30 @@
 
 exports[`SectionHeader component snapshots > TUI viewport section (no line range) 1`] = `
 "<button data-v-a902c83d="" class="section-header section-header--marker">
-  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Test Section</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range">24 lines (viewport)</span>
+  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Test Section</span><span data-v-a902c83d="" class="section-header__range">24&nbsp;lines (viewport)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
 </button>"
 `;
 
 exports[`SectionHeader component snapshots > collapsed marker section 1`] = `
 "<button data-v-a902c83d="" class="section-header section-header--collapsed section-header--marker">
-  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-right"></span></div><span data-v-a902c83d="" class="section-header__label">Deploy</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L101–L200 (100 lines) </span>
+  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-right"></span></div><span data-v-a902c83d="" class="section-header__label">Deploy</span><span data-v-a902c83d="" class="section-header__range">L101–L200 (100&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
 </button>"
 `;
 
 exports[`SectionHeader component snapshots > detected section with auto-label 1`] = `
 "<button data-v-a902c83d="" class="section-header section-header--detected">
-  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Section 1</span><span data-v-a902c83d="" class="badge badge--sm badge--accent">Detected</span><span data-v-a902c83d="" class="section-header__range"> L1–L150 (150 lines) </span>
+  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Section 1</span><span data-v-a902c83d="" class="section-header__range">L1–L150 (150&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--accent">Detected</span>
 </button>"
 `;
 
 exports[`SectionHeader component snapshots > expanded marker section with CLI line range 1`] = `
 "<button data-v-a902c83d="" class="section-header section-header--marker">
-  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Build Step</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L11–L60 (50 lines) </span>
+  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Build Step</span><span data-v-a902c83d="" class="section-header__range">L11–L60 (50&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
 </button>"
 `;
 
 exports[`SectionHeader component snapshots > large line count display 1`] = `
 "<button data-v-a902c83d="" class="section-header section-header--marker">
-  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Test Section</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L1–L5000 (5000 lines) </span>
+  <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Test Section</span><span data-v-a902c83d="" class="section-header__range">L1–L5000 (5000&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
 </button>"
 `;

@@ -2,66 +2,75 @@
 
 exports[`SessionContent component snapshots > CLI sections with line ranges 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <div data-v-b8c49044="" class="terminal-scroll">
-    <!-- Lines before first section -->
-    <!--v-if-->
-    <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">First</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L1–L5 (5 lines) </span>
-    </button>
-    <div data-v-b8c49044="" class="section-content">
-      <!-- CLI section: slice from session snapshot -->
-      <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 0</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 1</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 2</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">4</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 3</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">5</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 4</span></span></div>
-      </div>
-    </div><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Second</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L6–L10 (5 lines) </span>
-    </button>
-    <div data-v-b8c49044="" class="section-content">
-      <!-- CLI section: slice from session snapshot -->
-      <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">6</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 5</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">7</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 6</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">8</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 7</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">9</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 8</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">10</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 9</span></span></div>
+  <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
+    <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Lines before first section -->
+      <!--v-if-->
+      <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">First</span><span data-v-a902c83d="" class="section-header__range">L1–L5 (5&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <div data-v-b8c49044="" class="section-content">
+        <!-- CLI section: slice from session snapshot -->
+        <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 0</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 1</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 2</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">4</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 3</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">5</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 4</span></span></div>
+        </div>
+      </div><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Second</span><span data-v-a902c83d="" class="section-header__range">L6–L10 (5&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <div data-v-b8c49044="" class="section-content">
+        <!-- CLI section: slice from session snapshot -->
+        <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">6</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 5</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">7</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 6</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">8</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 7</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">9</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 8</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">10</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Line 9</span></span></div>
+        </div>
       </div>
     </div>
+    <!--v-if-->
   </div>
 </div>"
 `;
 
 exports[`SessionContent component snapshots > TUI section with viewport snapshot 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <div data-v-b8c49044="" class="terminal-scroll">
-    <!-- Lines before first section -->
-    <!--v-if-->
-    <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">TUI View</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range">2 lines (viewport)</span>
-    </button>
-    <div data-v-b8c49044="" class="section-content">
-      <!-- CLI section: slice from session snapshot -->
-      <!-- TUI/overflow section: inline viewport snapshot -->
-      <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">TUI viewport line 1</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">TUI viewport line 2</span></span></div>
+  <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
+    <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Lines before first section -->
+      <!--v-if-->
+      <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">TUI View</span><span data-v-a902c83d="" class="section-header__range">2&nbsp;lines (viewport)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <div data-v-b8c49044="" class="section-content">
+        <!-- CLI section: slice from session snapshot -->
+        <!-- TUI/overflow section: inline viewport snapshot -->
+        <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">TUI viewport line 1</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">TUI viewport line 2</span></span></div>
+        </div>
       </div>
     </div>
+    <!--v-if-->
   </div>
 </div>"
 `;
 
 exports[`SessionContent component snapshots > defaultCollapsed prop — sections start collapsed 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <div data-v-b8c49044="" class="terminal-scroll">
-    <!-- Lines before first section -->
-    <!--v-if-->
-    <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--collapsed section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-right"></span></div><span data-v-a902c83d="" class="section-header__label">Collapsed</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L1–L2 (2 lines) </span>
-    </button>
+  <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
+    <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Lines before first section -->
+      <!--v-if-->
+      <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--collapsed section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-right"></span></div><span data-v-a902c83d="" class="section-header__label">Collapsed</span><span data-v-a902c83d="" class="section-header__range">L1–L2 (2&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <!--v-if-->
+    </div>
     <!--v-if-->
   </div>
 </div>"
@@ -76,50 +85,56 @@ exports[`SessionContent component snapshots > empty state (no snapshot, no secti
 
 exports[`SessionContent component snapshots > mixed CLI and TUI sections 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <div data-v-b8c49044="" class="terminal-scroll">
-    <!-- Lines before first section -->
-    <!--v-if-->
-    <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">CLI Part</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L1–L3 (3 lines) </span>
-    </button>
-    <div data-v-b8c49044="" class="section-content">
-      <!-- CLI section: slice from session snapshot -->
-      <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">CLI line 0</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">CLI line 1</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">CLI line 2</span></span></div>
-      </div>
-    </div><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">TUI Part</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range">1 lines (viewport)</span>
-    </button>
-    <div data-v-b8c49044="" class="section-content">
-      <!-- CLI section: slice from session snapshot -->
-      <!-- TUI/overflow section: inline viewport snapshot -->
-      <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">TUI content</span></span></div>
+  <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
+    <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Lines before first section -->
+      <!--v-if-->
+      <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">CLI Part</span><span data-v-a902c83d="" class="section-header__range">L1–L3 (3&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <div data-v-b8c49044="" class="section-content">
+        <!-- CLI section: slice from session snapshot -->
+        <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">CLI line 0</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">CLI line 1</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">CLI line 2</span></span></div>
+        </div>
+      </div><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">TUI Part</span><span data-v-a902c83d="" class="section-header__range">1&nbsp;lines (viewport)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <div data-v-b8c49044="" class="section-content">
+        <!-- CLI section: slice from session snapshot -->
+        <!-- TUI/overflow section: inline viewport snapshot -->
+        <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">TUI content</span></span></div>
+        </div>
       </div>
     </div>
+    <!--v-if-->
   </div>
 </div>"
 `;
 
 exports[`SessionContent component snapshots > preamble lines before first section 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <div data-v-b8c49044="" class="terminal-scroll">
-    <!-- Lines before first section -->
-    <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-      <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Preamble A</span></span></div>
-      <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Preamble B</span></span></div>
-    </div><!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
-      <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Main</span><span data-v-a902c83d="" class="badge badge--sm badge--secondary">Marker</span><span data-v-a902c83d="" class="section-header__range"> L3–L4 (2 lines) </span>
-    </button>
-    <div data-v-b8c49044="" class="section-content">
-      <!-- CLI section: slice from session snapshot -->
+  <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
+    <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Lines before first section -->
       <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Section content 1</span></span></div>
-        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">4</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Section content 2</span></span></div>
+        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Preamble A</span></span></div>
+        <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">2</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Preamble B</span></span></div>
+      </div><!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
+        <div data-v-a902c83d="" class="section-header__chevron"><span data-v-a902c83d="" class="icon icon--sm icon-chevron-down"></span></div><span data-v-a902c83d="" class="section-header__label">Main</span><span data-v-a902c83d="" class="section-header__range">L3–L4 (2&nbsp;lines)</span><span data-v-a902c83d="" class="badge badge--sm section-header__badge badge--secondary">Marker</span>
+      </button>
+      <div data-v-b8c49044="" class="section-content">
+        <!-- CLI section: slice from session snapshot -->
+        <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">3</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Section content 1</span></span></div>
+          <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">4</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Section content 2</span></span></div>
+        </div>
       </div>
     </div>
+    <!--v-if-->
   </div>
 </div>"
 `;
