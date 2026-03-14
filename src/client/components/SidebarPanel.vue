@@ -296,7 +296,7 @@ function clearFilters(): void {
   flex-direction: column;
   height: 100%;
   background: var(--bg-surface);
-  width: var(--sidebar-width);
+  width: 100%;
   overflow: hidden;
 }
 
@@ -455,13 +455,14 @@ function clearFilters(): void {
 
 /* Mobile brand header — close button + brand name at the top of the overlay panel.
    Mirrors the BrandMark height and bottom-border styling for visual continuity.
-   padding-inline-start matches ShellHeader's padding-inline (--space-6) so the close
-   button lands at the exact same horizontal offset as the hamburger in the header. */
+   padding-inline-start uses --space-2 (8px) so the close button's visible 28px box
+   lands at x=16px — matching the header hamburger icon position exactly.
+   (Button has 8px internal padding, so 8px container + 8px button = 16px.) */
 .sidebar__mobile-header {
   display: flex;
   align-items: center;
   height: var(--header-height);
-  padding-inline: var(--space-6) var(--space-4);
+  padding-inline: var(--space-2) var(--space-4);
   background: var(--bg-surface);
   border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 60%, transparent);
   flex-shrink: 0;

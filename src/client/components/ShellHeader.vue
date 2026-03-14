@@ -3,7 +3,7 @@
     class="spatial-shell__header shell-header"
     aria-label="Application header"
   >
-    <!-- Hex Gate nav trigger: visible only on mobile viewports -->
+    <!-- Hex Gate nav trigger + brand name: visible only on mobile viewports -->
     <HexGateIcon
       v-if="isMobile"
       ref="hamburgerRef"
@@ -13,6 +13,10 @@
       :aria-expanded="isMobileOverlayOpen"
       @click="toggleMobileOverlay"
     />
+    <span
+      v-if="isMobile"
+      class="shell-header__brand"
+    >Erika</span>
     <div class="shell-header__left">
       <nav
         v-if="isSessionRoute"
@@ -180,5 +184,24 @@ defineExpose({ hamburgerRef });
 }
 
 /* Hex gate button — inherits all styles from HexGateIcon component.
-   No local overrides needed; the component is self-contained. */
+   Negative start margin compensates for the button's internal padding-left (--space-2 = 8px)
+   so the visible 28px icon box aligns with BrandMark's icon position.
+   Header padding is --space-6 (24px), BrandMark padding is --space-4 (16px),
+   button internal padding-left is --space-2 (8px).
+   Needed offset: -(24px - 16px + 8px) = -16px = calc(-1 * var(--space-4)) */
+.shell-header__hamburger {
+  margin-inline-start: calc(-1 * var(--space-4));
+}
+
+/* Brand name shown next to hamburger on mobile — matches SidebarPanel mobile brand typography. */
+.shell-header__brand {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  line-height: var(--lh-lg);
+  margin-inline-end: var(--space-4);
+}
 </style>

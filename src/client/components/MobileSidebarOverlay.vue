@@ -178,12 +178,12 @@ watch(() => route.fullPath, (newPath, oldPath) => {
   opacity: 1;
 }
 
-/* Slide-in panel container: fixed left column. */
+/* Slide-in panel container: full-width drawer on mobile. */
 .mobile-sidebar-overlay__panel {
   position: absolute;
   top: 0;
   left: 0;
-  width: var(--sidebar-width);
+  width: 100vw;
   height: 100dvh;
   z-index: var(--z-overlay-panel);
   outline: none; /* Panel is focusable but we manage visual focus internally. */
