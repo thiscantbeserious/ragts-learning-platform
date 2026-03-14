@@ -24,11 +24,82 @@ const emit = defineEmits<{
       <div
         class="toast__icon"
         aria-hidden="true"
-      />
+      >
+        <!-- success -->
+        <svg
+          v-if="toast.type === 'success'"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle
+            cx="10"
+            cy="10"
+            r="8"
+          />
+          <path d="M7 10l2 2 4-4" />
+        </svg>
+        <!-- warning -->
+        <svg
+          v-else-if="toast.type === 'warning'"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M10 2L1.5 17h17L10 2z" />
+          <path d="M10 8v4M10 14v.5" />
+        </svg>
+        <!-- error -->
+        <svg
+          v-else-if="toast.type === 'error'"
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle
+            cx="10"
+            cy="10"
+            r="8"
+          />
+          <path d="M7 7l6 6M13 7l-6 6" />
+        </svg>
+        <!-- info (default) -->
+        <svg
+          v-else
+          width="20"
+          height="20"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <circle
+            cx="10"
+            cy="10"
+            r="8"
+          />
+          <path d="M10 9v5M10 6.5v.5" />
+        </svg>
+      </div>
       <div class="toast__content">
-        <p class="toast__message">
+        <div
+          v-if="toast.title"
+          class="toast__title"
+        >
+          {{ toast.title }}
+        </div>
+        <div class="toast__message">
           {{ toast.message }}
-        </p>
+        </div>
       </div>
       <button
         class="toast__close"
@@ -36,10 +107,17 @@ const emit = defineEmits<{
         type="button"
         @click="emit('dismiss', toast.id)"
       >
-        <span
-          class="icon icon--sm icon-close"
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
           aria-hidden="true"
-        />
+        >
+          <path d="M3 3l8 8M11 3l-8 8" />
+        </svg>
       </button>
     </div>
   </div>
