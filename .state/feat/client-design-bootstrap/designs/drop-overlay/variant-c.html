@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Drop Overlay — Variant C: Background Shift + Footer Zone</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* === Design Tokens (from layout.css) === */
+  :root {
+    --bg-page: #1a1a2e;
+    --bg-surface: #212136;
+    --bg-elevated: #28283e;
+    --accent-primary: #00d4ff;
+    --accent-primary-subtle: rgba(0, 212, 255, 0.08);
+    --text-primary: #f1f1f7;
+    --text-secondary: #d3d4d9;
+    --text-muted: #aaaab0;
+    --text-disabled: #55556a;
+    --border-default: #323349;
+    --border-strong: #3d3d55;
+    --status-success: #00ff66;
+    --status-error: #d7457b;
+    --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+    --text-xs: 10px;
+    --text-sm: 12px;
+    --text-base: 14px;
+    --baseline: 18px;
+    --space-1: 4px;
+    --space-1-5: 6px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-full: 9999px;
+    --input-height-sm: 36px;
+    --btn-height-sm: 27px;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --easing-default: ease-out;
+    --sidebar-width: 260px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    line-height: var(--baseline);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    gap: 48px;
+    padding: 32px;
+    min-height: 100vh;
+    align-items: flex-start;
+  }
+
+  /* === Label === */
+  .label {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  /* === Sidebar Container === */
+  .sidebar {
+    width: var(--sidebar-width);
+    height: 520px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    overflow: hidden;
+    flex-shrink: 0;
+    border-radius: 2px;
+    position: relative;
+  }
+
+  /* === Drag-active sidebar modifier (Variant C) === */
+  .sidebar--drag-active {
+    background: color-mix(in srgb, var(--accent-primary) 3%, var(--bg-surface));
+    border-left: 2px solid var(--accent-primary);
+    transition: background var(--duration-normal) var(--easing-default),
+                border-color var(--duration-normal) var(--easing-default);
+  }
+
+  .sidebar--drag-active .sidebar__content-dimmed {
+    opacity: 0.35;
+    pointer-events: none;
+    transition: opacity var(--duration-normal) var(--easing-default);
+  }
+
+  /* === Search === */
+  .sidebar__search-wrap {
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border-default);
+    flex-shrink: 0;
+  }
+
+  .sidebar__search-input {
+    width: 100%;
+    height: var(--input-height-sm);
+    padding: 0 var(--space-3);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+  }
+  .sidebar__search-input::placeholder { color: var(--text-muted); }
+
+  /* === Filter pills === */
+  .sidebar__filters {
+    padding: var(--space-1-5) var(--space-3);
+    border-bottom: 1px solid var(--border-default);
+    flex-shrink: 0;
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .filter-pill {
+    padding: 2px var(--space-1-5);
+    font-size: var(--text-xs);
+    line-height: var(--baseline);
+    border-radius: var(--radius-sm);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: transparent;
+    border: 1px solid var(--border-default);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .filter-pill--active {
+    background: var(--accent-primary-subtle);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  /* === Session list === */
+  .sidebar__list-region {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .sidebar__session-list {
+    list-style: none;
+    padding: var(--space-1) 0;
+  }
+
+  /* === Session card === */
+  .session-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    width: 100%;
+    padding: var(--space-1-5) var(--space-3);
+    background: transparent;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+  }
+  .session-card:hover { background: var(--accent-primary-subtle); }
+  .session-card--selected {
+    border-left-color: var(--accent-primary);
+    background: var(--accent-primary-subtle);
+  }
+
+  .session-card__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1-5);
+    min-width: 0;
+  }
+
+  .session-card__status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+  }
+  .session-card__status-dot--ready { background: var(--status-success); }
+  .session-card__status-dot--processing { background: var(--accent-primary); }
+  .session-card__status-dot--failed { background: var(--status-error); }
+
+  .session-card__filename {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--baseline);
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+  .session-card--selected .session-card__filename { color: var(--text-primary); }
+
+  .session-card__meta {
+    color: var(--text-muted);
+    font-size: var(--text-xs);
+    line-height: var(--baseline);
+    gap: var(--space-2);
+    padding-left: calc(6px + var(--space-1-5));
+  }
+  .session-card__age { margin-left: auto; }
+
+  /* === Footer === */
+  .sidebar__footer {
+    padding: var(--space-3);
+    border-top: 1px solid var(--border-default);
+    flex-shrink: 0;
+  }
+
+  .sidebar__new-session-btn {
+    width: 100%;
+    height: var(--btn-height-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1-5);
+    background: var(--accent-primary);
+    color: var(--bg-page);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* === Drag-active footer drop indicator (replaces button) === */
+  .sidebar__drop-indicator {
+    width: 100%;
+    height: var(--btn-height-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 40%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--accent-primary);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .sidebar__drop-indicator svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  /* === Column wrapper === */
+  .column { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<!-- NORMAL STATE -->
+<div class="column">
+  <div class="label">Normal State</div>
+  <div class="sidebar">
+    <div class="sidebar__search-wrap">
+      <input type="text" class="sidebar__search-input" placeholder="Filter sessions..." />
+    </div>
+    <div class="sidebar__filters">
+      <button class="filter-pill filter-pill--active">ALL</button>
+      <button class="filter-pill">PROCESSING</button>
+      <button class="filter-pill">READY</button>
+      <button class="filter-pill">FAILED</button>
+    </div>
+    <div class="sidebar__list-region">
+      <ul class="sidebar__session-list">
+        <li>
+          <div class="session-card session-card--selected">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">refactor-auth-module.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span>12 sections</span>
+              <span class="session-card__age">2m ago</span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--processing"></span>
+              <span class="session-card__filename">migrate-database-v3.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span>-- sections</span>
+              <span class="session-card__age">5m ago</span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">setup-ci-pipeline.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span>8 sections</span>
+              <span class="session-card__age">1h ago</span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--failed"></span>
+              <span class="session-card__filename">debug-memory-leak.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span>3 sections</span>
+              <span class="session-card__age">3h ago</span>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">api-endpoint-tests.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span>15 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="sidebar__footer">
+      <button class="sidebar__new-session-btn">+ New Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAG ACTIVE STATE (Variant C) -->
+<div class="column">
+  <div class="label">Drag Active (Variant C)</div>
+  <div class="sidebar sidebar--drag-active">
+    <div class="sidebar__content-dimmed">
+      <div class="sidebar__search-wrap">
+        <input type="text" class="sidebar__search-input" placeholder="Filter sessions..." />
+      </div>
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">ALL</button>
+        <button class="filter-pill">PROCESSING</button>
+        <button class="filter-pill">READY</button>
+        <button class="filter-pill">FAILED</button>
+      </div>
+      <div class="sidebar__list-region">
+        <ul class="sidebar__session-list">
+          <li>
+            <div class="session-card session-card--selected">
+              <div class="session-card__row">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">refactor-auth-module.cast</span>
+              </div>
+              <div class="session-card__row session-card__meta">
+                <span>12 sections</span>
+                <span class="session-card__age">2m ago</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="session-card">
+              <div class="session-card__row">
+                <span class="session-card__status-dot session-card__status-dot--processing"></span>
+                <span class="session-card__filename">migrate-database-v3.cast</span>
+              </div>
+              <div class="session-card__row session-card__meta">
+                <span>-- sections</span>
+                <span class="session-card__age">5m ago</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="session-card">
+              <div class="session-card__row">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">setup-ci-pipeline.cast</span>
+              </div>
+              <div class="session-card__row session-card__meta">
+                <span>8 sections</span>
+                <span class="session-card__age">1h ago</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="session-card">
+              <div class="session-card__row">
+                <span class="session-card__status-dot session-card__status-dot--failed"></span>
+                <span class="session-card__filename">debug-memory-leak.cast</span>
+              </div>
+              <div class="session-card__row session-card__meta">
+                <span>3 sections</span>
+                <span class="session-card__age">3h ago</span>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="session-card">
+              <div class="session-card__row">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">api-endpoint-tests.cast</span>
+              </div>
+              <div class="session-card__row session-card__meta">
+                <span>15 sections</span>
+                <span class="session-card__age">yesterday</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- Footer: button replaced with drop indicator -->
+    <div class="sidebar__footer">
+      <div class="sidebar__drop-indicator">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        DROP .CAST TO UPLOAD
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Erika — Sidebar with Processing Cards (Accurate Mockup)</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   TOKENS — copied verbatim from layout.css
+   ================================================================ */
+:root {
+  --baseline: 18px;
+
+  /* Backgrounds */
+  --bg-page: #1a1a2e;
+  --bg-surface: #212136;
+  --bg-elevated: #28283e;
+
+  /* Primary accent */
+  --accent-primary: #00d4ff;
+  --accent-primary-hover: #33ddff;
+  --accent-primary-subtle: rgba(0, 212, 255, 0.08);
+  --accent-primary-glow: rgba(0, 212, 255, 0.4);
+
+  /* Secondary accent */
+  --accent-secondary: #ff4d6a;
+
+  /* Status */
+  --status-success: #00ff66;
+  --status-error: #d7457b;
+
+  /* Text hierarchy */
+  --text-primary: #f1f1f7;
+  --text-secondary: #d3d4d9;
+  --text-muted: #aaaab0;
+  --text-disabled: #55556a;
+  --text-inverse: var(--bg-page);
+
+  /* Borders */
+  --border-default: #323349;
+  --border-strong: #3d3d55;
+
+  /* Typography */
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  --text-xs: 0.625rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-lg: 1.0625rem;
+  --lh-xs: var(--baseline);
+  --lh-sm: var(--baseline);
+  --lh-base: var(--baseline);
+  --lh-lg: var(--baseline);
+
+  /* Spacing */
+  --space-0\.5: 2px;
+  --space-1: 4px;
+  --space-1\.5: 6px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Rhythm */
+  --rhythm-2: calc(var(--baseline) * 2);
+  --rhythm-3: calc(var(--baseline) * 3);
+
+  /* Layout */
+  --header-height: var(--rhythm-3);
+  --sidebar-width: 260px;
+  --input-height-sm: var(--rhythm-2);
+  --btn-height-sm: calc(var(--baseline) * 1.5);
+  --btn-height-md: var(--rhythm-2);
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* Weights */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Letter spacing */
+  --tracking-wide: 0.06em;
+
+  /* Animation */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --easing-default: ease-out;
+}
+
+/* ================================================================
+   RESET + BASE — from layout.css
+   ================================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ================================================================
+   BRAND MARK — from BrandMark.vue
+   ================================================================ */
+.brand-mark {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding-inline: var(--space-4);
+  background: var(--bg-surface);
+  position: relative;
+  box-shadow: inset -1px 0 0 var(--border-default);
+}
+
+.brand-mark::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+}
+
+.brand-mark__logotype {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-mark__icon {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--accent-primary);
+  background: rgba(0, 212, 255, 0.06);
+  box-shadow:
+    0 0 8px rgba(0, 212, 255, 0.15),
+    inset 0 0 6px rgba(0, 212, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.brand-mark__name {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-primary);
+  line-height: var(--lh-lg);
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+}
+
+/* ================================================================
+   SIDEBAR PANEL — from SidebarPanel.vue
+   ================================================================ */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-surface);
+  width: var(--sidebar-width);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.sidebar__search-wrap {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.sidebar__search-input {
+  width: 100%;
+  height: var(--input-height-sm);
+  padding: 0 var(--space-3);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  box-sizing: border-box;
+}
+
+.sidebar__search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ================================================================
+   FILTER PILLS — base from components.css
+   ================================================================ */
+.filter-pills {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  background: rgba(10, 10, 25, 0.55);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+}
+
+.filter-pill--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+/* Sidebar-specific overrides — from SidebarPanel.vue scoped CSS.
+   These come AFTER the base filter-pills to win in the cascade,
+   matching how Vue scoped CSS works (component styles after global). */
+.sidebar__filters {
+  padding: var(--space-1\.5) var(--space-3);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  gap: var(--space-1);
+}
+
+.sidebar__filters .filter-pill {
+  padding: 2px var(--space-1\.5);
+  font-size: var(--text-xs);
+  line-height: var(--lh-xs);
+  border-radius: var(--radius-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   SESSION LIST — from SidebarPanel.vue
+   ================================================================ */
+.sidebar__list-region {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar to match OverlayScrollbar look */
+.sidebar__list-region::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar__list-region::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar__list-region::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+.sidebar__session-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 0;
+  overflow: hidden;
+}
+
+.sidebar__session-item {
+  list-style: none;
+}
+
+/* ================================================================
+   SESSION CARD — from SessionCard.vue (verbatim)
+   ================================================================ */
+.session-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--space-1\.5) var(--space-3);
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  box-sizing: border-box;
+  transition: background var(--duration-fast) var(--easing-default),
+              border-color var(--duration-fast) var(--easing-default);
+}
+
+.session-card:hover {
+  background: var(--accent-primary-subtle);
+}
+
+.session-card--selected {
+  border-left-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+}
+
+.session-card--selected:hover {
+  background: rgba(0, 212, 255, 0.12);
+}
+
+/* Row layout */
+.session-card__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1\.5);
+  min-width: 0;
+}
+
+.session-card__row--primary {
+  justify-content: flex-start;
+}
+
+/* Filename */
+.session-card__filename {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--lh-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.session-card:hover .session-card__filename,
+.session-card--selected .session-card__filename {
+  color: var(--text-primary);
+}
+
+/* Metadata row */
+.session-card__meta {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: var(--lh-xs);
+  gap: var(--space-2);
+  padding-left: calc(6px + var(--space-1\.5));
+}
+
+.session-card__sections,
+.session-card__age {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-card__age {
+  margin-left: auto;
+}
+
+/* Status dot */
+.session-card__status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.session-card__status-dot--ready {
+  background: var(--status-success);
+}
+
+.session-card__status-dot--processing {
+  background: var(--accent-primary);
+}
+
+.session-card__status-dot--failed {
+  background: var(--status-error);
+}
+
+/* Pulse animation for processing state */
+.session-card__status-dot--pulse {
+  animation: status-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ================================================================
+   PROCESSING STATE — Variant E: Synced Light Swoosh
+   ================================================================ */
+.session-card--processing {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Muted content when processing */
+.session-card--processing .session-card__filename {
+  color: var(--text-muted);
+}
+
+/* Processing text */
+.session-card__processing-text {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--lh-xs);
+  color: var(--accent-primary);
+  padding-left: calc(6px + var(--space-1\.5));
+}
+
+.session-card__processing-text::after {
+  content: '';
+  animation: ellipsis 1.8s steps(4, end) infinite;
+}
+
+@keyframes ellipsis {
+  0%  { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+/* Swoosh pseudo-element */
+.session-card--processing::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(0, 212, 255, 0.03) 30%,
+    rgba(0, 212, 255, 0.08) 40%,
+    rgba(0, 212, 255, 0.15) 50%,
+    rgba(0, 212, 255, 0.08) 60%,
+    rgba(0, 212, 255, 0.03) 70%,
+    transparent 100%
+  );
+  /* Static frame: show the swoosh band at ~40% across the card */
+  transform: translateX(-10%);
+}
+
+/* ================================================================
+   FOOTER — from SidebarPanel.vue
+   ================================================================ */
+.sidebar__footer {
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+/* Button — from components.css */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--btn-height-md);
+  padding: 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-default);
+  border: 1px solid transparent;
+  background: transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn--sm {
+  height: var(--btn-height-sm);
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.btn--primary {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.sidebar__new-session-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ================================================================
+   MAIN CONTENT AREA (placeholder to show context)
+   ================================================================ */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding-inline: var(--space-6);
+  background: var(--bg-surface);
+  position: relative;
+}
+
+.shell-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent-primary) 60%, transparent),
+    color-mix(in srgb, var(--accent-secondary) 80%, transparent)
+  );
+}
+
+.main-content {
+  flex: 1;
+  background: var(--bg-page);
+}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div class="sidebar-panel">
+  <!-- Brand Mark -->
+  <div class="brand-mark">
+    <a class="brand-mark__logotype" href="#">
+      <div class="brand-mark__icon">E</div>
+      <span class="brand-mark__name">Erika</span>
+    </a>
+  </div>
+
+  <!-- Search -->
+  <div class="sidebar__search-wrap">
+    <input type="search" class="sidebar__search-input" placeholder="Filter sessions..." />
+  </div>
+
+  <!-- Filter Pills -->
+  <div class="sidebar__filters filter-pills">
+    <button class="filter-pill filter-pill--active">ALL</button>
+    <button class="filter-pill">PROCESSING</button>
+    <button class="filter-pill">READY</button>
+    <button class="filter-pill">FAILED</button>
+  </div>
+
+  <!-- Session List -->
+  <div class="sidebar__list-region">
+    <ul class="sidebar__session-list">
+
+      <!-- Card 1: Ready (SELECTED) -->
+      <li class="sidebar__session-item">
+        <div class="session-card session-card--selected">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">gemini-pattern-analysis.cast</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">50 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 2: Processing -->
+      <li class="sidebar__session-item">
+        <div class="session-card session-card--processing">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+            <span class="session-card__filename">agnt-ses-rec_260206_213638.ca...</span>
+          </div>
+          <div class="session-card__processing-text">Processing</div>
+        </div>
+      </li>
+
+      <!-- Card 3: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">sim-sanl_0ta794q.cast</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">8m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 4: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">agnt-ses-rec_refactor-sdlc__0...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">7 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 5: Processing -->
+      <li class="sidebar__session-item">
+        <div class="session-card session-card--processing">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+            <span class="session-card__filename">agnt-ses-rec_refactor-sdlc__0...</span>
+          </div>
+          <div class="session-card__processing-text">Processing</div>
+        </div>
+      </li>
+
+      <!-- Card 6: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">agnt-ses-rec_main__0ta839f.ca...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 7: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">agnt-ses-rec_main__0ta8hdj.ca...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 8: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">codex-pattern-analysis.cast</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">7 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 9: Processing -->
+      <li class="sidebar__session-item">
+        <div class="session-card session-card--processing">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+            <span class="session-card__filename">env-ag-fix-initial-prototype_...</span>
+          </div>
+          <div class="session-card__processing-text">Processing</div>
+        </div>
+      </li>
+
+      <!-- Card 10: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">agnt-ses-rec_main__0ta9h0j.ca...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 11: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">agnt-ses-rec_feature--improv...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 12: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">agnt-ses-rec_main__0taaq51.ca...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">4m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 13: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">ragts-le-platf_feat--snapshot...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">42m ago</span>
+          </div>
+        </div>
+      </li>
+
+      <!-- Card 14: Ready -->
+      <li class="sidebar__session-item">
+        <div class="session-card">
+          <div class="session-card__row session-card__row--primary">
+            <span class="session-card__status-dot session-card__status-dot--ready"></span>
+            <span class="session-card__filename">ragts-le-platf_feat--snapshot...</span>
+          </div>
+          <div class="session-card__row session-card__meta">
+            <span class="session-card__sections">0 sections</span>
+            <span class="session-card__age">42m ago</span>
+          </div>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar__footer">
+    <button class="btn btn--sm btn--primary sidebar__new-session-btn">+ New Session</button>
+  </div>
+</div>
+
+<!-- MAIN AREA (context only) -->
+<div class="main-area">
+  <header class="shell-header"></header>
+  <div class="main-content"></div>
+</div>
+</body>
+</html>

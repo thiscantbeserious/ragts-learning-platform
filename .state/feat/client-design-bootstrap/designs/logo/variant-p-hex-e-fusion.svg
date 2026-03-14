@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <g stroke="currentColor" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top horizontal: E's top stroke -->
+    <line x1="27.5" y1="11" x2="68" y2="11" />
+    <!-- Upper-left: E's spine (top half) -->
+    <line x1="27.5" y1="11" x2="5" y2="50" />
+    <!-- Lower-left: E's spine (bottom half) -->
+    <line x1="5" y1="50" x2="27.5" y2="89" />
+    <!-- Bottom horizontal: E's bottom stroke -->
+    <line x1="27.5" y1="89" x2="68" y2="89" />
+    <!-- Middle crossbar: E's middle stroke -->
+    <line x1="5" y1="50" x2="58" y2="50" />
+  </g>
+</svg>

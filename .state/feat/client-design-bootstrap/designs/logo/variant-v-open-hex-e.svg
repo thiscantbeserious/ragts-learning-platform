@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Open Hex E: Left vertical formed by two angled hex segments meeting at midpoint,
+       three strokes extending right at hex-native angles (~8deg off horizontal).
+       Right side is OPEN — preserving the gate portal concept. -->
+
+  <!-- Upper-left diagonal: from top junction down to mid-left vertex -->
+  <line x1="8.5" y1="6.5" x2="7" y2="14" />
+
+  <!-- Lower-left diagonal: from mid-left vertex down to bottom junction -->
+  <line x1="7" y1="14" x2="8.5" y2="21.5" />
+
+  <!-- Top stroke — angled slightly up-right (~8deg), extending right, open-ended -->
+  <line x1="8.5" y1="6.5" x2="19" y2="5.5" />
+
+  <!-- Middle stroke — slightly angled, a bit shorter for classic E proportion -->
+  <line x1="7" y1="14" x2="16.5" y2="13.2" />
+
+  <!-- Bottom stroke — angled slightly down-right (~8deg), extending right, open-ended -->
+  <line x1="8.5" y1="21.5" x2="19" y2="22.5" />
+</svg>

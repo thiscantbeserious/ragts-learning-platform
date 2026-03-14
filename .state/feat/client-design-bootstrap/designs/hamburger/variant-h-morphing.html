@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variant H: Morphing Bars</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * VARIANT H: Animated/Morphing
+     *
+     * Static state is clean geometric bars. On hover, bars subtly morph:
+     * top bar rotates down, bottom bar rotates up, middle fades -- suggesting
+     * an arrow or X. Uses CSS transitions only (no JS). Shows 3 states:
+     * normal, hover, active/open. prefers-reduced-motion disables morph.
+     */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+      gap: 48px;
+    }
+    h1 {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+    }
+    h2 {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+    }
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    /* THE HAMBURGER BUTTON */
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .hamburger__icon {
+      --accent: var(--accent-primary);
+      --accent-glow: rgba(0, 212, 255, 0.15);
+      --accent-glow-strong: rgba(0, 212, 255, 0.35);
+      --accent-bg: rgba(0, 212, 255, 0.06);
+      --accent-inset: rgba(0, 212, 255, 0.08);
+      --accent-inset-strong: rgba(0, 212, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      box-shadow: 0 0 8px var(--accent-glow), inset 0 0 6px var(--accent-inset);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+      color: var(--accent);
+      position: relative;
+    }
+    .hamburger--hover .hamburger__icon {
+      box-shadow: 0 0 14px var(--accent-glow-strong), inset 0 0 8px var(--accent-inset-strong);
+    }
+    .hamburger--active .hamburger__icon {
+      box-shadow: 0 0 18px var(--accent-glow-strong), inset 0 0 10px var(--accent-inset-strong);
+    }
+
+    /* Bars positioned absolutely for transform-origin control */
+    .hamburger__bar {
+      position: absolute;
+      display: block;
+      width: 14px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 200ms ease-out,
+                  width 200ms ease-out;
+    }
+    .hamburger__bar--top    { top: 7px; }
+    .hamburger__bar--mid    { top: 12px; }
+    .hamburger__bar--bottom { top: 17px; }
+
+    /* HOVER STATE: bars shift inward, middle shortens */
+    .hamburger--hover .hamburger__bar--top {
+      transform: translateX(-50%) translateY(2px);
+    }
+    .hamburger--hover .hamburger__bar--mid {
+      width: 8px;
+      opacity: 0.6;
+    }
+    .hamburger--hover .hamburger__bar--bottom {
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    /* ACTIVE/OPEN STATE: full X morph */
+    .hamburger--active .hamburger__bar--top {
+      transform: translateX(-50%) translateY(5px) rotate(45deg);
+    }
+    .hamburger--active .hamburger__bar--mid {
+      opacity: 0;
+      width: 0;
+    }
+    .hamburger--active .hamburger__bar--bottom {
+      transform: translateX(-50%) translateY(-5px) rotate(-45deg);
+    }
+
+    /* prefers-reduced-motion: disable morphing */
+    @media (prefers-reduced-motion: reduce) {
+      .hamburger__bar { transition: none; }
+      .hamburger--hover .hamburger__bar--top { transform: translateX(-50%); }
+      .hamburger--hover .hamburger__bar--mid { width: 14px; opacity: 1; }
+      .hamburger--hover .hamburger__bar--bottom { transform: translateX(-50%); }
+    }
+
+    /* === MORPH STYLE B: Arrow morph === */
+    .hamburger__icon--arrow .hamburger__bar--top    { width: 14px; }
+    .hamburger__icon--arrow .hamburger__bar--mid    { width: 14px; }
+    .hamburger__icon--arrow .hamburger__bar--bottom { width: 14px; }
+
+    .hamburger--hover .hamburger__icon--arrow .hamburger__bar--top {
+      transform: translateX(-30%) translateY(2px) rotate(-30deg);
+      width: 9px;
+    }
+    .hamburger--hover .hamburger__icon--arrow .hamburger__bar--mid {
+      width: 14px;
+      opacity: 1;
+    }
+    .hamburger--hover .hamburger__icon--arrow .hamburger__bar--bottom {
+      transform: translateX(-30%) translateY(-2px) rotate(30deg);
+      width: 9px;
+    }
+
+    .hamburger--active .hamburger__icon--arrow .hamburger__bar--top {
+      transform: translateX(-20%) translateY(3px) rotate(-40deg);
+      width: 8px;
+    }
+    .hamburger--active .hamburger__icon--arrow .hamburger__bar--mid {
+      width: 14px;
+      opacity: 1;
+    }
+    .hamburger--active .hamburger__icon--arrow .hamburger__bar--bottom {
+      transform: translateX(-20%) translateY(-3px) rotate(40deg);
+      width: 8px;
+    }
+
+    /* === MORPH STYLE C: Pulse/Breathe on hover, X on active === */
+    .hamburger__icon--pulse .hamburger__bar { width: 14px; }
+
+    .hamburger--hover .hamburger__icon--pulse .hamburger__bar--top {
+      transform: translateX(-50%) scaleX(1.15);
+    }
+    .hamburger--hover .hamburger__icon--pulse .hamburger__bar--mid {
+      width: 14px;
+      opacity: 0.5;
+      transform: translateX(-50%) scaleX(0.7);
+    }
+    .hamburger--hover .hamburger__icon--pulse .hamburger__bar--bottom {
+      transform: translateX(-50%) scaleX(1.15);
+    }
+
+    .hamburger--active .hamburger__icon--pulse .hamburger__bar--top {
+      transform: translateX(-50%) translateY(5px) rotate(45deg);
+    }
+    .hamburger--active .hamburger__icon--pulse .hamburger__bar--mid {
+      opacity: 0;
+      width: 0;
+    }
+    .hamburger--active .hamburger__icon--pulse .hamburger__bar--bottom {
+      transform: translateX(-50%) translateY(-5px) rotate(-45deg);
+    }
+
+    /* Whitelabel */
+    .theme-orange .hamburger__icon {
+      --accent: #ff8c00;
+      --accent-glow: rgba(255, 140, 0, 0.15);
+      --accent-glow-strong: rgba(255, 140, 0, 0.35);
+      --accent-bg: rgba(255, 140, 0, 0.06);
+      --accent-inset: rgba(255, 140, 0, 0.08);
+      --accent-inset-strong: rgba(255, 140, 0, 0.12);
+      color: #ff8c00;
+    }
+    .theme-green .hamburger__icon {
+      --accent: #00ff88;
+      --accent-glow: rgba(0, 255, 136, 0.15);
+      --accent-glow-strong: rgba(0, 255, 136, 0.35);
+      --accent-bg: rgba(0, 255, 136, 0.06);
+      --accent-inset: rgba(0, 255, 136, 0.08);
+      --accent-inset-strong: rgba(0, 255, 136, 0.12);
+      color: #00ff88;
+    }
+
+    /* Light theme */
+    .theme-light .demo__context { background: #f5f5f7; border-color: #d0d0d8; }
+    .theme-light .demo__context-label { color: #555; }
+    .theme-light .hamburger__icon {
+      --accent: #0099bb;
+      --accent-glow: rgba(0, 153, 187, 0.12);
+      --accent-glow-strong: rgba(0, 153, 187, 0.25);
+      --accent-bg: rgba(0, 153, 187, 0.06);
+      --accent-inset: rgba(0, 153, 187, 0.05);
+      --accent-inset-strong: rgba(0, 153, 187, 0.10);
+      color: #0099bb;
+    }
+
+    /* BrandMark comparison */
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 600px;
+      height: 1px;
+      background: var(--border-default);
+    }
+    .state-flow {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .state-flow__arrow {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-disabled);
+    }
+    .notes {
+      max-width: 560px;
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+    }
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: var(--weight-semibold);
+    }
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+    .notes__text + .notes__text { margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>Variant H: Morphing Bars</h1>
+  <p style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); max-width: 520px; text-align: center; line-height: var(--lh-sm);">
+    Clean bars at rest. On hover, bars compress inward hinting at state change.
+    On active/open, full X morph. Three morph styles shown. CSS-only, respects prefers-reduced-motion.
+  </p>
+
+  <!-- MORPH STYLE A: Compress to X -->
+  <div class="section">
+    <h2>Style A: Compress &rarr; X</h2>
+    <div class="state-flow">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <span class="state-flow__arrow">&rarr;</span>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <span class="state-flow__arrow">&rarr;</span>
+      <div class="demo">
+        <span class="demo__label">Active / Open</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--active" type="button" aria-label="Close menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MORPH STYLE B: Arrow -->
+  <div class="section">
+    <h2>Style B: Arrow Morph</h2>
+    <div class="state-flow">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--arrow" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <span class="state-flow__arrow">&rarr;</span>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--arrow" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <span class="state-flow__arrow">&rarr;</span>
+      <div class="demo">
+        <span class="demo__label">Active / Open</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--active" type="button" aria-label="Close menu">
+            <span class="hamburger__icon hamburger__icon--arrow" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MORPH STYLE C: Pulse/Breathe -->
+  <div class="section">
+    <h2>Style C: Pulse / Breathe</h2>
+    <div class="state-flow">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--pulse" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <span class="state-flow__arrow">&rarr;</span>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--pulse" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <span class="state-flow__arrow">&rarr;</span>
+      <div class="demo">
+        <span class="demo__label">Active / Open</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--active" type="button" aria-label="Close menu">
+            <span class="hamburger__icon hamburger__icon--pulse" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHITELABEL -->
+  <div class="section">
+    <h2>Whitelabel Colors (Style A)</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Cyan</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo theme-orange">
+        <span class="demo__label">Orange</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo theme-green">
+        <span class="demo__label">Green</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LIGHT THEME -->
+  <div class="section">
+    <h2>Light Theme</h2>
+    <div class="row theme-light">
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Active</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--active" type="button" aria-label="Close menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- COMPARISON WITH BRANDMARK -->
+  <div class="section">
+    <h2>Alongside BrandMark E</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">BrandMark</span>
+        <div class="demo__context">
+          <div class="brand-icon">E</div>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Nav (H)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Menu</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Side by side</span>
+        <div class="demo__context">
+          <div class="brand-icon">E</div>
+          <button class="hamburger" type="button" aria-label="Menu" style="margin-left: -8px;">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="notes">
+    <p class="notes__title">Implementation Notes</p>
+    <p class="notes__text">
+      <strong>Complexity: LOW.</strong> Three absolutely-positioned spans with CSS transforms
+      and transitions. No JS for the morph -- state classes toggle via Vue.
+    </p>
+    <p class="notes__text">
+      <strong>Three morph styles:</strong> (A) Compress then X -- classic, reliable.
+      (B) Arrow morph -- top/bottom angle into a pointing chevron. (C) Pulse/breathe --
+      outer bars widen, middle shrinks, then X on active. All CSS-only.
+    </p>
+    <p class="notes__text">
+      <strong>Accessibility:</strong> prefers-reduced-motion media query disables all transforms.
+      Button remains functional, just static. ARIA labels switch between "Menu" and "Close menu".
+    </p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant J: Hexagonal Gate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --glow-soft: rgba(0, 212, 255, 0.15);
+    --glow-hover: rgba(0, 212, 255, 0.35);
+    --glow-intense: rgba(0, 212, 255, 0.55);
+    --glow-inset: rgba(0, 212, 255, 0.08);
+    --glow-inset-hover: rgba(0, 212, 255, 0.12);
+    --glow-inset-intense: rgba(0, 212, 255, 0.25);
+    --bg-icon: rgba(0, 212, 255, 0.06);
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 560px; line-height: 1.5;
+  }
+
+  .demo-row { display: flex; gap: 64px; align-items: flex-start; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* ================================================================
+     HEXAGONAL GATE - A partial hexagon with a gap (portal/gate).
+     Built from 5 CSS line segments using positioned spans.
+     On toggle: segments collapse into an X close indicator.
+     ================================================================ */
+
+  .hex-gate {
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hex-gate:focus-visible {
+    outline: 2px solid var(--accent-primary); outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .hex-gate__box {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+    transition: box-shadow var(--duration-normal) ease;
+  }
+  .hex-gate:hover .hex-gate__box {
+    box-shadow: 0 0 14px var(--glow-hover), inset 0 0 8px var(--glow-inset-hover);
+  }
+
+  .hex-gate__inner {
+    position: relative;
+  }
+
+  .hex-gate__seg {
+    position: absolute;
+    background: var(--accent-primary);
+    will-change: transform, opacity;
+    transform-origin: center center;
+  }
+
+  /* === SCALED (84px box) === */
+  .hex-gate--scaled .hex-gate__box { width: 84px; height: 84px; border-radius: calc(var(--radius-sm) * 3); border-width: 3px; }
+  .hex-gate--scaled .hex-gate__inner { width: 46px; height: 40px; }
+  .hex-gate--scaled .hex-gate__seg { height: 3px; border-radius: 1.5px; }
+
+  /* Hex segments at 84px scale:
+     Flat-top hexagon, w=46 h=40, centered at (23, 20).
+     Corners: TL(11.5,0) TR(34.5,0) R(46,20) BR(34.5,40) BL(11.5,40) L(0,20)
+     Gap = bottom-right segment (BR to R) is missing/dim */
+
+  .hex-gate--scaled .hex-gate__seg--1 { width: 23px; top: -1px; left: 11.5px; transform: rotate(0deg); }
+  .hex-gate--scaled .hex-gate__seg--2 { width: 23px; top: 8.5px; left: -5px; transform: rotate(-60deg); }
+  .hex-gate--scaled .hex-gate__seg--3 { width: 23px; top: 28.5px; left: -5px; transform: rotate(60deg); }
+  .hex-gate--scaled .hex-gate__seg--4 { width: 23px; bottom: -1px; left: 11.5px; transform: rotate(0deg); }
+  .hex-gate--scaled .hex-gate__seg--5 { width: 23px; top: 8.5px; right: -5px; transform: rotate(60deg); opacity: 0.3; }
+
+  /* Staggered transitions - M3 Glow Pulse Morph timing */
+  .hex-gate__seg--1 {
+    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 200ms ease 0ms, top 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, left 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, right 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, bottom 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, width 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  }
+  .hex-gate__seg--2 {
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 40ms, opacity 200ms ease 40ms, top 300ms cubic-bezier(0.4, 0, 0.2, 1) 40ms, left 300ms cubic-bezier(0.4, 0, 0.2, 1) 40ms, right 300ms cubic-bezier(0.4, 0, 0.2, 1) 40ms, bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) 40ms, width 300ms cubic-bezier(0.4, 0, 0.2, 1) 40ms;
+  }
+  .hex-gate__seg--3 {
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1) 80ms, opacity 200ms ease 80ms, top 300ms cubic-bezier(0.4, 0, 0.2, 1) 80ms, left 300ms cubic-bezier(0.4, 0, 0.2, 1) 80ms, right 300ms cubic-bezier(0.4, 0, 0.2, 1) 80ms, bottom 300ms cubic-bezier(0.4, 0, 0.2, 1) 80ms, width 300ms cubic-bezier(0.4, 0, 0.2, 1) 80ms;
+  }
+  .hex-gate__seg--4 {
+    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, opacity 200ms ease 120ms, top 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, left 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, right 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, bottom 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, width 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms;
+  }
+  .hex-gate__seg--5 {
+    transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, opacity 250ms ease 60ms, top 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, left 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, right 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, bottom 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, width 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms;
+  }
+
+  /* OPEN STATE (scaled): segments collapse into X */
+  .hex-gate--scaled.is-open .hex-gate__seg--1 { width: 36px; top: 18px; left: 5px; transform: rotate(45deg); opacity: 1; }
+  .hex-gate--scaled.is-open .hex-gate__seg--2 { width: 0; top: 18px; left: 23px; transform: rotate(0deg); opacity: 0; }
+  .hex-gate--scaled.is-open .hex-gate__seg--3 { width: 0; top: 18px; left: 23px; transform: rotate(0deg); opacity: 0; }
+  .hex-gate--scaled.is-open .hex-gate__seg--4 { width: 36px; top: 18px; left: 5px; transform: rotate(-45deg); opacity: 1; }
+  .hex-gate--scaled.is-open .hex-gate__seg--5 { width: 0; top: 18px; right: 23px; transform: rotate(0deg); opacity: 0; }
+
+  /* === ACTUAL SIZE (28px) === */
+  .hex-gate--actual .hex-gate__box { width: 28px; height: 28px; }
+  .hex-gate--actual .hex-gate__inner { width: 15px; height: 13px; }
+  .hex-gate--actual .hex-gate__seg { height: 1.5px; border-radius: 0.75px; }
+
+  .hex-gate--actual .hex-gate__seg--1 { width: 7.5px; top: -0.5px; left: 3.75px; transform: rotate(0deg); }
+  .hex-gate--actual .hex-gate__seg--2 { width: 7.5px; top: 2.75px; left: -1.5px; transform: rotate(-60deg); }
+  .hex-gate--actual .hex-gate__seg--3 { width: 7.5px; top: 9.25px; left: -1.5px; transform: rotate(60deg); }
+  .hex-gate--actual .hex-gate__seg--4 { width: 7.5px; bottom: -0.5px; left: 3.75px; transform: rotate(0deg); }
+  .hex-gate--actual .hex-gate__seg--5 { width: 7.5px; top: 2.75px; right: -1.5px; transform: rotate(60deg); opacity: 0.3; }
+
+  /* OPEN STATE (actual): X */
+  .hex-gate--actual.is-open .hex-gate__seg--1 { width: 12px; top: 5.75px; left: 1.5px; transform: rotate(45deg); opacity: 1; }
+  .hex-gate--actual.is-open .hex-gate__seg--2 { width: 0; top: 5.75px; left: 7.5px; transform: rotate(0deg); opacity: 0; }
+  .hex-gate--actual.is-open .hex-gate__seg--3 { width: 0; top: 5.75px; left: 7.5px; transform: rotate(0deg); opacity: 0; }
+  .hex-gate--actual.is-open .hex-gate__seg--4 { width: 12px; top: 5.75px; left: 1.5px; transform: rotate(-45deg); opacity: 1; }
+  .hex-gate--actual.is-open .hex-gate__seg--5 { width: 0; top: 5.75px; right: 7.5px; transform: rotate(0deg); opacity: 0; }
+
+  /* === GLOW PULSE === */
+  .hex-gate.is-open .hex-gate__box { animation: glow-pulse 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .hex-gate:not(.is-open) .hex-gate__box { animation: glow-settle 350ms ease forwards; }
+
+  @keyframes glow-pulse {
+    0% { box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset); }
+    40% { box-shadow: 0 0 22px var(--glow-intense), 0 0 44px rgba(0, 212, 255, 0.2), inset 0 0 12px var(--glow-inset-intense); }
+    100% { box-shadow: 0 0 10px var(--glow-hover), inset 0 0 6px var(--glow-inset); }
+  }
+  @keyframes glow-settle {
+    0% { box-shadow: 0 0 10px var(--glow-hover), inset 0 0 6px var(--glow-inset); }
+    30% { box-shadow: 0 0 18px var(--glow-intense), 0 0 36px rgba(0, 212, 255, 0.15), inset 0 0 10px var(--glow-inset-intense); }
+    100% { box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset); }
+  }
+
+  /* Light bg */
+  .bg-light .hex-gate__box { border-color: #0090b3; background: rgba(0, 212, 255, 0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .hex-gate__seg { background: #007a99; }
+  .bg-light .hex-gate.is-open .hex-gate__box { animation: glow-pulse-light 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .bg-light .hex-gate:not(.is-open) .hex-gate__box { animation: glow-settle-light 350ms ease forwards; }
+
+  @keyframes glow-pulse-light {
+    0% { box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+    40% { box-shadow: 0 0 16px rgba(0,150,180,0.4), 0 0 32px rgba(0,150,180,0.15), inset 0 0 8px rgba(0,150,180,0.15); }
+    100% { box-shadow: 0 0 8px rgba(0,150,180,0.2), inset 0 0 4px rgba(0,150,180,0.06); }
+  }
+  @keyframes glow-settle-light {
+    0% { box-shadow: 0 0 8px rgba(0,150,180,0.2), inset 0 0 4px rgba(0,150,180,0.06); }
+    30% { box-shadow: 0 0 14px rgba(0,150,180,0.35), 0 0 28px rgba(0,150,180,0.1), inset 0 0 6px rgba(0,150,180,0.1); }
+    100% { box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  }
+
+  /* === WHITELABEL COLORS === */
+  .whitelabel-row { display: flex; gap: 32px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .whitelabel-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .whitelabel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .wl-orange .hex-gate__box { border-color: #ff8c00; background: rgba(255, 140, 0, 0.06); box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  .wl-orange .hex-gate__seg { background: #ff8c00; }
+  .wl-orange .hex-gate.is-open .hex-gate__box { animation: glow-pulse-orange 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .wl-orange .hex-gate:not(.is-open) .hex-gate__box { animation: glow-settle-orange 350ms ease forwards; }
+  @keyframes glow-pulse-orange {
+    0% { box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+    40% { box-shadow: 0 0 22px rgba(255,140,0,0.55), 0 0 44px rgba(255,140,0,0.2), inset 0 0 12px rgba(255,140,0,0.25); }
+    100% { box-shadow: 0 0 10px rgba(255,140,0,0.35), inset 0 0 6px rgba(255,140,0,0.08); }
+  }
+  @keyframes glow-settle-orange {
+    0% { box-shadow: 0 0 10px rgba(255,140,0,0.35), inset 0 0 6px rgba(255,140,0,0.08); }
+    30% { box-shadow: 0 0 18px rgba(255,140,0,0.55), 0 0 36px rgba(255,140,0,0.15), inset 0 0 10px rgba(255,140,0,0.25); }
+    100% { box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  }
+
+  .wl-green .hex-gate__box { border-color: #00ff88; background: rgba(0, 255, 136, 0.06); box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  .wl-green .hex-gate__seg { background: #00ff88; }
+  .wl-green .hex-gate.is-open .hex-gate__box { animation: glow-pulse-green 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .wl-green .hex-gate:not(.is-open) .hex-gate__box { animation: glow-settle-green 350ms ease forwards; }
+  @keyframes glow-pulse-green {
+    0% { box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+    40% { box-shadow: 0 0 22px rgba(0,255,136,0.55), 0 0 44px rgba(0,255,136,0.2), inset 0 0 12px rgba(0,255,136,0.25); }
+    100% { box-shadow: 0 0 10px rgba(0,255,136,0.35), inset 0 0 6px rgba(0,255,136,0.08); }
+  }
+  @keyframes glow-settle-green {
+    0% { box-shadow: 0 0 10px rgba(0,255,136,0.35), inset 0 0 6px rgba(0,255,136,0.08); }
+    30% { box-shadow: 0 0 18px rgba(0,255,136,0.55), 0 0 36px rgba(0,255,136,0.15), inset 0 0 10px rgba(0,255,136,0.25); }
+    100% { box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  }
+
+  /* === BRANDMARK COMPARISON === */
+  .brand-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--accent-primary); background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+  }
+
+  .comparison-row { display: flex; gap: 32px; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .comparison-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .comparison-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  /* Controls */
+  .controls { display: flex; gap: 12px; margin-bottom: 32px; }
+  .btn-toggle {
+    font-family: 'Geist', system-ui, sans-serif; font-size: 13px;
+    padding: 8px 20px; border-radius: var(--radius-sm);
+    border: 1px solid var(--accent-primary); background: transparent;
+    color: var(--accent-primary); cursor: pointer;
+    transition: background var(--duration-fast) ease, color var(--duration-fast) ease;
+  }
+  .btn-toggle:hover { background: var(--accent-primary); color: var(--bg-base); }
+
+  /* Annotations */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 560px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); }
+
+  .size-label { font-size: 11px; color: #555; font-family: var(--font-mono); text-align: center; margin-top: 8px; }
+  .section-title { font-size: 13px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; margin-top: 16px; }
+</style>
+</head>
+<body>
+  <h1>Variant J: Hexagonal Gate</h1>
+  <p class="subtitle">
+    A partial hexagon outline with a gap on the right side -- a portal or gate that invites entry.
+    On toggle, the hex segments collapse and rearrange into an X close indicator with staggered
+    timing and M3 glow pulse. The dim gap-edge segment vanishes first. CSS-only, no SVG.
+  </p>
+
+  <div class="controls">
+    <button class="btn-toggle" onclick="toggleAll()">Toggle All</button>
+  </div>
+
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <button class="hex-gate hex-gate--scaled js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+              </span></span>
+            </button>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <button class="hex-gate hex-gate--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+              </span></span>
+            </button>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <button class="hex-gate hex-gate--scaled js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+              </span></span>
+            </button>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <button class="hex-gate hex-gate--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+              </span></span>
+            </button>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="section-title">Whitelabel Colors</span>
+  <div class="whitelabel-row">
+    <div class="whitelabel-item">
+      <span class="whitelabel-label">Cyan (default)</span>
+      <button class="hex-gate hex-gate--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+        </span></span>
+      </button>
+    </div>
+    <div class="whitelabel-item wl-orange">
+      <span class="whitelabel-label">Orange #ff8c00</span>
+      <button class="hex-gate hex-gate--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+        </span></span>
+      </button>
+    </div>
+    <div class="whitelabel-item wl-green">
+      <span class="whitelabel-label">Green #00ff88</span>
+      <button class="hex-gate hex-gate--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+        </span></span>
+      </button>
+    </div>
+  </div>
+
+  <span class="section-title">BrandMark Comparison</span>
+  <div class="comparison-row">
+    <div class="comparison-item">
+      <div class="brand-icon">E</div>
+      <span class="comparison-label">BrandMark E</span>
+    </div>
+    <div class="comparison-item">
+      <button class="hex-gate hex-gate--actual" aria-label="Hex Gate closed" style="pointer-events:none;">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+        </span></span>
+      </button>
+      <span class="comparison-label">Hex Gate (closed)</span>
+    </div>
+    <div class="comparison-item">
+      <button class="hex-gate hex-gate--actual is-open" aria-label="Hex Gate open" style="pointer-events:none;">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+        </span></span>
+      </button>
+      <span class="comparison-label">Hex Gate (open)</span>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Total duration</span><span class="annotation__value">~440ms (stagger inclusive)</span></div>
+    <div class="annotation"><span class="annotation__key">Easing</span><span class="annotation__value">cubic-bezier(0.4, 0, 0.2, 1)</span></div>
+    <div class="annotation"><span class="annotation__key">Seg 1 (top)</span><span class="annotation__value">320ms, delay 0ms</span></div>
+    <div class="annotation"><span class="annotation__key">Seg 2 (top-left)</span><span class="annotation__value">300ms, delay 40ms</span></div>
+    <div class="annotation"><span class="annotation__key">Seg 3 (btm-left)</span><span class="annotation__value">300ms, delay 80ms</span></div>
+    <div class="annotation"><span class="annotation__key">Seg 4 (bottom)</span><span class="annotation__value">320ms, delay 120ms</span></div>
+    <div class="annotation"><span class="annotation__key">Seg 5 (gap edge)</span><span class="annotation__value">280ms, delay 60ms (fades out)</span></div>
+    <div class="annotation"><span class="annotation__key">Glow pulse</span><span class="annotation__value">450ms, peaks at 40%</span></div>
+    <div class="annotation"><span class="annotation__key">Closed shape</span><span class="annotation__value">5-segment partial hex (gap right)</span></div>
+    <div class="annotation"><span class="annotation__key">Open shape</span><span class="annotation__value">2-segment X cross</span></div>
+    <div class="annotation"><span class="annotation__key">Technique</span><span class="annotation__value">CSS transitions + @keyframes glow</span></div>
+    <div class="annotation"><span class="annotation__key">prefers-reduced-motion</span><span class="annotation__value">instant state, no animation</span></div>
+  </div>
+
+  <script>
+    function toggle(btn) { btn.classList.toggle('is-open'); }
+    function toggleAll() { document.querySelectorAll('.js-toggle').forEach(function(el) { el.classList.toggle('is-open'); }); }
+  </script>
+</body>
+</html>

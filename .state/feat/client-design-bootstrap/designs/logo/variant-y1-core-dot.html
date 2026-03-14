@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant Y1: Core Dot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --glow-soft: rgba(0, 212, 255, 0.15);
+    --glow-hover: rgba(0, 212, 255, 0.35);
+    --glow-intense: rgba(0, 212, 255, 0.55);
+    --glow-inset: rgba(0, 212, 255, 0.08);
+    --glow-inset-hover: rgba(0, 212, 255, 0.12);
+    --glow-inset-intense: rgba(0, 212, 255, 0.25);
+    --bg-icon: rgba(0, 212, 255, 0.06);
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 560px; line-height: 1.5;
+  }
+
+  .section-title { font-size: 13px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; margin-top: 16px; }
+  .demo-row { display: flex; gap: 64px; align-items: flex-start; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+  .size-label { font-size: 11px; color: #555; font-family: var(--font-mono); text-align: center; margin-top: 8px; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* ================================================================
+     HEX GATE + CORE DOT
+     Exact hex gate shape from HexGateIcon.vue with a centered dot.
+     ================================================================ */
+
+  .hex-gate {
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hex-gate:focus-visible {
+    outline: 2px solid var(--accent-primary); outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .hex-gate__box {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+    transition: box-shadow var(--duration-normal) ease;
+  }
+  .hex-gate:hover .hex-gate__box {
+    box-shadow: 0 0 14px var(--glow-hover), inset 0 0 8px var(--glow-inset-hover);
+  }
+
+  .hex-gate__inner { position: relative; }
+
+  .hex-gate__seg {
+    position: absolute;
+    background: var(--accent-primary);
+    transform-origin: center center;
+  }
+
+  /* Core dot element */
+  .hex-gate__core {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--accent-primary);
+  }
+
+  /* === 84px SCALE === */
+  .hex-gate--scaled .hex-gate__box { width: 84px; height: 84px; border-radius: calc(var(--radius-sm) * 3); border-width: 3px; }
+  .hex-gate--scaled .hex-gate__inner { width: 46px; height: 40px; }
+  .hex-gate--scaled .hex-gate__seg { height: 3px; border-radius: 1.5px; }
+  .hex-gate--scaled .hex-gate__core { width: 9px; height: 9px; top: 15.5px; left: 18.5px; }
+
+  .hex-gate--scaled .hex-gate__seg--1 { width: 23px; top: -1px; left: 11.5px; transform: rotate(0deg); }
+  .hex-gate--scaled .hex-gate__seg--2 { width: 23px; top: 8.5px; left: -5px; transform: rotate(-60deg); }
+  .hex-gate--scaled .hex-gate__seg--3 { width: 23px; top: 28.5px; left: -5px; transform: rotate(60deg); }
+  .hex-gate--scaled .hex-gate__seg--4 { width: 23px; bottom: -1px; left: 11.5px; transform: rotate(0deg); }
+  .hex-gate--scaled .hex-gate__seg--5 { width: 23px; top: 8.5px; right: -5px; transform: rotate(60deg); opacity: 0.3; }
+
+  /* === 28px SCALE === */
+  .hex-gate--actual .hex-gate__box { width: 28px; height: 28px; }
+  .hex-gate--actual .hex-gate__inner { width: 15px; height: 13px; }
+  .hex-gate--actual .hex-gate__seg { height: 1.5px; border-radius: 0.75px; }
+  .hex-gate--actual .hex-gate__core { width: 3px; height: 3px; top: 5px; left: 6px; }
+
+  .hex-gate--actual .hex-gate__seg--1 { width: 7.5px; top: -0.5px; left: 3.75px; transform: rotate(0deg); }
+  .hex-gate--actual .hex-gate__seg--2 { width: 7.5px; top: 2.75px; left: -1.5px; transform: rotate(-60deg); }
+  .hex-gate--actual .hex-gate__seg--3 { width: 7.5px; top: 9.25px; left: -1.5px; transform: rotate(60deg); }
+  .hex-gate--actual .hex-gate__seg--4 { width: 7.5px; bottom: -0.5px; left: 3.75px; transform: rotate(0deg); }
+  .hex-gate--actual .hex-gate__seg--5 { width: 7.5px; top: 2.75px; right: -1.5px; transform: rotate(60deg); opacity: 0.3; }
+
+  /* Light bg */
+  .bg-light .hex-gate__box { border-color: #0090b3; background: rgba(0, 212, 255, 0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .hex-gate__seg { background: #007a99; }
+  .bg-light .hex-gate__core { background: #007a99; }
+
+  /* === WHITELABEL === */
+  .whitelabel-row { display: flex; gap: 32px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .whitelabel-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .whitelabel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .wl-orange .hex-gate__box { border-color: #ff8c00; background: rgba(255, 140, 0, 0.06); box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  .wl-orange .hex-gate__seg { background: #ff8c00; }
+  .wl-orange .hex-gate__core { background: #ff8c00; }
+
+  .wl-green .hex-gate__box { border-color: #00ff88; background: rgba(0, 255, 136, 0.06); box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  .wl-green .hex-gate__seg { background: #00ff88; }
+  .wl-green .hex-gate__core { background: #00ff88; }
+
+  /* === BRANDMARK COMPARISON === */
+  .brand-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--accent-primary); background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+  }
+
+  .comparison-row { display: flex; gap: 32px; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .comparison-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .comparison-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  /* === WORDMARK === */
+  .wordmark-row { display: flex; gap: 48px; align-items: center; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .wordmark {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .wordmark__name {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #e8e8f0;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+  .wordmark--large .wordmark__name {
+    font-size: 28px;
+  }
+
+  /* === SVG SECTION === */
+  .svg-row { display: flex; gap: 48px; align-items: center; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .svg-panel { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 560px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+  <h1>Variant Y1: Core Dot</h1>
+  <p class="subtitle">
+    The hex gate shape (5 segments, partial hexagon, gap on right) with a single small
+    filled circle at the center. The dot is the focal point -- the core of the portal.
+    Looking through the gate, you see something at the center.
+  </p>
+
+  <!-- 1. Size comparison: 84px and 28px side by side -->
+  <span class="section-title">Size Comparison</span>
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="hex-gate hex-gate--scaled">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+                <span class="hex-gate__core"></span>
+              </span></span>
+            </div>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <div class="hex-gate hex-gate--actual">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+                <span class="hex-gate__core"></span>
+              </span></span>
+            </div>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="hex-gate hex-gate--scaled">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+                <span class="hex-gate__core"></span>
+              </span></span>
+            </div>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <div class="hex-gate hex-gate--actual">
+              <span class="hex-gate__box"><span class="hex-gate__inner">
+                <span class="hex-gate__seg hex-gate__seg--1"></span>
+                <span class="hex-gate__seg hex-gate__seg--2"></span>
+                <span class="hex-gate__seg hex-gate__seg--3"></span>
+                <span class="hex-gate__seg hex-gate__seg--4"></span>
+                <span class="hex-gate__seg hex-gate__seg--5"></span>
+                <span class="hex-gate__core"></span>
+              </span></span>
+            </div>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Family comparison -->
+  <span class="section-title">Family Comparison</span>
+  <div class="comparison-row">
+    <div class="comparison-item">
+      <div class="brand-icon">E</div>
+      <span class="comparison-label">BrandMark "E"</span>
+    </div>
+    <div class="comparison-item">
+      <div class="hex-gate hex-gate--actual" style="pointer-events:none;">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+        </span></span>
+      </div>
+      <span class="comparison-label">HexGate (plain)</span>
+    </div>
+    <div class="comparison-item">
+      <div class="hex-gate hex-gate--actual" style="pointer-events:none;">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+          <span class="hex-gate__core"></span>
+        </span></span>
+      </div>
+      <span class="comparison-label">Y1: Core Dot</span>
+    </div>
+  </div>
+
+  <!-- 3. Whitelabel colors -->
+  <span class="section-title">Whitelabel Colors</span>
+  <div class="whitelabel-row">
+    <div class="whitelabel-item">
+      <span class="whitelabel-label">Cyan (default)</span>
+      <div class="hex-gate hex-gate--actual">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+          <span class="hex-gate__core"></span>
+        </span></span>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-orange">
+      <span class="whitelabel-label">Orange #ff8c00</span>
+      <div class="hex-gate hex-gate--actual">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+          <span class="hex-gate__core"></span>
+        </span></span>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-green">
+      <span class="whitelabel-label">Green #00ff88</span>
+      <div class="hex-gate hex-gate--actual">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+          <span class="hex-gate__core"></span>
+        </span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Standalone SVG -->
+  <span class="section-title">Standalone SVG</span>
+  <div class="svg-row">
+    <div class="svg-panel">
+      <svg width="84" height="84" viewBox="0 0 84 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1.5" y="1.5" width="81" height="81" rx="16.5" stroke="#00d4ff" stroke-width="3" fill="rgba(0,212,255,0.06)"/>
+        <!-- Hex gate segments centered in 84px box. Inner area 46x40 centered at (42,42), so offset = (42-23, 42-20) = (19, 22) -->
+        <!-- Seg 1: top horizontal at y=22-1=21, x from 19+11.5=30.5, width 23 -->
+        <rect x="30.5" y="20" width="23" height="3" rx="1.5" fill="#00d4ff"/>
+        <!-- Seg 2: top-left diagonal, center at (19-5+11.5, 22+8.5+1.5) = (25.5, 32), rotate -60 -->
+        <rect x="14" y="30.5" width="23" height="3" rx="1.5" fill="#00d4ff" transform="rotate(-60 25.5 32)"/>
+        <!-- Seg 3: bottom-left diagonal, center at (19-5+11.5, 22+28.5+1.5) = (25.5, 52), rotate 60 -->
+        <rect x="14" y="50.5" width="23" height="3" rx="1.5" fill="#00d4ff" transform="rotate(60 25.5 52)"/>
+        <!-- Seg 4: bottom horizontal at y=22+40-1=61, same x as seg 1 -->
+        <rect x="30.5" y="60" width="23" height="3" rx="1.5" fill="#00d4ff"/>
+        <!-- Seg 5: gap edge (top-right), center at (19+46-(-5)+(-11.5), 22+8.5+1.5) wrong approach -->
+        <!-- Seg 5: right=-5 means right edge of inner is at 19+46=65, so seg center x = 65+5-11.5=58.5, same y as seg 2 -->
+        <rect x="47" y="30.5" width="23" height="3" rx="1.5" fill="#00d4ff" opacity="0.3" transform="rotate(60 58.5 32)"/>
+        <!-- Core dot: 9px circle at center (42, 42) -->
+        <circle cx="42" cy="42" r="4.5" fill="#00d4ff"/>
+      </svg>
+      <span class="size-label">84px SVG</span>
+    </div>
+    <div class="svg-panel">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0.5" y="0.5" width="27" height="27" rx="5.5" stroke="#00d4ff" stroke-width="1" fill="rgba(0,212,255,0.06)"/>
+        <!-- Inner area 15x13 centered at (14,14), offset = (14-7.5, 14-6.5) = (6.5, 7.5) -->
+        <!-- Seg 1: top, y=7.5-0.5=7, x=6.5+3.75=10.25, w=7.5 -->
+        <rect x="10.25" y="6.25" width="7.5" height="1.5" rx="0.75" fill="#00d4ff"/>
+        <!-- Seg 2: top-left, center at (6.5-1.5+3.75, 7.5+2.75+0.75) = (8.75, 11) rotate -60 -->
+        <rect x="5" y="10.25" width="7.5" height="1.5" rx="0.75" fill="#00d4ff" transform="rotate(-60 8.75 11)"/>
+        <!-- Seg 3: bottom-left, center at (8.75, 7.5+9.25+0.75) = (8.75, 17.5) rotate 60 -->
+        <rect x="5" y="16.75" width="7.5" height="1.5" rx="0.75" fill="#00d4ff" transform="rotate(60 8.75 17.5)"/>
+        <!-- Seg 4: bottom, y=7.5+13-0.5-0.75=19.25, same x as seg 1 -->
+        <rect x="10.25" y="19.25" width="7.5" height="1.5" rx="0.75" fill="#00d4ff"/>
+        <!-- Seg 5: gap edge right, center x=6.5+15+1.5-3.75=19.25, same y as seg 2 -->
+        <rect x="15.5" y="10.25" width="7.5" height="1.5" rx="0.75" fill="#00d4ff" opacity="0.3" transform="rotate(60 19.25 11)"/>
+        <!-- Core dot: 3px circle at center (14, 14) -->
+        <circle cx="14" cy="14" r="1.5" fill="#00d4ff"/>
+      </svg>
+      <span class="size-label">28px SVG</span>
+    </div>
+  </div>
+
+  <!-- 5. Wordmark pairing -->
+  <span class="section-title">Wordmark Pairing</span>
+  <div class="wordmark-row">
+    <div class="wordmark">
+      <div class="hex-gate hex-gate--actual" style="pointer-events:none;">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+          <span class="hex-gate__core"></span>
+        </span></span>
+      </div>
+      <span class="wordmark__name">Erika</span>
+    </div>
+    <div class="wordmark wordmark--large">
+      <div class="hex-gate hex-gate--scaled" style="pointer-events:none; transform: scale(0.5); transform-origin: center;">
+        <span class="hex-gate__box"><span class="hex-gate__inner">
+          <span class="hex-gate__seg hex-gate__seg--1"></span>
+          <span class="hex-gate__seg hex-gate__seg--2"></span>
+          <span class="hex-gate__seg hex-gate__seg--3"></span>
+          <span class="hex-gate__seg hex-gate__seg--4"></span>
+          <span class="hex-gate__seg hex-gate__seg--5"></span>
+          <span class="hex-gate__core"></span>
+        </span></span>
+      </div>
+      <span class="wordmark__name">Erika</span>
+    </div>
+  </div>
+
+  <!-- Annotations -->
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Variant</span><span class="annotation__value">Y1 -- Core Dot</span></div>
+    <div class="annotation"><span class="annotation__key">Concept</span><span class="annotation__value">Solid dot at hex center = portal core</span></div>
+    <div class="annotation"><span class="annotation__key">Dot size (84px)</span><span class="annotation__value">9px diameter (4.5px radius)</span></div>
+    <div class="annotation"><span class="annotation__key">Dot size (28px)</span><span class="annotation__value">3px diameter (1.5px radius)</span></div>
+    <div class="annotation"><span class="annotation__key">Dot color</span><span class="annotation__value">Same as segments (accent-primary)</span></div>
+    <div class="annotation"><span class="annotation__key">Hex shape</span><span class="annotation__value">Unchanged -- 5 segments, gap right</span></div>
+  </div>
+</body>
+</html>

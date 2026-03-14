@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C2-Gamma: Negative Space — Branded Hamburger</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * C2-GAMMA: Negative Space
+     *
+     * Three full-width bars with strategic GAPS cut into them to form the letter.
+     * NO vertical spine — the letter emerges purely from negative space within
+     * the bars themselves. Most abstract of the three — reads as hamburger first.
+     *
+     * E: top bar full, mid bar has right gap, bottom bar full (forms E shape)
+     * M: top bar has 2 gaps (forming M peaks), mid+bottom full
+     * W: top+mid full, bottom bar has 2 gaps (forming W valleys)
+     * Generic: all bars full — clean hamburger, no letter encoding
+     *
+     * Implementation: CSS with flex segments per bar.
+     * Complexity: MEDIUM — no spine simplifies structure but gaps need careful sizing.
+     */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+      gap: 48px;
+    }
+
+    h1 {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+    }
+
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    /* ============================
+       THE HAMBURGER BUTTON
+       ============================ */
+
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .hamburger__icon {
+      --accent: var(--accent-primary);
+      --accent-glow: rgba(0, 212, 255, 0.15);
+      --accent-glow-strong: rgba(0, 212, 255, 0.35);
+      --accent-bg: rgba(0, 212, 255, 0.06);
+      --accent-inset: rgba(0, 212, 255, 0.08);
+      --accent-inset-strong: rgba(0, 212, 255, 0.12);
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      box-shadow:
+        0 0 8px var(--accent-glow),
+        inset 0 0 6px var(--accent-inset);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+      color: var(--accent);
+      position: relative;
+      gap: 3px;
+      padding: 0 6px;
+    }
+
+    .hamburger--hover .hamburger__icon {
+      box-shadow:
+        0 0 14px var(--accent-glow-strong),
+        inset 0 0 8px var(--accent-inset-strong);
+    }
+
+    /* No spine — bars are centered, no left offset */
+
+    /* Bar row */
+    .hamburger__bar-row {
+      display: flex;
+      align-items: center;
+      width: 14px;
+      height: 2px;
+    }
+
+    .hamburger__seg {
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .hamburger__gap {
+      height: 2px;
+      flex-shrink: 0;
+    }
+
+    /* ---- LETTER E ---- */
+    /* Top: full bar */
+    .neg-e .hamburger__bar-row--top .hamburger__seg { width: 14px; }
+
+    /* Mid: left segment + gap (shorter, like E's middle arm) */
+    .neg-e .hamburger__bar-row--mid .hamburger__seg:first-child { width: 9px; }
+    .neg-e .hamburger__bar-row--mid .hamburger__gap { width: 2px; }
+    .neg-e .hamburger__bar-row--mid .hamburger__seg:last-child { width: 3px; }
+
+    /* Bottom: full bar */
+    .neg-e .hamburger__bar-row--bottom .hamburger__seg { width: 14px; }
+
+    /* ---- LETTER M ---- */
+    /* Top: two gaps creating 3 peaks (M shape) */
+    .neg-m .hamburger__bar-row--top .hamburger__seg:nth-child(1) { width: 4px; }
+    .neg-m .hamburger__bar-row--top .hamburger__gap:nth-child(2) { width: 2px; }
+    .neg-m .hamburger__bar-row--top .hamburger__seg:nth-child(3) { width: 2px; }
+    .neg-m .hamburger__bar-row--top .hamburger__gap:nth-child(4) { width: 2px; }
+    .neg-m .hamburger__bar-row--top .hamburger__seg:nth-child(5) { width: 4px; }
+
+    /* Mid: full */
+    .neg-m .hamburger__bar-row--mid .hamburger__seg { width: 14px; }
+
+    /* Bottom: full */
+    .neg-m .hamburger__bar-row--bottom .hamburger__seg { width: 14px; }
+
+    /* ---- LETTER W ---- */
+    /* Top: full */
+    .neg-w .hamburger__bar-row--top .hamburger__seg { width: 14px; }
+
+    /* Mid: full */
+    .neg-w .hamburger__bar-row--mid .hamburger__seg { width: 14px; }
+
+    /* Bottom: two gaps creating W valleys */
+    .neg-w .hamburger__bar-row--bottom .hamburger__seg:nth-child(1) { width: 4px; }
+    .neg-w .hamburger__bar-row--bottom .hamburger__gap:nth-child(2) { width: 2px; }
+    .neg-w .hamburger__bar-row--bottom .hamburger__seg:nth-child(3) { width: 2px; }
+    .neg-w .hamburger__bar-row--bottom .hamburger__gap:nth-child(4) { width: 2px; }
+    .neg-w .hamburger__bar-row--bottom .hamburger__seg:nth-child(5) { width: 4px; }
+
+    /* ---- GENERIC (no letter) ---- */
+    .neg-none .hamburger__bar-row .hamburger__seg { width: 14px; }
+    .neg-none .hamburger__bar-row .hamburger__gap { width: 0; }
+
+    /* ============================
+       WHITELABEL COLOR OVERRIDES
+       ============================ */
+
+    .theme-orange .hamburger__icon {
+      --accent: #ff8c00;
+      --accent-glow: rgba(255, 140, 0, 0.15);
+      --accent-glow-strong: rgba(255, 140, 0, 0.35);
+      --accent-bg: rgba(255, 140, 0, 0.06);
+      --accent-inset: rgba(255, 140, 0, 0.08);
+      --accent-inset-strong: rgba(255, 140, 0, 0.12);
+      color: #ff8c00;
+    }
+
+    .theme-green .hamburger__icon {
+      --accent: #00ff88;
+      --accent-glow: rgba(0, 255, 136, 0.15);
+      --accent-glow-strong: rgba(0, 255, 136, 0.35);
+      --accent-bg: rgba(0, 255, 136, 0.06);
+      --accent-inset: rgba(0, 255, 136, 0.08);
+      --accent-inset-strong: rgba(0, 255, 136, 0.12);
+      color: #00ff88;
+    }
+
+    /* ============================
+       LIGHT THEME
+       ============================ */
+    .theme-light .demo__context {
+      background: #f5f5f7;
+      border-color: #d0d0d8;
+    }
+
+    .theme-light .demo__context-label {
+      color: #555;
+    }
+
+    .theme-light .hamburger__icon {
+      --accent: #0099bb;
+      --accent-glow: rgba(0, 153, 187, 0.12);
+      --accent-glow-strong: rgba(0, 153, 187, 0.25);
+      --accent-bg: rgba(0, 153, 187, 0.06);
+      --accent-inset: rgba(0, 153, 187, 0.05);
+      --accent-inset-strong: rgba(0, 153, 187, 0.10);
+      color: #0099bb;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 600px;
+      height: 1px;
+      background: var(--border-default);
+    }
+
+    .notes {
+      max-width: 560px;
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+    }
+
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: var(--weight-semibold);
+    }
+
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+
+    .notes__text + .notes__text {
+      margin-top: 8px;
+    }
+
+    /* Enlarged detail view */
+    .detail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail__icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border: 2px solid var(--accent-primary);
+      border-radius: 8px;
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+      color: var(--accent-primary);
+      position: relative;
+      gap: 6px;
+      padding: 0 12px;
+    }
+
+    .detail__bar-row {
+      display: flex;
+      align-items: center;
+      width: 28px;
+      height: 3px;
+    }
+
+    .detail__seg {
+      height: 3px;
+      background: currentColor;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .detail__gap {
+      height: 3px;
+      flex-shrink: 0;
+    }
+
+    /* E detail */
+    .detail--e .detail__bar-row--top .detail__seg { width: 28px; }
+    .detail--e .detail__bar-row--mid .detail__seg:first-child { width: 18px; }
+    .detail--e .detail__bar-row--mid .detail__gap { width: 4px; }
+    .detail--e .detail__bar-row--mid .detail__seg:last-child { width: 6px; }
+    .detail--e .detail__bar-row--bottom .detail__seg { width: 28px; }
+
+    /* M detail */
+    .detail--m .detail__bar-row--top .detail__seg:nth-child(1) { width: 8px; }
+    .detail--m .detail__bar-row--top .detail__gap:nth-child(2) { width: 4px; }
+    .detail--m .detail__bar-row--top .detail__seg:nth-child(3) { width: 4px; }
+    .detail--m .detail__bar-row--top .detail__gap:nth-child(4) { width: 4px; }
+    .detail--m .detail__bar-row--top .detail__seg:nth-child(5) { width: 8px; }
+    .detail--m .detail__bar-row--mid .detail__seg { width: 28px; }
+    .detail--m .detail__bar-row--bottom .detail__seg { width: 28px; }
+
+    /* W detail */
+    .detail--w .detail__bar-row--top .detail__seg { width: 28px; }
+    .detail--w .detail__bar-row--mid .detail__seg { width: 28px; }
+    .detail--w .detail__bar-row--bottom .detail__seg:nth-child(1) { width: 8px; }
+    .detail--w .detail__bar-row--bottom .detail__gap:nth-child(2) { width: 4px; }
+    .detail--w .detail__bar-row--bottom .detail__seg:nth-child(3) { width: 4px; }
+    .detail--w .detail__bar-row--bottom .detail__gap:nth-child(4) { width: 4px; }
+    .detail--w .detail__bar-row--bottom .detail__seg:nth-child(5) { width: 8px; }
+
+    /* Generic detail */
+    .detail--none .detail__bar-row .detail__seg { width: 28px; }
+
+    .detail__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>C2-Gamma: Negative Space</h1>
+  <p style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); max-width: 520px; text-align: center; line-height: var(--lh-sm);">
+    No spine. Full-width bars with strategic gaps that form the letter in negative space.
+    Most abstract — reads as hamburger first, letter second.
+    Degrades to a clean standard hamburger when no letter is configured.
+  </p>
+
+  <!-- ENLARGED DETAIL VIEW -->
+  <div class="section">
+    <h2>Negative Space Detail (2x Scale)</h2>
+    <div class="row">
+      <div class="detail detail--e">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+            <span class="detail__gap"></span>
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">E: gap in mid bar</span>
+      </div>
+
+      <div class="detail detail--m">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+            <span class="detail__gap"></span>
+            <span class="detail__seg"></span>
+            <span class="detail__gap"></span>
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">M: two gaps in top bar</span>
+      </div>
+
+      <div class="detail detail--w">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+            <span class="detail__gap"></span>
+            <span class="detail__seg"></span>
+            <span class="detail__gap"></span>
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">W: two gaps in bottom bar</span>
+      </div>
+
+      <div class="detail detail--none">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">Generic: no gaps</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ACTUAL SIZE -->
+  <div class="section">
+    <h2>Actual Size (28px)</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">"E" Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__gap"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"E" Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__gap"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"M" Config</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-m" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__gap"></span>
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__gap"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"W" Config</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-w" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__gap"></span>
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__gap"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Wavelength</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">Generic</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-none" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Brand</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHITELABEL ACCENT COLORS -->
+  <div class="section">
+    <h2>Whitelabel Accent Colors</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Cyan (default)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid"><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom"><span class="hamburger__seg"></span></div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo theme-orange">
+        <span class="demo__label">Orange #ff8c00</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-m" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top"><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom"><span class="hamburger__seg"></span></div>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo theme-green">
+        <span class="demo__label">Green #00ff88</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-w" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom"><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span></div>
+            </span>
+          </button>
+          <span class="demo__context-label">Wavelength</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LIGHT THEME -->
+  <div class="section">
+    <h2>Light Theme Preview</h2>
+    <div class="row theme-light">
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">"E" Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid"><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom"><span class="hamburger__seg"></span></div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">"M" Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-m" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top"><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span><span class="hamburger__gap"></span><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom"><span class="hamburger__seg"></span></div>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Generic Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon neg-none" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid"><span class="hamburger__seg"></span></div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom"><span class="hamburger__seg"></span></div>
+            </span>
+          </button>
+          <span class="demo__context-label">Brand</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <p class="notes__title">Implementation Notes</p>
+    <p class="notes__text">
+      <strong>Complexity: MEDIUM.</strong> No spine element needed — simpler DOM than Alpha/Beta.
+      Each bar is a flex row of segments with optional gaps. The letter is encoded by which bar(s)
+      have gaps and where. Generic (no letter) is just 3 plain spans — the simplest possible hamburger.
+    </p>
+    <p class="notes__text">
+      <strong>CSS-only feasibility: YES.</strong> Flex segments with gap sizing. Could also be done
+      with a single element per bar + CSS mask-image for the gaps, which would reduce DOM nodes
+      to 3 elements total (one per bar, no segments needed).
+    </p>
+    <p class="notes__text">
+      <strong>Whitelabel API:</strong> Override --accent color. Letter encoding is a JSON config of
+      gap positions per bar. The cleanest fallback of all three — with no letter config, it is
+      indistinguishable from a standard hamburger icon. Best for brands that want subtlety.
+    </p>
+    <p class="notes__text">
+      <strong>Graceful degradation:</strong> This is the only variant where removing the letter
+      config produces a standard, universally-recognized hamburger with zero visual artifacts.
+      Alpha still has the spine; Beta still has the spine. Gamma without a letter = pure hamburger.
+    </p>
+  </div>
+
+</body>
+</html>

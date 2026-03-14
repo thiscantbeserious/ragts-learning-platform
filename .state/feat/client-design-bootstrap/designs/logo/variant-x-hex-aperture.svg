@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hex Aperture: 5 overlapping blade-like segments forming a hexagonal iris.
+       Blades overlap to create depth. Opening/gap faces right — the portal.
+       Front blades full opacity, rear blades 0.6 for depth layering. -->
+
+  <!-- Blade 1: top — sweeps from upper-left toward center-right -->
+  <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+
+  <!-- Blade 2: upper-left — sweeps from far-left toward upper-center -->
+  <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+
+  <!-- Blade 3: lower-left — sweeps from far-left toward lower-center -->
+  <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+
+  <!-- Blade 4: bottom — sweeps from lower-left toward center-right -->
+  <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+
+  <!-- Blade 5: upper-right — partial, forming the aperture opening edge -->
+  <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+</svg>

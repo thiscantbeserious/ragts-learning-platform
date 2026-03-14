@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variant E — Real Sidebar Layout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ================================================================
+       Design Tokens (from Erika design system)
+       ================================================================ */
+    :root {
+      --bg-base: #16162a;
+      --bg-surface: #1e1e2e;
+      --bg-elevated: #252538;
+      --accent-primary: #00d4ff;
+      --accent-primary-subtle: rgba(0, 212, 255, 0.06);
+      --accent-primary-glow: rgba(0, 212, 255, 0.25);
+      --text-primary: #e8e8f0;
+      --text-secondary: #b0b0c0;
+      --text-muted: #6a6a80;
+      --text-disabled: #4a4a5a;
+      --text-inverse: #0a0a14;
+      --status-success: #00ff80;
+      --status-error: #ff4d6a;
+      --border-default: #2a2a3e;
+      --border-strong: #3a3a52;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-body: 'Inter', sans-serif;
+      --text-sm: 12px;
+      --text-xs: 10px;
+      --lh-sm: 1.5;
+      --lh-xs: 1.4;
+      --space-1: 4px;
+      --space-1-5: 6px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-full: 9999px;
+      --input-height-sm: 32px;
+      --btn-height-sm: 32px;
+      --sidebar-width: 280px;
+      --tracking-wide: 0.03em;
+      --duration-fast: 120ms;
+      --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ================================================================
+       Page Setup — centered preview on dark background
+       ================================================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0e0e1a;
+      display: flex;
+      justify-content: center;
+      padding: 32px;
+      min-height: 100vh;
+      font-family: var(--font-body);
+    }
+
+    .preview-frame {
+      width: var(--sidebar-width);
+      height: 620px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ================================================================
+       Search Input
+       ================================================================ */
+    .sidebar__search-wrap {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__search-input {
+      width: 100%;
+      height: var(--input-height-sm);
+      padding: 0 var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      box-sizing: border-box;
+      outline: none;
+    }
+
+    .sidebar__search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* ================================================================
+       Filter Pills
+       ================================================================ */
+    .sidebar__filters {
+      display: flex;
+      align-items: center;
+      padding: var(--space-1-5) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      gap: var(--space-1);
+    }
+
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px var(--space-1-5);
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      border-radius: var(--radius-sm);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      border: 1px solid var(--border-default);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filter-pill--active {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    /* ================================================================
+       Session List
+       ================================================================ */
+    .sidebar__list-region {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    /* Thin custom scrollbar */
+    .sidebar__list-region::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar__list-region::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar__list-region::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: 2px;
+    }
+
+    .sidebar__session-list {
+      list-style: none;
+      padding: var(--space-1) 0;
+    }
+
+    /* ================================================================
+       Session Card — Base
+       ================================================================ */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1-5) var(--space-3);
+      background: transparent;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+
+    /* Selected state */
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    /* Row layout */
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1-5);
+      min-width: 0;
+    }
+
+    .session-card__row--primary {
+      justify-content: flex-start;
+    }
+
+    /* Filename */
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+
+    /* Metadata row */
+    .session-card__meta {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: var(--space-2);
+      padding-left: calc(6px + var(--space-1-5));
+    }
+
+    .session-card__sections,
+    .session-card__age {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-card__age {
+      margin-left: auto;
+    }
+
+    /* Status dot */
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+
+    .session-card__status-dot--processing {
+      background: var(--accent-primary);
+      animation: status-pulse 1.4s ease-in-out infinite;
+    }
+
+    .session-card__status-dot--failed {
+      background: var(--status-error);
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ================================================================
+       Processing State — Variant E: Synced Light Swoosh
+       ================================================================ */
+    .session-card--processing {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .session-card--processing .session-card__filename {
+      color: var(--text-muted);
+    }
+
+    /* Processing text with animated ellipsis */
+    .session-card__processing-text {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--accent-primary);
+      opacity: 0.6;
+      padding-left: calc(6px + var(--space-1-5));
+    }
+
+    .session-card__processing-text::after {
+      content: '';
+      animation: ellipsis 1.8s steps(4, end) infinite;
+    }
+
+    @keyframes ellipsis {
+      0%  { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    /* Swoosh — synced diagonal sweep */
+    .session-card--processing::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.02) 30%,
+        rgba(0, 212, 255, 0.06) 40%,
+        rgba(0, 212, 255, 0.10) 50%,
+        rgba(0, 212, 255, 0.06) 60%,
+        rgba(0, 212, 255, 0.02) 70%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: swoosh-sweep 3s ease-in-out infinite;
+    }
+
+    @keyframes swoosh-sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* Static swoosh frame for screenshot — shows the light band mid-sweep */
+    .session-card--processing.swoosh-static::after {
+      animation: none;
+      transform: translateX(10%);
+    }
+
+    /* ================================================================
+       Footer
+       ================================================================ */
+    .sidebar__footer {
+      padding: var(--space-3);
+      border-top: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--btn-height-sm);
+      padding: 0 var(--space-3);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      gap: var(--space-2);
+      width: 100%;
+    }
+
+    .btn--primary {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    /* ================================================================
+       Label annotation
+       ================================================================ */
+    .preview-label {
+      position: absolute;
+      bottom: -28px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .preview-container {
+      position: relative;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-container">
+    <div class="preview-frame">
+
+      <!-- Search input -->
+      <div class="sidebar__search-wrap">
+        <input
+          type="search"
+          class="sidebar__search-input"
+          placeholder="Filter sessions..."
+          readonly
+        >
+      </div>
+
+      <!-- Filter pills -->
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Processing</button>
+        <button class="filter-pill">Ready</button>
+        <button class="filter-pill">Failed</button>
+      </div>
+
+      <!-- Session list — flat, no section headers -->
+      <div class="sidebar__list-region">
+        <ul class="sidebar__session-list">
+
+          <!-- 1. Ready session (selected) -->
+          <li>
+            <div class="session-card session-card--selected">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">deploy-k8s-staging.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">12 sections</span>
+                <span class="session-card__age">3m ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 2. Processing session (swoosh static) -->
+          <li>
+            <div class="session-card session-card--processing swoosh-static">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--processing"></span>
+                <span class="session-card__filename">migrate-db-prod.cast</span>
+              </div>
+              <div class="session-card__processing-text">Processing</div>
+            </div>
+          </li>
+
+          <!-- 3. Ready session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">setup-ci-pipeline.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">8 sections</span>
+                <span class="session-card__age">12m ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 4. Ready session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">debug-auth-flow.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">5 sections</span>
+                <span class="session-card__age">1h ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 5. Processing session (swoosh static) -->
+          <li>
+            <div class="session-card session-card--processing swoosh-static">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--processing"></span>
+                <span class="session-card__filename">refactor-api-routes.cast</span>
+              </div>
+              <div class="session-card__processing-text">Processing</div>
+            </div>
+          </li>
+
+          <!-- 6. Failed session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--failed"></span>
+                <span class="session-card__filename">install-deps.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">-- sections</span>
+                <span class="session-card__age">2h ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 7. Ready session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">terraform-plan.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">21 sections</span>
+                <span class="session-card__age">3h ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 8. Ready session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">docker-build-multi.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">15 sections</span>
+                <span class="session-card__age">5h ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 9. Ready session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">fix-memory-leak.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">3 sections</span>
+                <span class="session-card__age">1d ago</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 10. Ready session -->
+          <li>
+            <div class="session-card">
+              <div class="session-card__row session-card__row--primary">
+                <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                <span class="session-card__filename">nginx-ssl-config.cast</span>
+              </div>
+              <div class="session-card__meta">
+                <span class="session-card__sections">7 sections</span>
+                <span class="session-card__age">2d ago</span>
+              </div>
+            </div>
+          </li>
+
+        </ul>
+      </div>
+
+      <!-- Footer -->
+      <div class="sidebar__footer">
+        <button class="btn btn--primary">+ New Session</button>
+      </div>
+
+    </div>
+    <div class="preview-label">Variant E (Real Sidebar) -- Processing cards with synced swoosh</div>
+  </div>
+</body>
+</html>

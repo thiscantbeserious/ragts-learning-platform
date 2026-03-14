@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebar Card Variants — Erika Design</title>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ================================================================
+       TOKENS (from layout.css)
+       ================================================================ */
+    :root {
+      --baseline: 18px;
+      --bg-page: #1a1a2e;
+      --bg-surface: #212136;
+      --bg-elevated: #28283e;
+      --accent-primary: #00d4ff;
+      --accent-primary-hover: #33ddff;
+      --accent-primary-subtle: rgba(0, 212, 255, 0.08);
+      --accent-primary-glow: rgba(0, 212, 255, 0.4);
+      --accent-secondary: #ff4d6a;
+      --status-success: #00ff66;
+      --status-success-subtle: rgba(0, 255, 102, 0.08);
+      --status-error: #d7457b;
+      --text-primary: #f1f1f7;
+      --text-secondary: #d3d4d9;
+      --text-muted: #aaaab0;
+      --text-disabled: #55556a;
+      --border-default: #323349;
+      --border-strong: #3d3d55;
+      --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+      --text-xs: 0.625rem;
+      --text-sm: 0.75rem;
+      --text-base: 0.875rem;
+      --lh-xs: 18px;
+      --lh-sm: 18px;
+      --lh-base: 18px;
+      --space-1: 4px;
+      --space-1-5: 6px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-6: 24px;
+      --rhythm-half: 9px;
+      --rhythm-1: 18px;
+      --rhythm-2: 36px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-xl: 10px;
+      --radius-full: 9999px;
+      --sidebar-width: 260px;
+      --duration-fast: 120ms;
+      --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+      --tracking-wide: 0.06em;
+      --weight-medium: 500;
+      --weight-semibold: 600;
+    }
+
+    /* ================================================================
+       RESET + PAGE
+       ================================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0e0e1a;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--lh-base);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ================================================================
+       LAYOUT — 3 sidebars side by side
+       ================================================================ */
+    .page {
+      display: flex;
+      gap: 40px;
+      padding: 32px 40px;
+      min-height: 100vh;
+      align-items: flex-start;
+    }
+
+    .variant {
+      display: flex;
+      flex-direction: column;
+      width: var(--sidebar-width);
+      flex-shrink: 0;
+    }
+
+    .variant__label {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--accent-primary);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .variant__desc {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* ================================================================
+       SIDEBAR SHELL (shared across all variants)
+       ================================================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      height: 620px;
+      overflow: hidden;
+    }
+
+    /* Brand area */
+    .sidebar__brand {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .sidebar__brand-icon {
+      width: 22px;
+      height: 22px;
+      background: var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--bg-page);
+    }
+    .sidebar__brand-name {
+      font-size: var(--text-base);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    /* Search + filters */
+    .sidebar__search {
+      padding: 10px 12px 0;
+    }
+    .search-input {
+      width: 100%;
+      height: 32px;
+      background: var(--bg-page);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 0 10px;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      outline: none;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px 6px;
+    }
+    .pill {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-default);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .pill--active {
+      background: var(--accent-primary-subtle);
+      border-color: rgba(0, 212, 255, 0.25);
+      color: var(--accent-primary);
+    }
+
+    /* Session list area */
+    .sidebar__list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    /* New session button */
+    .sidebar__footer {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border-default);
+    }
+    .btn-new {
+      width: 100%;
+      height: 32px;
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(0, 212, 255, 0.3);
+      background: transparent;
+      color: var(--accent-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+    .btn-new:hover {
+      background: var(--accent-primary-subtle);
+      border-color: rgba(0, 212, 255, 0.5);
+    }
+
+    /* ================================================================
+       SHARED CARD PARTS
+       ================================================================ */
+    .sc__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1-5);
+      min-width: 0;
+    }
+    .sc__dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+    .sc__dot--ready { background: var(--status-success); }
+    .sc__dot--processing {
+      background: var(--accent-primary);
+      animation: dot-pulse 1.4s ease-in-out infinite;
+    }
+    .sc__dot--failed { background: var(--status-error); }
+
+    @keyframes dot-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .sc__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+    .sc__meta {
+      display: flex;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-muted);
+      padding-left: calc(6px + var(--space-1-5));
+    }
+    .sc__age { margin-left: auto; }
+
+    .sc__processing-text {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--accent-primary);
+      padding-left: calc(6px + var(--space-1-5));
+    }
+
+    /* ================================================================
+       VARIANT A: Current Flat (Baseline)
+       ================================================================
+       Flat rows, left-border accent on selected, no radius.
+       This is what we have now.
+       ================================================================ */
+    .va-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1-5) var(--space-3);
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+    .va-card .sc__filename { color: var(--text-secondary); }
+    .va-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+    .va-card:hover .sc__filename { color: var(--text-primary); }
+
+    .va-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+    .va-card--selected .sc__filename { color: var(--text-primary); }
+
+    /* Processing swoosh — edge to edge, no clip */
+    .va-card--processing {
+      cursor: default;
+      pointer-events: none;
+    }
+    .va-card--processing .sc__filename { color: var(--text-muted); }
+    .va-card--processing::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.03) 30%,
+        rgba(0, 212, 255, 0.08) 40%,
+        rgba(0, 212, 255, 0.15) 50%,
+        rgba(0, 212, 255, 0.08) 60%,
+        rgba(0, 212, 255, 0.03) 70%,
+        transparent 100%
+      );
+      animation: swoosh-a 3s ease-in-out infinite;
+    }
+    @keyframes swoosh-a {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* ================================================================
+       VARIANT B: Soft Selected + Flat Rest
+       ================================================================
+       UX research recommendation. Flat rows at rest, rounded fill
+       on selected only, subtle hover, edge-to-edge swoosh.
+       ================================================================ */
+    .vb-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: visible;
+      padding: var(--space-1-5) var(--space-3);
+      margin: 0 0;
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      border-radius: 0;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default),
+                  border-radius var(--duration-fast) var(--easing-default);
+    }
+    .vb-card .sc__filename { color: var(--text-secondary); }
+    .vb-card:hover {
+      background: rgba(0, 212, 255, 0.05);
+    }
+    .vb-card:hover .sc__filename { color: var(--text-primary); }
+
+    .vb-card--selected {
+      border-left-color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.10);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-right: 6px;
+    }
+    .vb-card--selected .sc__filename { color: var(--text-primary); }
+
+    /* Processing — flat, no rounding, edge-to-edge swoosh */
+    .vb-card--processing {
+      cursor: default;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .vb-card--processing .sc__filename { color: var(--text-muted); }
+    .vb-card--processing::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.03) 30%,
+        rgba(0, 212, 255, 0.08) 40%,
+        rgba(0, 212, 255, 0.15) 50%,
+        rgba(0, 212, 255, 0.08) 60%,
+        rgba(0, 212, 255, 0.03) 70%,
+        transparent 100%
+      );
+      animation: swoosh-b 3s ease-in-out infinite;
+    }
+    @keyframes swoosh-b {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* ================================================================
+       VARIANT C: Compact Glass Cards
+       ================================================================
+       Every card gets subtle glass treatment. Faint border,
+       small radius, very subtle backdrop, minimal shadow.
+       Processing swoosh clips to card shape.
+       ================================================================ */
+    .sidebar--c .sidebar__list {
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .vc-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1-5) var(--space-3);
+      background: rgba(33, 33, 54, 0.45);
+      border: 1px solid rgba(50, 51, 73, 0.6);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default),
+                  box-shadow var(--duration-fast) var(--easing-default);
+    }
+    .vc-card .sc__filename { color: var(--text-secondary); }
+    .vc-card:hover {
+      background: rgba(33, 33, 54, 0.7);
+      border-color: rgba(50, 51, 73, 0.9);
+    }
+    .vc-card:hover .sc__filename { color: var(--text-primary); }
+
+    .vc-card--selected {
+      border-color: rgba(0, 212, 255, 0.35);
+      background: rgba(0, 212, 255, 0.08);
+      box-shadow: 0 0 8px rgba(0, 212, 255, 0.1),
+                  inset 0 0 6px rgba(0, 212, 255, 0.04);
+    }
+    .vc-card--selected .sc__filename { color: var(--text-primary); }
+
+    /* Processing — swoosh clips to card radius */
+    .vc-card--processing {
+      cursor: default;
+      pointer-events: none;
+    }
+    .vc-card--processing .sc__filename { color: var(--text-muted); }
+    .vc-card--processing::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      border-radius: inherit;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.03) 30%,
+        rgba(0, 212, 255, 0.08) 40%,
+        rgba(0, 212, 255, 0.15) 50%,
+        rgba(0, 212, 255, 0.08) 60%,
+        rgba(0, 212, 255, 0.03) 70%,
+        transparent 100%
+      );
+      animation: swoosh-c 3s ease-in-out infinite;
+    }
+    @keyframes swoosh-c {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- ============================================================
+         VARIANT A: Current Flat (Baseline)
+         ============================================================ -->
+    <div class="variant">
+      <div class="variant__label">Variant A</div>
+      <div class="variant__desc">Current flat rows. Left-border accent on selected. No radius. Edge-to-edge swoosh.</div>
+      <div class="sidebar">
+        <div class="sidebar__brand">
+          <div class="sidebar__brand-icon">E</div>
+          <span class="sidebar__brand-name">Erika</span>
+        </div>
+        <div class="sidebar__search">
+          <input class="search-input" type="text" placeholder="Filter sessions..." readonly>
+        </div>
+        <div class="filter-pills">
+          <button class="pill pill--active">All</button>
+          <button class="pill">Processing</button>
+          <button class="pill">Ready</button>
+          <button class="pill">Failed</button>
+        </div>
+        <div class="sidebar__list">
+          <!-- Selected ready card -->
+          <div class="va-card va-card--selected">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">gemini-pattern-analysis.cast</span>
+            </div>
+            <div class="sc__meta">
+              <span>50 sections</span>
+              <span class="sc__age">4m ago</span>
+            </div>
+          </div>
+          <!-- Ready cards -->
+          <div class="va-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">agnt-ses-rec_260206_213638.ca...</span>
+            </div>
+            <div class="sc__meta">
+              <span>4 sections</span>
+              <span class="sc__age">8m ago</span>
+            </div>
+          </div>
+          <div class="va-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">sim-san1_0ta794q.cast</span>
+            </div>
+            <div class="sc__meta">
+              <span>0 sections</span>
+              <span class="sc__age">12m ago</span>
+            </div>
+          </div>
+          <!-- Processing cards -->
+          <div class="va-card va-card--processing">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--processing"></span>
+              <span class="sc__filename">agnt-ses-rec_refactor-sdlc__0...</span>
+            </div>
+            <div class="sc__processing-text">Processing...</div>
+          </div>
+          <div class="va-card va-card--processing">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--processing"></span>
+              <span class="sc__filename">codex-pattern-analysis.cast</span>
+            </div>
+            <div class="sc__processing-text">Processing...</div>
+          </div>
+          <!-- More ready cards -->
+          <div class="va-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">agnt-ses-rec_main_0ta839f.ca...</span>
+            </div>
+            <div class="sc__meta">
+              <span>12 sections</span>
+              <span class="sc__age">25m ago</span>
+            </div>
+          </div>
+          <div class="va-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">env-ag-fix-initial-prototype_...</span>
+            </div>
+            <div class="sc__meta">
+              <span>8 sections</span>
+              <span class="sc__age">32m ago</span>
+            </div>
+          </div>
+          <div class="va-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--failed"></span>
+              <span class="sc__filename">ragts-le-platf_feat--snapsho...</span>
+            </div>
+            <div class="sc__meta">
+              <span>0 sections</span>
+              <span class="sc__age">41m ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar__footer">
+          <button class="btn-new">+ New Session</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         VARIANT B: Soft Selected + Flat Rest
+         ============================================================ -->
+    <div class="variant">
+      <div class="variant__label">Variant B</div>
+      <div class="variant__desc">UX research recommendation. Flat at rest, rounded fill on selected only (4px right-side radius). Subtle hover. Edge-to-edge swoosh.</div>
+      <div class="sidebar">
+        <div class="sidebar__brand">
+          <div class="sidebar__brand-icon">E</div>
+          <span class="sidebar__brand-name">Erika</span>
+        </div>
+        <div class="sidebar__search">
+          <input class="search-input" type="text" placeholder="Filter sessions..." readonly>
+        </div>
+        <div class="filter-pills">
+          <button class="pill pill--active">All</button>
+          <button class="pill">Processing</button>
+          <button class="pill">Ready</button>
+          <button class="pill">Failed</button>
+        </div>
+        <div class="sidebar__list">
+          <!-- Selected ready card -->
+          <div class="vb-card vb-card--selected">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">gemini-pattern-analysis.cast</span>
+            </div>
+            <div class="sc__meta">
+              <span>50 sections</span>
+              <span class="sc__age">4m ago</span>
+            </div>
+          </div>
+          <!-- Ready cards -->
+          <div class="vb-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">agnt-ses-rec_260206_213638.ca...</span>
+            </div>
+            <div class="sc__meta">
+              <span>4 sections</span>
+              <span class="sc__age">8m ago</span>
+            </div>
+          </div>
+          <div class="vb-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">sim-san1_0ta794q.cast</span>
+            </div>
+            <div class="sc__meta">
+              <span>0 sections</span>
+              <span class="sc__age">12m ago</span>
+            </div>
+          </div>
+          <!-- Processing cards -->
+          <div class="vb-card vb-card--processing">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--processing"></span>
+              <span class="sc__filename">agnt-ses-rec_refactor-sdlc__0...</span>
+            </div>
+            <div class="sc__processing-text">Processing...</div>
+          </div>
+          <div class="vb-card vb-card--processing">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--processing"></span>
+              <span class="sc__filename">codex-pattern-analysis.cast</span>
+            </div>
+            <div class="sc__processing-text">Processing...</div>
+          </div>
+          <!-- More ready cards -->
+          <div class="vb-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">agnt-ses-rec_main_0ta839f.ca...</span>
+            </div>
+            <div class="sc__meta">
+              <span>12 sections</span>
+              <span class="sc__age">25m ago</span>
+            </div>
+          </div>
+          <div class="vb-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">env-ag-fix-initial-prototype_...</span>
+            </div>
+            <div class="sc__meta">
+              <span>8 sections</span>
+              <span class="sc__age">32m ago</span>
+            </div>
+          </div>
+          <div class="vb-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--failed"></span>
+              <span class="sc__filename">ragts-le-platf_feat--snapsho...</span>
+            </div>
+            <div class="sc__meta">
+              <span>0 sections</span>
+              <span class="sc__age">41m ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar__footer">
+          <button class="btn-new">+ New Session</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         VARIANT C: Compact Glass Cards
+         ============================================================ -->
+    <div class="variant">
+      <div class="variant__label">Variant C</div>
+      <div class="variant__desc">Every card gets subtle glass treatment. Faint border, 6px radius, minimal shadow. Swoosh clips to card shape. More vertical spacing.</div>
+      <div class="sidebar sidebar--c">
+        <div class="sidebar__brand">
+          <div class="sidebar__brand-icon">E</div>
+          <span class="sidebar__brand-name">Erika</span>
+        </div>
+        <div class="sidebar__search">
+          <input class="search-input" type="text" placeholder="Filter sessions..." readonly>
+        </div>
+        <div class="filter-pills">
+          <button class="pill pill--active">All</button>
+          <button class="pill">Processing</button>
+          <button class="pill">Ready</button>
+          <button class="pill">Failed</button>
+        </div>
+        <div class="sidebar__list">
+          <!-- Selected ready card -->
+          <div class="vc-card vc-card--selected">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">gemini-pattern-analysis.cast</span>
+            </div>
+            <div class="sc__meta">
+              <span>50 sections</span>
+              <span class="sc__age">4m ago</span>
+            </div>
+          </div>
+          <!-- Ready cards -->
+          <div class="vc-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">agnt-ses-rec_260206_213638.ca...</span>
+            </div>
+            <div class="sc__meta">
+              <span>4 sections</span>
+              <span class="sc__age">8m ago</span>
+            </div>
+          </div>
+          <div class="vc-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">sim-san1_0ta794q.cast</span>
+            </div>
+            <div class="sc__meta">
+              <span>0 sections</span>
+              <span class="sc__age">12m ago</span>
+            </div>
+          </div>
+          <!-- Processing cards -->
+          <div class="vc-card vc-card--processing">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--processing"></span>
+              <span class="sc__filename">agnt-ses-rec_refactor-sdlc__0...</span>
+            </div>
+            <div class="sc__processing-text">Processing...</div>
+          </div>
+          <div class="vc-card vc-card--processing">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--processing"></span>
+              <span class="sc__filename">codex-pattern-analysis.cast</span>
+            </div>
+            <div class="sc__processing-text">Processing...</div>
+          </div>
+          <!-- More ready cards -->
+          <div class="vc-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">agnt-ses-rec_main_0ta839f.ca...</span>
+            </div>
+            <div class="sc__meta">
+              <span>12 sections</span>
+              <span class="sc__age">25m ago</span>
+            </div>
+          </div>
+          <div class="vc-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--ready"></span>
+              <span class="sc__filename">env-ag-fix-initial-prototype_...</span>
+            </div>
+            <div class="sc__meta">
+              <span>8 sections</span>
+              <span class="sc__age">32m ago</span>
+            </div>
+          </div>
+          <div class="vc-card">
+            <div class="sc__row">
+              <span class="sc__dot sc__dot--failed"></span>
+              <span class="sc__filename">ragts-le-platf_feat--snapsho...</span>
+            </div>
+            <div class="sc__meta">
+              <span>0 sections</span>
+              <span class="sc__age">41m ago</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar__footer">
+          <button class="btn-new">+ New Session</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

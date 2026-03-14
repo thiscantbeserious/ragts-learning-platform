@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Outer partial hexagon: 5 segments, gap on bottom-right -->
+  <!-- Top edge -->
+  <line x1="6" y1="3.5" x2="18" y2="3.5"/>
+  <!-- Top-left diagonal -->
+  <line x1="0.5" y1="12" x2="6" y2="3.5"/>
+  <!-- Bottom-left diagonal -->
+  <line x1="0.5" y1="12" x2="6" y2="20.5"/>
+  <!-- Bottom edge -->
+  <line x1="6" y1="20.5" x2="18" y2="20.5"/>
+  <!-- Top-right diagonal (gap edge, dim) -->
+  <line x1="18" y1="3.5" x2="23.5" y2="12" opacity="0.3"/>
+  <!-- Inner echo/reflection: scaled ~55%, offset slightly down-right -->
+  <g opacity="0.3" stroke-width="1">
+    <!-- Top edge (inner) -->
+    <line x1="9.5" y1="7.5" x2="16.5" y2="7.5"/>
+    <!-- Top-left diagonal (inner) -->
+    <line x1="6.5" y1="12.5" x2="9.5" y2="7.5"/>
+    <!-- Bottom-left diagonal (inner) -->
+    <line x1="6.5" y1="12.5" x2="9.5" y2="17.5"/>
+    <!-- Bottom edge (inner) -->
+    <line x1="9.5" y1="17.5" x2="16.5" y2="17.5"/>
+    <!-- Top-right diagonal (inner, even dimmer) -->
+    <line x1="16.5" y1="7.5" x2="19.5" y2="12.5" opacity="0.5"/>
+  </g>
+</svg>

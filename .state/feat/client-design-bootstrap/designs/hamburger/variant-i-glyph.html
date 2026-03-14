@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variant I: Abstract Glyph</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * VARIANT I: Abstract Glyph / Symbol
+     *
+     * A single abstract glyph that is unique to the platform, rendered as
+     * pure CSS shapes (no font characters) for cross-platform consistency.
+     * Three glyph concepts explored:
+     *
+     * I-1: "Grid Window" -- 2x2 grid of small squares suggesting a dashboard/panel view.
+     *      Reads as "show me panels" which IS the nav action. On hover, squares shift.
+     *
+     * I-2: "Stacked Planes" -- Three overlapping parallelograms creating depth.
+     *      Suggests stacked content/layers. Geometric and distinctive.
+     *
+     * I-3: "Circuit Node" -- A central dot with 3 radiating lines (like a circuit junction).
+     *      Ties into the TRON/tech aesthetic. Unique, recognizable at 28px.
+     */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+      gap: 48px;
+    }
+    h1 {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+    }
+    h2 {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+    }
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    /* THE HAMBURGER BUTTON */
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .hamburger__icon {
+      --accent: var(--accent-primary);
+      --accent-glow: rgba(0, 212, 255, 0.15);
+      --accent-glow-strong: rgba(0, 212, 255, 0.35);
+      --accent-bg: rgba(0, 212, 255, 0.06);
+      --accent-inset: rgba(0, 212, 255, 0.08);
+      --accent-inset-strong: rgba(0, 212, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      box-shadow: 0 0 8px var(--accent-glow), inset 0 0 6px var(--accent-inset);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+      color: var(--accent);
+      position: relative;
+    }
+    .hamburger--hover .hamburger__icon {
+      box-shadow: 0 0 14px var(--accent-glow-strong), inset 0 0 8px var(--accent-inset-strong);
+    }
+
+    /* ========================================
+       GLYPH I-1: Grid Window (2x2 squares)
+       ======================================== */
+    .glyph-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      width: 14px;
+      height: 14px;
+    }
+    .glyph-grid__cell {
+      background: currentColor;
+      border-radius: 1px;
+      transition: transform 200ms ease-out, border-radius 200ms ease-out;
+    }
+    /* Hover: cells rotate slightly and round */
+    .hamburger--hover .glyph-grid__cell:nth-child(1) { transform: translate(-0.5px, -0.5px); }
+    .hamburger--hover .glyph-grid__cell:nth-child(2) { transform: translate(0.5px, -0.5px); }
+    .hamburger--hover .glyph-grid__cell:nth-child(3) { transform: translate(-0.5px, 0.5px); }
+    .hamburger--hover .glyph-grid__cell:nth-child(4) { transform: translate(0.5px, 0.5px); }
+
+    /* ========================================
+       GLYPH I-2: Stacked Planes
+       ======================================== */
+    .glyph-planes {
+      position: relative;
+      width: 16px;
+      height: 14px;
+    }
+    .glyph-planes__layer {
+      position: absolute;
+      left: 0;
+      width: 12px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      transition: transform 200ms ease-out, width 200ms ease-out;
+    }
+    .glyph-planes__layer:nth-child(1) { top: 2px; width: 14px; }
+    .glyph-planes__layer:nth-child(2) { top: 6px; width: 11px; transform: translateX(1px); }
+    .glyph-planes__layer:nth-child(3) { top: 10px; width: 8px; transform: translateX(2px); }
+
+    /* Hover: layers fan out creating depth illusion */
+    .hamburger--hover .glyph-planes__layer:nth-child(1) { transform: translateX(-1px); width: 15px; }
+    .hamburger--hover .glyph-planes__layer:nth-child(2) { transform: translateX(2px); width: 10px; }
+    .hamburger--hover .glyph-planes__layer:nth-child(3) { transform: translateX(4px); width: 7px; }
+
+    /* ========================================
+       GLYPH I-3: Circuit Node
+       ======================================== */
+    .glyph-circuit {
+      position: relative;
+      width: 16px;
+      height: 16px;
+    }
+    /* Central dot */
+    .glyph-circuit__core {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 4px;
+      background: currentColor;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: box-shadow 250ms ease-out;
+    }
+    .hamburger--hover .glyph-circuit__core {
+      box-shadow: 0 0 4px currentColor;
+    }
+    /* Radiating lines */
+    .glyph-circuit__line {
+      position: absolute;
+      background: currentColor;
+      border-radius: 1px;
+      transition: transform 200ms ease-out, opacity 200ms ease-out;
+    }
+    /* Line going up */
+    .glyph-circuit__line--n {
+      width: 2px;
+      height: 5px;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    /* Line going down-left */
+    .glyph-circuit__line--sw {
+      width: 2px;
+      height: 5px;
+      bottom: 0;
+      left: 3px;
+      transform: rotate(30deg);
+      transform-origin: top center;
+    }
+    /* Line going down-right */
+    .glyph-circuit__line--se {
+      width: 2px;
+      height: 5px;
+      bottom: 0;
+      right: 3px;
+      transform: rotate(-30deg);
+      transform-origin: top center;
+    }
+    /* Hover: lines extend slightly */
+    .hamburger--hover .glyph-circuit__line--n  { transform: translateX(-50%) scaleY(1.2); }
+    .hamburger--hover .glyph-circuit__line--sw { transform: rotate(30deg) scaleY(1.2); }
+    .hamburger--hover .glyph-circuit__line--se { transform: rotate(-30deg) scaleY(1.2); }
+
+    /* ========================================
+       GLYPH I-4: Terminal Cursor (bonus)
+       ======================================== */
+    .glyph-terminal {
+      position: relative;
+      width: 14px;
+      height: 14px;
+    }
+    /* Prompt bracket > */
+    .glyph-terminal__bracket {
+      position: absolute;
+      left: 1px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .glyph-terminal__bracket-top,
+    .glyph-terminal__bracket-bottom {
+      position: absolute;
+      width: 6px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      transition: transform 200ms ease-out;
+    }
+    .glyph-terminal__bracket-top {
+      top: -3px;
+      transform: rotate(30deg);
+      transform-origin: left center;
+    }
+    .glyph-terminal__bracket-bottom {
+      bottom: -3px;
+      transform: rotate(-30deg);
+      transform-origin: left center;
+    }
+    /* Cursor block */
+    .glyph-terminal__cursor {
+      position: absolute;
+      right: 1px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 10px;
+      background: currentColor;
+      border-radius: 1px;
+      opacity: 0.8;
+      transition: opacity 200ms ease-out;
+    }
+    .hamburger--hover .glyph-terminal__cursor { opacity: 1; }
+    .hamburger--hover .glyph-terminal__bracket-top { transform: rotate(35deg); }
+    .hamburger--hover .glyph-terminal__bracket-bottom { transform: rotate(-35deg); }
+
+    /* Whitelabel */
+    .theme-orange .hamburger__icon {
+      --accent: #ff8c00;
+      --accent-glow: rgba(255, 140, 0, 0.15);
+      --accent-glow-strong: rgba(255, 140, 0, 0.35);
+      --accent-bg: rgba(255, 140, 0, 0.06);
+      --accent-inset: rgba(255, 140, 0, 0.08);
+      --accent-inset-strong: rgba(255, 140, 0, 0.12);
+      color: #ff8c00;
+    }
+    .theme-green .hamburger__icon {
+      --accent: #00ff88;
+      --accent-glow: rgba(0, 255, 136, 0.15);
+      --accent-glow-strong: rgba(0, 255, 136, 0.35);
+      --accent-bg: rgba(0, 255, 136, 0.06);
+      --accent-inset: rgba(0, 255, 136, 0.08);
+      --accent-inset-strong: rgba(0, 255, 136, 0.12);
+      color: #00ff88;
+    }
+    .theme-purple .hamburger__icon {
+      --accent: #b388ff;
+      --accent-glow: rgba(179, 136, 255, 0.15);
+      --accent-glow-strong: rgba(179, 136, 255, 0.35);
+      --accent-bg: rgba(179, 136, 255, 0.06);
+      --accent-inset: rgba(179, 136, 255, 0.08);
+      --accent-inset-strong: rgba(179, 136, 255, 0.12);
+      color: #b388ff;
+    }
+
+    /* Light theme */
+    .theme-light .demo__context { background: #f5f5f7; border-color: #d0d0d8; }
+    .theme-light .demo__context-label { color: #555; }
+    .theme-light .hamburger__icon {
+      --accent: #0099bb;
+      --accent-glow: rgba(0, 153, 187, 0.12);
+      --accent-glow-strong: rgba(0, 153, 187, 0.25);
+      --accent-bg: rgba(0, 153, 187, 0.06);
+      --accent-inset: rgba(0, 153, 187, 0.05);
+      --accent-inset-strong: rgba(0, 153, 187, 0.10);
+      color: #0099bb;
+    }
+
+    /* BrandMark comparison */
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 600px;
+      height: 1px;
+      background: var(--border-default);
+    }
+    .notes {
+      max-width: 560px;
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+    }
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: var(--weight-semibold);
+    }
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+    .notes__text + .notes__text { margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>Variant I: Abstract Glyphs</h1>
+  <p style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); max-width: 520px; text-align: center; line-height: var(--lh-sm);">
+    Unique abstract glyphs rendered as pure CSS shapes. No font characters. Each is
+    distinctive at 28px and reads as "navigation" without being a standard hamburger.
+  </p>
+
+  <!-- GLYPH I-1: Grid Window -->
+  <div class="section">
+    <h2>I-1: Grid Window</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Normal</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Hover</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- GLYPH I-2: Stacked Planes -->
+  <div class="section">
+    <h2>I-2: Stacked Planes</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-planes">
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Normal</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-planes">
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Hover</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- GLYPH I-3: Circuit Node -->
+  <div class="section">
+    <h2>I-3: Circuit Node</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-circuit">
+                <span class="glyph-circuit__core"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--n"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--sw"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--se"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Normal</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-circuit">
+                <span class="glyph-circuit__core"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--n"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--sw"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--se"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Hover</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- GLYPH I-4: Terminal Cursor -->
+  <div class="section">
+    <h2>I-4: Terminal Prompt (bonus)</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-terminal">
+                <span class="glyph-terminal__bracket">
+                  <span class="glyph-terminal__bracket-top"></span>
+                  <span class="glyph-terminal__bracket-bottom"></span>
+                </span>
+                <span class="glyph-terminal__cursor"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Normal</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-terminal">
+                <span class="glyph-terminal__bracket">
+                  <span class="glyph-terminal__bracket-top"></span>
+                  <span class="glyph-terminal__bracket-bottom"></span>
+                </span>
+                <span class="glyph-terminal__cursor"></span>
+              </span>
+            </span>
+          </button>
+          <span class="demo__context-label">Hover</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHITELABEL -->
+  <div class="section">
+    <h2>Whitelabel Colors (Grid Window)</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Cyan</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo theme-orange">
+        <span class="demo__label">Orange</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo theme-green">
+        <span class="demo__label">Green</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo theme-purple">
+        <span class="demo__label">Purple</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LIGHT THEME -->
+  <div class="section">
+    <h2>Light Theme</h2>
+    <div class="row theme-light">
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Grid</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Planes</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-planes">
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Circuit</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-circuit">
+                <span class="glyph-circuit__core"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--n"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--sw"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--se"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Terminal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-terminal">
+                <span class="glyph-terminal__bracket">
+                  <span class="glyph-terminal__bracket-top"></span>
+                  <span class="glyph-terminal__bracket-bottom"></span>
+                </span>
+                <span class="glyph-terminal__cursor"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- COMPARISON WITH BRANDMARK -->
+  <div class="section">
+    <h2>Alongside BrandMark E</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">BrandMark</span>
+        <div class="demo__context">
+          <div class="brand-icon">E</div>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Grid (I-1)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-grid">
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+                <span class="glyph-grid__cell"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Planes (I-2)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-planes">
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+                <span class="glyph-planes__layer"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Circuit (I-3)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-circuit">
+                <span class="glyph-circuit__core"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--n"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--sw"></span>
+                <span class="glyph-circuit__line glyph-circuit__line--se"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="demo">
+        <span class="demo__label">Terminal (I-4)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon" aria-hidden="true">
+              <span class="glyph-terminal">
+                <span class="glyph-terminal__bracket">
+                  <span class="glyph-terminal__bracket-top"></span>
+                  <span class="glyph-terminal__bracket-bottom"></span>
+                </span>
+                <span class="glyph-terminal__cursor"></span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="notes">
+    <p class="notes__title">Implementation Notes</p>
+    <p class="notes__text">
+      <strong>All pure CSS.</strong> No SVG, no icon fonts, no Unicode characters.
+      Each glyph is built from positioned spans with backgrounds and border-radius.
+      Guaranteed cross-platform consistency.
+    </p>
+    <p class="notes__text">
+      <strong>I-1 Grid Window</strong> -- reads as "dashboard panels". Very modern (Windows 11, macOS Launchpad).
+      <strong>I-2 Stacked Planes</strong> -- cascade of content layers, close to hamburger but more spatial.
+      <strong>I-3 Circuit Node</strong> -- TRON aesthetic, reads as "junction/hub".
+      <strong>I-4 Terminal Prompt</strong> -- domain-specific: a terminal cursor with chevron bracket.
+    </p>
+    <p class="notes__text">
+      <strong>Risk:</strong> Non-standard icons may confuse first-time users. Mitigated by
+      tooltip + aria-label. Grid Window (I-1) has strongest "nav" recognition.
+    </p>
+  </div>
+
+</body>
+</html>

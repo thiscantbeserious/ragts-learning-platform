@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamburger Variant A — Proportioned Bars</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * VARIANT A: Proportioned Bars
+     *
+     * Rationale: The current hamburger has 14px-wide bars with 4px gap and 1.5px
+     * thickness inside a 28px box. The proportions feel cramped — the bars are
+     * too close together and too thin relative to the container. This variant
+     * refines the geometry:
+     *   - Bar width: 14px (centered in 28px box = 7px padding each side)
+     *   - Bar thickness: 2px (up from 1.5px — more visible at small size)
+     *   - Gap between bars: 3px (down from 4px — tighter, more cohesive)
+     *   - Total bar group height: 2+3+2+3+2 = 12px, centered in 28px = 8px pad top/bottom
+     *
+     * This gives a balanced, confident hamburger that reads clearly at 28px.
+     */
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 80px;
+      flex-wrap: wrap;
+      padding: 40px;
+    }
+
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .hamburger__icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow:
+        0 0 8px rgba(0, 212, 255, 0.15),
+        inset 0 0 6px rgba(0, 212, 255, 0.08);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+    }
+
+    .hamburger--hover .hamburger__icon {
+      box-shadow:
+        0 0 14px rgba(0, 212, 255, 0.35),
+        inset 0 0 8px rgba(0, 212, 255, 0.12);
+    }
+
+    .hamburger__bar {
+      display: block;
+      width: 14px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    .comparison {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      margin-top: 40px;
+    }
+
+    .comparison__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .comparison__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow:
+        0 0 8px rgba(0, 212, 255, 0.15),
+        inset 0 0 6px rgba(0, 212, 255, 0.08);
+    }
+
+    .notes {
+      margin-top: 48px;
+      max-width: 480px;
+      text-align: center;
+    }
+
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- Normal state -->
+  <div class="demo">
+    <span class="demo__label">Normal</span>
+    <div class="demo__context">
+      <button class="hamburger" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon" aria-hidden="true">
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- Hover state -->
+  <div class="demo">
+    <span class="demo__label">Hover</span>
+    <div class="demo__context">
+      <button class="hamburger hamburger--hover" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon" aria-hidden="true">
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+          <span class="hamburger__bar"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- Comparison with E brand mark -->
+  <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="comparison">
+      <div class="comparison__item">
+        <div class="brand-icon">E</div>
+        <span class="comparison__label">BrandMark E (reference)</span>
+      </div>
+      <div class="comparison__item">
+        <button class="hamburger" type="button" style="width: 28px; height: 28px; padding: 0;">
+          <span class="hamburger__icon" aria-hidden="true">
+            <span class="hamburger__bar"></span>
+            <span class="hamburger__bar"></span>
+            <span class="hamburger__bar"></span>
+          </span>
+        </button>
+        <span class="comparison__label">Variant A (bars)</span>
+      </div>
+    </div>
+
+    <div class="notes">
+      <p class="notes__title">Variant A: Proportioned Bars</p>
+      <p class="notes__text">
+        Classic 3-bar hamburger refined for the 28px branded box.
+        Bars are 14px wide, 2px thick with 3px gaps.
+        Total bar group: 12px tall, centered in 28px with 8px padding.
+        Clean, universally recognized, pairs naturally with the E icon.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

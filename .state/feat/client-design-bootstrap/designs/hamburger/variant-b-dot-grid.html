@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamburger Variant B — Dot Grid / Minimal</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * VARIANT B: Dot Grid / Minimal
+     *
+     * Two sub-variants:
+     *   B1: 3 vertical dots (kebab-style) — 3px diameter, 4px gap
+     *   B2: 2x3 dot grid (6 dots) — 2.5px dots, techy/sci-fi feel
+     */
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 80px;
+      flex-wrap: wrap;
+      padding: 40px;
+    }
+
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .hamburger__icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow:
+        0 0 8px rgba(0, 212, 255, 0.15),
+        inset 0 0 6px rgba(0, 212, 255, 0.08);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+    }
+
+    .hamburger--hover .hamburger__icon {
+      box-shadow:
+        0 0 14px rgba(0, 212, 255, 0.35),
+        inset 0 0 8px rgba(0, 212, 255, 0.12);
+    }
+
+    /* B1: Vertical 3 dots */
+    .hamburger__icon--dots {
+      gap: 4px;
+    }
+
+    .hamburger__dot {
+      display: block;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* B2: 2x3 dot grid */
+    .hamburger__icon--grid {
+      display: grid;
+      grid-template-columns: repeat(2, 2.5px);
+      grid-template-rows: repeat(3, 2.5px);
+      column-gap: 5px;
+      row-gap: 3.5px;
+      flex-direction: unset;
+      align-content: center;
+      justify-content: center;
+    }
+
+    .hamburger__grid-dot {
+      width: 2.5px;
+      height: 2.5px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow:
+        0 0 8px rgba(0, 212, 255, 0.15),
+        inset 0 0 6px rgba(0, 212, 255, 0.08);
+    }
+
+    .comparison {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      margin-top: 40px;
+    }
+
+    .comparison__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .comparison__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+    }
+
+    .section-divider {
+      width: 1px;
+      height: 120px;
+      background: var(--border-default);
+    }
+
+    .notes {
+      margin-top: 48px;
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- B1: Vertical dots — Normal -->
+  <div class="demo">
+    <span class="demo__label">B1 Normal</span>
+    <div class="demo__context">
+      <button class="hamburger" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--dots" aria-hidden="true">
+          <span class="hamburger__dot"></span>
+          <span class="hamburger__dot"></span>
+          <span class="hamburger__dot"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- B1: Vertical dots — Hover -->
+  <div class="demo">
+    <span class="demo__label">B1 Hover</span>
+    <div class="demo__context">
+      <button class="hamburger hamburger--hover" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--dots" aria-hidden="true">
+          <span class="hamburger__dot"></span>
+          <span class="hamburger__dot"></span>
+          <span class="hamburger__dot"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- B2: Dot grid — Normal -->
+  <div class="demo">
+    <span class="demo__label">B2 Normal</span>
+    <div class="demo__context">
+      <button class="hamburger" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--grid" aria-hidden="true">
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- B2: Dot grid — Hover -->
+  <div class="demo">
+    <span class="demo__label">B2 Hover</span>
+    <div class="demo__context">
+      <button class="hamburger hamburger--hover" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--grid" aria-hidden="true">
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+          <span class="hamburger__grid-dot"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- Comparison -->
+  <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="comparison">
+      <div class="comparison__item">
+        <div class="brand-icon">E</div>
+        <span class="comparison__label">BrandMark E</span>
+      </div>
+      <div class="comparison__item">
+        <button class="hamburger" type="button" style="width: 28px; height: 28px; padding: 0;">
+          <span class="hamburger__icon hamburger__icon--dots" aria-hidden="true">
+            <span class="hamburger__dot"></span>
+            <span class="hamburger__dot"></span>
+            <span class="hamburger__dot"></span>
+          </span>
+        </button>
+        <span class="comparison__label">B1 Dots</span>
+      </div>
+      <div class="comparison__item">
+        <button class="hamburger" type="button" style="width: 28px; height: 28px; padding: 0;">
+          <span class="hamburger__icon hamburger__icon--grid" aria-hidden="true">
+            <span class="hamburger__grid-dot"></span>
+            <span class="hamburger__grid-dot"></span>
+            <span class="hamburger__grid-dot"></span>
+            <span class="hamburger__grid-dot"></span>
+            <span class="hamburger__grid-dot"></span>
+            <span class="hamburger__grid-dot"></span>
+          </span>
+        </button>
+        <span class="comparison__label">B2 Grid</span>
+      </div>
+    </div>
+
+    <div class="notes">
+      <p class="notes__title">Variant B: Dot Grid / Minimal</p>
+      <p class="notes__text">
+        B1 uses 3 vertical dots (3px, 4px gap) for a clean kebab-style icon.
+        B2 uses a 2x3 dot grid (2.5px dots) for a more techy/sci-fi feel.
+        Both are more minimal than bars and pair well with the TRON-neon aesthetic.
+        Tradeoff: dots are less universally recognized as "menu" than bars.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

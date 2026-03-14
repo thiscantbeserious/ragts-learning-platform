@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M1: Smooth Rotation Morph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --glow-soft: rgba(0, 212, 255, 0.15);
+    --glow-hover: rgba(0, 212, 255, 0.35);
+    --glow-inset: rgba(0, 212, 255, 0.08);
+    --glow-inset-hover: rgba(0, 212, 255, 0.12);
+    --bg-icon: rgba(0, 212, 255, 0.06);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 500px; line-height: 1.5;
+  }
+
+  .demo-row { display: flex; gap: 64px; align-items: flex-start; margin-bottom: 48px; }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* === Hamburger Icon === */
+  .hamburger {
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hamburger:focus-visible {
+    outline: 2px solid var(--accent-primary); outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .hamburger__box {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+    transition: box-shadow var(--duration-normal) ease;
+  }
+  .hamburger:hover .hamburger__box {
+    box-shadow: 0 0 14px var(--glow-hover), inset 0 0 8px var(--glow-inset-hover);
+  }
+
+  /* 3x scaled */
+  .hamburger--scaled .hamburger__box {
+    width: 84px; height: 84px;
+    border-radius: calc(var(--radius-sm) * 3); border-width: 3px;
+  }
+  .hamburger--scaled .hamburger__bar { width: 42px; height: 4.5px; border-radius: 3px; }
+
+  /* Actual size */
+  .hamburger--actual .hamburger__box { width: 28px; height: 28px; }
+  .hamburger--actual .hamburger__bar { width: 14px; height: 1.5px; border-radius: 1px; }
+
+  /* Bars */
+  .hamburger__bar {
+    position: absolute; display: block; background: var(--accent-primary);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
+    will-change: transform, opacity;
+  }
+
+  /* Light overrides */
+  .bg-light .hamburger__box {
+    border-color: #0090b3; background: rgba(0, 212, 255, 0.08);
+    box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06);
+  }
+  .bg-light .hamburger__bar { background: #007a99; }
+
+  /* Closed positions - scaled */
+  .hamburger--scaled .hamburger__bar:nth-child(1) { transform: translateY(-12px); }
+  .hamburger--scaled .hamburger__bar:nth-child(2) { transform: translateY(0); }
+  .hamburger--scaled .hamburger__bar:nth-child(3) { transform: translateY(12px); }
+
+  /* Closed positions - actual */
+  .hamburger--actual .hamburger__bar:nth-child(1) { transform: translateY(-4px); }
+  .hamburger--actual .hamburger__bar:nth-child(2) { transform: translateY(0); }
+  .hamburger--actual .hamburger__bar:nth-child(3) { transform: translateY(4px); }
+
+  /* Open (X) - scaled */
+  .hamburger--scaled.is-open .hamburger__bar:nth-child(1) { transform: translateY(0) rotate(45deg); }
+  .hamburger--scaled.is-open .hamburger__bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger--scaled.is-open .hamburger__bar:nth-child(3) { transform: translateY(0) rotate(-45deg); }
+
+  /* Open (X) - actual */
+  .hamburger--actual.is-open .hamburger__bar:nth-child(1) { transform: translateY(0) rotate(45deg); }
+  .hamburger--actual.is-open .hamburger__bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger--actual.is-open .hamburger__bar:nth-child(3) { transform: translateY(0) rotate(-45deg); }
+
+  /* Controls */
+  .controls { display: flex; gap: 12px; margin-bottom: 32px; }
+  .btn-toggle {
+    font-family: 'Geist', system-ui, sans-serif; font-size: 13px;
+    padding: 8px 20px; border-radius: var(--radius-sm);
+    border: 1px solid var(--accent-primary); background: transparent;
+    color: var(--accent-primary); cursor: pointer;
+    transition: background var(--duration-fast) ease, color var(--duration-fast) ease;
+  }
+  .btn-toggle:hover { background: var(--accent-primary); color: var(--bg-base); }
+
+  /* Annotations */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 500px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: 'Geist Mono', monospace; }
+
+  .size-label {
+    font-size: 11px; color: #555; font-family: 'Geist Mono', monospace;
+    text-align: center; margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+  <h1>M1: Smooth Rotation Morph</h1>
+  <p class="subtitle">
+    Classic hamburger-to-X with smooth rotation. Top and bottom bars rotate 45deg into an X
+    while the middle bar fades and collapses. The branded box stays perfectly stable.
+  </p>
+
+  <div class="controls">
+    <button class="btn-toggle" onclick="toggleAll()">Toggle All</button>
+  </div>
+
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <button class="hamburger hamburger--scaled js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hamburger__box">
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+              </span>
+            </button>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <button class="hamburger hamburger--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hamburger__box">
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+              </span>
+            </button>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <button class="hamburger hamburger--scaled js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hamburger__box">
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+              </span>
+            </button>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <button class="hamburger hamburger--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="hamburger__box">
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+                <span class="hamburger__bar"></span>
+              </span>
+            </button>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Duration</span><span class="annotation__value">300ms</span></div>
+    <div class="annotation"><span class="annotation__key">Easing</span><span class="annotation__value">cubic-bezier(0.4, 0, 0.2, 1)</span></div>
+    <div class="annotation"><span class="annotation__key">Middle bar fade</span><span class="annotation__value">200ms ease (opacity + scaleX)</span></div>
+    <div class="annotation"><span class="annotation__key">Technique</span><span class="annotation__value">CSS transition on class toggle</span></div>
+    <div class="annotation"><span class="annotation__key">Box stability</span><span class="annotation__value">border + glow unchanged during morph</span></div>
+    <div class="annotation"><span class="annotation__key">Reversibility</span><span class="annotation__value">fully symmetric (same timing both ways)</span></div>
+    <div class="annotation"><span class="annotation__key">prefers-reduced-motion</span><span class="annotation__value">instant state change, no animation</span></div>
+  </div>
+
+  <script>
+    function toggle(btn) { btn.classList.toggle('is-open'); }
+    function toggleAll() { document.querySelectorAll('.js-toggle').forEach(function(el) { el.classList.toggle('is-open'); }); }
+  </script>
+</body>
+</html>

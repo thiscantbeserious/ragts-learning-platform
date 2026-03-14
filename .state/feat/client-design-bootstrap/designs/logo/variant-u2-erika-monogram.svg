@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!--
+    Erika Monogram — E and K fused, built from hex gate geometry.
+    60-degree angles, partial shapes, gaps. Reads as EK monogram
+    but feels like a constructed geometric mark.
+  -->
+  <!-- E: vertical spine with three hex-angled arms -->
+  <line x1="5.5" y1="6" x2="5.5" y2="22" />
+  <line x1="5.5" y1="6" x2="13" y2="6" />
+  <line x1="5.5" y1="14" x2="11.5" y2="14" />
+  <line x1="5.5" y1="22" x2="13" y2="22" />
+  <!-- K: diagonals from shared junction, 60-degree hex angles -->
+  <line x1="14" y1="14" x2="22.5" y2="6" />
+  <line x1="14" y1="14" x2="22.5" y2="22" />
+  <!-- Gap bridge between E-bar and K-junction (dim, like hex gate gap) -->
+  <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+  <!-- Hex accent: angled serifs at K arm ends -->
+  <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+  <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+</svg>

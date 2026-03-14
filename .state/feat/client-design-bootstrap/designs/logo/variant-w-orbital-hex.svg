@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Orbital Hex: flat-top partial hexagon (5 segments, gap on right) + orbiting particle circle.
+       Flat-top hex center (14,14) radius ~8:
+         right:      22, 14
+         top-right:  18, 7.07
+         top-left:   10, 7.07
+         left:       6, 14
+         bot-left:   10, 20.93
+         bot-right:  18, 20.93
+  -->
+
+  <!-- Seg 1: top — top-left to top-right -->
+  <line x1="10" y1="7.07" x2="18" y2="7.07" />
+
+  <!-- Seg 2: upper-left — left to top-left -->
+  <line x1="6" y1="14" x2="10" y2="7.07" />
+
+  <!-- Seg 3: lower-left — bot-left to left -->
+  <line x1="10" y1="20.93" x2="6" y2="14" />
+
+  <!-- Seg 4: bottom — bot-left to bot-right -->
+  <line x1="10" y1="20.93" x2="18" y2="20.93" />
+
+  <!-- Seg 5: upper-right gap-edge (dimmed) — top-right toward right, partial -->
+  <line x1="18" y1="7.07" x2="20.5" y2="10" opacity="0.3" />
+
+  <!-- Orbiting particle circle near the gap — represents learning particle entering the portal -->
+  <circle cx="21.5" cy="14" r="1.8" fill="currentColor" stroke="none" />
+</svg>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant P2: Hex-E Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+    --font-sans: 'Geist', system-ui, sans-serif;
+    --glow-soft: rgba(0, 212, 255, 0.15);
+    --glow-hover: rgba(0, 212, 255, 0.35);
+    --glow-inset: rgba(0, 212, 255, 0.08);
+    --glow-inset-hover: rgba(0, 212, 255, 0.12);
+    --bg-icon: rgba(0, 212, 255, 0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 600px; line-height: 1.6;
+  }
+
+  .section-title {
+    font-size: 13px; font-weight: 500; color: #666; text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 16px; margin-top: 24px;
+  }
+
+  .demo-row { display: flex; gap: 64px; align-items: flex-start; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .size-label { font-size: 11px; color: #555; font-family: var(--font-mono); text-align: center; margin-top: 8px; }
+
+  /* ================================================================
+     BRANDED BOX — shared across all icon family members
+     ================================================================ */
+  .branded-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--accent-primary);
+    border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+    transition: box-shadow 250ms ease;
+  }
+  .branded-box:hover {
+    box-shadow: 0 0 14px var(--glow-hover), inset 0 0 8px var(--glow-inset-hover);
+  }
+
+  .branded-box--28 { width: 28px; height: 28px; }
+  .branded-box--84 { width: 84px; height: 84px; border-width: 3px; border-radius: calc(var(--radius-sm) * 3); }
+
+  /* ================================================================
+     HEX-E LOGO — SVG inside branded box
+     The hexagonal E: left spine + 3 horizontal strokes with angled hex tips
+     ================================================================ */
+  .hex-e-svg {
+    display: block;
+  }
+  .hex-e-svg--sm { width: 16px; height: 16px; }
+  .hex-e-svg--lg { width: 48px; height: 48px; }
+
+  /* ================================================================
+     BRANDMARK "E" (for comparison)
+     ================================================================ */
+  .brand-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--accent-primary); background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+  }
+
+  /* ================================================================
+     HEX GATE (for comparison) — CSS segments
+     ================================================================ */
+  .hex-gate-box {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+  }
+  .hex-gate-inner { position: relative; width: 15px; height: 13px; }
+  .hex-gate-seg {
+    position: absolute; height: 1.5px; border-radius: 0.75px;
+    background: var(--accent-primary);
+  }
+  .hex-gate-seg--1 { width: 7.5px; top: -0.5px; left: 3.75px; }
+  .hex-gate-seg--2 { width: 7.5px; top: 2.75px; left: -1.5px; transform: rotate(-60deg); }
+  .hex-gate-seg--3 { width: 7.5px; top: 9.25px; left: -1.5px; transform: rotate(60deg); }
+  .hex-gate-seg--4 { width: 7.5px; bottom: -0.5px; left: 3.75px; }
+  .hex-gate-seg--5 { width: 7.5px; top: 2.75px; right: -1.5px; transform: rotate(60deg); opacity: 0.3; }
+
+  /* ================================================================
+     COMPARISON ROW
+     ================================================================ */
+  .comparison-row { display: flex; gap: 32px; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .comparison-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .comparison-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  /* ================================================================
+     WHITELABEL COLORS
+     ================================================================ */
+  .whitelabel-row { display: flex; gap: 32px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .whitelabel-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .whitelabel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .wl-orange .branded-box { border-color: #ff8c00; background: rgba(255,140,0,0.06); box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  .wl-orange .hex-e-svg { color: #ff8c00; }
+
+  .wl-green .branded-box { border-color: #00ff88; background: rgba(0,255,136,0.06); box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  .wl-green .hex-e-svg { color: #00ff88; }
+
+  /* ================================================================
+     WORDMARK PAIRING
+     ================================================================ */
+  .wordmark-row { display: flex; gap: 48px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .wordmark {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .wordmark__name {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #e8e8f0;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+  .wordmark--light .wordmark__name { color: #1a1a2e; text-shadow: none; }
+
+  /* ================================================================
+     LIGHT BACKGROUND OVERRIDES
+     ================================================================ */
+  .bg-light .branded-box { border-color: #0090b3; background: rgba(0,212,255,0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .hex-e-svg { color: #007a99; }
+  .bg-light .brand-icon { border-color: #0090b3; color: #007a99; background: rgba(0,212,255,0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .hex-gate-box { border-color: #0090b3; background: rgba(0,212,255,0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .hex-gate-seg { background: #007a99; }
+
+  /* ================================================================
+     ANNOTATIONS
+     ================================================================ */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 560px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+  <h1>Variant P2: Hex-E</h1>
+  <p class="subtitle">
+    The hexagonal gate shape adjusted to read as the letter "E". The left side forms
+    a vertical spine. Three horizontal strokes extend right with angled hex-style tips,
+    creating openings that read as an E while maintaining the geometric, hexagonal character.
+    Lives inside the same 28px branded box as BrandMark and HexGateIcon.
+  </p>
+
+  <!-- ============================================================
+       INLINE SVG DEFINITION (reusable)
+       ============================================================ -->
+
+  <!-- 84px (3x) and 28px (1x) side by side -->
+  <span class="section-title">Size Comparison</span>
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="branded-box branded-box--84">
+              <svg class="hex-e-svg hex-e-svg--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="var(--accent-primary)">
+                <line x1="5" y1="4" x2="5" y2="20" />
+                <line x1="5" y1="4" x2="16" y2="4" />
+                <line x1="16" y1="4" x2="19" y2="7" />
+                <line x1="5" y1="12" x2="15" y2="12" />
+                <line x1="15" y1="12" x2="17.5" y2="14" />
+                <line x1="5" y1="20" x2="16" y2="20" />
+                <line x1="16" y1="20" x2="19" y2="17" />
+              </svg>
+            </div>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <div class="branded-box branded-box--28">
+              <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="var(--accent-primary)">
+                <line x1="5" y1="4" x2="5" y2="20" />
+                <line x1="5" y1="4" x2="16" y2="4" />
+                <line x1="16" y1="4" x2="19" y2="7" />
+                <line x1="5" y1="12" x2="15" y2="12" />
+                <line x1="15" y1="12" x2="17.5" y2="14" />
+                <line x1="5" y1="20" x2="16" y2="20" />
+                <line x1="16" y1="20" x2="19" y2="17" />
+              </svg>
+            </div>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="branded-box branded-box--84">
+              <svg class="hex-e-svg hex-e-svg--lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="4" x2="5" y2="20" />
+                <line x1="5" y1="4" x2="16" y2="4" />
+                <line x1="16" y1="4" x2="19" y2="7" />
+                <line x1="5" y1="12" x2="15" y2="12" />
+                <line x1="15" y1="12" x2="17.5" y2="14" />
+                <line x1="5" y1="20" x2="16" y2="20" />
+                <line x1="16" y1="20" x2="19" y2="17" />
+              </svg>
+            </div>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <div class="branded-box branded-box--28">
+              <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="4" x2="5" y2="20" />
+                <line x1="5" y1="4" x2="16" y2="4" />
+                <line x1="16" y1="4" x2="19" y2="7" />
+                <line x1="5" y1="12" x2="15" y2="12" />
+                <line x1="15" y1="12" x2="17.5" y2="14" />
+                <line x1="5" y1="20" x2="16" y2="20" />
+                <line x1="16" y1="20" x2="19" y2="17" />
+              </svg>
+            </div>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family comparison -->
+  <span class="section-title">Family Comparison</span>
+  <div class="comparison-row">
+    <div class="comparison-item">
+      <div class="brand-icon">E</div>
+      <span class="comparison-label">BrandMark E</span>
+    </div>
+    <div class="comparison-item">
+      <div class="branded-box branded-box--28">
+        <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="var(--accent-primary)">
+          <line x1="5" y1="4" x2="5" y2="20" />
+          <line x1="5" y1="4" x2="16" y2="4" />
+          <line x1="16" y1="4" x2="19" y2="7" />
+          <line x1="5" y1="12" x2="15" y2="12" />
+          <line x1="15" y1="12" x2="17.5" y2="14" />
+          <line x1="5" y1="20" x2="16" y2="20" />
+          <line x1="16" y1="20" x2="19" y2="17" />
+        </svg>
+      </div>
+      <span class="comparison-label">Hex-E (P2)</span>
+    </div>
+    <div class="comparison-item">
+      <div class="hex-gate-box">
+        <div class="hex-gate-inner">
+          <span class="hex-gate-seg hex-gate-seg--1"></span>
+          <span class="hex-gate-seg hex-gate-seg--2"></span>
+          <span class="hex-gate-seg hex-gate-seg--3"></span>
+          <span class="hex-gate-seg hex-gate-seg--4"></span>
+          <span class="hex-gate-seg hex-gate-seg--5"></span>
+        </div>
+      </div>
+      <span class="comparison-label">HexGate Icon</span>
+    </div>
+  </div>
+
+  <!-- Whitelabel colors -->
+  <span class="section-title">Whitelabel Colors</span>
+  <div class="whitelabel-row">
+    <div class="whitelabel-item">
+      <span class="whitelabel-label">Cyan (default)</span>
+      <div class="branded-box branded-box--28">
+        <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="var(--accent-primary)">
+          <line x1="5" y1="4" x2="5" y2="20" />
+          <line x1="5" y1="4" x2="16" y2="4" />
+          <line x1="16" y1="4" x2="19" y2="7" />
+          <line x1="5" y1="12" x2="15" y2="12" />
+          <line x1="15" y1="12" x2="17.5" y2="14" />
+          <line x1="5" y1="20" x2="16" y2="20" />
+          <line x1="16" y1="20" x2="19" y2="17" />
+        </svg>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-orange">
+      <span class="whitelabel-label">Orange #ff8c00</span>
+      <div class="branded-box branded-box--28">
+        <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="4" x2="5" y2="20" />
+          <line x1="5" y1="4" x2="16" y2="4" />
+          <line x1="16" y1="4" x2="19" y2="7" />
+          <line x1="5" y1="12" x2="15" y2="12" />
+          <line x1="15" y1="12" x2="17.5" y2="14" />
+          <line x1="5" y1="20" x2="16" y2="20" />
+          <line x1="16" y1="20" x2="19" y2="17" />
+        </svg>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-green">
+      <span class="whitelabel-label">Green #00ff88</span>
+      <div class="branded-box branded-box--28">
+        <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="4" x2="5" y2="20" />
+          <line x1="5" y1="4" x2="16" y2="4" />
+          <line x1="16" y1="4" x2="19" y2="7" />
+          <line x1="5" y1="12" x2="15" y2="12" />
+          <line x1="15" y1="12" x2="17.5" y2="14" />
+          <line x1="5" y1="20" x2="16" y2="20" />
+          <line x1="16" y1="20" x2="19" y2="17" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wordmark pairings -->
+  <span class="section-title">Logo + Wordmark Pairing</span>
+  <div class="wordmark-row">
+    <div class="wordmark">
+      <div class="branded-box branded-box--28">
+        <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="var(--accent-primary)">
+          <line x1="5" y1="4" x2="5" y2="20" />
+          <line x1="5" y1="4" x2="16" y2="4" />
+          <line x1="16" y1="4" x2="19" y2="7" />
+          <line x1="5" y1="12" x2="15" y2="12" />
+          <line x1="15" y1="12" x2="17.5" y2="14" />
+          <line x1="5" y1="20" x2="16" y2="20" />
+          <line x1="16" y1="20" x2="19" y2="17" />
+        </svg>
+      </div>
+      <span class="wordmark__name">Erika</span>
+    </div>
+    <div style="background:#f0f0f4;padding:12px 20px;border-radius:8px;">
+      <div class="wordmark wordmark--light">
+        <div class="branded-box branded-box--28" style="border-color:#0090b3;background:rgba(0,212,255,0.08);box-shadow:0 0 6px rgba(0,150,180,0.15),inset 0 0 4px rgba(0,150,180,0.06);">
+          <svg class="hex-e-svg hex-e-svg--sm" viewBox="0 0 24 24" fill="none" stroke="#007a99" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="4" x2="5" y2="20" />
+            <line x1="5" y1="4" x2="16" y2="4" />
+            <line x1="16" y1="4" x2="19" y2="7" />
+            <line x1="5" y1="12" x2="15" y2="12" />
+            <line x1="15" y1="12" x2="17.5" y2="14" />
+            <line x1="5" y1="20" x2="16" y2="20" />
+            <line x1="16" y1="20" x2="19" y2="17" />
+          </svg>
+        </div>
+        <span class="wordmark__name" style="color:#1a1a2e;text-shadow:none;">Erika</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annotations -->
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Concept</span><span class="annotation__value">Hexagonal E — geometric letterform</span></div>
+    <div class="annotation"><span class="annotation__key">Container</span><span class="annotation__value">28px branded box (shared family)</span></div>
+    <div class="annotation"><span class="annotation__key">SVG viewBox</span><span class="annotation__value">0 0 24 24</span></div>
+    <div class="annotation"><span class="annotation__key">Stroke width</span><span class="annotation__value">1.5 (matches hex gate segments)</span></div>
+    <div class="annotation"><span class="annotation__key">E spine</span><span class="annotation__value">Left vertical line (5, 4) to (5, 20)</span></div>
+    <div class="annotation"><span class="annotation__key">Horizontal strokes</span><span class="annotation__value">3 strokes with angled hex tips at right ends</span></div>
+    <div class="annotation"><span class="annotation__key">Hex character</span><span class="annotation__value">60-degree angled tips on each stroke</span></div>
+    <div class="annotation"><span class="annotation__key">Right openings</span><span class="annotation__value">2 gaps between strokes form E openings</span></div>
+    <div class="annotation"><span class="annotation__key">Color mode</span><span class="annotation__value">stroke="currentColor" (whitelabel-ready)</span></div>
+    <div class="annotation"><span class="annotation__key">File</span><span class="annotation__value">variant-p2-hex-e.svg</span></div>
+  </div>
+</body>
+</html>

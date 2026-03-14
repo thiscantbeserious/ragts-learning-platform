@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C2-Alpha: Pure Geometric — Branded Hamburger</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * C2-ALPHA: Pure Geometric
+     *
+     * Vertical spine + 3 horizontal bars where bar LENGTHS encode the brand letter.
+     * The proportions are the only thing that changes per brand — the structure
+     * (spine + 3 bars) stays identical. Any letter can be represented by adjusting
+     * 3 CSS custom properties (--bar-top, --bar-mid, --bar-bottom).
+     *
+     * Implementation: Pure CSS, no SVG. 1 pseudo-element for spine, 3 spans for bars.
+     * Complexity: LOW — just CSS custom properties for bar widths.
+     */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+      gap: 48px;
+    }
+
+    h1 {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+    }
+
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    /* ============================
+       THE HAMBURGER BUTTON
+       ============================ */
+
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .hamburger__icon {
+      --accent: var(--accent-primary);
+      --accent-glow: rgba(0, 212, 255, 0.15);
+      --accent-glow-strong: rgba(0, 212, 255, 0.35);
+      --accent-bg: rgba(0, 212, 255, 0.06);
+      --accent-inset: rgba(0, 212, 255, 0.08);
+      --accent-inset-strong: rgba(0, 212, 255, 0.12);
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      box-shadow:
+        0 0 8px var(--accent-glow),
+        inset 0 0 6px var(--accent-inset);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+      color: var(--accent);
+      position: relative;
+      gap: 3px;
+      padding-left: 7px;
+      padding-right: 5px;
+    }
+
+    .hamburger--hover .hamburger__icon {
+      box-shadow:
+        0 0 14px var(--accent-glow-strong),
+        inset 0 0 8px var(--accent-inset-strong);
+    }
+
+    /* Vertical spine */
+    .hamburger__icon::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      width: 2px;
+      height: 14px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    /* Bars */
+    .hamburger__bar {
+      display: block;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      margin-left: 4px;
+      transition: width 200ms ease-out;
+    }
+
+    /* Letter-specific bar proportions via CSS custom properties */
+    .hamburger__icon--letter-e { --bar-top: 13px; --bar-mid: 10px; --bar-bottom: 13px; }
+    .hamburger__icon--letter-m { --bar-top: 13px; --bar-mid: 7px; --bar-bottom: 13px; }
+    .hamburger__icon--letter-w { --bar-top: 7px; --bar-mid: 10px; --bar-bottom: 13px; }
+    .hamburger__icon--generic { --bar-top: 13px; --bar-mid: 13px; --bar-bottom: 13px; }
+
+    .hamburger__bar--top { width: var(--bar-top); }
+    .hamburger__bar--mid { width: var(--bar-mid); }
+    .hamburger__bar--bottom { width: var(--bar-bottom); }
+
+    /* ============================
+       WHITELABEL COLOR OVERRIDES
+       ============================ */
+
+    .theme-orange .hamburger__icon {
+      --accent: #ff8c00;
+      --accent-glow: rgba(255, 140, 0, 0.15);
+      --accent-glow-strong: rgba(255, 140, 0, 0.35);
+      --accent-bg: rgba(255, 140, 0, 0.06);
+      --accent-inset: rgba(255, 140, 0, 0.08);
+      --accent-inset-strong: rgba(255, 140, 0, 0.12);
+      color: #ff8c00;
+    }
+
+    .theme-green .hamburger__icon {
+      --accent: #00ff88;
+      --accent-glow: rgba(0, 255, 136, 0.15);
+      --accent-glow-strong: rgba(0, 255, 136, 0.35);
+      --accent-bg: rgba(0, 255, 136, 0.06);
+      --accent-inset: rgba(0, 255, 136, 0.08);
+      --accent-inset-strong: rgba(0, 255, 136, 0.12);
+      color: #00ff88;
+    }
+
+    /* ============================
+       LIGHT THEME
+       ============================ */
+    .theme-light .demo__context {
+      background: #f5f5f7;
+      border-color: #d0d0d8;
+    }
+
+    .theme-light .demo__context-label {
+      color: #555;
+    }
+
+    .theme-light .hamburger__icon {
+      --accent: #0099bb;
+      --accent-glow: rgba(0, 153, 187, 0.12);
+      --accent-glow-strong: rgba(0, 153, 187, 0.25);
+      --accent-bg: rgba(0, 153, 187, 0.06);
+      --accent-inset: rgba(0, 153, 187, 0.05);
+      --accent-inset-strong: rgba(0, 153, 187, 0.10);
+      color: #0099bb;
+    }
+
+    /* ============================
+       DIVIDERS + NOTES
+       ============================ */
+
+    .divider {
+      width: 100%;
+      max-width: 600px;
+      height: 1px;
+      background: var(--border-default);
+    }
+
+    .notes {
+      max-width: 560px;
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+    }
+
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: var(--weight-semibold);
+    }
+
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+
+    .notes__text + .notes__text {
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>C2-Alpha: Pure Geometric</h1>
+  <p style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); max-width: 520px; text-align: center; line-height: var(--lh-sm);">
+    Bar lengths encode brand identity. Structure stays constant: vertical spine + 3 horizontal bars.
+    Only --bar-top, --bar-mid, --bar-bottom change per brand.
+  </p>
+
+  <!-- LETTER CONFIGURATIONS -->
+  <div class="section">
+    <h2>Letter Configurations</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">"E" Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-e" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"E" Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-e" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"M" Config</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-m" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"W" Config</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-w" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Wavelength</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">Generic</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--generic" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Brand</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHITELABEL ACCENT COLORS -->
+  <div class="section">
+    <h2>Whitelabel Accent Colors</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Cyan (default)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-e" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo theme-orange">
+        <span class="demo__label">Orange #ff8c00</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-m" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo theme-green">
+        <span class="demo__label">Green #00ff88</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-w" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Wavelength</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LIGHT THEME -->
+  <div class="section">
+    <h2>Light Theme Preview</h2>
+    <div class="row theme-light">
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">"E" Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-e" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">"M" Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--letter-m" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">Generic Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon hamburger__icon--generic" aria-hidden="true">
+              <span class="hamburger__bar hamburger__bar--top"></span>
+              <span class="hamburger__bar hamburger__bar--mid"></span>
+              <span class="hamburger__bar hamburger__bar--bottom"></span>
+            </span>
+          </button>
+          <span class="demo__context-label">Brand</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <p class="notes__title">Implementation Notes</p>
+    <p class="notes__text">
+      <strong>Complexity: LOW.</strong> Pure CSS — one pseudo-element for the spine, three spans for bars.
+      Letter identity is encoded in 3 custom properties (--bar-top, --bar-mid, --bar-bottom) which can
+      be set at the component level or via a whitelabel config.
+    </p>
+    <p class="notes__text">
+      <strong>CSS-only feasibility: YES.</strong> No SVG, no JavaScript needed for rendering. Hover
+      animation uses box-shadow transition. Bar width transitions work via CSS transition: width if
+      animated letter-switching is ever desired.
+    </p>
+    <p class="notes__text">
+      <strong>Whitelabel API:</strong> Override --accent + bar width vars. The entire visual identity
+      shifts with just 4 CSS custom properties. Color theming uses the same --accent-* family as
+      BrandMark for consistency.
+    </p>
+  </div>
+
+</body>
+</html>

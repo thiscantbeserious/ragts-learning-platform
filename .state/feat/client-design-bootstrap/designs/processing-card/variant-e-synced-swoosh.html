@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variant E — Synced Light Swoosh</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    body {
+      background: var(--bg-page);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+
+    .demo-sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-default);
+    }
+
+    .demo-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      padding: 12px 12px 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ================================================================
+       SESSION CARD BASE
+       Matches SessionCard.vue styles exactly
+       ================================================================ */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected:hover {
+      background: rgba(0, 212, 255, 0.12);
+    }
+
+    /* Row layout */
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .session-card__row--primary {
+      justify-content: flex-start;
+    }
+
+    /* Filename */
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-card:hover .session-card__filename,
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+
+    /* Meta row */
+    .session-card__meta {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: 8px;
+      padding-left: calc(6px + 6px); /* dot width + row gap */
+    }
+
+    .session-card__sections,
+    .session-card__age {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-card__age {
+      margin-left: auto;
+    }
+
+    /* Status dot */
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+
+    .session-card__status-dot--processing {
+      background: var(--accent-primary);
+    }
+
+    /* Pulse animation for processing status dot */
+    .session-card__status-dot--pulse {
+      animation: status-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+
+    /* ================================================================
+       VARIANT E: SYNCED LIGHT SWOOSH — Processing Card Overrides
+       ================================================================ */
+
+    .session-card--processing {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* Muted content for processing state */
+    .session-card--processing .session-card__filename {
+      color: var(--text-muted);
+    }
+
+    .session-card--processing .session-card__meta {
+      color: var(--text-disabled);
+    }
+
+    /* Processing status text with animated ellipsis */
+    .session-card__processing-text {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--accent-primary);
+      padding-left: calc(6px + 6px);
+    }
+
+    .session-card__processing-text::after {
+      content: '';
+      animation: ellipsis 1.8s steps(4, end) infinite;
+    }
+
+    @keyframes ellipsis {
+      0%  { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    /* ================================================================
+       THE SWOOSH — synced across all processing cards
+       ================================================================
+       Key insight: all processing cards use the SAME @keyframes name
+       with the SAME duration and NO per-card delay. CSS animation
+       timing is global — all instances of the same animation name
+       share the same clock. This means the bright band passes through
+       every processing card at exactly the same time.
+       ================================================================ */
+
+    .session-card--processing::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.03) 30%,
+        rgba(0, 212, 255, 0.08) 40%,
+        rgba(0, 212, 255, 0.15) 50%,
+        rgba(0, 212, 255, 0.08) 60%,
+        rgba(0, 212, 255, 0.03) 70%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: swoosh-sweep 3s ease-in-out infinite;
+    }
+
+    @keyframes swoosh-sweep {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(200%);
+      }
+    }
+
+    /* Respect prefers-reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+      .session-card--processing::after {
+        animation: none;
+        transform: none;
+        background: none;
+      }
+
+      .session-card__status-dot--pulse {
+        animation: none;
+      }
+
+      .session-card__processing-text::after {
+        content: '...';
+        animation: none;
+      }
+    }
+
+
+    /* ================================================================
+       DEMO ANNOTATIONS
+       ================================================================ */
+
+    .demo-wrapper {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    .demo-annotations {
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-top: 36px;
+    }
+
+    .annotation {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-left: 2px solid var(--border-default);
+    }
+
+    .annotation strong {
+      color: var(--text-primary);
+      font-weight: 500;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .annotation--cyan {
+      border-left-color: var(--accent-primary);
+    }
+
+    .annotation--green {
+      border-left-color: var(--status-success);
+    }
+
+    .demo-title {
+      font-family: var(--font-body);
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+    }
+
+    .demo-subtitle {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    /* Divider between card groups */
+    .card-divider {
+      height: 1px;
+      background: var(--border-default);
+      margin: 4px 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-wrapper">
+  <!-- Sidebar mockup -->
+  <div>
+    <div class="demo-subtitle">Variant E</div>
+    <div class="demo-title">Synced Light Swoosh</div>
+
+    <div class="demo-sidebar">
+      <div class="demo-label">Processing</div>
+
+      <!-- Processing Card 1 -->
+      <div class="session-card session-card--processing">
+        <div class="session-card__row session-card__row--primary">
+          <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+          <span class="session-card__filename">agent-debug-2026-03-12.cast</span>
+        </div>
+        <div class="session-card__processing-text">Processing</div>
+      </div>
+
+      <!-- Processing Card 2 -->
+      <div class="session-card session-card--processing">
+        <div class="session-card__row session-card__row--primary">
+          <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+          <span class="session-card__filename">refactor-session.cast</span>
+        </div>
+        <div class="session-card__processing-text">Processing</div>
+      </div>
+
+      <!-- Processing Card 3 -->
+      <div class="session-card session-card--processing">
+        <div class="session-card__row session-card__row--primary">
+          <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+          <span class="session-card__filename">fix-lint-errors-ci.cast</span>
+        </div>
+        <div class="session-card__processing-text">Processing</div>
+      </div>
+
+      <div class="card-divider"></div>
+      <div class="demo-label">Ready</div>
+
+      <!-- Ready Card (normal) -->
+      <div class="session-card">
+        <div class="session-card__row session-card__row--primary">
+          <span class="session-card__status-dot session-card__status-dot--ready"></span>
+          <span class="session-card__filename">deploy-production-v3.cast</span>
+        </div>
+        <div class="session-card__row session-card__meta">
+          <span class="session-card__sections">14 sections</span>
+          <span class="session-card__age">2h ago</span>
+        </div>
+      </div>
+
+      <!-- Ready Card (selected) -->
+      <div class="session-card session-card--selected">
+        <div class="session-card__row session-card__row--primary">
+          <span class="session-card__status-dot session-card__status-dot--ready"></span>
+          <span class="session-card__filename">setup-postgres-dev.cast</span>
+        </div>
+        <div class="session-card__row session-card__meta">
+          <span class="session-card__sections">8 sections</span>
+          <span class="session-card__age">5h ago</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Annotations -->
+  <div class="demo-annotations">
+    <div class="annotation annotation--cyan">
+      <strong>Synced swoosh</strong>
+      All three processing cards animate in lockstep. One beam of light sweeps through all of them simultaneously, like a TRON scanner.
+    </div>
+
+    <div class="annotation annotation--cyan">
+      <strong>Muted content</strong>
+      Filename uses --text-muted, replacing the metadata row with "Processing" in --accent-primary cyan with animated ellipsis.
+    </div>
+
+    <div class="annotation annotation--cyan">
+      <strong>105deg diagonal</strong>
+      The gradient is angled at 105deg for a subtle diagonal sweep rather than flat horizontal. 3s ease-in-out loop.
+    </div>
+
+    <div class="annotation annotation--green">
+      <strong>Visual hierarchy</strong>
+      Selected (cyan border + bg) > Ready (normal) > Processing (muted + swoosh). Processing cards are clearly subordinate.
+    </div>
+
+    <div class="annotation">
+      <strong>Reduced motion</strong>
+      With prefers-reduced-motion: no swoosh, no dot pulse, static "Processing..." text. Just a dimmed card.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

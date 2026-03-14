@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!--
+    Infinity Hex — hex gate left face merges into infinity loop on right.
+    The hex's "gap" is where the loop crosses through.
+    Angular left, flowing right. The infinite learning cycle.
+  -->
+  <!-- Left hex face: top-left diagonal, left vertical, bottom-left diagonal -->
+  <polyline points="14,5.5 8.5,5.5 5,10 5,18 8.5,22.5 14,22.5" fill="none" />
+  <!-- Right infinity loop: upper arc from top-center, swoops right and crosses back -->
+  <path d="M 14,5.5 C 17,5.5 21.5,7 21.5,11 C 21.5,13.5 19,14 17,14" fill="none" />
+  <!-- Cross-through center (the twist of the infinity) -->
+  <path d="M 17,14 C 15,14 14,16.5 14,18.5" fill="none" />
+  <!-- Lower arc: from center-bottom, swoops right -->
+  <path d="M 14,22.5 C 17,22.5 21.5,21 21.5,17 C 21.5,14.5 19,14 17,14" fill="none" />
+  <!-- Dim crossover echo (like hex gate's gap segment) -->
+  <path d="M 14,9.5 C 14,12 15.5,14 17,14" opacity="0.25" fill="none" />
+</svg>

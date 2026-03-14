@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebar Redesign — Erika</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../design/styles/layout.css">
+  <style>
+    /* ================================================================
+       Sidebar Redesign — Proposed CSS changes
+       ================================================================
+       This mockup uses the real design tokens from layout.css.
+       Only scoped sidebar/card styles are overridden here.
+       ================================================================ */
+
+    body {
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+      /* Override the background grid from layout.css for this mockup */
+      background: var(--bg-page) !important;
+      box-shadow: none !important;
+    }
+
+    /* === SIDEBAR PANEL === */
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-surface);
+      width: var(--sidebar-width);
+      height: 100vh;
+      overflow: hidden;
+      border-right: 1px solid var(--border-default);
+    }
+
+    /* --- Search --- */
+    .sidebar__search-wrap {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__search-input {
+      width: 100%;
+      height: var(--input-height-sm);
+      padding: 0 var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .sidebar__search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .sidebar__search-input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    /* --- Filter pills: compact, single row, no wrap --- */
+    .sidebar__filters {
+      display: flex;
+      align-items: center;
+      padding: var(--space-1\.5) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      flex-wrap: nowrap;
+      gap: var(--space-1);
+    }
+
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px var(--space-2);
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .filter-pill:hover {
+      color: var(--text-secondary);
+      border-color: var(--border-strong);
+      background: var(--bg-elevated);
+    }
+
+    .filter-pill--active {
+      color: var(--accent-primary);
+      border-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .filter-pill--active:hover {
+      color: var(--accent-primary-hover);
+      border-color: var(--accent-primary-hover);
+    }
+
+    /* --- Scrollable list region with custom scrollbar --- */
+    .sidebar__list-region {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+
+    .sidebar__list-region::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar__list-region::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar__list-region::-webkit-scrollbar-thumb {
+      background: var(--border-strong);
+      border-radius: var(--radius-full);
+    }
+
+    .sidebar__list-region::-webkit-scrollbar-thumb:hover {
+      background: var(--text-disabled);
+    }
+
+    .sidebar__session-list {
+      list-style: none;
+      margin: 0;
+      padding: var(--space-1) 0;
+    }
+
+    .sidebar__session-item {
+      list-style: none;
+    }
+
+    /* === SESSION CARD === */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1\.5) var(--space-3);
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card:focus-visible {
+      outline: 2px solid var(--accent-primary);
+      outline-offset: -2px;
+    }
+
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected:hover {
+      background: rgba(0, 212, 255, 0.12);
+    }
+
+    /* Row layout */
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1\.5);
+      min-width: 0;
+    }
+
+    .session-card__row--primary {
+      justify-content: flex-start;
+    }
+
+    /* Status dot — placed before filename for consistent visual anchor */
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+
+    .session-card__status-dot--processing {
+      background: var(--accent-primary);
+    }
+
+    .session-card__status-dot--failed {
+      background: var(--status-error);
+    }
+
+    .session-card__status-dot--pulse {
+      animation: status-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Filename — monospace, truncated, slightly smaller */
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-card:hover .session-card__filename,
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+
+    /* Metadata row — indented to align with filename (past the dot) */
+    .session-card__meta {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: var(--space-2);
+      /* 6px dot width + 6px gap = 12px indent to align meta under filename */
+      padding-left: calc(6px + var(--space-1\.5));
+    }
+
+    .session-card__sections,
+    .session-card__age {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-card__age {
+      margin-left: auto;
+    }
+
+    /* --- Footer --- */
+    .sidebar__footer {
+      padding: var(--space-3);
+      border-top: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__new-session-btn {
+      width: 100%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1);
+      padding: var(--space-1) var(--space-3);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      border: 1px solid var(--accent-primary);
+      color: var(--accent-primary);
+      background: transparent;
+    }
+
+    .sidebar__new-session-btn:hover {
+      background: var(--accent-primary);
+      color: var(--bg-page);
+    }
+
+    /* === MAIN CONTENT PLACEHOLDER === */
+    .main-content {
+      flex: 1;
+      background: var(--bg-page);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: var(--text-lg);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-panel">
+    <!-- Search -->
+    <div class="sidebar__search-wrap">
+      <input
+        type="search"
+        class="sidebar__search-input"
+        placeholder="Filter sessions..."
+        aria-label="Filter sessions by filename"
+      />
+    </div>
+
+    <!-- Filter pills -->
+    <div class="sidebar__filters" role="group" aria-label="Filter by status">
+      <button class="filter-pill filter-pill--active" type="button">All</button>
+      <button class="filter-pill" type="button">Processing</button>
+      <button class="filter-pill" type="button">Ready</button>
+      <button class="filter-pill" type="button">Failed</button>
+    </div>
+
+    <!-- Session list -->
+    <div class="sidebar__list-region">
+      <ul class="sidebar__session-list" role="list">
+        <!-- Selected card -->
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card session-card--selected" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_260204_002834.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <!-- Normal card with sections -->
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">lennart-working-session-result-1.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">50 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <!-- Long filename that truncates -->
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_feature--improve-filename-template__0ta7h55.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <!-- Processing state -->
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--processing session-card__status-dot--pulse"></span>
+              <span class="session-card__filename">ragts-le-platf_feat--snapshot-testing__0tb4bdb.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">-- sections</span>
+              <span class="session-card__age">2 min ago</span>
+            </div>
+          </div>
+        </li>
+
+        <!-- Failed state -->
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--failed"></span>
+              <span class="session-card__filename">ragts-le-platf_feat--snapshot-testing__0tb4be9.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">-- sections</span>
+              <span class="session-card__age">5 min ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_main__0ta839f.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_refactor-sdlc__0ta99vg.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">1 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_main__0ta839f.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">env-ag-fir_initial-prototype__0ta7azo.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_main__0ta8hdj.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">codex-pattern-analysis.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">1 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">env-ag-fir_initial-prototype__0ta7asn.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_main__0ta9h9j.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_feature--improve-filename-template__0ta7c9u.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">0 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">igp-mono_IGPS-13450-fix-interface-name__0tb41d3.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">6 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+
+        <li class="sidebar__session-item" role="listitem">
+          <div class="session-card" role="button" tabindex="0">
+            <div class="session-card__row session-card__row--primary">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">3-hour-semi-autonomous-tui-refactoring.cast</span>
+            </div>
+            <div class="session-card__row session-card__meta">
+              <span class="session-card__sections">19 sections</span>
+              <span class="session-card__age">yesterday</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Footer -->
+    <div class="sidebar__footer">
+      <button class="sidebar__new-session-btn" type="button">+ New Session</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    Main content area
+  </div>
+</body>
+</html>

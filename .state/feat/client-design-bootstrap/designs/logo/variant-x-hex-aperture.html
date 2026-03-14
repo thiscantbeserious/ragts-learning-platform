@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant X — Hex Aperture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #00d4ff;
+    --bg-primary: #0a0a14;
+    --bg-surface: #12121e;
+    --text-primary: #e8e8ed;
+    --text-secondary: #8888a0;
+    --font-mono: 'Geist Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    background: var(--bg-primary);
+  }
+
+  .section { padding: 48px 40px; }
+  .section--dark { background: var(--bg-primary); }
+  .section--light { background: #f0f0f4; color: #1a1a2e; }
+  .section--light .text-secondary { color: #666; }
+  .section--light .section-title { color: #1a1a2e; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+
+  .branded-box {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .branded-box--3x {
+    width: 84px;
+    height: 84px;
+    border-radius: 18px;
+    box-shadow: 0 0 24px rgba(0, 212, 255, 0.15), inset 0 0 18px rgba(0, 212, 255, 0.08);
+  }
+
+  .branded-box svg { width: 100%; height: 100%; color: var(--accent); }
+  .branded-box--e {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .hex-gate-inner { position: relative; width: 15px; height: 13px; }
+  .hex-gate-inner--3x { width: 45px; height: 39px; }
+  .hex-seg {
+    position: absolute;
+    height: 1.5px;
+    border-radius: 0.75px;
+    background: var(--accent);
+  }
+  .hex-gate-inner--3x .hex-seg { height: 4.5px; border-radius: 2.25px; }
+  .hex-seg--1 { width: 7.5px; top: -0.5px; left: 3.75px; }
+  .hex-seg--2 { width: 7.5px; top: 2.75px; left: -1.5px; transform: rotate(-60deg); }
+  .hex-seg--3 { width: 7.5px; top: 9.25px; left: -1.5px; transform: rotate(60deg); }
+  .hex-seg--4 { width: 7.5px; bottom: -0.5px; left: 3.75px; }
+  .hex-seg--5 { width: 7.5px; top: 2.75px; right: -1.5px; transform: rotate(60deg); opacity: 0.3; }
+  .hex-gate-inner--3x .hex-seg--1 { width: 22.5px; top: -1.5px; left: 11.25px; }
+  .hex-gate-inner--3x .hex-seg--2 { width: 22.5px; top: 8.25px; left: -4.5px; transform: rotate(-60deg); }
+  .hex-gate-inner--3x .hex-seg--3 { width: 22.5px; top: 27.75px; left: -4.5px; transform: rotate(60deg); }
+  .hex-gate-inner--3x .hex-seg--4 { width: 22.5px; bottom: -1.5px; left: 11.25px; }
+  .hex-gate-inner--3x .hex-seg--5 { width: 22.5px; top: 8.25px; right: -4.5px; transform: rotate(60deg); opacity: 0.3; }
+
+  .row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .row--family { gap: 24px; margin-bottom: 40px; }
+  .family-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .family-label { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.5; }
+  .logotype { display: flex; align-items: center; gap: 8px; }
+  .logotype__name {
+    font-size: 18px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--text-primary);
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+  .logotype__name--sm { font-size: 14px; }
+  .label { font-size: 10px; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 12px; }
+  .whitelabel-row { display: flex; gap: 32px; flex-wrap: wrap; }
+  .whitelabel-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .whitelabel-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.6; }
+
+  .wl-orange .branded-box {
+    border-color: #ff8c00;
+    background: rgba(255, 140, 0, 0.06);
+    box-shadow: 0 0 8px rgba(255, 140, 0, 0.15), inset 0 0 6px rgba(255, 140, 0, 0.08);
+  }
+  .wl-orange .branded-box--3x { box-shadow: 0 0 24px rgba(255, 140, 0, 0.15), inset 0 0 18px rgba(255, 140, 0, 0.08); }
+  .wl-orange svg { color: #ff8c00; }
+  .wl-orange .logotype__name { text-shadow: 0 0 20px rgba(255, 140, 0, 0.15); }
+
+  .wl-green .branded-box {
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.06);
+    box-shadow: 0 0 8px rgba(0, 255, 136, 0.15), inset 0 0 6px rgba(0, 255, 136, 0.08);
+  }
+  .wl-green .branded-box--3x { box-shadow: 0 0 24px rgba(0, 255, 136, 0.15), inset 0 0 18px rgba(0, 255, 136, 0.08); }
+  .wl-green svg { color: #00ff88; }
+  .wl-green .logotype__name { text-shadow: 0 0 20px rgba(0, 255, 136, 0.15); }
+
+  .section--light .branded-box {
+    background: rgba(0, 212, 255, 0.04);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.12), inset 0 0 4px rgba(0, 212, 255, 0.06);
+  }
+  .section--light .branded-box--3x { box-shadow: 0 0 18px rgba(0, 212, 255, 0.12), inset 0 0 12px rgba(0, 212, 255, 0.06); }
+  .section--light .logotype__name { color: #1a1a2e; text-shadow: none; }
+  .section--light .hex-seg { background: var(--accent); }
+  .section--light .branded-box--e { color: var(--accent); }
+
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 0; }
+</style>
+</head>
+<body>
+
+<!-- ============ DARK SECTION ============ -->
+<div class="section section--dark">
+  <div class="section-title">Variant X — Hex Aperture / Dark Background</div>
+
+  <div class="label">Family comparison (84px / 3x scale)</div>
+  <div class="row row--family">
+    <div class="family-item">
+      <div class="branded-box branded-box--3x branded-box--e" style="font-size:39px;">E</div>
+      <span class="family-label">BrandMark</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box branded-box--3x">
+        <div class="hex-gate-inner hex-gate-inner--3x">
+          <span class="hex-seg hex-seg--1"></span>
+          <span class="hex-seg hex-seg--2"></span>
+          <span class="hex-seg hex-seg--3"></span>
+          <span class="hex-seg hex-seg--4"></span>
+          <span class="hex-seg hex-seg--5"></span>
+        </div>
+      </div>
+      <span class="family-label">HexGate</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Aperture blade 1: top — rear layer -->
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <!-- Aperture blade 2: upper-left — front layer -->
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <!-- Aperture blade 3: lower-left — front layer -->
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <!-- Aperture blade 4: bottom — rear layer -->
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <!-- Aperture blade 5: right edge — faintest, creating opening -->
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="family-label">Hex Aperture</span>
+    </div>
+  </div>
+
+  <div class="label">Actual size (28px / 1x) — family row</div>
+  <div class="row row--family">
+    <div class="family-item">
+      <div class="branded-box branded-box--e">E</div>
+      <span class="family-label">BrandMark</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box">
+        <div class="hex-gate-inner">
+          <span class="hex-seg hex-seg--1"></span>
+          <span class="hex-seg hex-seg--2"></span>
+          <span class="hex-seg hex-seg--3"></span>
+          <span class="hex-seg hex-seg--4"></span>
+          <span class="hex-seg hex-seg--5"></span>
+        </div>
+      </div>
+      <span class="family-label">HexGate</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="family-label">Hex Aperture</span>
+    </div>
+  </div>
+
+  <div class="label">Logo + Wordmark</div>
+  <div class="row">
+    <div class="logotype">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="logotype__name">Erika</span>
+    </div>
+  </div>
+  <div class="row">
+    <div class="logotype">
+      <div class="branded-box">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="logotype__name logotype__name--sm">Erika</span>
+    </div>
+  </div>
+
+  <div class="label" style="margin-top:24px;">Whitelabel variants (3x)</div>
+  <div class="whitelabel-row">
+    <div class="whitelabel-group">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="whitelabel-label">Cyan (default)</span>
+    </div>
+    <div class="whitelabel-group wl-orange">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="whitelabel-label">Orange</span>
+    </div>
+    <div class="whitelabel-group wl-green">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="whitelabel-label">Green</span>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ============ LIGHT SECTION ============ -->
+<div class="section section--light">
+  <div class="section-title">Variant X — Hex Aperture / Light Background</div>
+
+  <div class="row row--family">
+    <div class="family-item">
+      <div class="branded-box branded-box--3x branded-box--e" style="font-size:39px;">E</div>
+      <span class="family-label">BrandMark</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box branded-box--3x">
+        <div class="hex-gate-inner hex-gate-inner--3x">
+          <span class="hex-seg hex-seg--1"></span>
+          <span class="hex-seg hex-seg--2"></span>
+          <span class="hex-seg hex-seg--3"></span>
+          <span class="hex-seg hex-seg--4"></span>
+          <span class="hex-seg hex-seg--5"></span>
+        </div>
+      </div>
+      <span class="family-label">HexGate</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="family-label">Hex Aperture</span>
+    </div>
+  </div>
+
+  <div class="row row--family">
+    <div class="family-item">
+      <div class="branded-box branded-box--e">E</div>
+      <span class="family-label">BrandMark</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box">
+        <div class="hex-gate-inner">
+          <span class="hex-seg hex-seg--1"></span>
+          <span class="hex-seg hex-seg--2"></span>
+          <span class="hex-seg hex-seg--3"></span>
+          <span class="hex-seg hex-seg--4"></span>
+          <span class="hex-seg hex-seg--5"></span>
+        </div>
+      </div>
+      <span class="family-label">HexGate</span>
+    </div>
+    <div class="family-item">
+      <div class="branded-box">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="family-label">Hex Aperture</span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="logotype">
+      <div class="branded-box branded-box--3x">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8.5" y1="6" x2="17" y2="10.5" opacity="0.6" />
+          <line x1="5.5" y1="11.5" x2="14.5" y2="9.5" opacity="1" />
+          <line x1="5.5" y1="16.5" x2="14.5" y2="18.5" opacity="1" />
+          <line x1="8.5" y1="22" x2="17" y2="17.5" opacity="0.6" />
+          <line x1="17.5" y1="8" x2="21" y2="12.5" opacity="0.35" />
+        </svg>
+      </div>
+      <span class="logotype__name">Erika</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

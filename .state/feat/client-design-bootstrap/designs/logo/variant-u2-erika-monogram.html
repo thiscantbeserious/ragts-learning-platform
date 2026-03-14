@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant U2: Erika Monogram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 600px; line-height: 1.6;
+  }
+
+  .section-title {
+    font-size: 13px; font-weight: 500; color: #666;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 16px; margin-top: 16px;
+  }
+
+  .demo-row {
+    display: flex; gap: 64px; align-items: flex-start;
+    margin-bottom: 48px; flex-wrap: wrap; justify-content: center;
+  }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+  .size-label { font-size: 11px; color: #555; font-family: var(--font-mono); text-align: center; margin-top: 8px; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* ================================================================
+     BRANDED BOX — identical to BrandMark / HexGateIcon
+     ================================================================ */
+  .logo-box {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+  }
+  .logo-box:hover {
+    box-shadow: 0 0 14px rgba(0, 212, 255, 0.35), inset 0 0 8px rgba(0, 212, 255, 0.12);
+  }
+
+  .logo-box--28 { width: 28px; height: 28px; }
+  .logo-box--28 svg { width: 28px; height: 28px; }
+
+  .logo-box--84 { width: 84px; height: 84px; border-width: 3px; border-radius: calc(var(--radius-sm) * 3); }
+  .logo-box--84 svg { width: 84px; height: 84px; }
+
+  .logo-box svg { color: var(--accent-primary); }
+
+  /* Light background overrides */
+  .bg-light .logo-box {
+    border-color: #0090b3; background: rgba(0, 212, 255, 0.08);
+    box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06);
+  }
+  .bg-light .logo-box svg { color: #007a99; }
+
+  /* BrandMark E reference */
+  .brand-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--accent-primary); background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+    flex-shrink: 0;
+  }
+
+  /* HexGate reference (CSS version) */
+  .hex-ref { position: relative; width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+    flex-shrink: 0;
+  }
+  .hex-ref__inner { position: relative; width: 15px; height: 13px; }
+  .hex-ref__seg {
+    position: absolute; height: 1.5px; border-radius: 0.75px;
+    background: var(--accent-primary); transform-origin: center center;
+  }
+  .hex-ref__seg--1 { width: 7.5px; top: -0.5px; left: 3.75px; }
+  .hex-ref__seg--2 { width: 7.5px; top: 2.75px; left: -1.5px; transform: rotate(-60deg); }
+  .hex-ref__seg--3 { width: 7.5px; top: 9.25px; left: -1.5px; transform: rotate(60deg); }
+  .hex-ref__seg--4 { width: 7.5px; bottom: -0.5px; left: 3.75px; }
+  .hex-ref__seg--5 { width: 7.5px; top: 2.75px; right: -1.5px; transform: rotate(60deg); opacity: 0.3; }
+
+  /* Comparison & Whitelabel rows */
+  .comparison-row { display: flex; gap: 32px; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .comparison-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .comparison-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .whitelabel-row { display: flex; gap: 40px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .whitelabel-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .whitelabel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .wl-orange .logo-box { border-color: #ff8c00; background: rgba(255,140,0,0.06); box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  .wl-orange .logo-box svg { color: #ff8c00; }
+  .wl-green .logo-box { border-color: #00ff88; background: rgba(0,255,136,0.06); box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  .wl-green .logo-box svg { color: #00ff88; }
+
+  /* Wordmark pairing */
+  .logotype {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit;
+  }
+  .logotype__name {
+    font-family: var(--font-mono); font-size: 18px; font-weight: 600;
+    letter-spacing: 0.04em; color: #e8e8e8;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+  .logotype--large .logotype__name {
+    font-size: 32px;
+  }
+
+  /* Annotations */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 600px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+  <h1>Variant U2: Erika Monogram</h1>
+  <p class="subtitle">
+    E and K fused into a single geometric monogram, built from hex gate DNA. The E's spine and arms
+    use the hex gate's straight segments. The K's diagonals shoot out at angles that echo 60-degree
+    hex geometry. A dim gap-bridge connects them — the same visual language as the hex gate's
+    missing segment. Abstract enough to be a mark, legible enough to read as "EK" once you see it.
+  </p>
+
+  <!-- 84px and 28px side by side -->
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="logo-box logo-box--84">
+              <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5.5" y1="6" x2="5.5" y2="22" />
+                <line x1="5.5" y1="6" x2="13" y2="6" />
+                <line x1="5.5" y1="14" x2="11.5" y2="14" />
+                <line x1="5.5" y1="22" x2="13" y2="22" />
+                <line x1="14" y1="14" x2="22.5" y2="6" />
+                <line x1="14" y1="14" x2="22.5" y2="22" />
+                <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+                <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+                <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+              </svg>
+            </div>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <div class="logo-box logo-box--28">
+              <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5.5" y1="6" x2="5.5" y2="22" />
+                <line x1="5.5" y1="6" x2="13" y2="6" />
+                <line x1="5.5" y1="14" x2="11.5" y2="14" />
+                <line x1="5.5" y1="22" x2="13" y2="22" />
+                <line x1="14" y1="14" x2="22.5" y2="6" />
+                <line x1="14" y1="14" x2="22.5" y2="22" />
+                <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+                <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+                <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+              </svg>
+            </div>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="logo-box logo-box--84">
+              <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5.5" y1="6" x2="5.5" y2="22" />
+                <line x1="5.5" y1="6" x2="13" y2="6" />
+                <line x1="5.5" y1="14" x2="11.5" y2="14" />
+                <line x1="5.5" y1="22" x2="13" y2="22" />
+                <line x1="14" y1="14" x2="22.5" y2="6" />
+                <line x1="14" y1="14" x2="22.5" y2="22" />
+                <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+                <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+                <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+              </svg>
+            </div>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <div class="logo-box logo-box--28">
+              <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5.5" y1="6" x2="5.5" y2="22" />
+                <line x1="5.5" y1="6" x2="13" y2="6" />
+                <line x1="5.5" y1="14" x2="11.5" y2="14" />
+                <line x1="5.5" y1="22" x2="13" y2="22" />
+                <line x1="14" y1="14" x2="22.5" y2="6" />
+                <line x1="14" y1="14" x2="22.5" y2="22" />
+                <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+                <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+                <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+              </svg>
+            </div>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family comparison -->
+  <span class="section-title">Family Comparison</span>
+  <div class="comparison-row">
+    <div class="comparison-item">
+      <div class="brand-icon">E</div>
+      <span class="comparison-label">BrandMark E</span>
+    </div>
+    <div class="comparison-item">
+      <div class="hex-ref">
+        <span class="hex-ref__inner">
+          <span class="hex-ref__seg hex-ref__seg--1"></span>
+          <span class="hex-ref__seg hex-ref__seg--2"></span>
+          <span class="hex-ref__seg hex-ref__seg--3"></span>
+          <span class="hex-ref__seg hex-ref__seg--4"></span>
+          <span class="hex-ref__seg hex-ref__seg--5"></span>
+        </span>
+      </div>
+      <span class="comparison-label">HexGate</span>
+    </div>
+    <div class="comparison-item">
+      <div class="logo-box logo-box--28">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5.5" y1="6" x2="5.5" y2="22" />
+          <line x1="5.5" y1="6" x2="13" y2="6" />
+          <line x1="5.5" y1="14" x2="11.5" y2="14" />
+          <line x1="5.5" y1="22" x2="13" y2="22" />
+          <line x1="14" y1="14" x2="22.5" y2="6" />
+          <line x1="14" y1="14" x2="22.5" y2="22" />
+          <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+          <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+          <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+        </svg>
+      </div>
+      <span class="comparison-label">EK Monogram</span>
+    </div>
+  </div>
+
+  <!-- Whitelabel colors -->
+  <span class="section-title">Whitelabel Colors</span>
+  <div class="whitelabel-row">
+    <div class="whitelabel-item">
+      <span class="whitelabel-label">Cyan (default)</span>
+      <div class="logo-box logo-box--28">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5.5" y1="6" x2="5.5" y2="22" />
+          <line x1="5.5" y1="6" x2="13" y2="6" />
+          <line x1="5.5" y1="14" x2="11.5" y2="14" />
+          <line x1="5.5" y1="22" x2="13" y2="22" />
+          <line x1="14" y1="14" x2="22.5" y2="6" />
+          <line x1="14" y1="14" x2="22.5" y2="22" />
+          <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+          <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+          <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+        </svg>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-orange">
+      <span class="whitelabel-label">Orange #ff8c00</span>
+      <div class="logo-box logo-box--28">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5.5" y1="6" x2="5.5" y2="22" />
+          <line x1="5.5" y1="6" x2="13" y2="6" />
+          <line x1="5.5" y1="14" x2="11.5" y2="14" />
+          <line x1="5.5" y1="22" x2="13" y2="22" />
+          <line x1="14" y1="14" x2="22.5" y2="6" />
+          <line x1="14" y1="14" x2="22.5" y2="22" />
+          <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+          <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+          <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+        </svg>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-green">
+      <span class="whitelabel-label">Green #00ff88</span>
+      <div class="logo-box logo-box--28">
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5.5" y1="6" x2="5.5" y2="22" />
+          <line x1="5.5" y1="6" x2="13" y2="6" />
+          <line x1="5.5" y1="14" x2="11.5" y2="14" />
+          <line x1="5.5" y1="22" x2="13" y2="22" />
+          <line x1="14" y1="14" x2="22.5" y2="6" />
+          <line x1="14" y1="14" x2="22.5" y2="22" />
+          <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+          <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+          <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wordmark pairing -->
+  <span class="section-title">Logo + Wordmark Pairing</span>
+  <div class="demo-row">
+    <div class="demo-panel">
+      <div class="logotype">
+        <div class="logo-box logo-box--28">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5.5" y1="6" x2="5.5" y2="22" />
+            <line x1="5.5" y1="6" x2="13" y2="6" />
+            <line x1="5.5" y1="14" x2="11.5" y2="14" />
+            <line x1="5.5" y1="22" x2="13" y2="22" />
+            <line x1="14" y1="14" x2="22.5" y2="6" />
+            <line x1="14" y1="14" x2="22.5" y2="22" />
+            <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+            <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+            <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+          </svg>
+        </div>
+        <span class="logotype__name">Erika</span>
+      </div>
+      <div class="size-label">Nav size (28px icon)</div>
+    </div>
+    <div class="demo-panel">
+      <div class="logotype logotype--large">
+        <div class="logo-box logo-box--84">
+          <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5.5" y1="6" x2="5.5" y2="22" />
+            <line x1="5.5" y1="6" x2="13" y2="6" />
+            <line x1="5.5" y1="14" x2="11.5" y2="14" />
+            <line x1="5.5" y1="22" x2="13" y2="22" />
+            <line x1="14" y1="14" x2="22.5" y2="6" />
+            <line x1="14" y1="14" x2="22.5" y2="22" />
+            <line x1="11.5" y1="14" x2="14" y2="14" opacity="0.25" />
+            <line x1="22.5" y1="6" x2="22.5" y2="8" opacity="0.4" />
+            <line x1="22.5" y1="22" x2="22.5" y2="20" opacity="0.4" />
+          </svg>
+        </div>
+        <span class="logotype__name">Erika</span>
+      </div>
+      <div class="size-label">Hero size (84px icon)</div>
+    </div>
+  </div>
+
+  <!-- Annotations -->
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Concept</span><span class="annotation__value">E+K monogram from hex gate DNA</span></div>
+    <div class="annotation"><span class="annotation__key">E construction</span><span class="annotation__value">Vertical spine + 3 horizontal arms</span></div>
+    <div class="annotation"><span class="annotation__key">K construction</span><span class="annotation__value">Two diagonals from shared junction point</span></div>
+    <div class="annotation"><span class="annotation__key">Gap bridge</span><span class="annotation__value">Dim connector between E-bar and K (0.25 opacity)</span></div>
+    <div class="annotation"><span class="annotation__key">Hex accents</span><span class="annotation__value">Vertical ticks at K arm terminals (0.4 opacity)</span></div>
+    <div class="annotation"><span class="annotation__key">Symbolism</span><span class="annotation__value">Erika identity, geometric construction, the gap</span></div>
+    <div class="annotation"><span class="annotation__key">Stroke</span><span class="annotation__value">1.5px, round cap/join, currentColor</span></div>
+    <div class="annotation"><span class="annotation__key">ViewBox</span><span class="annotation__value">0 0 28 28</span></div>
+    <div class="annotation"><span class="annotation__key">Box</span><span class="annotation__value">28px, 1px border, radius 6px, glow</span></div>
+  </div>
+</body>
+</html>

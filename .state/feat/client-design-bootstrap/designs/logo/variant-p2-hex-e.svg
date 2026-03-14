@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Hex-E: A hexagonal shape that reads as the letter E.
+       Left vertical spine from hex diagonals, three horizontal strokes (top, middle, bottom).
+       Right side has angled hex-style tips. -->
+  <!-- Left spine -->
+  <line x1="5" y1="4" x2="5" y2="20" />
+  <!-- Top horizontal stroke -->
+  <line x1="5" y1="4" x2="16" y2="4" />
+  <!-- Top-right angled segment (hex feel) -->
+  <line x1="16" y1="4" x2="19" y2="7" />
+  <!-- Middle horizontal stroke -->
+  <line x1="5" y1="12" x2="15" y2="12" />
+  <!-- Middle-right angled segment (hex feel) -->
+  <line x1="15" y1="12" x2="17.5" y2="14" />
+  <!-- Bottom horizontal stroke -->
+  <line x1="5" y1="20" x2="16" y2="20" />
+  <!-- Bottom-right angled segment (hex feel) -->
+  <line x1="16" y1="20" x2="19" y2="17" />
+</svg>

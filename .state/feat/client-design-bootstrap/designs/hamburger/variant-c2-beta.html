@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C2-Beta: Spine + Notch — Branded Hamburger</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * C2-BETA: Spine + Notch
+     *
+     * Vertical spine on the left, 3 EQUAL-length bars on the right.
+     * Brand identity is encoded by a small NOTCH (gap) in one of the bars.
+     * The notch position (which bar, where on the bar) subtly evokes the letter.
+     *
+     * E-notch: gap at the right end of the middle bar (missing right arm of E)
+     * M-notch: gap at the center of the top bar (M's center dip)
+     * W-notch: gap at the center of the bottom bar (W's center peak)
+     *
+     * Implementation: CSS with clip-path or two sub-spans per bar.
+     * Complexity: MEDIUM — notch positioning needs per-letter config.
+     */
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px;
+      gap: 48px;
+    }
+
+    h1 {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-secondary);
+      font-weight: var(--weight-medium);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+      text-transform: uppercase;
+    }
+
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    /* ============================
+       THE HAMBURGER BUTTON
+       ============================ */
+
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .hamburger__icon {
+      --accent: var(--accent-primary);
+      --accent-glow: rgba(0, 212, 255, 0.15);
+      --accent-glow-strong: rgba(0, 212, 255, 0.35);
+      --accent-bg: rgba(0, 212, 255, 0.06);
+      --accent-inset: rgba(0, 212, 255, 0.08);
+      --accent-inset-strong: rgba(0, 212, 255, 0.12);
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      background: var(--accent-bg);
+      box-shadow:
+        0 0 8px var(--accent-glow),
+        inset 0 0 6px var(--accent-inset);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+      color: var(--accent);
+      position: relative;
+      gap: 3px;
+      padding-left: 7px;
+      padding-right: 5px;
+    }
+
+    .hamburger--hover .hamburger__icon {
+      box-shadow:
+        0 0 14px var(--accent-glow-strong),
+        inset 0 0 8px var(--accent-inset-strong);
+    }
+
+    /* Vertical spine */
+    .hamburger__icon::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      width: 2px;
+      height: 14px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    /* Bar row — contains two segments with a gap between them */
+    .hamburger__bar-row {
+      display: flex;
+      align-items: center;
+      margin-left: 4px;
+      width: 13px;
+      height: 2px;
+      gap: 0;
+    }
+
+    .hamburger__seg {
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .hamburger__notch {
+      height: 2px;
+      flex-shrink: 0;
+    }
+
+    /* E-notch: notch at end of middle bar */
+    .notch-e .hamburger__bar-row--top .hamburger__seg { width: 13px; }
+    .notch-e .hamburger__bar-row--top .hamburger__notch { width: 0; }
+
+    .notch-e .hamburger__bar-row--mid .hamburger__seg:first-child { width: 8px; }
+    .notch-e .hamburger__bar-row--mid .hamburger__notch { width: 2px; }
+    .notch-e .hamburger__bar-row--mid .hamburger__seg:last-child { width: 3px; }
+
+    .notch-e .hamburger__bar-row--bottom .hamburger__seg { width: 13px; }
+    .notch-e .hamburger__bar-row--bottom .hamburger__notch { width: 0; }
+
+    /* M-notch: notch at center of top bar */
+    .notch-m .hamburger__bar-row--top .hamburger__seg:first-child { width: 5px; }
+    .notch-m .hamburger__bar-row--top .hamburger__notch { width: 3px; }
+    .notch-m .hamburger__bar-row--top .hamburger__seg:last-child { width: 5px; }
+
+    .notch-m .hamburger__bar-row--mid .hamburger__seg { width: 13px; }
+    .notch-m .hamburger__bar-row--mid .hamburger__notch { width: 0; }
+
+    .notch-m .hamburger__bar-row--bottom .hamburger__seg { width: 13px; }
+    .notch-m .hamburger__bar-row--bottom .hamburger__notch { width: 0; }
+
+    /* W-notch: notch at center of bottom bar */
+    .notch-w .hamburger__bar-row--top .hamburger__seg { width: 13px; }
+    .notch-w .hamburger__bar-row--top .hamburger__notch { width: 0; }
+
+    .notch-w .hamburger__bar-row--mid .hamburger__seg { width: 13px; }
+    .notch-w .hamburger__bar-row--mid .hamburger__notch { width: 0; }
+
+    .notch-w .hamburger__bar-row--bottom .hamburger__seg:first-child { width: 5px; }
+    .notch-w .hamburger__bar-row--bottom .hamburger__notch { width: 3px; }
+    .notch-w .hamburger__bar-row--bottom .hamburger__seg:last-child { width: 5px; }
+
+    /* No-notch: generic hamburger */
+    .notch-none .hamburger__bar-row .hamburger__seg { width: 13px; }
+    .notch-none .hamburger__bar-row .hamburger__notch { width: 0; }
+
+    /* Hide unused segments when notch width is 0 */
+    .hamburger__bar-row .hamburger__seg:last-child {
+      /* Only visible when notch creates a gap */
+    }
+
+    /* ============================
+       WHITELABEL COLOR OVERRIDES
+       ============================ */
+
+    .theme-orange .hamburger__icon {
+      --accent: #ff8c00;
+      --accent-glow: rgba(255, 140, 0, 0.15);
+      --accent-glow-strong: rgba(255, 140, 0, 0.35);
+      --accent-bg: rgba(255, 140, 0, 0.06);
+      --accent-inset: rgba(255, 140, 0, 0.08);
+      --accent-inset-strong: rgba(255, 140, 0, 0.12);
+      color: #ff8c00;
+    }
+
+    .theme-green .hamburger__icon {
+      --accent: #00ff88;
+      --accent-glow: rgba(0, 255, 136, 0.15);
+      --accent-glow-strong: rgba(0, 255, 136, 0.35);
+      --accent-bg: rgba(0, 255, 136, 0.06);
+      --accent-inset: rgba(0, 255, 136, 0.08);
+      --accent-inset-strong: rgba(0, 255, 136, 0.12);
+      color: #00ff88;
+    }
+
+    /* ============================
+       LIGHT THEME
+       ============================ */
+    .theme-light .demo__context {
+      background: #f5f5f7;
+      border-color: #d0d0d8;
+    }
+
+    .theme-light .demo__context-label {
+      color: #555;
+    }
+
+    .theme-light .hamburger__icon {
+      --accent: #0099bb;
+      --accent-glow: rgba(0, 153, 187, 0.12);
+      --accent-glow-strong: rgba(0, 153, 187, 0.25);
+      --accent-bg: rgba(0, 153, 187, 0.06);
+      --accent-inset: rgba(0, 153, 187, 0.05);
+      --accent-inset-strong: rgba(0, 153, 187, 0.10);
+      color: #0099bb;
+    }
+
+    .divider {
+      width: 100%;
+      max-width: 600px;
+      height: 1px;
+      background: var(--border-default);
+    }
+
+    .notes {
+      max-width: 560px;
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+    }
+
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: var(--weight-semibold);
+    }
+
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+
+    .notes__text + .notes__text {
+      margin-top: 8px;
+    }
+
+    /* Enlarged detail view */
+    .detail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail__icon {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border: 2px solid var(--accent-primary);
+      border-radius: 8px;
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+      color: var(--accent-primary);
+      position: relative;
+      gap: 6px;
+      padding-left: 14px;
+      padding-right: 10px;
+    }
+
+    .detail__icon::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      width: 3px;
+      height: 28px;
+      background: currentColor;
+      border-radius: 2px;
+    }
+
+    .detail__bar-row {
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+      width: 26px;
+      height: 3px;
+    }
+
+    .detail__seg {
+      height: 3px;
+      background: currentColor;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .detail__notch {
+      height: 3px;
+      flex-shrink: 0;
+    }
+
+    /* E detail */
+    .detail--e .detail__bar-row--top .detail__seg { width: 26px; }
+    .detail--e .detail__bar-row--mid .detail__seg:first-child { width: 16px; }
+    .detail--e .detail__bar-row--mid .detail__notch { width: 4px; }
+    .detail--e .detail__bar-row--mid .detail__seg:last-child { width: 6px; }
+    .detail--e .detail__bar-row--bottom .detail__seg { width: 26px; }
+
+    /* M detail */
+    .detail--m .detail__bar-row--top .detail__seg:first-child { width: 10px; }
+    .detail--m .detail__bar-row--top .detail__notch { width: 6px; }
+    .detail--m .detail__bar-row--top .detail__seg:last-child { width: 10px; }
+    .detail--m .detail__bar-row--mid .detail__seg { width: 26px; }
+    .detail--m .detail__bar-row--bottom .detail__seg { width: 26px; }
+
+    /* W detail */
+    .detail--w .detail__bar-row--top .detail__seg { width: 26px; }
+    .detail--w .detail__bar-row--mid .detail__seg { width: 26px; }
+    .detail--w .detail__bar-row--bottom .detail__seg:first-child { width: 10px; }
+    .detail--w .detail__bar-row--bottom .detail__notch { width: 6px; }
+    .detail--w .detail__bar-row--bottom .detail__seg:last-child { width: 10px; }
+
+    .detail__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wider);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>C2-Beta: Spine + Notch</h1>
+  <p style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); max-width: 520px; text-align: center; line-height: var(--lh-sm);">
+    Equal-length bars with a subtle notch (gap) that encodes the brand letter.
+    The notch position changes per brand — which bar, where on the bar.
+    Reads as hamburger first, letter hint second.
+  </p>
+
+  <!-- ENLARGED DETAIL VIEW -->
+  <div class="section">
+    <h2>Notch Detail (2x Scale)</h2>
+    <div class="row">
+      <div class="detail detail--e">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+            <span class="detail__notch"></span>
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">E-notch: mid bar, right</span>
+      </div>
+
+      <div class="detail detail--m">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+            <span class="detail__notch"></span>
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">M-notch: top bar, center</span>
+      </div>
+
+      <div class="detail detail--w">
+        <div class="detail__icon">
+          <div class="detail__bar-row detail__bar-row--top">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--mid">
+            <span class="detail__seg"></span>
+          </div>
+          <div class="detail__bar-row detail__bar-row--bottom">
+            <span class="detail__seg"></span>
+            <span class="detail__notch"></span>
+            <span class="detail__seg"></span>
+          </div>
+        </div>
+        <span class="detail__label">W-notch: bottom bar, center</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LETTER CONFIGURATIONS AT ACTUAL SIZE -->
+  <div class="section">
+    <h2>Actual Size (28px)</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">"E" Normal</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"E" Hover</span>
+        <div class="demo__context">
+          <button class="hamburger hamburger--hover" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"M" Notch</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-m" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">"W" Notch</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-w" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Wavelength</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label">No Notch</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-none" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span>
+                <span class="hamburger__notch"></span>
+                <span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Generic</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHITELABEL ACCENT COLORS -->
+  <div class="section">
+    <h2>Whitelabel Accent Colors</h2>
+    <div class="row">
+      <div class="demo">
+        <span class="demo__label">Cyan (default)</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo theme-orange">
+        <span class="demo__label">Orange #ff8c00</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-m" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo theme-green">
+        <span class="demo__label">Green #00ff88</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-w" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Wavelength</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- LIGHT THEME -->
+  <div class="section">
+    <h2>Light Theme Preview</h2>
+    <div class="row theme-light">
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">"E" Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-e" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Erika</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">"M" Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-m" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Maxima</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo__label" style="color: #999;">No Notch Light</span>
+        <div class="demo__context">
+          <button class="hamburger" type="button" aria-label="Menu">
+            <span class="hamburger__icon notch-none" aria-hidden="true">
+              <div class="hamburger__bar-row hamburger__bar-row--top">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--mid">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+              <div class="hamburger__bar-row hamburger__bar-row--bottom">
+                <span class="hamburger__seg"></span><span class="hamburger__notch"></span><span class="hamburger__seg"></span>
+              </div>
+            </span>
+          </button>
+          <span class="demo__context-label">Generic</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- NOTES -->
+  <div class="notes">
+    <p class="notes__title">Implementation Notes</p>
+    <p class="notes__text">
+      <strong>Complexity: MEDIUM.</strong> Each bar is split into two segments with a gap between them.
+      The notch position is controlled by segment widths per letter configuration. Requires 6 values
+      per letter config (2 segment widths x 3 bars) but most bars are full-width (no notch).
+    </p>
+    <p class="notes__text">
+      <strong>CSS-only feasibility: YES.</strong> No SVG needed. Each bar row is a flex container with
+      two span segments and a gap span. Notch width and segment widths are CSS custom properties.
+      Could also use clip-path for a single-element approach, but flex segments are simpler.
+    </p>
+    <p class="notes__text">
+      <strong>Whitelabel API:</strong> Configure --accent color + notch-bar (top/mid/bottom) +
+      notch-position (left/center/right). More expressive than Alpha but more config values.
+      The notch is subtle enough that at 28px it reads primarily as hamburger.
+    </p>
+  </div>
+
+</body>
+</html>

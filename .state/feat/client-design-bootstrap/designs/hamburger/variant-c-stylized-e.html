@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamburger Variant C — Stylized E</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    /*
+     * VARIANT C: Stylized "E" That Reads as Menu
+     *
+     * C1: Literal "E" in the same treatment as BrandMark — users learn
+     *     that tapping E opens/closes navigation.
+     * C2: The E deconstructed into geometric bars with a vertical spine.
+     *     Three horizontal strokes (top/mid/bottom) plus a left vertical,
+     *     forming a recognizable E that also reads as a menu icon.
+     */
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 80px;
+      flex-wrap: wrap;
+      padding: 40px;
+    }
+
+    .demo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .demo__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .demo__context {
+      display: flex;
+      align-items: center;
+      height: 54px;
+      padding-inline: 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      gap: 12px;
+    }
+
+    .demo__context-label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+    }
+
+    .hamburger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      padding: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .hamburger__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow:
+        0 0 8px rgba(0, 212, 255, 0.15),
+        inset 0 0 6px rgba(0, 212, 255, 0.08);
+      transition: box-shadow 250ms ease-out;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .hamburger--hover .hamburger__icon {
+      box-shadow:
+        0 0 14px rgba(0, 212, 255, 0.35),
+        inset 0 0 8px rgba(0, 212, 255, 0.12);
+    }
+
+    /* C1: Direct "E" — identical to BrandMark icon */
+    .hamburger__icon--e {
+      font-size: var(--text-sm);
+    }
+
+    /* C2: E-shaped bars with vertical spine */
+    .hamburger__icon--e-bars {
+      flex-direction: column;
+      gap: 3px;
+      position: relative;
+    }
+
+    .hamburger__icon--e-bars::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 7px;
+      width: 2px;
+      height: 14px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    .hamburger__e-stroke {
+      display: block;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      margin-left: 1px;
+    }
+
+    .hamburger__e-stroke--top {
+      width: 12px;
+    }
+
+    .hamburger__e-stroke--mid {
+      width: 10px;
+    }
+
+    .hamburger__e-stroke--bottom {
+      width: 12px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--accent-primary);
+      background: rgba(0, 212, 255, 0.06);
+      box-shadow:
+        0 0 8px rgba(0, 212, 255, 0.15),
+        inset 0 0 6px rgba(0, 212, 255, 0.08);
+    }
+
+    .comparison {
+      display: flex;
+      align-items: center;
+      gap: 48px;
+      margin-top: 40px;
+    }
+
+    .comparison__item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .comparison__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+    }
+
+    .section-divider {
+      width: 1px;
+      height: 120px;
+      background: var(--border-default);
+    }
+
+    .notes {
+      margin-top: 48px;
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .notes__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .notes__text {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      line-height: var(--lh-sm);
+    }
+  </style>
+</head>
+<body>
+  <!-- C1: Direct E — Normal -->
+  <div class="demo">
+    <span class="demo__label">C1 Normal</span>
+    <div class="demo__context">
+      <button class="hamburger" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--e" aria-hidden="true">E</span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- C1: Direct E — Hover -->
+  <div class="demo">
+    <span class="demo__label">C1 Hover</span>
+    <div class="demo__context">
+      <button class="hamburger hamburger--hover" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--e" aria-hidden="true">E</span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- C2: E-shaped bars — Normal -->
+  <div class="demo">
+    <span class="demo__label">C2 Normal</span>
+    <div class="demo__context">
+      <button class="hamburger" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--e-bars" aria-hidden="true">
+          <span class="hamburger__e-stroke hamburger__e-stroke--top"></span>
+          <span class="hamburger__e-stroke hamburger__e-stroke--mid"></span>
+          <span class="hamburger__e-stroke hamburger__e-stroke--bottom"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- C2: E-shaped bars — Hover -->
+  <div class="demo">
+    <span class="demo__label">C2 Hover</span>
+    <div class="demo__context">
+      <button class="hamburger hamburger--hover" type="button" aria-label="Open navigation">
+        <span class="hamburger__icon hamburger__icon--e-bars" aria-hidden="true">
+          <span class="hamburger__e-stroke hamburger__e-stroke--top"></span>
+          <span class="hamburger__e-stroke hamburger__e-stroke--mid"></span>
+          <span class="hamburger__e-stroke hamburger__e-stroke--bottom"></span>
+        </span>
+      </button>
+      <span class="demo__context-label">Sessions</span>
+    </div>
+  </div>
+
+  <!-- Comparison -->
+  <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    <div class="comparison">
+      <div class="comparison__item">
+        <div class="brand-icon">E</div>
+        <span class="comparison__label">BrandMark E</span>
+      </div>
+      <div class="comparison__item">
+        <button class="hamburger" type="button" style="width: 28px; height: 28px; padding: 0;">
+          <span class="hamburger__icon hamburger__icon--e" aria-hidden="true">E</span>
+        </button>
+        <span class="comparison__label">C1 Letter E</span>
+      </div>
+      <div class="comparison__item">
+        <button class="hamburger" type="button" style="width: 28px; height: 28px; padding: 0;">
+          <span class="hamburger__icon hamburger__icon--e-bars" aria-hidden="true">
+            <span class="hamburger__e-stroke hamburger__e-stroke--top"></span>
+            <span class="hamburger__e-stroke hamburger__e-stroke--mid"></span>
+            <span class="hamburger__e-stroke hamburger__e-stroke--bottom"></span>
+          </span>
+        </button>
+        <span class="comparison__label">C2 E-Bars</span>
+      </div>
+    </div>
+
+    <div class="notes">
+      <p class="notes__title">Variant C: Stylized E</p>
+      <p class="notes__text">
+        C1 uses the identical "E" letter from the desktop BrandMark. On mobile,
+        it acts as both brand identifier and menu toggle — users learn "tap E to navigate."
+        C2 deconstructs the E into geometric bars with a vertical spine, making the
+        hamburger metaphor explicit while retaining the E shape. The middle bar is
+        shorter, breaking the uniform hamburger pattern to evoke the letter E.
+      </p>
+    </div>
+  </div>
+</body>
+</html>

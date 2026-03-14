@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant S2: Reflection Hex</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+    --glow-soft: rgba(0, 212, 255, 0.15);
+    --glow-hover: rgba(0, 212, 255, 0.35);
+    --glow-inset: rgba(0, 212, 255, 0.08);
+    --glow-inset-hover: rgba(0, 212, 255, 0.12);
+    --bg-icon: rgba(0, 212, 255, 0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 560px; line-height: 1.5;
+  }
+
+  .section-title { font-size: 13px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; margin-top: 16px; }
+  .demo-row { display: flex; gap: 64px; align-items: flex-start; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+  .size-label { font-size: 11px; color: #555; font-family: var(--font-mono); text-align: center; margin-top: 8px; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* === BRANDED BOX === */
+  .logo-box {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+    transition: box-shadow 250ms ease;
+  }
+  .logo-box:hover {
+    box-shadow: 0 0 14px var(--glow-hover), inset 0 0 8px var(--glow-inset-hover);
+  }
+
+  .logo-box--84 { width: 84px; height: 84px; border-width: 3px; border-radius: calc(var(--radius-sm) * 3); }
+  .logo-box--28 { width: 28px; height: 28px; }
+
+  .logo-box svg { color: var(--accent-primary); }
+  .logo-box--84 svg { width: 52px; height: 52px; }
+  .logo-box--28 svg { width: 18px; height: 18px; }
+
+  /* Light mode overrides */
+  .bg-light .logo-box { border-color: #0090b3; background: rgba(0, 212, 255, 0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .logo-box svg { color: #007a99; }
+
+  /* Whitelabel */
+  .whitelabel-row { display: flex; gap: 32px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .whitelabel-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .whitelabel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .wl-orange .logo-box { border-color: #ff8c00; background: rgba(255, 140, 0, 0.06); box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  .wl-orange .logo-box svg { color: #ff8c00; }
+  .wl-green .logo-box { border-color: #00ff88; background: rgba(0, 255, 136, 0.06); box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  .wl-green .logo-box svg { color: #00ff88; }
+
+  /* BrandMark E comparison */
+  .brand-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--accent-primary); background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+  }
+
+  /* HexGate comparison (CSS segments) */
+  .hex-gate-compare {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+  }
+  .hex-gate-compare__inner { position: relative; width: 15px; height: 13px; }
+  .hex-gate-compare__seg {
+    position: absolute; height: 1.5px; border-radius: 0.75px;
+    background: var(--accent-primary);
+  }
+  .hex-gate-compare__seg--1 { width: 7.5px; top: -0.5px; left: 3.75px; }
+  .hex-gate-compare__seg--2 { width: 7.5px; top: 2.75px; left: -1.5px; transform: rotate(-60deg); }
+  .hex-gate-compare__seg--3 { width: 7.5px; top: 9.25px; left: -1.5px; transform: rotate(60deg); }
+  .hex-gate-compare__seg--4 { width: 7.5px; bottom: -0.5px; left: 3.75px; }
+  .hex-gate-compare__seg--5 { width: 7.5px; top: 2.75px; right: -1.5px; transform: rotate(60deg); opacity: 0.3; }
+
+  .comparison-row { display: flex; gap: 32px; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .comparison-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .comparison-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  /* Wordmark pairing */
+  .wordmark-row { display: flex; gap: 48px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  .wordmark-pair { display: flex; align-items: center; gap: 10px; }
+  .wordmark-text {
+    font-family: var(--font-mono); font-size: 18px; font-weight: 600;
+    letter-spacing: 0.04em; color: #e0e0e0;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+  }
+
+  /* Annotations */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 560px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+  <h1>Variant S2: Reflection Hex</h1>
+  <p class="subtitle">
+    The hex gate with an inner echo -- a smaller, dimmer partial hexagon nested inside,
+    slightly offset. Represents looking through the portal and seeing the agent's
+    perspective reflected back. The inner shape uses the same geometry at reduced
+    scale and opacity, creating depth without clutter.
+  </p>
+
+  <!-- SVG definition (inline for reuse) -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <defs>
+      <symbol id="reflection-hex" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Outer partial hexagon -->
+        <!-- Top edge -->
+        <line x1="6" y1="3.5" x2="18" y2="3.5"/>
+        <!-- Top-left diagonal -->
+        <line x1="0.5" y1="12" x2="6" y2="3.5"/>
+        <!-- Bottom-left diagonal -->
+        <line x1="0.5" y1="12" x2="6" y2="20.5"/>
+        <!-- Bottom edge -->
+        <line x1="6" y1="20.5" x2="18" y2="20.5"/>
+        <!-- Top-right diagonal (gap edge, dim) -->
+        <line x1="18" y1="3.5" x2="23.5" y2="12" opacity="0.3"/>
+        <!-- Inner echo/reflection: scaled ~55%, centered slightly right -->
+        <g opacity="0.3" stroke-width="1">
+          <line x1="9.5" y1="7.5" x2="16.5" y2="7.5"/>
+          <line x1="6.5" y1="12.5" x2="9.5" y2="7.5"/>
+          <line x1="6.5" y1="12.5" x2="9.5" y2="17.5"/>
+          <line x1="9.5" y1="17.5" x2="16.5" y2="17.5"/>
+          <line x1="16.5" y1="7.5" x2="19.5" y2="12.5" opacity="0.5"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <span class="section-title">Size Comparison</span>
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="logo-box logo-box--84">
+              <svg><use href="#reflection-hex"/></svg>
+            </div>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <div class="logo-box logo-box--28">
+              <svg><use href="#reflection-hex"/></svg>
+            </div>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <div class="logo-box logo-box--84">
+              <svg><use href="#reflection-hex"/></svg>
+            </div>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <div class="logo-box logo-box--28">
+              <svg><use href="#reflection-hex"/></svg>
+            </div>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="section-title">Whitelabel Colors</span>
+  <div class="whitelabel-row">
+    <div class="whitelabel-item">
+      <span class="whitelabel-label">Cyan (default)</span>
+      <div class="logo-box logo-box--28">
+        <svg><use href="#reflection-hex"/></svg>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-orange">
+      <span class="whitelabel-label">Orange #ff8c00</span>
+      <div class="logo-box logo-box--28">
+        <svg><use href="#reflection-hex"/></svg>
+      </div>
+    </div>
+    <div class="whitelabel-item wl-green">
+      <span class="whitelabel-label">Green #00ff88</span>
+      <div class="logo-box logo-box--28">
+        <svg><use href="#reflection-hex"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <span class="section-title">Family Comparison</span>
+  <div class="comparison-row">
+    <div class="comparison-item">
+      <div class="brand-icon">E</div>
+      <span class="comparison-label">BrandMark E</span>
+    </div>
+    <div class="comparison-item">
+      <div class="hex-gate-compare">
+        <span class="hex-gate-compare__inner">
+          <span class="hex-gate-compare__seg hex-gate-compare__seg--1"></span>
+          <span class="hex-gate-compare__seg hex-gate-compare__seg--2"></span>
+          <span class="hex-gate-compare__seg hex-gate-compare__seg--3"></span>
+          <span class="hex-gate-compare__seg hex-gate-compare__seg--4"></span>
+          <span class="hex-gate-compare__seg hex-gate-compare__seg--5"></span>
+        </span>
+      </div>
+      <span class="comparison-label">HexGateIcon</span>
+    </div>
+    <div class="comparison-item">
+      <div class="logo-box logo-box--28">
+        <svg><use href="#reflection-hex"/></svg>
+      </div>
+      <span class="comparison-label">Reflection Hex (S2)</span>
+    </div>
+  </div>
+
+  <span class="section-title">Logo + Wordmark</span>
+  <div class="wordmark-row">
+    <div class="wordmark-pair">
+      <div class="logo-box logo-box--28">
+        <svg><use href="#reflection-hex"/></svg>
+      </div>
+      <span class="wordmark-text">Erika</span>
+    </div>
+    <div class="wordmark-pair" style="background: #f0f0f4; padding: 12px 20px; border-radius: 8px;">
+      <div class="logo-box logo-box--28">
+        <svg><use href="#reflection-hex"/></svg>
+      </div>
+      <span class="wordmark-text" style="color: #1a1a2e;">Erika</span>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Concept</span><span class="annotation__value">Hex gate + inner reflection echo</span></div>
+    <div class="annotation"><span class="annotation__key">Box</span><span class="annotation__value">28px, 1px border, 6px radius</span></div>
+    <div class="annotation"><span class="annotation__key">Outer hex</span><span class="annotation__value">stroke-width 1.5, full opacity</span></div>
+    <div class="annotation"><span class="annotation__key">Inner echo</span><span class="annotation__value">stroke-width 1, opacity 0.3</span></div>
+    <div class="annotation"><span class="annotation__key">Inner scale</span><span class="annotation__value">~55% of outer, centered</span></div>
+    <div class="annotation"><span class="annotation__key">Technique</span><span class="annotation__value">SVG stroke-based, currentColor</span></div>
+    <div class="annotation"><span class="annotation__key">ViewBox</span><span class="annotation__value">0 0 24 24</span></div>
+    <div class="annotation"><span class="annotation__key">Gap edge opacity</span><span class="annotation__value">0.3 outer, 0.15 inner</span></div>
+  </div>
+</body>
+</html>

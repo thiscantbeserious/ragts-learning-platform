@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant M — Hash / Octothorpe Nav Trigger</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent: #00d4ff;
+  --accent-glow: rgba(0, 212, 255, 0.4);
+  --accent-glow-strong: rgba(0, 212, 255, 0.7);
+  --accent-subtle: rgba(0, 212, 255, 0.06);
+  --bg-base: #0a0a14;
+  --bg-surface: #1a1a2e;
+  --bg-elevated: #212136;
+  --text-primary: #f1f1f7;
+  --text-secondary: #d3d4d9;
+  --text-muted: #aaaab0;
+  --radius-sm: 6px;
+  --font-mono: 'Geist Mono', monospace;
+  --font-body: 'Geist', sans-serif;
+  --m3-easing: cubic-bezier(0.2, 0, 0, 1);
+  --morph-duration: 300ms;
+  --glow-duration: 440ms;
+  --stagger-1: 0ms;
+  --stagger-2: 60ms;
+  --stagger-3: 120ms;
+}
+
+body { font-family: var(--font-body); color: var(--text-primary); line-height: 1.5; }
+
+.page { display: flex; flex-direction: column; gap: 48px; padding: 32px; }
+.section { max-width: 900px; }
+.section__title {
+  font-size: 20px; font-weight: 600; margin-bottom: 8px;
+  font-family: var(--font-mono); letter-spacing: 0.02em;
+}
+.section__subtitle {
+  font-size: 13px; color: var(--text-muted); margin-bottom: 24px;
+  font-family: var(--font-mono);
+}
+.row { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+.label {
+  font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);
+  text-transform: uppercase; letter-spacing: 0.08em; margin-top: 8px;
+  text-align: center;
+}
+.swatch-group { display: flex; flex-direction: column; align-items: center; }
+.panel { border-radius: 12px; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+.panel--dark { background: var(--bg-base); }
+.panel--light { background: #f0f0f5; }
+.panel--light .label { color: #666; }
+.panel--light .section__title { color: #111; }
+.panel--light .section__subtitle { color: #888; }
+
+/* BrandMark */
+.brand-mark-icon {
+  width: 28px; height: 28px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 14px; font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: 0 0 8px var(--accent-glow), inset 0 0 6px rgba(0,212,255,0.08);
+  flex-shrink: 0;
+}
+.brand-mark-icon--3x {
+  width: 84px; height: 84px; font-size: 42px;
+  box-shadow: 0 0 24px var(--accent-glow), inset 0 0 18px rgba(0,212,255,0.08);
+}
+.panel--light .brand-mark-icon {
+  --accent: #0090b0;
+  --accent-glow: rgba(0, 144, 176, 0.25);
+  --accent-subtle: rgba(0, 144, 176, 0.06);
+}
+
+/* ================================================================
+   NAV TRIGGER — Hash #
+   ================================================================
+   Built from 4 CSS lines: 2 vertical + 2 horizontal.
+   The # is slightly rotated (~10deg) for visual interest.
+   On toggle to X:
+   - Horizontals fade out (stagger-1: 0ms)
+   - Verticals rotate to form X (stagger-3: 120ms)
+   ================================================================ */
+.nav-trigger {
+  position: relative;
+  width: 28px; height: 28px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+  box-shadow: 0 0 8px var(--accent-glow), inset 0 0 6px rgba(0,212,255,0.08);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  outline: none; padding: 0;
+  transition: box-shadow var(--glow-duration) var(--m3-easing);
+}
+.nav-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.nav-trigger--3x {
+  width: 84px; height: 84px;
+  box-shadow: 0 0 24px var(--accent-glow), inset 0 0 18px rgba(0,212,255,0.08);
+}
+.nav-trigger.is-animating {
+  box-shadow: 0 0 18px var(--accent-glow-strong), 0 0 40px var(--accent-glow), inset 0 0 12px rgba(0,212,255,0.15);
+}
+.nav-trigger--3x.is-animating {
+  box-shadow: 0 0 48px var(--accent-glow-strong), 0 0 80px var(--accent-glow), inset 0 0 30px rgba(0,212,255,0.15);
+}
+
+.nav-trigger__inner {
+  position: relative;
+  width: 14px; height: 14px;
+  transform: rotate(-8deg);
+  transition: transform var(--morph-duration) var(--m3-easing);
+}
+.nav-trigger--3x .nav-trigger__inner {
+  width: 42px; height: 42px;
+}
+
+/* The 4 lines of the hash */
+.nav-trigger__h1,
+.nav-trigger__h2,
+.nav-trigger__v1,
+.nav-trigger__v2 {
+  position: absolute;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+/* Horizontal lines */
+.nav-trigger__h1,
+.nav-trigger__h2 {
+  width: 100%; height: 2px;
+  left: 0;
+  transition: opacity var(--morph-duration) var(--m3-easing), transform var(--morph-duration) var(--m3-easing);
+  transition-delay: var(--stagger-1);
+}
+.nav-trigger__h1 { top: 4px; }
+.nav-trigger__h2 { bottom: 4px; }
+.nav-trigger--3x .nav-trigger__h1,
+.nav-trigger--3x .nav-trigger__h2 { height: 3px; }
+.nav-trigger--3x .nav-trigger__h1 { top: 12px; }
+.nav-trigger--3x .nav-trigger__h2 { bottom: 12px; }
+
+/* Vertical lines */
+.nav-trigger__v1,
+.nav-trigger__v2 {
+  height: 100%; width: 2px;
+  top: 0;
+  transition: transform var(--morph-duration) var(--m3-easing), width var(--morph-duration) var(--m3-easing);
+  transition-delay: var(--stagger-3);
+  transform-origin: center center;
+}
+.nav-trigger__v1 { left: 4px; }
+.nav-trigger__v2 { right: 4px; }
+.nav-trigger--3x .nav-trigger__v1,
+.nav-trigger--3x .nav-trigger__v2 { width: 3px; }
+.nav-trigger--3x .nav-trigger__v1 { left: 12px; }
+.nav-trigger--3x .nav-trigger__v2 { right: 12px; }
+
+/* ================================================================
+   OPEN STATE — # morphs to X
+   ================================================================ */
+
+/* Remove the rotation on inner container */
+.nav-trigger.is-open .nav-trigger__inner {
+  transform: rotate(0deg);
+}
+
+/* Horizontals fade out */
+.nav-trigger.is-open .nav-trigger__h1,
+.nav-trigger.is-open .nav-trigger__h2 {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+/* Verticals converge to center and rotate into X */
+.nav-trigger.is-open .nav-trigger__v1 {
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+.nav-trigger.is-open .nav-trigger__v2 {
+  right: 50%;
+  transform: translateX(50%) rotate(-45deg);
+}
+
+/* Whitelabel */
+.nav-trigger--orange {
+  --accent: #ff8c00;
+  --accent-glow: rgba(255, 140, 0, 0.4);
+  --accent-glow-strong: rgba(255, 140, 0, 0.7);
+  --accent-subtle: rgba(255, 140, 0, 0.06);
+}
+.nav-trigger--green {
+  --accent: #00ff88;
+  --accent-glow: rgba(0, 255, 136, 0.4);
+  --accent-glow-strong: rgba(0, 255, 136, 0.7);
+  --accent-subtle: rgba(0, 255, 136, 0.06);
+}
+.panel--light .nav-trigger {
+  --accent: #0090b0;
+  --accent-glow: rgba(0, 144, 176, 0.25);
+  --accent-glow-strong: rgba(0, 144, 176, 0.5);
+  --accent-subtle: rgba(0, 144, 176, 0.06);
+  background: rgba(0, 144, 176, 0.04);
+}
+.panel--light .nav-trigger--orange {
+  --accent: #cc7000;
+  --accent-glow: rgba(204, 112, 0, 0.25);
+  --accent-glow-strong: rgba(204, 112, 0, 0.5);
+  --accent-subtle: rgba(204, 112, 0, 0.06);
+}
+.panel--light .nav-trigger--green {
+  --accent: #009955;
+  --accent-glow: rgba(0, 153, 85, 0.25);
+  --accent-glow-strong: rgba(0, 153, 85, 0.5);
+  --accent-subtle: rgba(0, 153, 85, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-trigger, .nav-trigger__inner,
+  .nav-trigger__h1, .nav-trigger__h2,
+  .nav-trigger__v1, .nav-trigger__v2 {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+.timing {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
+  background: var(--bg-elevated); padding: 12px 16px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06); line-height: 1.8; max-width: 420px;
+}
+.timing code {
+  color: var(--accent); background: rgba(0,212,255,0.08);
+  padding: 1px 5px; border-radius: 3px;
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="panel panel--dark">
+    <div class="section">
+      <div class="section__title">Variant M: Hash / Octothorpe #</div>
+      <div class="section__subtitle">Click icons to toggle between closed/open states</div>
+    </div>
+    <div class="row">
+      <div class="swatch-group">
+        <div class="brand-mark-icon brand-mark-icon--3x">E</div>
+        <div class="label">BrandMark 3x</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Nav Trigger 3x (84px)</div>
+      </div>
+      <div style="width:1px;height:60px;background:rgba(255,255,255,0.06)"></div>
+      <div class="swatch-group">
+        <div class="brand-mark-icon">E</div>
+        <div class="label">BrandMark 1x</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Nav Trigger 1x (28px)</div>
+      </div>
+    </div>
+    <div class="section" style="margin-top:16px">
+      <div class="section__subtitle">Whitelabel Color Variants</div>
+    </div>
+    <div class="row">
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x" aria-label="Toggle navigation (cyan)" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Cyan (default)</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x nav-trigger--orange" aria-label="Toggle navigation (orange)" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Orange #ff8c00</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x nav-trigger--green" aria-label="Toggle navigation (green)" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Green #00ff88</div>
+      </div>
+    </div>
+    <div class="timing">
+      <strong>M3 Glow Pulse Morph Timing</strong><br>
+      Total: <code>~440ms</code><br>
+      Horizontals fade: <code>0ms</code> delay, <code>300ms</code> duration (scaleX to 0)<br>
+      Inner rotation: <code>60ms</code> delay, <code>300ms</code> (un-rotate from -8deg to 0)<br>
+      Verticals converge + rotate: <code>120ms</code> delay, <code>300ms</code> to X<br>
+      Glow pulse: <code>0ms</code> start, peaks <code>~220ms</code>, settles <code>440ms</code><br>
+      Easing: <code>cubic-bezier(0.2, 0, 0, 1)</code> (M3 standard)
+    </div>
+  </div>
+
+  <div class="panel panel--light">
+    <div class="section">
+      <div class="section__title">Light Background</div>
+      <div class="section__subtitle">Same component, light theme tokens</div>
+    </div>
+    <div class="row">
+      <div class="swatch-group">
+        <div class="brand-mark-icon brand-mark-icon--3x">E</div>
+        <div class="label">BrandMark 3x</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Nav Trigger 3x</div>
+      </div>
+      <div style="width:1px;height:60px;background:rgba(0,0,0,0.08)"></div>
+      <div class="swatch-group">
+        <div class="brand-mark-icon">E</div>
+        <div class="label">BrandMark 1x</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Nav Trigger 1x</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x nav-trigger--orange" aria-label="Toggle navigation (orange)" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Orange</div>
+      </div>
+      <div class="swatch-group">
+        <button class="nav-trigger nav-trigger--3x nav-trigger--green" aria-label="Toggle navigation (green)" aria-expanded="false" onclick="toggleNav(this)">
+          <div class="nav-trigger__inner">
+            <span class="nav-trigger__h1"></span>
+            <span class="nav-trigger__h2"></span>
+            <span class="nav-trigger__v1"></span>
+            <span class="nav-trigger__v2"></span>
+          </div>
+        </button>
+        <div class="label">Green</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function toggleNav(btn) {
+  var isOpen = btn.classList.toggle('is-open');
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  btn.classList.add('is-animating');
+  setTimeout(function() { btn.classList.remove('is-animating'); }, 440);
+}
+</script>
+</body>
+</html>

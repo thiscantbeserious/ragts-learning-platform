@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Processing Card — Variant A: TRON Border Glow</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 48px 24px;
+      min-height: 100vh;
+    }
+
+    .sidebar-mock {
+      width: 260px;
+      background: var(--bg-page);
+      border-right: 1px solid var(--border-default);
+      padding: var(--space-2) 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .sidebar-mock__label {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      padding: var(--space-3) var(--space-3) var(--space-1);
+    }
+
+    /* ============================================================
+       BASE SESSION CARD (from SessionCard.vue)
+       ============================================================ */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1\.5) var(--space-3);
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected:hover {
+      background: rgba(0, 212, 255, 0.12);
+    }
+
+    /* Row layout */
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1\.5);
+      min-width: 0;
+    }
+
+    .session-card__row--primary {
+      justify-content: flex-start;
+    }
+
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-card:hover .session-card__filename,
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+
+    .session-card__meta {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: var(--space-2);
+      padding-left: calc(6px + var(--space-1\.5));
+    }
+
+    .session-card__sections,
+    .session-card__age {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-card__age {
+      margin-left: auto;
+    }
+
+    /* Status dot */
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+
+    .session-card__status-dot--processing {
+      background: var(--accent-primary);
+      animation: status-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ============================================================
+       VARIANT A: TRON BORDER GLOW
+       ============================================================
+       - Animated cyan border that traces the card perimeter
+       - Content dimmed to signal "not ready"
+       - Card is non-interactive (disabled)
+       ============================================================ */
+    .session-card--processing-a {
+      cursor: default;
+      pointer-events: none;
+      border-left: none;
+      padding: var(--space-1\.5) var(--space-3);
+      position: relative;
+      overflow: visible;
+      background: transparent;
+    }
+
+    /* Outer wrapper for the conic-gradient border trick */
+    .tron-border-wrap {
+      position: relative;
+      border-radius: var(--radius-sm);
+      padding: 1px; /* border thickness */
+      overflow: hidden;
+    }
+
+    .tron-border-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-sm);
+      background: conic-gradient(
+        from var(--tron-angle, 0deg),
+        transparent 0%,
+        var(--accent-primary) 10%,
+        var(--accent-primary-glow-strong) 15%,
+        var(--accent-primary) 20%,
+        transparent 30%,
+        transparent 100%
+      );
+      animation: tron-rotate 2.5s linear infinite;
+    }
+
+    @keyframes tron-rotate {
+      from { --tron-angle: 0deg; }
+      to { --tron-angle: 360deg; }
+    }
+
+    /* Register custom property for animation */
+    @property --tron-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    .tron-border-wrap .session-card--processing-a {
+      background: var(--bg-page);
+      border-radius: calc(var(--radius-sm) - 1px);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Dim content */
+    .session-card--processing-a .session-card__filename {
+      color: var(--text-disabled);
+    }
+
+    .session-card--processing-a .session-card__meta {
+      color: var(--text-disabled);
+    }
+
+    /* No hover effect */
+    .session-card--processing-a:hover {
+      background: var(--bg-page);
+    }
+
+    .session-card--processing-a:hover .session-card__filename {
+      color: var(--text-disabled);
+    }
+
+    /* Reduced motion: static border, no rotation */
+    @media (prefers-reduced-motion: reduce) {
+      .tron-border-wrap::before {
+        animation: none;
+        background: conic-gradient(
+          from 0deg,
+          var(--accent-primary) 0%,
+          transparent 25%,
+          transparent 75%,
+          var(--accent-primary) 100%
+        );
+      }
+      .session-card__status-dot--processing {
+        animation: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-mock">
+    <div class="sidebar-mock__label">Variant A: TRON Border Glow</div>
+
+    <!-- PROCESSING CARD -->
+    <div class="tron-border-wrap" style="margin: 0 var(--space-1);">
+      <div class="session-card session-card--processing-a">
+        <div class="session-card__row session-card__row--primary">
+          <span class="session-card__status-dot session-card__status-dot--processing"></span>
+          <span class="session-card__filename">agent-refactor-2026.cast</span>
+        </div>
+        <div class="session-card__row session-card__meta">
+          <span class="session-card__sections">&mdash; sections</span>
+          <span class="session-card__age">2m ago</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: var(--space-4);"></div>
+    <div class="sidebar-mock__label">Ready (for comparison)</div>
+
+    <!-- READY CARD -->
+    <div class="session-card">
+      <div class="session-card__row session-card__row--primary">
+        <span class="session-card__status-dot session-card__status-dot--ready"></span>
+        <span class="session-card__filename">debug-memory-leak.cast</span>
+      </div>
+      <div class="session-card__row session-card__meta">
+        <span class="session-card__sections">12 sections</span>
+        <span class="session-card__age">15m ago</span>
+      </div>
+    </div>
+
+    <div style="height: var(--space-4);"></div>
+    <div class="sidebar-mock__label">Selected Ready (for comparison)</div>
+
+    <!-- SELECTED READY CARD -->
+    <div class="session-card session-card--selected">
+      <div class="session-card__row session-card__row--primary">
+        <span class="session-card__status-dot session-card__status-dot--ready"></span>
+        <span class="session-card__filename">implement-sse-handler.cast</span>
+      </div>
+      <div class="session-card__row session-card__meta">
+        <span class="session-card__sections">8 sections</span>
+        <span class="session-card__age">1h ago</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

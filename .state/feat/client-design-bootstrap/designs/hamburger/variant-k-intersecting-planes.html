@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant K: Intersecting Planes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --glow-soft: rgba(0, 212, 255, 0.15);
+    --glow-hover: rgba(0, 212, 255, 0.35);
+    --glow-intense: rgba(0, 212, 255, 0.55);
+    --glow-inset: rgba(0, 212, 255, 0.08);
+    --glow-inset-hover: rgba(0, 212, 255, 0.12);
+    --glow-inset-intense: rgba(0, 212, 255, 0.25);
+    --bg-icon: rgba(0, 212, 255, 0.06);
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', system-ui, sans-serif;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 24px;
+  }
+
+  h1 { font-size: 20px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 40px;
+    text-align: center; max-width: 560px; line-height: 1.5;
+  }
+
+  .demo-row { display: flex; gap: 64px; align-items: flex-start; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .demo-panel { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .panel-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #666; }
+
+  .bg-dark {
+    background: var(--bg-base); padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f0f0f4; padding: 32px; border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* ================================================================
+     INTERSECTING PLANES - Three thin parallelograms overlapping at
+     different angles, like stacked data planes or architectural
+     cross-sections. On toggle: planes shift/rotate into an X.
+     ================================================================ */
+
+  .planes {
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .planes:focus-visible {
+    outline: 2px solid var(--accent-primary); outline-offset: 4px;
+    border-radius: var(--radius-sm);
+  }
+
+  .planes__box {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    background: var(--bg-icon);
+    box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset);
+    transition: box-shadow var(--duration-normal) ease;
+  }
+  .planes:hover .planes__box {
+    box-shadow: 0 0 14px var(--glow-hover), inset 0 0 8px var(--glow-inset-hover);
+  }
+
+  .planes__inner {
+    position: relative;
+  }
+
+  .planes__shape {
+    position: absolute;
+    background: var(--accent-primary);
+    will-change: transform, opacity;
+    transform-origin: center center;
+  }
+
+  /* === SCALED (84px box) === */
+  .planes--scaled .planes__box { width: 84px; height: 84px; border-radius: calc(var(--radius-sm) * 3); border-width: 3px; }
+  .planes--scaled .planes__inner { width: 48px; height: 40px; }
+
+  /* Three planes: thin rectangles at different angles.
+     Plane 1: horizontal-ish, slight tilt (-10deg), top position
+     Plane 2: slight opposite tilt (8deg), middle, slightly wider
+     Plane 3: more tilted (-15deg), bottom position
+     They overlap in the center creating a layered/intersecting look. */
+
+  .planes--scaled .planes__shape { border-radius: 1.5px; }
+
+  /* Plane 1: top, narrow, tilted left */
+  .planes--scaled .planes__shape--1 {
+    width: 30px; height: 3px;
+    top: 6px; left: 9px;
+    transform: rotate(-12deg) skewX(-15deg);
+    opacity: 0.9;
+  }
+
+  /* Plane 2: middle, widest, slight opposite tilt */
+  .planes--scaled .planes__shape--2 {
+    width: 36px; height: 3.5px;
+    top: 18px; left: 6px;
+    transform: rotate(5deg) skewX(10deg);
+    opacity: 1;
+  }
+
+  /* Plane 3: bottom, medium, more tilted */
+  .planes--scaled .planes__shape--3 {
+    width: 28px; height: 3px;
+    top: 31px; left: 12px;
+    transform: rotate(-8deg) skewX(-20deg);
+    opacity: 0.7;
+  }
+
+  /* Staggered transitions - M3 Glow Pulse Morph timing */
+  .planes__shape--1 {
+    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, opacity 200ms ease 0ms, top 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, left 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, width 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, height 320ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  }
+  .planes__shape--2 {
+    transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, opacity 180ms ease 60ms, top 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, left 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, width 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms, height 280ms cubic-bezier(0.4, 0, 0.2, 1) 60ms;
+  }
+  .planes__shape--3 {
+    transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, opacity 200ms ease 120ms, top 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, left 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, width 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms, height 320ms cubic-bezier(0.4, 0, 0.2, 1) 120ms;
+  }
+
+  /* OPEN STATE (scaled): planes converge into an X */
+  .planes--scaled.is-open .planes__shape--1 {
+    width: 38px; height: 3px;
+    top: 18px; left: 5px;
+    transform: rotate(45deg) skewX(0deg);
+    opacity: 1;
+  }
+  .planes--scaled.is-open .planes__shape--2 {
+    width: 0; height: 3.5px;
+    top: 18px; left: 24px;
+    transform: rotate(0deg) skewX(0deg);
+    opacity: 0;
+  }
+  .planes--scaled.is-open .planes__shape--3 {
+    width: 38px; height: 3px;
+    top: 18px; left: 5px;
+    transform: rotate(-45deg) skewX(0deg);
+    opacity: 1;
+  }
+
+  /* === ACTUAL SIZE (28px) === */
+  .planes--actual .planes__box { width: 28px; height: 28px; }
+  .planes--actual .planes__inner { width: 16px; height: 13px; }
+  .planes--actual .planes__shape { border-radius: 0.75px; }
+
+  /* Plane 1: top */
+  .planes--actual .planes__shape--1 {
+    width: 10px; height: 1.5px;
+    top: 2px; left: 3px;
+    transform: rotate(-12deg) skewX(-15deg);
+    opacity: 0.9;
+  }
+
+  /* Plane 2: middle */
+  .planes--actual .planes__shape--2 {
+    width: 12px; height: 1.5px;
+    top: 6px; left: 2px;
+    transform: rotate(5deg) skewX(10deg);
+    opacity: 1;
+  }
+
+  /* Plane 3: bottom */
+  .planes--actual .planes__shape--3 {
+    width: 9px; height: 1.5px;
+    top: 10px; left: 4px;
+    transform: rotate(-8deg) skewX(-20deg);
+    opacity: 0.7;
+  }
+
+  /* OPEN STATE (actual): X */
+  .planes--actual.is-open .planes__shape--1 {
+    width: 13px; height: 1.5px;
+    top: 5.75px; left: 1.5px;
+    transform: rotate(45deg) skewX(0deg);
+    opacity: 1;
+  }
+  .planes--actual.is-open .planes__shape--2 {
+    width: 0; height: 1.5px;
+    top: 5.75px; left: 8px;
+    transform: rotate(0deg) skewX(0deg);
+    opacity: 0;
+  }
+  .planes--actual.is-open .planes__shape--3 {
+    width: 13px; height: 1.5px;
+    top: 5.75px; left: 1.5px;
+    transform: rotate(-45deg) skewX(0deg);
+    opacity: 1;
+  }
+
+  /* === GLOW PULSE === */
+  .planes.is-open .planes__box { animation: glow-pulse 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .planes:not(.is-open) .planes__box { animation: glow-settle 350ms ease forwards; }
+
+  @keyframes glow-pulse {
+    0% { box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset); }
+    40% { box-shadow: 0 0 22px var(--glow-intense), 0 0 44px rgba(0, 212, 255, 0.2), inset 0 0 12px var(--glow-inset-intense); }
+    100% { box-shadow: 0 0 10px var(--glow-hover), inset 0 0 6px var(--glow-inset); }
+  }
+  @keyframes glow-settle {
+    0% { box-shadow: 0 0 10px var(--glow-hover), inset 0 0 6px var(--glow-inset); }
+    30% { box-shadow: 0 0 18px var(--glow-intense), 0 0 36px rgba(0, 212, 255, 0.15), inset 0 0 10px var(--glow-inset-intense); }
+    100% { box-shadow: 0 0 8px var(--glow-soft), inset 0 0 6px var(--glow-inset); }
+  }
+
+  /* Light bg */
+  .bg-light .planes__box { border-color: #0090b3; background: rgba(0, 212, 255, 0.08); box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  .bg-light .planes__shape { background: #007a99; }
+  .bg-light .planes.is-open .planes__box { animation: glow-pulse-light 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .bg-light .planes:not(.is-open) .planes__box { animation: glow-settle-light 350ms ease forwards; }
+
+  @keyframes glow-pulse-light {
+    0% { box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+    40% { box-shadow: 0 0 16px rgba(0,150,180,0.4), 0 0 32px rgba(0,150,180,0.15), inset 0 0 8px rgba(0,150,180,0.15); }
+    100% { box-shadow: 0 0 8px rgba(0,150,180,0.2), inset 0 0 4px rgba(0,150,180,0.06); }
+  }
+  @keyframes glow-settle-light {
+    0% { box-shadow: 0 0 8px rgba(0,150,180,0.2), inset 0 0 4px rgba(0,150,180,0.06); }
+    30% { box-shadow: 0 0 14px rgba(0,150,180,0.35), 0 0 28px rgba(0,150,180,0.1), inset 0 0 6px rgba(0,150,180,0.1); }
+    100% { box-shadow: 0 0 6px rgba(0,150,180,0.15), inset 0 0 4px rgba(0,150,180,0.06); }
+  }
+
+  /* === WHITELABEL COLORS === */
+  .whitelabel-row { display: flex; gap: 32px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .whitelabel-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .whitelabel-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .wl-orange .planes__box { border-color: #ff8c00; background: rgba(255, 140, 0, 0.06); box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  .wl-orange .planes__shape { background: #ff8c00; }
+  .wl-orange .planes.is-open .planes__box { animation: glow-pulse-orange 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .wl-orange .planes:not(.is-open) .planes__box { animation: glow-settle-orange 350ms ease forwards; }
+  @keyframes glow-pulse-orange {
+    0% { box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+    40% { box-shadow: 0 0 22px rgba(255,140,0,0.55), 0 0 44px rgba(255,140,0,0.2), inset 0 0 12px rgba(255,140,0,0.25); }
+    100% { box-shadow: 0 0 10px rgba(255,140,0,0.35), inset 0 0 6px rgba(255,140,0,0.08); }
+  }
+  @keyframes glow-settle-orange {
+    0% { box-shadow: 0 0 10px rgba(255,140,0,0.35), inset 0 0 6px rgba(255,140,0,0.08); }
+    30% { box-shadow: 0 0 18px rgba(255,140,0,0.55), 0 0 36px rgba(255,140,0,0.15), inset 0 0 10px rgba(255,140,0,0.25); }
+    100% { box-shadow: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); }
+  }
+
+  .wl-green .planes__box { border-color: #00ff88; background: rgba(0, 255, 136, 0.06); box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  .wl-green .planes__shape { background: #00ff88; }
+  .wl-green .planes.is-open .planes__box { animation: glow-pulse-green 450ms cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .wl-green .planes:not(.is-open) .planes__box { animation: glow-settle-green 350ms ease forwards; }
+  @keyframes glow-pulse-green {
+    0% { box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+    40% { box-shadow: 0 0 22px rgba(0,255,136,0.55), 0 0 44px rgba(0,255,136,0.2), inset 0 0 12px rgba(0,255,136,0.25); }
+    100% { box-shadow: 0 0 10px rgba(0,255,136,0.35), inset 0 0 6px rgba(0,255,136,0.08); }
+  }
+  @keyframes glow-settle-green {
+    0% { box-shadow: 0 0 10px rgba(0,255,136,0.35), inset 0 0 6px rgba(0,255,136,0.08); }
+    30% { box-shadow: 0 0 18px rgba(0,255,136,0.55), 0 0 36px rgba(0,255,136,0.15), inset 0 0 10px rgba(0,255,136,0.25); }
+    100% { box-shadow: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); }
+  }
+
+  /* === BRANDMARK COMPARISON === */
+  .brand-icon {
+    width: 28px; height: 28px;
+    border: 1px solid var(--accent-primary); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    color: var(--accent-primary); background: rgba(0, 212, 255, 0.06);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+  }
+
+  .comparison-row { display: flex; gap: 32px; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; justify-content: center; }
+  .comparison-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .comparison-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  /* Controls */
+  .controls { display: flex; gap: 12px; margin-bottom: 32px; }
+  .btn-toggle {
+    font-family: 'Geist', system-ui, sans-serif; font-size: 13px;
+    padding: 8px 20px; border-radius: var(--radius-sm);
+    border: 1px solid var(--accent-primary); background: transparent;
+    color: var(--accent-primary); cursor: pointer;
+    transition: background var(--duration-fast) ease, color var(--duration-fast) ease;
+  }
+  .btn-toggle:hover { background: var(--accent-primary); color: var(--bg-base); }
+
+  /* Annotations */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 560px; width: 100%;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; }
+  .annotation__key { color: #888; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); }
+
+  .size-label { font-size: 11px; color: #555; font-family: var(--font-mono); text-align: center; margin-top: 8px; }
+  .section-title { font-size: 13px; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; margin-top: 16px; }
+</style>
+</head>
+<body>
+  <h1>Variant K: Intersecting Planes</h1>
+  <p class="subtitle">
+    Three thin geometric shapes (parallelograms) overlapping at different angles --
+    stacked data planes, like architectural cross-sections or layered terminal buffers.
+    On toggle, the skewed planes un-skew and converge into a clean X with staggered
+    M3 glow pulse morph. The middle plane fades out while outer planes rotate into position.
+  </p>
+
+  <div class="controls">
+    <button class="btn-toggle" onclick="toggleAll()">Toggle All</button>
+  </div>
+
+  <div class="demo-row">
+    <div class="demo-panel">
+      <span class="panel-label">Dark Background</span>
+      <div class="bg-dark">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <button class="planes planes--scaled js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="planes__box"><span class="planes__inner">
+                <span class="planes__shape planes__shape--1"></span>
+                <span class="planes__shape planes__shape--2"></span>
+                <span class="planes__shape planes__shape--3"></span>
+              </span></span>
+            </button>
+            <div class="size-label">84px (3x)</div>
+          </div>
+          <div>
+            <button class="planes planes--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="planes__box"><span class="planes__inner">
+                <span class="planes__shape planes__shape--1"></span>
+                <span class="planes__shape planes__shape--2"></span>
+                <span class="planes__shape planes__shape--3"></span>
+              </span></span>
+            </button>
+            <div class="size-label">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-panel">
+      <span class="panel-label">Light Background</span>
+      <div class="bg-light">
+        <div style="display:flex;align-items:center;gap:32px;">
+          <div>
+            <button class="planes planes--scaled js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="planes__box"><span class="planes__inner">
+                <span class="planes__shape planes__shape--1"></span>
+                <span class="planes__shape planes__shape--2"></span>
+                <span class="planes__shape planes__shape--3"></span>
+              </span></span>
+            </button>
+            <div class="size-label" style="color:#999">84px (3x)</div>
+          </div>
+          <div>
+            <button class="planes planes--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+              <span class="planes__box"><span class="planes__inner">
+                <span class="planes__shape planes__shape--1"></span>
+                <span class="planes__shape planes__shape--2"></span>
+                <span class="planes__shape planes__shape--3"></span>
+              </span></span>
+            </button>
+            <div class="size-label" style="color:#999">28px (1x)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <span class="section-title">Whitelabel Colors</span>
+  <div class="whitelabel-row">
+    <div class="whitelabel-item">
+      <span class="whitelabel-label">Cyan (default)</span>
+      <button class="planes planes--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+        <span class="planes__box"><span class="planes__inner">
+          <span class="planes__shape planes__shape--1"></span>
+          <span class="planes__shape planes__shape--2"></span>
+          <span class="planes__shape planes__shape--3"></span>
+        </span></span>
+      </button>
+    </div>
+    <div class="whitelabel-item wl-orange">
+      <span class="whitelabel-label">Orange #ff8c00</span>
+      <button class="planes planes--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+        <span class="planes__box"><span class="planes__inner">
+          <span class="planes__shape planes__shape--1"></span>
+          <span class="planes__shape planes__shape--2"></span>
+          <span class="planes__shape planes__shape--3"></span>
+        </span></span>
+      </button>
+    </div>
+    <div class="whitelabel-item wl-green">
+      <span class="whitelabel-label">Green #00ff88</span>
+      <button class="planes planes--actual js-toggle" onclick="toggle(this)" aria-label="Toggle menu">
+        <span class="planes__box"><span class="planes__inner">
+          <span class="planes__shape planes__shape--1"></span>
+          <span class="planes__shape planes__shape--2"></span>
+          <span class="planes__shape planes__shape--3"></span>
+        </span></span>
+      </button>
+    </div>
+  </div>
+
+  <span class="section-title">BrandMark Comparison</span>
+  <div class="comparison-row">
+    <div class="comparison-item">
+      <div class="brand-icon">E</div>
+      <span class="comparison-label">BrandMark E</span>
+    </div>
+    <div class="comparison-item">
+      <button class="planes planes--actual" aria-label="Planes closed" style="pointer-events:none;">
+        <span class="planes__box"><span class="planes__inner">
+          <span class="planes__shape planes__shape--1"></span>
+          <span class="planes__shape planes__shape--2"></span>
+          <span class="planes__shape planes__shape--3"></span>
+        </span></span>
+      </button>
+      <span class="comparison-label">Planes (closed)</span>
+    </div>
+    <div class="comparison-item">
+      <button class="planes planes--actual is-open" aria-label="Planes open" style="pointer-events:none;">
+        <span class="planes__box"><span class="planes__inner">
+          <span class="planes__shape planes__shape--1"></span>
+          <span class="planes__shape planes__shape--2"></span>
+          <span class="planes__shape planes__shape--3"></span>
+        </span></span>
+      </button>
+      <span class="comparison-label">Planes (open)</span>
+    </div>
+  </div>
+
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Total duration</span><span class="annotation__value">~440ms (stagger inclusive)</span></div>
+    <div class="annotation"><span class="annotation__key">Easing</span><span class="annotation__value">cubic-bezier(0.4, 0, 0.2, 1)</span></div>
+    <div class="annotation"><span class="annotation__key">Plane 1 (top)</span><span class="annotation__value">320ms, delay 0ms</span></div>
+    <div class="annotation"><span class="annotation__key">Plane 2 (mid)</span><span class="annotation__value">280ms, delay 60ms (fade)</span></div>
+    <div class="annotation"><span class="annotation__key">Plane 3 (btm)</span><span class="annotation__value">320ms, delay 120ms</span></div>
+    <div class="annotation"><span class="annotation__key">Glow pulse</span><span class="annotation__value">450ms, peaks at 40%</span></div>
+    <div class="annotation"><span class="annotation__key">Closed shape</span><span class="annotation__value">3 skewed parallelograms at angles</span></div>
+    <div class="annotation"><span class="annotation__key">Open shape</span><span class="annotation__value">2-line X (skew removed)</span></div>
+    <div class="annotation"><span class="annotation__key">Key property</span><span class="annotation__value">skewX dissolves during morph</span></div>
+    <div class="annotation"><span class="annotation__key">Technique</span><span class="annotation__value">CSS transitions + @keyframes glow</span></div>
+    <div class="annotation"><span class="annotation__key">prefers-reduced-motion</span><span class="annotation__value">instant state, no animation</span></div>
+  </div>
+
+  <script>
+    function toggle(btn) { btn.classList.toggle('is-open'); }
+    function toggleAll() { document.querySelectorAll('.js-toggle').forEach(function(el) { el.classList.toggle('is-open'); }); }
+  </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant N: Dimensional Portal</title>
+<style>
+  :root {
+    --accent: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --glow-soft: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+    --glow-hover: 0 0 14px rgba(0, 212, 255, 0.35), inset 0 0 8px rgba(0, 212, 255, 0.12);
+    --glow-pulse-peak: 0 0 22px rgba(0, 212, 255, 0.6), inset 0 0 12px rgba(0, 212, 255, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  h1 { color: var(--accent); font-size: 24px; font-weight: 600; }
+  p.desc { max-width: 500px; text-align: center; color: #888; font-size: 13px; line-height: 1.5; }
+  h2 { color: #666; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .row { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; justify-content: center; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .label { font-size: 10px; color: #555; letter-spacing: 1px; text-transform: uppercase; }
+  .divider { width: 1px; height: 60px; background: #333; }
+
+  /* === PORTAL ICON === */
+  .portal-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glow-soft);
+    cursor: pointer;
+    transition: box-shadow 250ms ease;
+    outline: none;
+  }
+  .portal-icon:hover { box-shadow: var(--glow-hover); }
+  .portal-icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .portal-icon--3x { width: 84px; height: 84px; }
+  .portal-icon--1x { width: 28px; height: 28px; }
+
+  /* Rings — concentric ellipses */
+  .portal-icon__ring {
+    position: absolute;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    transition: all 320ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* 3x sizes */
+  .portal-icon--3x .portal-icon__ring--outer {
+    width: 48px; height: 30px;
+    transition-delay: 0ms;
+  }
+  .portal-icon--3x .portal-icon__ring--inner {
+    width: 28px; height: 18px;
+    transition-delay: 60ms;
+  }
+
+  /* 1x sizes */
+  .portal-icon--1x .portal-icon__ring--outer {
+    width: 16px; height: 10px;
+    border-width: 1px;
+    transition-delay: 0ms;
+  }
+  .portal-icon--1x .portal-icon__ring--inner {
+    width: 9px; height: 6px;
+    border-width: 1px;
+    transition-delay: 60ms;
+  }
+
+  /* Core dot */
+  .portal-icon__core {
+    position: absolute;
+    background: var(--accent);
+    border-radius: 50%;
+    transition: all 320ms cubic-bezier(0.2, 0, 0, 1);
+    transition-delay: 120ms;
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.5);
+  }
+  .portal-icon--3x .portal-icon__core { width: 6px; height: 6px; }
+  .portal-icon--1x .portal-icon__core { width: 2px; height: 2px; }
+
+  /* === OPEN STATE === */
+  /* Rings flatten into crossed lines */
+  .portal-icon.is-open .portal-icon__ring--outer {
+    height: 1.5px;
+    border-radius: 1px;
+    transform: rotate(45deg);
+    transition-delay: 0ms;
+  }
+  .portal-icon.is-open .portal-icon__ring--inner {
+    height: 1.5px;
+    border-radius: 1px;
+    transform: rotate(-45deg);
+    transition-delay: 60ms;
+  }
+
+  /* Core stretches into a slit */
+  .portal-icon--3x.is-open .portal-icon__core {
+    width: 12px; height: 2px;
+    border-radius: 1px;
+    opacity: 0;
+  }
+  .portal-icon--1x.is-open .portal-icon__core {
+    width: 4px; height: 1px;
+    border-radius: 1px;
+    opacity: 0;
+  }
+
+  /* Glow pulse animation */
+  @keyframes glow-pulse {
+    0% { box-shadow: var(--glow-soft); }
+    40% { box-shadow: var(--glow-pulse-peak); }
+    100% { box-shadow: var(--glow-soft); }
+  }
+  .portal-icon.is-animating { animation: glow-pulse 440ms cubic-bezier(0.2, 0, 0, 1); }
+
+  /* Idle breathing */
+  @keyframes breathe {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+  .portal-icon:not(.is-open) .portal-icon__ring--outer { animation: breathe 3s ease-in-out infinite; }
+
+  /* === BRANDMARK === */
+  .brandmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glow-soft);
+    font-family: 'Geist Mono', monospace;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .brandmark--3x { width: 84px; height: 84px; font-size: 42px; }
+  .brandmark--1x { width: 28px; height: 28px; font-size: 14px; }
+
+  /* === WHITELABEL === */
+  .orange { --accent: #ff8c00; --glow-soft: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); --glow-hover: 0 0 14px rgba(255,140,0,0.35); --glow-pulse-peak: 0 0 22px rgba(255,140,0,0.6); }
+  .green { --accent: #00ff88; --glow-soft: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); --glow-hover: 0 0 14px rgba(0,255,136,0.35); --glow-pulse-peak: 0 0 22px rgba(0,255,136,0.6); }
+
+  /* === LIGHT THEME === */
+  .light-section {
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 32px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .light-section h2 { color: #999; }
+  .light-section .portal-icon {
+    background: rgba(0, 180, 220, 0.08);
+    border-color: #0099bb;
+  }
+  .light-section .portal-icon__ring { border-color: #0099bb; }
+  .light-section .portal-icon__core { background: #0099bb; }
+  .light-section .brandmark { background: rgba(0,180,220,0.08); border-color: #0099bb; color: #0099bb; }
+
+  /* === TIMING === */
+  .timing {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 2;
+    max-width: 480px;
+    width: 100%;
+  }
+  .timing strong { color: #ccc; }
+  .timing .val { color: var(--accent); }
+
+  /* === RATIONALE === */
+  .rationale {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.7;
+    max-width: 500px;
+    color: #999;
+  }
+  .rationale strong { color: #ccc; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portal-icon__ring,
+    .portal-icon__core,
+    .portal-icon { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<h1>N: Dimensional Portal</h1>
+<p class="desc">Two concentric ellipses form a wormhole viewed head-on. On toggle, the rings flatten and cross into a dimensional rift (X). The core dot dissolves as the portal opens.</p>
+
+<button onclick="document.querySelectorAll('.portal-icon').forEach(el => { el.classList.toggle('is-open'); el.classList.add('is-animating'); setTimeout(() => el.classList.remove('is-animating'), 450); })" style="background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 13px;">Toggle All</button>
+
+<h2>Dark Background</h2>
+<div class="row">
+  <div class="col">
+    <div class="portal-icon portal-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0" aria-label="Navigation toggle" aria-expanded="false">
+      <div class="portal-icon__ring portal-icon__ring--outer"></div>
+      <div class="portal-icon__ring portal-icon__ring--inner"></div>
+      <div class="portal-icon__core"></div>
+    </div>
+    <span class="label">84px (3x)</span>
+  </div>
+  <div class="col">
+    <div class="portal-icon portal-icon--1x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0" aria-label="Navigation toggle" aria-expanded="false">
+      <div class="portal-icon__ring portal-icon__ring--outer"></div>
+      <div class="portal-icon__ring portal-icon__ring--inner"></div>
+      <div class="portal-icon__core"></div>
+    </div>
+    <span class="label">28px (1x)</span>
+  </div>
+  <div class="divider"></div>
+  <div class="col">
+    <div class="brandmark brandmark--3x">E</div>
+    <span class="label">BrandMark 3x</span>
+  </div>
+  <div class="col">
+    <div class="brandmark brandmark--1x">E</div>
+    <span class="label">BrandMark 1x</span>
+  </div>
+</div>
+
+<h2>Whitelabel Color Variants</h2>
+<div class="row">
+  <div class="col">
+    <div class="portal-icon portal-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+      <div class="portal-icon__ring portal-icon__ring--outer"></div>
+      <div class="portal-icon__ring portal-icon__ring--inner"></div>
+      <div class="portal-icon__core"></div>
+    </div>
+    <span class="label">Cyan (default)</span>
+  </div>
+  <div class="col orange">
+    <div class="portal-icon portal-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+      <div class="portal-icon__ring portal-icon__ring--outer"></div>
+      <div class="portal-icon__ring portal-icon__ring--inner"></div>
+      <div class="portal-icon__core"></div>
+    </div>
+    <span class="label">Orange #ff8c00</span>
+  </div>
+  <div class="col green">
+    <div class="portal-icon portal-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+      <div class="portal-icon__ring portal-icon__ring--outer"></div>
+      <div class="portal-icon__ring portal-icon__ring--inner"></div>
+      <div class="portal-icon__core"></div>
+    </div>
+    <span class="label">Green #00ff88</span>
+  </div>
+</div>
+
+<div class="timing">
+  <strong>M3 Glow Pulse Morph Timing</strong><br>
+  Total: <span class="val">~440ms</span><br>
+  Outer ring: <span class="val">0ms</span> delay, <span class="val">320ms</span> duration (flatten + rotate 45deg)<br>
+  Inner ring: <span class="val">60ms</span> delay, <span class="val">320ms</span> duration (flatten + rotate -45deg)<br>
+  Core dot: <span class="val">120ms</span> delay, <span class="val">320ms</span> duration (stretch + fade)<br>
+  Glow pulse: <span class="val">0ms</span> start, peaks <span class="val">~180ms</span>, settles <span class="val">440ms</span><br>
+  Easing: <span class="val">cubic-bezier(0.2, 0, 0, 1)</span> (M3 standard)
+</div>
+
+<div class="light-section">
+  <h2>Light Background</h2>
+  <div class="row" style="margin-top: 16px;">
+    <div class="col">
+      <div class="brandmark brandmark--3x">E</div>
+      <span class="label" style="color: #999;">BrandMark 3x</span>
+    </div>
+    <div class="col">
+      <div class="portal-icon portal-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+        <div class="portal-icon__ring portal-icon__ring--outer"></div>
+        <div class="portal-icon__ring portal-icon__ring--inner"></div>
+        <div class="portal-icon__core"></div>
+      </div>
+      <span class="label" style="color: #999;">Nav Trigger 3x</span>
+    </div>
+    <div class="divider" style="background: #ddd;"></div>
+    <div class="col">
+      <div class="brandmark brandmark--1x">E</div>
+      <span class="label" style="color: #999;">1x</span>
+    </div>
+    <div class="col">
+      <div class="portal-icon portal-icon--1x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+        <div class="portal-icon__ring portal-icon__ring--outer"></div>
+        <div class="portal-icon__ring portal-icon__ring--inner"></div>
+        <div class="portal-icon__core"></div>
+      </div>
+      <span class="label" style="color: #999;">1x</span>
+    </div>
+  </div>
+</div>
+
+<div class="rationale">
+  <strong>Design Rationale</strong><br><br>
+  The dimensional portal metaphor maps to the act of "opening a view into another space" — the session sidebar. Two concentric ellipses read as a wormhole or portal viewed head-on. The idle breathing animation gives it life. On activation, the rings flatten and cross, suggesting the portal has been breached. The core dot dissolves as the passage opens.<br><br>
+  <strong>Why it works for Erika:</strong> The platform is about observing AI agents working in terminal sessions — like peering through a portal into another dimension of computation. The geometric precision (ellipses, clean rotations) fits the TRON aesthetic. No text, no brand letter — purely geometric and fully whitelabel-safe.
+</div>
+
+</body>
+</html>

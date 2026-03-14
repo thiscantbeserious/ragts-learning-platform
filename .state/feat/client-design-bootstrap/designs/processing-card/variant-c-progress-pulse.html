@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Processing Card — Variant C: Progress Pulse</title>
+  <link rel="stylesheet" href="../../../../../design/styles/layout.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 48px 24px;
+      min-height: 100vh;
+    }
+
+    .sidebar-mock {
+      width: 260px;
+      background: var(--bg-page);
+      border-right: 1px solid var(--border-default);
+      padding: var(--space-2) 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .sidebar-mock__label {
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      padding: var(--space-3) var(--space-3) var(--space-1);
+    }
+
+    /* ============================================================
+       BASE SESSION CARD (from SessionCard.vue)
+       ============================================================ */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1\.5) var(--space-3);
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected:hover {
+      background: rgba(0, 212, 255, 0.12);
+    }
+
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1\.5);
+      min-width: 0;
+    }
+
+    .session-card__row--primary {
+      justify-content: flex-start;
+    }
+
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-card:hover .session-card__filename,
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+
+    .session-card__meta {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: var(--space-2);
+      padding-left: calc(6px + var(--space-1\.5));
+    }
+
+    .session-card__sections,
+    .session-card__age {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .session-card__age {
+      margin-left: auto;
+    }
+
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* ============================================================
+       VARIANT C: PROGRESS PULSE
+       ============================================================
+       - Left border becomes thick (4px) animated cyan bar
+       - Bar pulses in brightness
+       - Background oscillates between bg-surface and dark cyan tint
+       - Status dot enlarged with ripple ring effect
+       ============================================================ */
+    .session-card--processing-c {
+      cursor: default;
+      pointer-events: none;
+      border-left: 4px solid var(--accent-primary);
+      animation: bg-tint-pulse 3s ease-in-out infinite;
+      padding-left: calc(var(--space-3) - 2px); /* compensate for thicker border */
+    }
+
+    /* Border pulse via box-shadow on left edge */
+    .session-card--processing-c::before {
+      content: '';
+      position: absolute;
+      left: -4px;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent-primary);
+      animation: border-brightness 1.8s ease-in-out infinite;
+    }
+
+    @keyframes border-brightness {
+      0%, 100% {
+        box-shadow: 0 0 6px var(--accent-primary-glow),
+                    2px 0 12px var(--accent-primary-glow);
+        opacity: 1;
+      }
+      50% {
+        box-shadow: 0 0 14px var(--accent-primary-glow-strong),
+                    2px 0 24px var(--accent-primary-glow-strong);
+        opacity: 0.8;
+      }
+    }
+
+    @keyframes bg-tint-pulse {
+      0%, 100% {
+        background: transparent;
+      }
+      50% {
+        background: rgba(0, 212, 255, 0.04);
+      }
+    }
+
+    /* Enlarged status dot with ripple ring */
+    .session-card--processing-c .session-card__status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-primary);
+      position: relative;
+      animation: dot-glow 1.8s ease-in-out infinite;
+    }
+
+    .session-card--processing-c .session-card__status-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--accent-primary);
+      transform: translate(-50%, -50%);
+      animation: ripple-ring 1.8s ease-out infinite;
+    }
+
+    @keyframes dot-glow {
+      0%, 100% { box-shadow: 0 0 4px var(--accent-primary-glow); }
+      50% { box-shadow: 0 0 10px var(--accent-primary-glow-strong); }
+    }
+
+    @keyframes ripple-ring {
+      0% {
+        width: 8px;
+        height: 8px;
+        opacity: 0.8;
+      }
+      100% {
+        width: 20px;
+        height: 20px;
+        opacity: 0;
+      }
+    }
+
+    /* Dim content */
+    .session-card--processing-c .session-card__filename {
+      color: var(--text-muted);
+    }
+
+    .session-card--processing-c .session-card__meta {
+      color: var(--text-disabled);
+    }
+
+    /* Processing text */
+    .session-card__processing-label {
+      color: var(--accent-primary);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .session-card__processing-label::after {
+      content: '';
+      animation: ellipsis-c 1.5s steps(3, end) infinite;
+    }
+
+    @keyframes ellipsis-c {
+      0%   { content: ''; }
+      33%  { content: '.'; }
+      66%  { content: '..'; }
+      100% { content: '...'; }
+    }
+
+    /* No hover effect */
+    .session-card--processing-c:hover {
+      background: transparent;
+    }
+
+    .session-card--processing-c:hover .session-card__filename {
+      color: var(--text-muted);
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .session-card--processing-c {
+        animation: none;
+        background: rgba(0, 212, 255, 0.04);
+      }
+      .session-card--processing-c::before {
+        animation: none;
+        box-shadow: 0 0 8px var(--accent-primary-glow);
+      }
+      .session-card--processing-c .session-card__status-dot {
+        animation: none;
+        box-shadow: 0 0 6px var(--accent-primary-glow);
+      }
+      .session-card--processing-c .session-card__status-dot::after {
+        animation: none;
+        width: 14px;
+        height: 14px;
+        opacity: 0.5;
+      }
+      .session-card__processing-label::after {
+        animation: none;
+        content: '...';
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-mock">
+    <div class="sidebar-mock__label">Variant C: Progress Pulse</div>
+
+    <!-- PROCESSING CARD -->
+    <div class="session-card session-card--processing-c">
+      <div class="session-card__row session-card__row--primary">
+        <span class="session-card__status-dot"></span>
+        <span class="session-card__filename">agent-refactor-2026.cast</span>
+      </div>
+      <div class="session-card__row session-card__meta">
+        <span class="session-card__sections session-card__processing-label">Processing</span>
+        <span class="session-card__age">2m ago</span>
+      </div>
+    </div>
+
+    <div style="height: var(--space-4);"></div>
+    <div class="sidebar-mock__label">Ready (for comparison)</div>
+
+    <!-- READY CARD -->
+    <div class="session-card">
+      <div class="session-card__row session-card__row--primary">
+        <span class="session-card__status-dot session-card__status-dot--ready"></span>
+        <span class="session-card__filename">debug-memory-leak.cast</span>
+      </div>
+      <div class="session-card__row session-card__meta">
+        <span class="session-card__sections">12 sections</span>
+        <span class="session-card__age">15m ago</span>
+      </div>
+    </div>
+
+    <div style="height: var(--space-4);"></div>
+    <div class="sidebar-mock__label">Selected Ready (for comparison)</div>
+
+    <!-- SELECTED READY CARD -->
+    <div class="session-card session-card--selected">
+      <div class="session-card__row session-card__row--primary">
+        <span class="session-card__status-dot session-card__status-dot--ready"></span>
+        <span class="session-card__filename">implement-sse-handler.cast</span>
+      </div>
+      <div class="session-card__row session-card__meta">
+        <span class="session-card__sections">8 sections</span>
+        <span class="session-card__age">1h ago</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

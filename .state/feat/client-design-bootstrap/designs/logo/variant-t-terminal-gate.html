@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant T: Terminal Window Gate — Erika Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --accent-dark: #0090b3;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --font-sans: 'Geist', system-ui, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; text-align: center; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 48px;
+    text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; line-height: 1.6;
+  }
+
+  .section-title {
+    font-size: 12px; font-weight: 500; color: #666; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 20px; margin-top: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;
+  }
+
+  /* === LOGO SVG === */
+  .logo-svg {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  /* === SCALE GRID === */
+  .scale-grid {
+    display: flex; gap: 48px; align-items: flex-end; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 16px;
+  }
+  .scale-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .scale-label { font-size: 10px; color: #555; font-family: var(--font-mono); text-align: center; }
+
+  /* === BACKGROUND PANELS === */
+  .bg-row { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+  .bg-panel {
+    padding: 40px 48px; border-radius: 12px; display: flex; flex-direction: column;
+    align-items: center; gap: 24px; min-width: 280px;
+  }
+  .bg-dark {
+    background: var(--bg-base); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .bg-light {
+    background: #f4f4f8; border: 1px solid rgba(0,0,0,0.08);
+  }
+  .bg-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+  .bg-light .bg-label { color: #999; }
+
+  /* === WORDMARK === */
+  .wordmark-row {
+    display: flex; gap: 48px; flex-wrap: wrap; justify-content: center; align-items: center;
+    margin-bottom: 16px;
+  }
+  .wordmark {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .wordmark-text {
+    font-family: var(--font-sans); font-weight: 300; letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .wordmark-text--lg { font-size: 32px; }
+  .wordmark-text--md { font-size: 20px; }
+  .wordmark-text--sm { font-size: 14px; }
+
+  /* === WHITELABEL === */
+  .wl-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+  .wl-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .wl-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  /* === FAVICON TEST === */
+  .favicon-row {
+    display: flex; gap: 24px; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .favicon-box {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+    background: var(--bg-surface);
+  }
+  .favicon-box--16 { width: 16px; height: 16px; }
+  .favicon-box--32 { width: 32px; height: 32px; }
+  .favicon-box--48 { width: 48px; height: 48px; }
+
+  /* === ANNOTATIONS === */
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 640px; margin: 32px auto 0;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; gap: 24px; }
+  .annotation__key { color: #888; white-space: nowrap; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); text-align: right; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Variant T: Terminal Window Gate</h1>
+  <p class="subtitle">
+    The hexagonal gate frames a terminal window. The portal gap on the right is the command prompt
+    entry point — where commands flow in. Inside, a subtle prompt symbol grounds the mark in
+    Erika's purpose: understanding what AI agents did in terminal sessions. The hex provides
+    the geometric/TRON feel; the terminal elements make it unmistakably about the product.
+  </p>
+
+  <!-- ============ MULTI-SCALE ============ -->
+  <div class="section-title">Multi-Scale Rendering</div>
+  <div class="scale-grid">
+    <div class="scale-item">
+      <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="'Geist Mono', monospace" font-size="34" font-weight="700" fill="#00d4ff" opacity="0.6">&gt;_</text>
+      </svg>
+      <span class="scale-label">128px</span>
+    </div>
+    <div class="scale-item">
+      <svg width="64" height="64" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="'Geist Mono', monospace" font-size="34" font-weight="700" fill="#00d4ff" opacity="0.6">&gt;_</text>
+      </svg>
+      <span class="scale-label">64px</span>
+    </div>
+    <div class="scale-item">
+      <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+        <text x="40" y="80" font-family="'Geist Mono', monospace" font-size="40" font-weight="700" fill="#00d4ff" opacity="0.55">&gt;_</text>
+      </svg>
+      <span class="scale-label">28px</span>
+    </div>
+    <div class="scale-item">
+      <!-- At 16px favicon size, remove the prompt — just the hex shape -->
+      <svg width="16" height="16" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+      </svg>
+      <span class="scale-label">16px (favicon)</span>
+    </div>
+  </div>
+
+  <!-- ============ DARK + LIGHT BACKGROUNDS ============ -->
+  <div class="section-title">Dark + Light Backgrounds</div>
+  <div class="bg-row">
+    <div class="bg-panel bg-dark">
+      <span class="bg-label">Dark (#0a0a14)</span>
+      <svg width="96" height="96" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="'Geist Mono', monospace" font-size="34" font-weight="700" fill="#00d4ff" opacity="0.6">&gt;_</text>
+      </svg>
+    </div>
+    <div class="bg-panel bg-light">
+      <span class="bg-label" style="color:#999">Light (#f4f4f8)</span>
+      <svg width="96" height="96" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#007a99" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="'Geist Mono', monospace" font-size="34" font-weight="700" fill="#007a99" opacity="0.6">&gt;_</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ WORDMARK PAIRINGS ============ -->
+  <div class="section-title">Logo + Wordmark Pairings</div>
+  <div class="wordmark-row">
+    <div class="wordmark">
+      <svg width="40" height="40" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="monospace" font-size="34" font-weight="700" fill="#00d4ff" opacity="0.6">&gt;_</text>
+      </svg>
+      <span class="wordmark-text wordmark-text--lg" style="color: #00d4ff">Erika</span>
+    </div>
+  </div>
+  <div class="wordmark-row">
+    <div class="wordmark">
+      <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="monospace" font-size="36" font-weight="700" fill="#00d4ff" opacity="0.55">&gt;_</text>
+      </svg>
+      <span class="wordmark-text wordmark-text--md" style="color: #00d4ff">Erika</span>
+    </div>
+    <div class="wordmark">
+      <svg width="18" height="18" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+      </svg>
+      <span class="wordmark-text wordmark-text--sm" style="color: #00d4ff">Erika</span>
+    </div>
+  </div>
+
+  <!-- ============ WHITELABEL COLORS ============ -->
+  <div class="section-title">Whitelabel Color Variants</div>
+  <div class="wl-row">
+    <div class="wl-item">
+      <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="monospace" font-size="34" font-weight="700" fill="#00d4ff" opacity="0.6">&gt;_</text>
+      </svg>
+      <span class="wl-label">Cyan (default)</span>
+    </div>
+    <div class="wl-item">
+      <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#ff8c00" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="monospace" font-size="34" font-weight="700" fill="#ff8c00" opacity="0.6">&gt;_</text>
+      </svg>
+      <span class="wl-label">Orange #ff8c00</span>
+    </div>
+    <div class="wl-item">
+      <svg width="48" height="48" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00ff88" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="monospace" font-size="34" font-weight="700" fill="#00ff88" opacity="0.6">&gt;_</text>
+      </svg>
+      <span class="wl-label">Green #00ff88</span>
+    </div>
+  </div>
+
+  <!-- ============ FAVICON TEST ============ -->
+  <div class="section-title">Favicon Simulation</div>
+  <div class="favicon-row">
+    <div class="favicon-box favicon-box--16">
+      <svg width="14" height="14" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+      </svg>
+    </div>
+    <span class="scale-label">16x16</span>
+    <div class="favicon-box favicon-box--32">
+      <svg width="28" height="28" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+      </svg>
+    </div>
+    <span class="scale-label">32x32</span>
+    <div class="favicon-box favicon-box--48">
+      <svg width="44" height="44" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.25"/>
+        </g>
+        <text x="43" y="77" font-family="monospace" font-size="34" font-weight="700" fill="#00d4ff" opacity="0.55">&gt;_</text>
+      </svg>
+    </div>
+    <span class="scale-label">48x48</span>
+  </div>
+
+  <!-- ============ DESIGN RATIONALE ============ -->
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Concept</span><span class="annotation__value">Hex gate frames a terminal window</span></div>
+    <div class="annotation"><span class="annotation__key">Portal gap</span><span class="annotation__value">Right side = command entry point</span></div>
+    <div class="annotation"><span class="annotation__key">Interior element</span><span class="annotation__value">&gt;_ prompt at 60% opacity</span></div>
+    <div class="annotation"><span class="annotation__key">Dim segment</span><span class="annotation__value">Top-right at 25% opacity (gate threshold)</span></div>
+    <div class="annotation"><span class="annotation__key">Small-size strategy</span><span class="annotation__value">Drop prompt below 28px, pure hex at 16px</span></div>
+    <div class="annotation"><span class="annotation__key">Stroke scaling</span><span class="annotation__value">4.5px@128 / 5.5@64 / 8@28 / 12@16</span></div>
+    <div class="annotation"><span class="annotation__key">Geometry</span><span class="annotation__value">Flat-top hex, R=52, center 64,64</span></div>
+    <div class="annotation"><span class="annotation__key">Whitelabel</span><span class="annotation__value">Single color token swap</span></div>
+    <div class="annotation"><span class="annotation__key">Format</span><span class="annotation__value">Inline SVG, viewBox 0 0 128 128</span></div>
+  </div>
+</div>
+</body>
+</html>

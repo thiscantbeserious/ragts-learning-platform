@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drop Overlay Redesign — Sidebar Proposals</title>
+<link rel="stylesheet" href="/design/styles/layout.css">
+<style>
+/* ================================================================
+   Page scaffold — simulates the spatial shell layout
+   ================================================================ */
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  padding: 36px 48px;
+  align-items: flex-start;
+}
+
+.proposal {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.proposal__label {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+}
+
+.proposal__sublabel {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: -12px;
+}
+
+/* ================================================================
+   Shared sidebar skeleton (matches real SidebarPanel structure)
+   ================================================================ */
+.sidebar {
+  width: 260px;
+  background: var(--bg-surface);
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid var(--border-default);
+}
+
+.sidebar__search {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.sidebar__search input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  box-sizing: border-box;
+}
+
+.sidebar__filters {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.filter-pill {
+  padding: 2px 6px;
+  font-size: var(--text-xs);
+  line-height: var(--lh-xs);
+  border-radius: var(--radius-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.filter-pill--active {
+  background: var(--accent-primary-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.sidebar__list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+
+.session-card {
+  display: block;
+  padding: 8px 12px;
+  margin: 0 8px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-default);
+}
+
+.session-card:hover {
+  background: var(--bg-elevated);
+}
+
+.session-card__name {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  line-height: var(--lh-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-card__meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.session-card__meta span {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+}
+
+.sidebar__footer {
+  padding: 12px;
+  border-top: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.btn--primary {
+  width: 100%;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  color: var(--accent-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ================================================================
+   PROPOSAL A: Sidebar Border Highlight + Content Dim
+   ================================================================
+   The entire sidebar gets a subtle left accent border (or all-sides
+   border). Content dims slightly. A small text hint appears at the
+   top or bottom. No floating overlay box at all.
+   ================================================================ */
+.sidebar--proposal-a {
+  /* Active drag state applied to the sidebar wrapper itself */
+  border-left: 2px solid var(--accent-primary);
+  box-shadow: inset 4px 0 12px -4px rgba(0, 212, 255, 0.15);
+}
+
+.sidebar--proposal-a .sidebar__list {
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--easing-default);
+}
+
+.sidebar--proposal-a .sidebar__search,
+.sidebar--proposal-a .sidebar__filters {
+  opacity: 0.4;
+  transition: opacity var(--duration-fast) var(--easing-default);
+}
+
+.sidebar--proposal-a .drop-hint-a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--accent-primary-subtle);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.drop-hint-a {
+  display: none;
+}
+
+.drop-hint-a__icon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.drop-hint-a__text {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-primary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   PROPOSAL B: VS Code Style — Thin Border Only
+   ================================================================
+   Just a 2px accent border around the sidebar area. Minimal,
+   professional, no content dimming. Small icon swap on the
+   + New Session button area.
+   ================================================================ */
+.sidebar--proposal-b {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+  border-radius: 0;
+}
+
+.sidebar--proposal-b .sidebar__footer .btn--primary {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-subtle);
+  color: var(--accent-primary);
+}
+
+.sidebar--proposal-b .sidebar__footer .btn--primary::before {
+  content: '';
+}
+
+/* ================================================================
+   PROPOSAL C: Full Background Shift + Inline Message
+   (RECOMMENDED)
+   ================================================================
+   The sidebar background subtly shifts to a slightly lighter/
+   accent-tinted shade. Session list dims. A compact inline
+   message replaces the footer button. Left accent border for
+   directionality. This is the most polished approach.
+   ================================================================ */
+.sidebar--proposal-c {
+  background: color-mix(in srgb, var(--accent-primary) 3%, var(--bg-surface));
+  border-left: 2px solid var(--accent-primary);
+  transition:
+    background var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default);
+}
+
+.sidebar--proposal-c .sidebar__search,
+.sidebar--proposal-c .sidebar__filters,
+.sidebar--proposal-c .sidebar__list {
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--easing-default);
+}
+
+.sidebar--proposal-c .sidebar__footer {
+  border-top-color: rgba(0, 212, 255, 0.15);
+}
+
+/* The footer transforms into the drop indicator */
+.sidebar--proposal-c .drop-zone-c {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 12px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.drop-zone-c {
+  display: none;
+}
+
+.drop-zone-c__icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent-primary);
+  opacity: 0.8;
+}
+
+.drop-zone-c__text {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-primary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.drop-zone-c__subtext {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* ================================================================
+   PROPOSAL D: Minimal Inline Drop Bar
+   ================================================================
+   A thin accent bar appears at the very top of the session list.
+   Content stays fully visible. Extremely minimal.
+   ================================================================ */
+.sidebar--proposal-d .drop-bar-d {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(0, 212, 255, 0.06);
+  border-left: 2px solid var(--accent-primary);
+  margin: 4px 8px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.drop-bar-d {
+  display: none;
+}
+
+.drop-bar-d__icon {
+  width: 14px;
+  height: 14px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.drop-bar-d__text {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent-primary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+/* ================================================================
+   CURRENT (for comparison) — the dashed border overlay
+   ================================================================ */
+.sidebar--current .drop-overlay-old {
+  position: absolute;
+  inset: 0;
+  z-index: 200;
+  background: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-overlay-old__frame {
+  border: 2px dashed var(--accent-primary);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  text-align: center;
+  margin: 12px;
+  box-shadow:
+    0 0 16px 3px rgba(0, 212, 255, 0.25),
+    inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
+  animation: oldGlow 2s ease-in-out infinite;
+}
+
+.drop-overlay-old__text {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--accent-primary);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+@keyframes oldGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 16px 3px rgba(0, 212, 255, 0.25),
+      inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 0 30px 8px rgba(0, 212, 255, 0.45),
+      inset 0 0 24px 5px rgba(0, 212, 255, 0.1);
+  }
+}
+
+/* Upload arrow SVG icon (shared) */
+.upload-icon {
+  display: inline-block;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============================================================
+       CURRENT — For comparison
+       ============================================================ -->
+  <div class="proposal">
+    <p class="proposal__label">Current (for reference)</p>
+    <p class="proposal__sublabel">Dashed border + animated glow overlay</p>
+    <div class="sidebar sidebar--current">
+      <div class="sidebar__search"><input type="search" placeholder="Filter sessions..." /></div>
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Proc</button>
+        <button class="filter-pill">Ready</button>
+        <button class="filter-pill">Fail</button>
+      </div>
+      <ul class="sidebar__list">
+        <li class="session-card"><div class="session-card__name">agnt-ses-rec_260204_002834</div><div class="session-card__meta"><span>4.1 KB</span><span>2h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">lennart-working-session-1</div><div class="session-card__meta"><span>16.4 MB</span><span>3h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">feature--improve-template</div><div class="session-card__meta"><span>10.4 KB</span><span>5h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">main-0fa53f9</div><div class="session-card__meta"><span>8.2 KB</span><span>1d ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">codex-pattern-analysis</div><div class="session-card__meta"><span>22.1 KB</span><span>2d ago</span></div></li>
+      </ul>
+      <div class="sidebar__footer">
+        <button class="btn--primary">+ New Session</button>
+      </div>
+      <!-- Old overlay on top -->
+      <div class="drop-overlay-old">
+        <div class="drop-overlay-old__frame">
+          <p class="drop-overlay-old__text">Drop <code>.cast</code> file to upload</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PROPOSAL A: Left Border + Content Dim + Top Hint
+       ============================================================ -->
+  <div class="proposal">
+    <p class="proposal__label">A: Border + Dim + Top Hint</p>
+    <p class="proposal__sublabel">Left accent border, dimmed content, inline hint bar</p>
+    <div class="sidebar sidebar--proposal-a">
+      <div class="drop-hint-a">
+        <svg class="drop-hint-a__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="drop-hint-a__text">Drop .cast to upload</span>
+      </div>
+      <div class="sidebar__search"><input type="search" placeholder="Filter sessions..." /></div>
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Proc</button>
+        <button class="filter-pill">Ready</button>
+        <button class="filter-pill">Fail</button>
+      </div>
+      <ul class="sidebar__list">
+        <li class="session-card"><div class="session-card__name">agnt-ses-rec_260204_002834</div><div class="session-card__meta"><span>4.1 KB</span><span>2h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">lennart-working-session-1</div><div class="session-card__meta"><span>16.4 MB</span><span>3h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">feature--improve-template</div><div class="session-card__meta"><span>10.4 KB</span><span>5h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">main-0fa53f9</div><div class="session-card__meta"><span>8.2 KB</span><span>1d ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">codex-pattern-analysis</div><div class="session-card__meta"><span>22.1 KB</span><span>2d ago</span></div></li>
+      </ul>
+      <div class="sidebar__footer">
+        <button class="btn--primary">+ New Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PROPOSAL B: VS Code Style — Outline Only
+       ============================================================ -->
+  <div class="proposal">
+    <p class="proposal__label">B: VS Code Outline</p>
+    <p class="proposal__sublabel">2px accent outline, button highlights, no content change</p>
+    <div class="sidebar sidebar--proposal-b">
+      <div class="sidebar__search"><input type="search" placeholder="Filter sessions..." /></div>
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Proc</button>
+        <button class="filter-pill">Ready</button>
+        <button class="filter-pill">Fail</button>
+      </div>
+      <ul class="sidebar__list">
+        <li class="session-card"><div class="session-card__name">agnt-ses-rec_260204_002834</div><div class="session-card__meta"><span>4.1 KB</span><span>2h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">lennart-working-session-1</div><div class="session-card__meta"><span>16.4 MB</span><span>3h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">feature--improve-template</div><div class="session-card__meta"><span>10.4 KB</span><span>5h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">main-0fa53f9</div><div class="session-card__meta"><span>8.2 KB</span><span>1d ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">codex-pattern-analysis</div><div class="session-card__meta"><span>22.1 KB</span><span>2d ago</span></div></li>
+      </ul>
+      <div class="sidebar__footer">
+        <button class="btn--primary">Drop .cast to upload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PROPOSAL C: Background Shift + Footer Drop Zone (RECOMMENDED)
+       ============================================================ -->
+  <div class="proposal">
+    <p class="proposal__label">C: Background Shift + Footer Zone</p>
+    <p class="proposal__sublabel">Recommended -- subtle tint, dimmed list, footer becomes drop indicator</p>
+    <div class="sidebar sidebar--proposal-c">
+      <div class="sidebar__search"><input type="search" placeholder="Filter sessions..." /></div>
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Proc</button>
+        <button class="filter-pill">Ready</button>
+        <button class="filter-pill">Fail</button>
+      </div>
+      <ul class="sidebar__list">
+        <li class="session-card"><div class="session-card__name">agnt-ses-rec_260204_002834</div><div class="session-card__meta"><span>4.1 KB</span><span>2h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">lennart-working-session-1</div><div class="session-card__meta"><span>16.4 MB</span><span>3h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">feature--improve-template</div><div class="session-card__meta"><span>10.4 KB</span><span>5h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">main-0fa53f9</div><div class="session-card__meta"><span>8.2 KB</span><span>1d ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">codex-pattern-analysis</div><div class="session-card__meta"><span>22.1 KB</span><span>2d ago</span></div></li>
+      </ul>
+      <!-- Footer replaced by drop zone indicator -->
+      <div class="drop-zone-c">
+        <svg class="drop-zone-c__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="drop-zone-c__text">Drop .cast to upload</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PROPOSAL D: Minimal Inline Bar
+       ============================================================ -->
+  <div class="proposal">
+    <p class="proposal__label">D: Minimal Inline Bar</p>
+    <p class="proposal__sublabel">Accent-edged bar at top of list, content untouched</p>
+    <div class="sidebar sidebar--proposal-d">
+      <div class="sidebar__search"><input type="search" placeholder="Filter sessions..." /></div>
+      <div class="sidebar__filters">
+        <button class="filter-pill filter-pill--active">All</button>
+        <button class="filter-pill">Proc</button>
+        <button class="filter-pill">Ready</button>
+        <button class="filter-pill">Fail</button>
+      </div>
+      <ul class="sidebar__list">
+        <div class="drop-bar-d">
+          <svg class="drop-bar-d__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span class="drop-bar-d__text">Drop .cast to upload</span>
+        </div>
+        <li class="session-card"><div class="session-card__name">agnt-ses-rec_260204_002834</div><div class="session-card__meta"><span>4.1 KB</span><span>2h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">lennart-working-session-1</div><div class="session-card__meta"><span>16.4 MB</span><span>3h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">feature--improve-template</div><div class="session-card__meta"><span>10.4 KB</span><span>5h ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">main-0fa53f9</div><div class="session-card__meta"><span>8.2 KB</span><span>1d ago</span></div></li>
+        <li class="session-card"><div class="session-card__name">codex-pattern-analysis</div><div class="session-card__meta"><span>22.1 KB</span><span>2d ago</span></div></li>
+      </ul>
+      <div class="sidebar__footer">
+        <button class="btn--primary">+ New Session</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

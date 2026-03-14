@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidebar Drop Overlay — Design Mockup</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    /* === Tokens (subset from layout.css) === */
+    :root {
+      --baseline: 18px;
+      --bg-page: #1a1a2e;
+      --bg-surface: #212136;
+      --bg-elevated: #28283e;
+      --bg-overlay: rgba(10, 10, 18, 0.85);
+      --accent-primary: #00d4ff;
+      --accent-primary-glow: rgba(0, 212, 255, 0.4);
+      --text-primary: #f1f1f7;
+      --text-secondary: #d3d4d9;
+      --text-muted: #aaaab0;
+      --text-disabled: #55556a;
+      --border-default: #323349;
+      --border-strong: #3d3d55;
+      --font-body: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+      --text-xs: 0.625rem;
+      --text-sm: 0.75rem;
+      --text-base: 0.875rem;
+      --text-lg: 1.0625rem;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --duration-fast: 150ms;
+      --easing-default: ease-out;
+      --sidebar-width: 260px;
+      --header-height: 54px;
+      --tracking-wide: 0.06em;
+      --lh-base: 18px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      font-size: var(--text-base);
+      height: 100vh;
+    }
+
+    /* === Shell grid (simplified) === */
+    .spatial-shell {
+      display: grid;
+      grid-template-areas:
+        "brand  header header"
+        "sidebar main   aside"
+        "sidebar bottom aside";
+      grid-template-columns: var(--sidebar-width) 1fr 0fr;
+      grid-template-rows: var(--header-height) 1fr 0fr;
+      height: 100vh;
+    }
+
+    .spatial-shell__brand {
+      grid-area: brand;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-primary);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .spatial-shell__header {
+      grid-area: header;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-4);
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    /* KEY: sidebar needs position: relative to contain the overlay */
+    .spatial-shell__sidebar {
+      grid-area: sidebar;
+      overflow: hidden;
+      min-height: 0;
+      position: relative; /* <-- containment for drop overlay */
+    }
+
+    .spatial-shell__main {
+      grid-area: main;
+      min-width: 0;
+      overflow-y: auto;
+      padding: var(--space-6);
+      color: var(--text-muted);
+    }
+
+    /* === Sidebar panel === */
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-surface);
+      width: var(--sidebar-width);
+      overflow: hidden;
+    }
+
+    .sidebar__search-wrap {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__search-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+    }
+
+    .sidebar__filters {
+      padding: 6px var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      display: flex;
+      gap: var(--space-1);
+    }
+
+    .filter-pill {
+      padding: 2px 6px;
+      font-size: var(--text-xs);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    .filter-pill--active {
+      background: rgba(0, 212, 255, 0.08);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .sidebar__list-region {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .sidebar__session-list {
+      list-style: none;
+      padding: var(--space-1) 0;
+    }
+
+    .session-card {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      cursor: pointer;
+    }
+
+    .session-card__name {
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .session-card__meta {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .sidebar__footer {
+      padding: var(--space-3);
+      border-top: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__new-session-btn {
+      width: 100%;
+      height: 27px;
+      background: var(--accent-primary);
+      color: var(--bg-page);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* === DROP OVERLAY — sidebar-scoped === */
+    .drop-overlay {
+      /* CHANGED: position absolute instead of fixed */
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      background: var(--bg-overlay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--duration-fast) var(--easing-default);
+    }
+
+    .drop-overlay--visible {
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    /* CHANGED: compact frame for 260px sidebar width */
+    .drop-overlay__frame {
+      border: 2px dashed var(--accent-primary);
+      border-radius: var(--radius-md);
+      /* Compact padding: space-4 vertical, space-5 horizontal */
+      padding: var(--space-4) var(--space-5);
+      text-align: center;
+      /* Inset from sidebar edges */
+      margin: var(--space-3);
+      box-shadow:
+        0 0 16px 3px rgba(0, 212, 255, 0.25),
+        inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
+      animation: dropOverlayGlow 2s ease-in-out infinite;
+    }
+
+    /* CHANGED: smaller text for sidebar context */
+    .drop-overlay__message {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--accent-primary);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      margin: 0;
+      line-height: var(--lh-base);
+    }
+
+    .drop-overlay__message code {
+      font-family: var(--font-mono);
+      color: var(--accent-primary);
+    }
+
+    @keyframes dropOverlayGlow {
+      0%, 100% {
+        box-shadow:
+          0 0 16px 3px rgba(0, 212, 255, 0.25),
+          inset 0 0 16px 3px rgba(0, 212, 255, 0.05);
+      }
+      50% {
+        box-shadow:
+          0 0 30px 8px rgba(0, 212, 255, 0.45),
+          inset 0 0 24px 5px rgba(0, 212, 255, 0.1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .drop-overlay__frame {
+        animation: none;
+      }
+    }
+
+    /* === Demo controls === */
+    .demo-controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 300;
+      display: flex;
+      gap: 8px;
+    }
+
+    .demo-btn {
+      padding: 8px 16px;
+      background: var(--accent-primary);
+      color: var(--bg-page);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .demo-btn--secondary {
+      background: transparent;
+      color: var(--accent-primary);
+      border: 1px solid var(--accent-primary);
+    }
+
+    /* === Side-by-side comparison === */
+    .comparison-label {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      padding: 2px 8px;
+      border-radius: var(--radius-md);
+      z-index: 250;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .main-content-hint {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      max-width: 500px;
+    }
+
+    .main-content-hint h2 {
+      font-size: var(--text-lg);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .main-content-hint p {
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+      line-height: var(--lh-base);
+    }
+
+    .main-content-hint .highlight {
+      color: var(--accent-primary);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="spatial-shell">
+    <!-- Brand -->
+    <div class="spatial-shell__brand">ERIKA</div>
+
+    <!-- Header -->
+    <div class="spatial-shell__header">
+      Session Explorer
+    </div>
+
+    <!-- Sidebar with position: relative for overlay containment -->
+    <div class="spatial-shell__sidebar">
+      <div class="sidebar-panel">
+        <div class="sidebar__search-wrap">
+          <input type="search" class="sidebar__search-input" placeholder="Filter sessions..." />
+        </div>
+
+        <div class="sidebar__filters">
+          <button class="filter-pill filter-pill--active">All</button>
+          <button class="filter-pill">Processing</button>
+          <button class="filter-pill">Ready</button>
+          <button class="filter-pill">Failed</button>
+        </div>
+
+        <div class="sidebar__list-region">
+          <ul class="sidebar__session-list">
+            <li class="session-card">
+              <div class="session-card__name">deploy-hotfix.cast</div>
+              <div class="session-card__meta">2 min ago -- ready</div>
+            </li>
+            <li class="session-card">
+              <div class="session-card__name">debug-memory-leak.cast</div>
+              <div class="session-card__meta">15 min ago -- ready</div>
+            </li>
+            <li class="session-card">
+              <div class="session-card__name">refactor-auth.cast</div>
+              <div class="session-card__meta">1 hour ago -- processing</div>
+            </li>
+            <li class="session-card">
+              <div class="session-card__name">setup-ci-pipeline.cast</div>
+              <div class="session-card__meta">3 hours ago -- ready</div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar__footer">
+          <button class="sidebar__new-session-btn">+ New Session</button>
+        </div>
+      </div>
+
+      <!-- DROP OVERLAY: now inside sidebar, using position: absolute -->
+      <div id="dropOverlay" class="drop-overlay">
+        <span class="comparison-label">Sidebar-scoped overlay</span>
+        <div class="drop-overlay__frame">
+          <p class="drop-overlay__message">
+            Drop <code>.cast</code> file to upload
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content area — remains interactive during drag -->
+    <div class="spatial-shell__main">
+      <div class="main-content-hint">
+        <h2>Main content area</h2>
+        <p>
+          This area remains <span class="highlight">fully interactive</span> during file drag.
+          The drop overlay is scoped to the sidebar only, so the terminal replay,
+          session details, and other main-area interactions are never blocked.
+        </p>
+        <p>
+          Toggle the overlay with the button below to see the difference.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo toggle -->
+  <div class="demo-controls">
+    <button class="demo-btn" onclick="toggleOverlay()">Toggle Overlay</button>
+  </div>
+
+  <script>
+    let visible = false;
+    function toggleOverlay() {
+      visible = !visible;
+      document.getElementById('dropOverlay').classList.toggle('drop-overlay--visible', visible);
+    }
+    // Start with overlay visible for screenshot
+    setTimeout(() => {
+      document.getElementById('dropOverlay').classList.add('drop-overlay--visible');
+      visible = true;
+    }, 100);
+  </script>
+</body>
+</html>

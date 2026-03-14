@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant O: Neural Synapse</title>
+<style>
+  :root {
+    --accent: #00d4ff;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --glow-soft: 0 0 8px rgba(0, 212, 255, 0.15), inset 0 0 6px rgba(0, 212, 255, 0.08);
+    --glow-hover: 0 0 14px rgba(0, 212, 255, 0.35), inset 0 0 8px rgba(0, 212, 255, 0.12);
+    --glow-pulse-peak: 0 0 22px rgba(0, 212, 255, 0.6), inset 0 0 12px rgba(0, 212, 255, 0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist Mono', 'SF Mono', 'Fira Code', monospace;
+    background: var(--bg-base);
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    gap: 40px;
+  }
+
+  h1 { color: var(--accent); font-size: 24px; font-weight: 600; }
+  p.desc { max-width: 500px; text-align: center; color: #888; font-size: 13px; line-height: 1.5; }
+  h2 { color: #666; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; }
+
+  .row { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; justify-content: center; }
+  .col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .label { font-size: 10px; color: #555; letter-spacing: 1px; text-transform: uppercase; }
+  .divider { width: 1px; height: 60px; background: #333; }
+
+  /* === SYNAPSE ICON === */
+  .synapse-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glow-soft);
+    cursor: pointer;
+    transition: box-shadow 250ms ease;
+    outline: none;
+  }
+  .synapse-icon:hover { box-shadow: var(--glow-hover); }
+  .synapse-icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .synapse-icon--3x { width: 84px; height: 84px; }
+  .synapse-icon--1x { width: 28px; height: 28px; }
+
+  /* Nodes — three dots in triangle formation */
+  .synapse-icon__node {
+    position: absolute;
+    background: var(--accent);
+    border-radius: 50%;
+    transition: all 320ms cubic-bezier(0.2, 0, 0, 1);
+    box-shadow: 0 0 4px rgba(0, 212, 255, 0.4);
+  }
+
+  /* 3x node positions — triangle pointing up */
+  .synapse-icon--3x .synapse-icon__node { width: 8px; height: 8px; }
+  .synapse-icon--3x .synapse-icon__node--top {
+    top: 16px; left: 50%; transform: translateX(-50%);
+    transition-delay: 0ms;
+  }
+  .synapse-icon--3x .synapse-icon__node--left {
+    bottom: 18px; left: 18px;
+    transition-delay: 60ms;
+  }
+  .synapse-icon--3x .synapse-icon__node--right {
+    bottom: 18px; right: 18px;
+    transition-delay: 120ms;
+  }
+
+  /* 1x node positions */
+  .synapse-icon--1x .synapse-icon__node { width: 3px; height: 3px; }
+  .synapse-icon--1x .synapse-icon__node--top {
+    top: 5px; left: 50%; transform: translateX(-50%);
+    transition-delay: 0ms;
+  }
+  .synapse-icon--1x .synapse-icon__node--left {
+    bottom: 6px; left: 6px;
+    transition-delay: 60ms;
+  }
+  .synapse-icon--1x .synapse-icon__node--right {
+    bottom: 6px; right: 6px;
+    transition-delay: 120ms;
+  }
+
+  /* Connection lines — CSS pseudo-elements on a container */
+  .synapse-icon__connections {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Lines drawn as thin rotated elements */
+  .synapse-icon__line {
+    position: absolute;
+    background: var(--accent);
+    opacity: 0.5;
+    transition: all 320ms cubic-bezier(0.2, 0, 0, 1);
+    transform-origin: center;
+  }
+
+  /* 3x lines — connecting the three nodes */
+  .synapse-icon--3x .synapse-icon__line { height: 1.5px; }
+  .synapse-icon--3x .synapse-icon__line--top-left {
+    width: 28px; top: 34px; left: 14px;
+    transform: rotate(-50deg);
+    transition-delay: 0ms;
+  }
+  .synapse-icon--3x .synapse-icon__line--top-right {
+    width: 28px; top: 34px; right: 14px;
+    transform: rotate(50deg);
+    transition-delay: 60ms;
+  }
+  .synapse-icon--3x .synapse-icon__line--bottom {
+    width: 32px; bottom: 22px; left: 50%; transform: translateX(-50%);
+    transition-delay: 120ms;
+  }
+
+  /* 1x lines */
+  .synapse-icon--1x .synapse-icon__line { height: 1px; }
+  .synapse-icon--1x .synapse-icon__line--top-left {
+    width: 9px; top: 11px; left: 5px;
+    transform: rotate(-50deg);
+    transition-delay: 0ms;
+  }
+  .synapse-icon--1x .synapse-icon__line--top-right {
+    width: 9px; top: 11px; right: 5px;
+    transform: rotate(50deg);
+    transition-delay: 60ms;
+  }
+  .synapse-icon--1x .synapse-icon__line--bottom {
+    width: 11px; bottom: 7px; left: 50%; transform: translateX(-50%);
+    transition-delay: 120ms;
+  }
+
+  /* === OPEN STATE — nodes scatter, lines become X === */
+  /* Nodes move outward and fade */
+  .synapse-icon.is-open .synapse-icon__node--top {
+    top: 8px; opacity: 0; transform: translateX(-50%) scale(0.5);
+  }
+  .synapse-icon.is-open .synapse-icon__node--left {
+    bottom: 8px; left: 8px; opacity: 0; transform: scale(0.5);
+  }
+  .synapse-icon.is-open .synapse-icon__node--right {
+    bottom: 8px; right: 8px; opacity: 0; transform: scale(0.5);
+  }
+
+  /* Lines reform into X */
+  .synapse-icon--3x.is-open .synapse-icon__line--top-left {
+    width: 46px; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    opacity: 1;
+  }
+  .synapse-icon--3x.is-open .synapse-icon__line--top-right {
+    width: 46px; top: 50%; right: auto; left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    opacity: 1;
+  }
+  .synapse-icon--3x.is-open .synapse-icon__line--bottom {
+    opacity: 0; transform: translateX(-50%) scaleX(0);
+  }
+
+  .synapse-icon--1x.is-open .synapse-icon__line--top-left {
+    width: 16px; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    opacity: 1;
+  }
+  .synapse-icon--1x.is-open .synapse-icon__line--top-right {
+    width: 16px; top: 50%; right: auto; left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    opacity: 1;
+  }
+  .synapse-icon--1x.is-open .synapse-icon__line--bottom {
+    opacity: 0; transform: translateX(-50%) scaleX(0);
+  }
+
+  /* Glow pulse */
+  @keyframes glow-pulse {
+    0% { box-shadow: var(--glow-soft); }
+    40% { box-shadow: var(--glow-pulse-peak); }
+    100% { box-shadow: var(--glow-soft); }
+  }
+  .synapse-icon.is-animating { animation: glow-pulse 440ms cubic-bezier(0.2, 0, 0, 1); }
+
+  /* Idle pulse on nodes */
+  @keyframes node-pulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(0, 212, 255, 0.4); }
+    50% { box-shadow: 0 0 8px rgba(0, 212, 255, 0.7); }
+  }
+  .synapse-icon:not(.is-open) .synapse-icon__node--top { animation: node-pulse 2s ease-in-out infinite; }
+  .synapse-icon:not(.is-open) .synapse-icon__node--left { animation: node-pulse 2s ease-in-out infinite 0.6s; }
+  .synapse-icon:not(.is-open) .synapse-icon__node--right { animation: node-pulse 2s ease-in-out infinite 1.2s; }
+
+  /* === BRANDMARK === */
+  .brandmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glow-soft);
+    font-family: 'Geist Mono', monospace;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .brandmark--3x { width: 84px; height: 84px; font-size: 42px; }
+  .brandmark--1x { width: 28px; height: 28px; font-size: 14px; }
+
+  /* === WHITELABEL === */
+  .orange { --accent: #ff8c00; --glow-soft: 0 0 8px rgba(255,140,0,0.15), inset 0 0 6px rgba(255,140,0,0.08); --glow-hover: 0 0 14px rgba(255,140,0,0.35); --glow-pulse-peak: 0 0 22px rgba(255,140,0,0.6); }
+  .green { --accent: #00ff88; --glow-soft: 0 0 8px rgba(0,255,136,0.15), inset 0 0 6px rgba(0,255,136,0.08); --glow-hover: 0 0 14px rgba(0,255,136,0.35); --glow-pulse-peak: 0 0 22px rgba(0,255,136,0.6); }
+
+  /* === LIGHT THEME === */
+  .light-section {
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 32px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .light-section h2 { color: #999; }
+  .light-section .synapse-icon {
+    background: rgba(0, 180, 220, 0.08);
+    border-color: #0099bb;
+  }
+  .light-section .synapse-icon__node { background: #0099bb; box-shadow: 0 0 4px rgba(0,153,187,0.4); }
+  .light-section .synapse-icon__line { background: #0099bb; }
+  .light-section .brandmark { background: rgba(0,180,220,0.08); border-color: #0099bb; color: #0099bb; }
+
+  /* === TIMING === */
+  .timing {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 2;
+    max-width: 480px;
+    width: 100%;
+  }
+  .timing strong { color: #ccc; }
+  .timing .val { color: var(--accent); }
+
+  /* === RATIONALE === */
+  .rationale {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent);
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.7;
+    max-width: 500px;
+    color: #999;
+  }
+  .rationale strong { color: #ccc; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .synapse-icon__node,
+    .synapse-icon__line,
+    .synapse-icon { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<h1>O: Neural Synapse</h1>
+<p class="desc">Three nodes in triangular formation connected by synaptic lines. On toggle, nodes scatter and connections reform into an X — a neural network firing and dispersing.</p>
+
+<button onclick="document.querySelectorAll('.synapse-icon').forEach(el => { el.classList.toggle('is-open'); el.classList.add('is-animating'); setTimeout(() => el.classList.remove('is-animating'), 450); })" style="background: none; border: 1px solid var(--accent); color: var(--accent); padding: 8px 24px; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 13px;">Toggle All</button>
+
+<h2>Dark Background</h2>
+<div class="row">
+  <div class="col">
+    <div class="synapse-icon synapse-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0" aria-label="Navigation toggle" aria-expanded="false">
+      <div class="synapse-icon__node synapse-icon__node--top"></div>
+      <div class="synapse-icon__node synapse-icon__node--left"></div>
+      <div class="synapse-icon__node synapse-icon__node--right"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+      <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+    </div>
+    <span class="label">84px (3x)</span>
+  </div>
+  <div class="col">
+    <div class="synapse-icon synapse-icon--1x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0" aria-label="Navigation toggle" aria-expanded="false">
+      <div class="synapse-icon__node synapse-icon__node--top"></div>
+      <div class="synapse-icon__node synapse-icon__node--left"></div>
+      <div class="synapse-icon__node synapse-icon__node--right"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+      <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+    </div>
+    <span class="label">28px (1x)</span>
+  </div>
+  <div class="divider"></div>
+  <div class="col">
+    <div class="brandmark brandmark--3x">E</div>
+    <span class="label">BrandMark 3x</span>
+  </div>
+  <div class="col">
+    <div class="brandmark brandmark--1x">E</div>
+    <span class="label">BrandMark 1x</span>
+  </div>
+</div>
+
+<h2>Whitelabel Color Variants</h2>
+<div class="row">
+  <div class="col">
+    <div class="synapse-icon synapse-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+      <div class="synapse-icon__node synapse-icon__node--top"></div>
+      <div class="synapse-icon__node synapse-icon__node--left"></div>
+      <div class="synapse-icon__node synapse-icon__node--right"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+      <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+    </div>
+    <span class="label">Cyan (default)</span>
+  </div>
+  <div class="col orange">
+    <div class="synapse-icon synapse-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+      <div class="synapse-icon__node synapse-icon__node--top"></div>
+      <div class="synapse-icon__node synapse-icon__node--left"></div>
+      <div class="synapse-icon__node synapse-icon__node--right"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+      <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+    </div>
+    <span class="label">Orange #ff8c00</span>
+  </div>
+  <div class="col green">
+    <div class="synapse-icon synapse-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+      <div class="synapse-icon__node synapse-icon__node--top"></div>
+      <div class="synapse-icon__node synapse-icon__node--left"></div>
+      <div class="synapse-icon__node synapse-icon__node--right"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+      <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+      <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+    </div>
+    <span class="label">Green #00ff88</span>
+  </div>
+</div>
+
+<div class="timing">
+  <strong>M3 Glow Pulse Morph Timing</strong><br>
+  Total: <span class="val">~440ms</span><br>
+  Top node + line: <span class="val">0ms</span> delay, <span class="val">320ms</span> (scatter + reform)<br>
+  Left node + line: <span class="val">60ms</span> delay, <span class="val">320ms</span> (scatter + reform)<br>
+  Right node + line: <span class="val">120ms</span> delay, <span class="val">320ms</span> (scatter + reform)<br>
+  Bottom line: fades at <span class="val">120ms</span><br>
+  Glow pulse: <span class="val">0ms</span> start, peaks <span class="val">~180ms</span>, settles <span class="val">440ms</span><br>
+  Easing: <span class="val">cubic-bezier(0.2, 0, 0, 1)</span> (M3 standard)<br>
+  Idle: <span class="val">staggered node pulse</span> (2s cycle, 0.6s offset per node)
+</div>
+
+<div class="light-section">
+  <h2>Light Background</h2>
+  <div class="row" style="margin-top: 16px;">
+    <div class="col">
+      <div class="brandmark brandmark--3x">E</div>
+      <span class="label" style="color: #999;">BrandMark 3x</span>
+    </div>
+    <div class="col">
+      <div class="synapse-icon synapse-icon--3x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+        <div class="synapse-icon__node synapse-icon__node--top"></div>
+        <div class="synapse-icon__node synapse-icon__node--left"></div>
+        <div class="synapse-icon__node synapse-icon__node--right"></div>
+        <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+        <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+        <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+      </div>
+      <span class="label" style="color: #999;">Nav Trigger 3x</span>
+    </div>
+    <div class="divider" style="background: #ddd;"></div>
+    <div class="col">
+      <div class="brandmark brandmark--1x">E</div>
+      <span class="label" style="color: #999;">1x</span>
+    </div>
+    <div class="col">
+      <div class="synapse-icon synapse-icon--1x" onclick="this.classList.toggle('is-open'); this.classList.add('is-animating'); setTimeout(() => this.classList.remove('is-animating'), 450);" role="button" tabindex="0">
+        <div class="synapse-icon__node synapse-icon__node--top"></div>
+        <div class="synapse-icon__node synapse-icon__node--left"></div>
+        <div class="synapse-icon__node synapse-icon__node--right"></div>
+        <div class="synapse-icon__line synapse-icon__line--top-left"></div>
+        <div class="synapse-icon__line synapse-icon__line--top-right"></div>
+        <div class="synapse-icon__line synapse-icon__line--bottom"></div>
+      </div>
+      <span class="label" style="color: #999;">1x</span>
+    </div>
+  </div>
+</div>
+
+<div class="rationale">
+  <strong>Design Rationale</strong><br><br>
+  Three nodes in a triangular formation, connected by synaptic lines — a neural network in miniature. The idle state has staggered node pulses suggesting active computation. On toggle, the nodes scatter outward (the network "fires") while the connection lines reform into an X.<br><br>
+  <strong>Why it works for Erika:</strong> AI agents ARE neural networks. The synapse metaphor is literal — you're opening a view into AI agent sessions. The triangle formation is stable and recognizable at 28px. The scatter-to-X transition feels organic yet precise. Fully geometric, no text, whitelabel-safe.
+</div>
+
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Variant U: Infinite Gate — Erika Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-primary: #00d4ff;
+    --accent-dark: #0090b3;
+    --bg-base: #0a0a14;
+    --bg-surface: #1a1a2e;
+    --radius-sm: 6px;
+    --font-sans: 'Geist', system-ui, sans-serif;
+    --font-mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-base);
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 48px 24px;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 500; color: var(--accent-primary); margin-bottom: 8px; text-align: center; }
+  .subtitle {
+    font-size: 13px; color: #888; margin-bottom: 48px;
+    text-align: center; max-width: 640px; margin-left: auto; margin-right: auto; line-height: 1.6;
+  }
+
+  .section-title {
+    font-size: 12px; font-weight: 500; color: #666; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 20px; margin-top: 48px;
+    border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;
+  }
+
+  .scale-grid {
+    display: flex; gap: 48px; align-items: flex-end; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 16px;
+  }
+  .scale-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .scale-label { font-size: 10px; color: #555; font-family: var(--font-mono); text-align: center; }
+
+  .bg-row { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+  .bg-panel {
+    padding: 40px 48px; border-radius: 12px; display: flex; flex-direction: column;
+    align-items: center; gap: 24px; min-width: 280px;
+  }
+  .bg-dark { background: var(--bg-base); border: 1px solid rgba(255,255,255,0.06); }
+  .bg-light { background: #f4f4f8; border: 1px solid rgba(0,0,0,0.08); }
+  .bg-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #888; }
+  .bg-light .bg-label { color: #999; }
+
+  .wordmark-row {
+    display: flex; gap: 48px; flex-wrap: wrap; justify-content: center; align-items: center;
+    margin-bottom: 16px;
+  }
+  .wordmark { display: flex; align-items: center; gap: 12px; }
+  .wordmark-text {
+    font-family: var(--font-sans); font-weight: 300; letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .wordmark-text--lg { font-size: 32px; }
+  .wordmark-text--md { font-size: 20px; }
+  .wordmark-text--sm { font-size: 14px; }
+
+  .wl-row { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+  .wl-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .wl-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; font-family: var(--font-mono); }
+
+  .favicon-row {
+    display: flex; gap: 24px; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .favicon-box {
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
+    background: var(--bg-surface);
+  }
+  .favicon-box--16 { width: 16px; height: 16px; }
+  .favicon-box--32 { width: 32px; height: 32px; }
+  .favicon-box--48 { width: 48px; height: 48px; }
+
+  .annotations {
+    display: flex; flex-direction: column; gap: 8px; padding: 20px 24px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; max-width: 640px; margin: 32px auto 0;
+  }
+  .annotation { display: flex; justify-content: space-between; font-size: 12px; gap: 24px; }
+  .annotation__key { color: #888; white-space: nowrap; }
+  .annotation__value { color: var(--accent-primary); font-family: var(--font-mono); text-align: right; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Variant U: Infinite Gate</h1>
+  <p class="subtitle">
+    The hexagonal gate meets the infinity symbol — the never-ending learning loop.
+    The right side of the hex dissolves into a lemniscate (figure-8) curve that flows out
+    through the portal gap, loops, and returns. It embodies Erika's core concept:
+    "Loop and Loop — round and round until you understand." The gate is where
+    human insight enters; the infinity loop is the continuous refinement cycle.
+  </p>
+
+  <!-- ============ MULTI-SCALE ============ -->
+  <div class="section-title">Multi-Scale Rendering</div>
+  <div class="scale-grid">
+    <!-- 128px — full detail with infinity loop -->
+    <div class="scale-item">
+      <svg width="128" height="128" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <!-- Left hex frame: 4 solid segments -->
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <!-- Infinity loop — flows out of hex gap, curves right, crosses back -->
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+          <!-- Faint closing hint -->
+          <path d="M 82,19 Q 100,19 108,30" opacity="0.15"/>
+        </g>
+      </svg>
+      <span class="scale-label">128px</span>
+    </div>
+    <!-- 64px — slightly simplified -->
+    <div class="scale-item">
+      <svg width="80" height="64" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="scale-label">64px</span>
+    </div>
+    <!-- 28px — simplified: hex + simple loop -->
+    <div class="scale-item">
+      <svg width="35" height="28" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <!-- Simplified single arc at small size -->
+          <path d="M 82,19 C 116,19 140,44 140,72 C 140,100 116,109 82,109" opacity="0.6"/>
+        </g>
+      </svg>
+      <span class="scale-label">28px</span>
+    </div>
+    <!-- 16px — just the hex gate outline -->
+    <div class="scale-item">
+      <svg width="16" height="16" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+      </svg>
+      <span class="scale-label">16px (favicon)</span>
+    </div>
+  </div>
+
+  <!-- ============ DARK + LIGHT BACKGROUNDS ============ -->
+  <div class="section-title">Dark + Light Backgrounds</div>
+  <div class="bg-row">
+    <div class="bg-panel bg-dark">
+      <span class="bg-label">Dark (#0a0a14)</span>
+      <svg width="100" height="80" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+    </div>
+    <div class="bg-panel bg-light">
+      <span class="bg-label" style="color:#999">Light (#f4f4f8)</span>
+      <svg width="100" height="80" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#007a99" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ============ WORDMARK PAIRINGS ============ -->
+  <div class="section-title">Logo + Wordmark Pairings</div>
+  <div class="wordmark-row">
+    <div class="wordmark">
+      <svg width="50" height="40" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="wordmark-text wordmark-text--lg" style="color: #00d4ff">Erika</span>
+    </div>
+  </div>
+  <div class="wordmark-row">
+    <div class="wordmark">
+      <svg width="35" height="28" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="wordmark-text wordmark-text--md" style="color: #00d4ff">Erika</span>
+    </div>
+    <div class="wordmark">
+      <svg width="22" height="16" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 116,19 140,44 140,72 C 140,100 116,109 82,109" opacity="0.5"/>
+        </g>
+      </svg>
+      <span class="wordmark-text wordmark-text--sm" style="color: #00d4ff">Erika</span>
+    </div>
+  </div>
+
+  <!-- ============ WHITELABEL COLORS ============ -->
+  <div class="section-title">Whitelabel Color Variants</div>
+  <div class="wl-row">
+    <div class="wl-item">
+      <svg width="48" height="38" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="wl-label">Cyan (default)</span>
+    </div>
+    <div class="wl-item">
+      <svg width="48" height="38" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#ff8c00" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="wl-label">Orange #ff8c00</span>
+    </div>
+    <div class="wl-item">
+      <svg width="48" height="38" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00ff88" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+      <span class="wl-label">Green #00ff88</span>
+    </div>
+  </div>
+
+  <!-- ============ FAVICON TEST ============ -->
+  <div class="section-title">Favicon Simulation</div>
+  <div class="favicon-row">
+    <div class="favicon-box favicon-box--16">
+      <svg width="14" height="14" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="90" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="90" y2="109"/>
+          <line x1="90" y1="19" x2="116" y2="64" opacity="0.3"/>
+        </g>
+      </svg>
+    </div>
+    <span class="scale-label">16x16</span>
+    <div class="favicon-box favicon-box--32">
+      <svg width="28" height="22" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 116,19 140,44 140,72 C 140,100 116,109 82,109" opacity="0.5"/>
+        </g>
+      </svg>
+    </div>
+    <span class="scale-label">32x32</span>
+    <div class="favicon-box favicon-box--48">
+      <svg width="44" height="35" viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#00d4ff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <line x1="38" y1="19" x2="82" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="19"/>
+          <line x1="12" y1="64" x2="38" y2="109"/>
+          <line x1="38" y1="109" x2="82" y2="109"/>
+          <path d="M 82,19 C 100,19 118,32 118,50 C 118,64 108,72 96,72 C 84,72 78,64 82,52 C 86,40 100,36 112,42 C 124,48 132,60 132,72 C 132,90 118,109 82,109" opacity="0.7"/>
+        </g>
+      </svg>
+    </div>
+    <span class="scale-label">48x48</span>
+  </div>
+
+  <!-- ============ DESIGN RATIONALE ============ -->
+  <div class="annotations">
+    <div class="annotation"><span class="annotation__key">Concept</span><span class="annotation__value">Hex gate + infinity/lemniscate loop</span></div>
+    <div class="annotation"><span class="annotation__key">Symbolism</span><span class="annotation__value">Infinite learning, continuous refinement</span></div>
+    <div class="annotation"><span class="annotation__key">Portal gap</span><span class="annotation__value">Right side = where the loop enters/exits</span></div>
+    <div class="annotation"><span class="annotation__key">Loop path</span><span class="annotation__value">Bezier figure-8 flowing through hex gap</span></div>
+    <div class="annotation"><span class="annotation__key">Small-size strategy</span><span class="annotation__value">Loop simplifies to arc at 28px, pure hex at 16px</span></div>
+    <div class="annotation"><span class="annotation__key">Aspect ratio</span><span class="annotation__value">5:4 (wider than hex alone due to loop)</span></div>
+    <div class="annotation"><span class="annotation__key">Geometry</span><span class="annotation__value">Flat-top hex + cubic bezier lemniscate</span></div>
+    <div class="annotation"><span class="annotation__key">Whitelabel</span><span class="annotation__value">Single color token swap</span></div>
+    <div class="annotation"><span class="annotation__key">Brand connection</span><span class="annotation__value">"Loop and Loop — round and round"</span></div>
+    <div class="annotation"><span class="annotation__key">Format</span><span class="annotation__value">Inline SVG, viewBox 0 0 160 128</span></div>
+  </div>
+</div>
+</body>
+</html>
