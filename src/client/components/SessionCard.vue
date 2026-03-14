@@ -1,5 +1,4 @@
 <template>
-  <!-- NOSONAR: keyboard handlers are present via Vue @keydown directives below -->
   <div
     class="session-card"
     :class="cardClasses"
