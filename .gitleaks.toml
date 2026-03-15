@@ -1,0 +1,17 @@
+[extend]
+# Use the default gitleaks rules
+useDefault = true
+
+[allowlist]
+# .env files contain only port numbers and paths, no secrets
+paths = [
+  '''^\.env$''',
+  '''^\.env\.test$''',
+]
+
+# Known non-secret patterns
+regexTarget = "match"
+regexes = [
+  # Design token hex colors (e.g. #00d4ff, #ff4d6a)
+  '''#[0-9a-fA-F]{6}''',
+]

@@ -1,0 +1,6 @@
+# Scan staged files for secrets before committing
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged --no-banner
+else
+  echo "gitleaks not installed — skipping secret scan (install: brew install gitleaks)"
+fi
