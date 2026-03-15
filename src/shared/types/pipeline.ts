@@ -49,7 +49,7 @@ export type PipelineEvent =
   | { type: 'session.replayed';  sessionId: string & tags.MinLength<1>; lineCount: number & tags.Type<'uint32'> & tags.Minimum<0> }
   | { type: 'session.deduped';   sessionId: string & tags.MinLength<1>; rawLines: number & tags.Type<'uint32'> & tags.Minimum<0>; cleanLines: number & tags.Type<'uint32'> & tags.Minimum<0> }
   | { type: 'session.ready';     sessionId: string & tags.MinLength<1> }
-  | { type: 'session.failed';    sessionId: string & tags.MinLength<1>; stage: PipelineStage; error: string & tags.MinLength<1> }
+  | { type: 'session.failed';    sessionId: string & tags.MinLength<1>; stage: PipelineStage; error: string }
   | { type: 'session.retrying';  sessionId: string & tags.MinLength<1>; stage: PipelineStage; attempt: number & tags.Type<'uint32'> & tags.Minimum<1> };
 
 /** All possible `type` string values — useful for type-safe handler maps. */
