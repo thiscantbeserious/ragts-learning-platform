@@ -64,6 +64,9 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       // Enable WAL mode for better concurrent read performance
       db.pragma('journal_mode = WAL');
 
+      // Auto-reclaim space after deletes (avoids database bloat over time)
+      db.pragma('auto_vacuum = FULL');
+
       // Enable foreign key constraints
       db.pragma('foreign_keys = ON');
 
