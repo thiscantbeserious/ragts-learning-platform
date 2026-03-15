@@ -63,6 +63,21 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
+      # Run tests first WITHOUT --update-snapshots to collect diff info
+      - name: Collect snapshot diffs
+        id: diffs
+        continue-on-error: true
+        run: |
+          OUTPUT=$(npx playwright test 2>&1 || true)
+          MISMATCHES=$(echo "$OUTPUT" | grep -c "toHaveScreenshot" || echo "0")
+          FAILURES=$(echo "$OUTPUT" | grep -c "failed" | tail -1 || echo "0")
+          DIFF_LINES=$(echo "$OUTPUT" | grep -E "Expected:|Received:|ratio [0-9]" || echo "")
+          echo "mismatches=$MISMATCHES" >> "$GITHUB_OUTPUT"
+          echo "diff_summary<<EODIFF" >> "$GITHUB_OUTPUT"
+          echo "$DIFF_LINES" >> "$GITHUB_OUTPUT"
+          echo "EODIFF" >> "$GITHUB_OUTPUT"
+
+      # Now regenerate baselines
       - run: npx playwright test --update-snapshots
 
       - name: Commit and push
@@ -75,6 +90,15 @@ jobs:
             echo "updated=false" >> "$GITHUB_ENV"
           else
             CHANGED=$(git diff --cached --name-only | wc -l)
+            # Build file list with sizes
+            FILE_DETAILS=$(git diff --cached --name-only | while read f; do
+              SIZE=$(wc -c < "$f" 2>/dev/null | tr -d ' ')
+              echo "- \`$(basename "$f")\` (${SIZE} bytes)"
+            done)
+            echo "file_details<<EOFILES" >> "$GITHUB_ENV"
+            echo "$FILE_DETAILS" >> "$GITHUB_ENV"
+            echo "EOFILES" >> "$GITHUB_ENV"
+            echo "changed=$CHANGED" >> "$GITHUB_ENV"
             git commit --no-verify -m "test(ci): update ${CHANGED} visual baselines from CI [snapshot-update]"
             git push
             echo "updated=true" >> "$GITHUB_ENV"
@@ -83,8 +107,18 @@ jobs:
       - name: Comment result
         run: |
           if [ "$updated" = "true" ]; then
-            gh pr comment ${{ github.event.issue.number }} \
-              --body "Visual baselines regenerated on \`ubuntu-latest\` and committed to this branch. CI will re-run to verify."
+            gh pr comment ${{ github.event.issue.number }} --body "$(cat <<'COMMENT'
+          Visual baselines regenerated on `ubuntu-latest` and committed to this branch. CI will re-run to verify.
+
+          **${{ env.changed }} file(s) updated.**
+
+          <details><summary>Updated files</summary>
+
+          ${{ env.file_details }}
+
+          </details>
+          COMMENT
+          )"
           else
             gh pr comment ${{ github.event.issue.number }} \
               --body "No snapshot changes detected — baselines already match the CI runner."
