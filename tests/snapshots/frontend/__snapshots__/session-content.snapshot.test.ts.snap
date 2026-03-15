@@ -78,8 +78,8 @@ exports[`SessionContent component snapshots > defaultCollapsed prop — sections
 
 exports[`SessionContent component snapshots > empty state (no snapshot, no sections) 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <!-- Loading / empty states -->
-  <div data-v-b8c49044="" class="terminal-empty"> No content available </div>
+  <!-- State A (no snapshot): completed + 0 sections + no snapshot -->
+  <div data-v-b8c49044="" class="terminal-empty"> No content available for this session. </div>
 </div>"
 `;
 

@@ -6,6 +6,7 @@
  *   34  — getSectionLineCount: startLine/endLine null → falls back to snapshot.lines.length
  *   70  — template v-if/v-else-if: CLI section (startLine+endLine+snapshot), TUI section
  *         (snapshot only), empty section (neither)
+ *   State A — zero-section fallback: completed + no sections + snapshot exists → info banner
  *
  * Uses light stubs for child components to avoid vt-wasm dependency.
  */
@@ -134,10 +135,10 @@ describe('SessionContent', () => {
   describe('empty / null state', () => {
     it('renders the empty state when snapshot is null and sections is empty', () => {
       const wrapper = mount(SessionContent, {
-        props: { snapshot: null, sections: [] },
+        props: { snapshot: null, sections: [], detectionStatus: 'completed' },
       });
       expect(wrapper.find('.terminal-empty').exists()).toBe(true);
-      expect(wrapper.find('.terminal-empty').text()).toBe('No content available');
+      expect(wrapper.find('.terminal-empty').text()).toContain('No content available');
     });
 
     it('renders the scrollable area when sections exist even without a snapshot', () => {
@@ -196,14 +197,15 @@ describe('SessionContent', () => {
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(false);
     });
 
-    it('does not render preamble when sections array is empty', () => {
+    it('does not render section-preamble when sections array is empty (State A renders full snapshot instead)', () => {
       const snapshot = makeSnapshot(10);
       const wrapper = mount(SessionContent, {
-        props: { snapshot: snapshot as never, sections: [] },
+        props: { snapshot: snapshot as never, sections: [], detectionStatus: 'completed' },
       });
-      // preambleLines returns [] because sections.length === 0
-      // No snapshot stubs present
-      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(false);
+      // State A renders full snapshot — no section header rendered, but snapshot stub IS present
+      expect(wrapper.find('.section-header-stub').exists()).toBe(false);
+      // The snapshot stub is rendered (full-session view, not a preamble slice)
+      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
     });
   });
 
@@ -273,6 +275,53 @@ describe('SessionContent', () => {
         props: { snapshot: snapshot as never, sections },
       });
       expect(wrapper.find('.section-empty').exists()).toBe(true);
+    });
+  });
+
+  describe('State A — zero-section fallback (completed + no sections)', () => {
+    it('renders full snapshot when sections empty, snapshot provided, status completed', () => {
+      const snapshot = makeSnapshot(10);
+      const wrapper = mount(SessionContent, {
+        props: { snapshot: snapshot as never, sections: [], detectionStatus: 'completed' },
+      });
+      const snapshotStub = wrapper.find('.terminal-snapshot-stub');
+      expect(snapshotStub.exists()).toBe(true);
+      expect(snapshotStub.attributes('data-line-count')).toBe('10');
+    });
+
+    it('shows info banner with correct text when sections empty and snapshot provided', () => {
+      const snapshot = makeSnapshot(10);
+      const wrapper = mount(SessionContent, {
+        props: { snapshot: snapshot as never, sections: [], detectionStatus: 'completed' },
+      });
+      const banner = wrapper.find('.session-content-banner--info');
+      expect(banner.exists()).toBe(true);
+      expect(banner.text()).toContain('Section boundaries were not detected');
+    });
+
+    it('does NOT show info banner when sections exist', () => {
+      const snapshot = makeSnapshot(10);
+      const sections: Section[] = [makeCliSection('s1', 0, 5)];
+      const wrapper = mount(SessionContent, {
+        props: { snapshot: snapshot as never, sections, detectionStatus: 'completed' },
+      });
+      expect(wrapper.find('.session-content-banner--info').exists()).toBe(false);
+    });
+
+    it('does not show section headers in unsectioned view', () => {
+      const snapshot = makeSnapshot(10);
+      const wrapper = mount(SessionContent, {
+        props: { snapshot: snapshot as never, sections: [], detectionStatus: 'completed' },
+      });
+      expect(wrapper.find('.section-header-stub').exists()).toBe(false);
+    });
+
+    it('shows "No content available" state when snapshot is null and sections empty', () => {
+      const wrapper = mount(SessionContent, {
+        props: { snapshot: null, sections: [], detectionStatus: 'completed' },
+      });
+      expect(wrapper.find('.terminal-empty').exists()).toBe(true);
+      expect(wrapper.find('.terminal-empty').text()).toContain('No content available');
     });
   });
 
