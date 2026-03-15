@@ -376,6 +376,18 @@ describe('SessionContent', () => {
       });
       expect(wrapper.find('.terminal-empty').text()).toContain('being processed');
     });
+
+    it('failed + sections shows error banner above section content', () => {
+      const snapshot = makeSnapshot(20);
+      const sections: Section[] = [makeCliSection('s1', 0, 10)];
+      const wrapper = mount(SessionContent, {
+        props: { snapshot: snapshot as never, sections, detectionStatus: 'failed' },
+      });
+      expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
+      expect(wrapper.text()).toContain('processing encountered an error');
+      // Sections should still render
+      expect(wrapper.find('.section-header-stub').exists()).toBe(true);
+    });
   });
 
   describe('collapsed/expanded toggle (defaultCollapsed prop)', () => {

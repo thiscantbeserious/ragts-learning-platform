@@ -4,6 +4,8 @@ exports[`SessionContent component snapshots > CLI sections with line ranges 1`] 
 "<div data-v-b8c49044="" class="terminal-chrome">
   <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
     <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Error banner for failed sessions that have partial sections -->
+      <!--v-if-->
       <!-- Lines before first section -->
       <!--v-if-->
       <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
@@ -41,6 +43,8 @@ exports[`SessionContent component snapshots > TUI section with viewport snapshot
 "<div data-v-b8c49044="" class="terminal-chrome">
   <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
     <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Error banner for failed sessions that have partial sections -->
+      <!--v-if-->
       <!-- Lines before first section -->
       <!--v-if-->
       <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
@@ -64,6 +68,8 @@ exports[`SessionContent component snapshots > defaultCollapsed prop — sections
 "<div data-v-b8c49044="" class="terminal-chrome">
   <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
     <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Error banner for failed sessions that have partial sections -->
+      <!--v-if-->
       <!-- Lines before first section -->
       <!--v-if-->
       <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--collapsed section-header--marker">
@@ -87,6 +93,8 @@ exports[`SessionContent component snapshots > mixed CLI and TUI sections 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
   <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
     <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Error banner for failed sessions that have partial sections -->
+      <!--v-if-->
       <!-- Lines before first section -->
       <!--v-if-->
       <!-- Each section: sticky header + content --><button data-v-a902c83d="" data-v-b8c49044="" class="section-header section-header--marker">
@@ -119,6 +127,8 @@ exports[`SessionContent component snapshots > preamble lines before first sectio
 "<div data-v-b8c49044="" class="terminal-chrome">
   <div data-v-5d73d589="" data-v-b8c49044="" class="overlay-scrollbar terminal-scroll">
     <div data-v-5d73d589="" class="overlay-scrollbar__viewport">
+      <!-- Error banner for failed sessions that have partial sections -->
+      <!--v-if-->
       <!-- Lines before first section -->
       <div data-v-68ff1956="" data-v-b8c49044="" class="terminal-snapshot">
         <div data-v-68ff1956="" class="terminal-line"><span data-v-68ff1956="" class="terminal-line__number">1</span><span data-v-68ff1956="" class="terminal-line__content"><span data-v-68ff1956="" class="terminal-span">Preamble A</span></span></div>

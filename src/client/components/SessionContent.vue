@@ -60,6 +60,14 @@ const isTerminalError = computed(() =>
       v-if="sections.length > 0"
       class="terminal-scroll"
     >
+      <!-- Error banner for failed sessions that have partial sections -->
+      <div
+        v-if="isTerminalError"
+        class="session-content-banner session-content-banner--error"
+      >
+        Session processing encountered an error. Showing available content.
+      </div>
+
       <!-- Lines before first section -->
       <TerminalSnapshotComponent
         v-if="preambleLines.length > 0"
