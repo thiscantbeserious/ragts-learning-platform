@@ -67,6 +67,18 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       // Auto-reclaim space after deletes (avoids database bloat over time)
       db.pragma('auto_vacuum = FULL');
 
+      // Wait up to 5s on lock contention instead of failing immediately
+      db.pragma('busy_timeout = 5000');
+
+      // NORMAL sync is safe in WAL mode — only risk is last 1-2 txns on power failure
+      db.pragma('synchronous = NORMAL');
+
+      // 20MB page cache (default 2MB) — reduces disk reads for session browsing
+      db.pragma('cache_size = -20000');
+
+      // Keep temp tables/indices in memory instead of disk
+      db.pragma('temp_store = MEMORY');
+
       // Enable foreign key constraints
       db.pragma('foreign_keys = ON');
 
@@ -95,7 +107,7 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       jobQueue,
       eventLog,
       ping: async () => { db.prepare('SELECT 1').get(); },
-      close: async () => { db.close(); },
+      close: async () => { if (db.open) { db.pragma('optimize'); } db.close(); },
     };
   }
 }
