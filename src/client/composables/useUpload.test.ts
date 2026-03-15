@@ -128,6 +128,52 @@ describe('useUpload', () => {
     });
   });
 
+  describe('handleDrop', () => {
+    it('sets isDragging to false and uploads file when dataTransfer has a file', async () => {
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse({ id: '1' }));
+      const { handleDrop, isDragging } = useUpload();
+      isDragging.value = true;
+      const file = new File(['data'], 'session.cast');
+      const event = { dataTransfer: { files: [file] } } as unknown as DragEvent;
+      handleDrop(event);
+      expect(isDragging.value).toBe(false);
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      expect(fetch).toHaveBeenCalledOnce();
+    });
+
+    it('sets isDragging to false and does not fetch when dataTransfer is null', async () => {
+      const { handleDrop, isDragging } = useUpload();
+      isDragging.value = true;
+      const event = { dataTransfer: null } as unknown as DragEvent;
+      handleDrop(event);
+      expect(isDragging.value).toBe(false);
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      expect(fetch).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleFileInput', () => {
+    it('uploads file when input has a selected file', async () => {
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse({ id: '1' }));
+      const { handleFileInput } = useUpload();
+      const file = new File(['data'], 'session.cast');
+      const input = { files: [file] } as unknown as HTMLInputElement;
+      const event = { target: input } as unknown as Event;
+      handleFileInput(event);
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      expect(fetch).toHaveBeenCalledOnce();
+    });
+
+    it('does not fetch when input has no files', async () => {
+      const { handleFileInput } = useUpload();
+      const input = { files: null } as unknown as HTMLInputElement;
+      const event = { target: input } as unknown as Event;
+      handleFileInput(event);
+      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      expect(fetch).not.toHaveBeenCalled();
+    });
+  });
+
   describe('uploadFileWithOptimistic', () => {
     it('calls onOptimisticInsert immediately before upload completes', async () => {
       let fetchCalled = false;

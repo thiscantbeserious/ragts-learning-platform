@@ -262,4 +262,68 @@ describe('useSessionList()', () => {
       expect('filteredSessions' in composable).toBe(true);
     });
   });
+
+  describe('deleteSession()', () => {
+    it('returns true and refreshes sessions on successful delete', async () => {
+      const session = makeSession({ id: 'abc', filename: 'to-delete.cast' });
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(makeOkResponse([session]))
+        .mockResolvedValueOnce({ ok: true, status: 200 } as Response)
+        .mockResolvedValueOnce(makeOkResponse([]));
+
+      const { sessions, fetchSessions, deleteSession } = useSessionList();
+      await fetchSessions();
+      expect(sessions.value).toHaveLength(1);
+
+      const result = await deleteSession('abc');
+      expect(result).toBe(true);
+      expect(sessions.value).toHaveLength(0);
+    });
+
+    it('returns false and sets error with server message on HTTP failure', async () => {
+      vi.mocked(fetch)
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 404,
+          json: () => Promise.resolve({ error: 'Session not found' }),
+        } as unknown as Response);
+
+      const { error, deleteSession } = useSessionList();
+      const result = await deleteSession('missing-id');
+      expect(result).toBe(false);
+      expect(error.value).toBe('Session not found');
+    });
+
+    it('returns false and sets fallback error when server provides no error message', async () => {
+      vi.mocked(fetch)
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 500,
+          json: () => Promise.resolve({}),
+        } as unknown as Response);
+
+      const { error, deleteSession } = useSessionList();
+      const result = await deleteSession('some-id');
+      expect(result).toBe(false);
+      expect(error.value).toBe('Delete failed (500)');
+    });
+
+    it('returns false and sets error on network failure', async () => {
+      vi.mocked(fetch).mockRejectedValueOnce(new Error('Connection reset'));
+
+      const { error, deleteSession } = useSessionList();
+      const result = await deleteSession('some-id');
+      expect(result).toBe(false);
+      expect(error.value).toBe('Connection reset');
+    });
+
+    it('returns false and sets generic error for non-Error network failure', async () => {
+      vi.mocked(fetch).mockRejectedValueOnce('unexpected failure');
+
+      const { error, deleteSession } = useSessionList();
+      const result = await deleteSession('some-id');
+      expect(result).toBe(false);
+      expect(error.value).toBe('Delete failed');
+    });
+  });
 });
