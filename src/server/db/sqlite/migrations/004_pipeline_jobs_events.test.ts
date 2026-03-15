@@ -7,7 +7,7 @@
 
 // @vitest-environment node
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import Database from 'better-sqlite3';
+import Database from '../node_sqlite_compat.js';
 import { migrate002Sections } from './002_sections.js';
 import { migrate003UnifiedSnapshot } from './003_unified_snapshot.js';
 import { migrate004PipelineJobsEvents } from './004_pipeline_jobs_events.js';

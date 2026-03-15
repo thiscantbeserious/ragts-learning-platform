@@ -4,7 +4,7 @@
  * Uses prepared statements for performance and safety.
  */
 
-import type Database from 'better-sqlite3';
+import type Database from './node_sqlite_compat.js';
 import { nanoid } from 'nanoid';
 import type { SectionAdapter, SectionRow, CreateSectionInput } from '../section_adapter.js';
 

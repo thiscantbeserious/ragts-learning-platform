@@ -8,7 +8,7 @@
  * Events table schema created by migration 004.
  */
 
-import type Database from 'better-sqlite3';
+import type Database from '../db/sqlite/node_sqlite_compat.js';
 import type { EventLogAdapter, EventLogEntry } from './event_log_adapter.js';
 import type { PipelineEvent } from '../../shared/types/pipeline.js';
 

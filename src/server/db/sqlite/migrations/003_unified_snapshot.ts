@@ -12,7 +12,7 @@
  * Idempotent - safe to run multiple times.
  */
 
-import type Database from 'better-sqlite3';
+import type Database from '../node_sqlite_compat.js';
 
 export function migrate003UnifiedSnapshot(db: Database.Database): void {
   // Check if sessions table exists before altering
