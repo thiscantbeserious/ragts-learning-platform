@@ -12,7 +12,7 @@
  * Wrapped in a transaction for atomicity (SQLite DDL is transactional).
  */
 
-import type Database from 'better-sqlite3';
+import Database from '../node_sqlite_compat.js';
 
 /** Asserts sessions table exists — prerequisite for this migration. */
 function assertSessionsTableExists(db: Database.Database): void {

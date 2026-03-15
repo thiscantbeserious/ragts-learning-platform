@@ -8,7 +8,7 @@
  * passed via constructor. Jobs table created by migration 004.
  */
 
-import type Database from 'better-sqlite3';
+import Database from '../db/sqlite/node_sqlite_compat.js';
 import { nanoid } from 'nanoid';
 import type { Job, JobQueueAdapter } from './job_queue_adapter.js';
 import { PipelineStage } from '../../shared/types/pipeline.js';

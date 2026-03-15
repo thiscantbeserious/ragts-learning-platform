@@ -8,7 +8,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import Database from 'better-sqlite3';
+import Database from '../../../src/server/db/sqlite/node_sqlite_compat.js';
 import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
 import type { SessionAdapter } from '../../../src/server/db/session_adapter.js';

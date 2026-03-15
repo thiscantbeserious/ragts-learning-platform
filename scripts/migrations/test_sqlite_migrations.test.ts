@@ -14,8 +14,8 @@ import { describe, it, expect, afterAll } from 'vitest';
 import { readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Database from 'better-sqlite3';
-import type { Database as DatabaseType } from 'better-sqlite3';
+import Database from '../../src/server/db/sqlite/node_sqlite_compat.js';
+import type { Database as DatabaseType } from '../../src/server/db/sqlite/node_sqlite_compat.js';
 import { BASE_SCHEMA } from '../../src/server/db/sqlite/sqlite_database_impl.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

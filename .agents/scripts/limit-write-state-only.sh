@@ -21,5 +21,15 @@ if [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
   exit 0
 fi
 
-echo "Blocked: Write is restricted to .state/ directories within the repo." >&2
+if [[ "$RESOLVED" == "$REPO_ROOT/VISIONBOOK.md" ]]; then
+  exit 0
+fi
+
+# Allow agent memory system (memory: project/user/local in agent frontmatter)
+# .claude is a symlink to .agents, so _resolve() canonicalizes to .agents/
+if [[ "$RESOLVED" == "$REPO_ROOT/.agents/agent-memory/"* ]] || [[ "$RESOLVED" == "$REPO_ROOT/.claude/agent-memory/"* ]]; then
+  exit 0
+fi
+
+echo "Blocked: Write is restricted to .state/, VISIONBOOK.md, and .claude/agent-memory/ within the repo." >&2
 exit 2

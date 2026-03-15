@@ -1,4 +1,6 @@
 /* @ts-self-types="./vt_wasm.d.ts" */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 /**
  * Virtual terminal wrapper
@@ -76,7 +78,7 @@ class Vt {
     }
 }
 if (Symbol.dispose) Vt.prototype[Symbol.dispose] = Vt.prototype.free;
-exports.Vt = Vt;
+export { Vt };
 
 /**
  * Create a new virtual terminal instance
@@ -89,7 +91,7 @@ function create(cols, rows, scrollback_limit) {
     const ret = wasm.create(cols, rows, scrollback_limit);
     return Vt.__wrap(ret);
 }
-exports.create = create;
+export { create };
 
 function __wbg_get_imports() {
     const import0 = {
@@ -247,7 +249,8 @@ if (!('encodeInto' in cachedTextEncoder)) {
 
 let WASM_VECTOR_LEN = 0;
 
-const wasmPath = `${__dirname}/vt_wasm_bg.wasm`;
-const wasmBytes = require('fs').readFileSync(wasmPath);
+// import.meta.dirname is available in Node.js 22.12+ (the project minimum).
+// It returns the filesystem path directly, avoiding URL scheme issues in test environments.
+const wasmBytes = readFileSync(resolve(import.meta.dirname, 'vt_wasm_bg.wasm'));
 const wasmModule = new WebAssembly.Module(wasmBytes);
 const wasm = new WebAssembly.Instance(wasmModule, __wbg_get_imports()).exports;

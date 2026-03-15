@@ -78,7 +78,7 @@ No external databases, Redis, or Docker containers are needed for development. T
 
 ### Testing
 
-- `npx vitest run` — full unit/snapshot test suite (323 tests across 29 files)
+- `npx vitest run` — full unit/snapshot test suite
 - `npx playwright test` — visual regression tests (requires Playwright browsers: `npx playwright install`)
 - See `README.md` "Testing" section for additional commands
 

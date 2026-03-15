@@ -3,7 +3,7 @@
  * Encapsulates DB initialization, migrations, and repository construction.
  */
 
-import Database from 'better-sqlite3';
+import Database from './node_sqlite_compat.js';
 import { mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { migrate002Sections } from './migrations/002_sections.js';

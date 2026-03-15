@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import Database from 'better-sqlite3';
+import Database from '../../../src/server/db/sqlite/node_sqlite_compat.js';
 import { SqliteDatabaseImpl, BASE_SCHEMA } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
 import { migrate002Sections } from '../../../src/server/db/sqlite/migrations/002_sections.js';
 import { migrate003UnifiedSnapshot } from '../../../src/server/db/sqlite/migrations/003_unified_snapshot.js';

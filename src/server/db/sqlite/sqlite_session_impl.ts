@@ -3,7 +3,7 @@
  * Uses prepared statements for performance and safety.
  */
 
-import type Database from 'better-sqlite3';
+import Database from './node_sqlite_compat.js';
 import { nanoid } from 'nanoid';
 import type { Session, SessionCreate } from '../../../shared/types/session.js';
 import type { SessionAdapter } from '../session_adapter.js';
