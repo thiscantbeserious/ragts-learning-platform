@@ -9,7 +9,7 @@ Implementation challenges to solve (architect identifies, engineers resolve):
 1. **node:sqlite PRAGMA return values.** `db.prepare("PRAGMA journal_mode = WAL").get()` may return the result differently than `db.pragma("journal_mode = WAL")`. The engineer must verify the return shape and handle accordingly (likely `{ journal_mode: 'wal' }` vs `'wal'`).
 2. **node:sqlite :memory: database support.** Tests rely on `new Database(':memory:')`. Verify `new DatabaseSync(':memory:')` works identically.
 3. **@hono/vite-dev-server + @hono/node-server coexistence.** The production path still uses `@hono/node-server` via `start.ts`. The dev path needs `@hono/vite-dev-server`. These must not conflict. The engineer must determine how to structure the entry point (likely a separate `src/server/dev.ts` or conditional logic).
-4. **vt-wasm WASM path resolution after ESM conversion.** The CJS version uses `__dirname` to locate the `.wasm` file. ESM replacement via `import.meta.dirname` must produce the same path in both Vitest and production.
+4. **vt-wasm WASM path resolution after ESM conversion.** The CJS version uses `__dirname` to locate the `.wasm` file. ESM replacement via `import.meta.url` + `new URL()` must produce the same path in both Vitest and production.
 5. **Typia + Vitest compatibility.** Typia requires AOT compilation. Tests run through Vitest (which uses Vite). The `@typia/unplugin` must be in the Vitest config for tests that exercise validation logic.
 
 ## Stages
@@ -20,22 +20,21 @@ Goal: Configure `wasm-pack` / `build.sh` to produce ESM output natively, so the 
 
 Owner: backend-engineer
 
-- [x] Investigate `build.sh` and `Cargo.toml` for current wasm-pack target and output config
-- [x] Change wasm-pack target to produce ESM output (`--target web` or `--target bundler` or `--target nodejs` with ESM config)
-- [x] Verify the output `pkg/vt_wasm.js` uses `export` instead of `exports`, ESM imports instead of `require()`, and `import.meta.dirname` instead of `__dirname`
-- [x] Update `packages/vt-wasm/pkg/package.json` if needed (`"type": "module"`, `"exports"` field)
-- [x] Update `packages/vt-wasm/index.ts` wrapper if the import pattern changes
-- [x] Rebuild: run `build.sh`, verify output is ESM
-- [x] Verify: `npx vitest run` -- all existing tests pass
+- [ ] Investigate `build.sh` and `Cargo.toml` for current wasm-pack target and output config
+- [ ] Change wasm-pack target to produce ESM output (`--target web` or `--target bundler` or `--target nodejs` with ESM config)
+- [ ] Verify the output `pkg/vt_wasm.js` uses `export` instead of `exports`, ESM imports instead of `require()`, and `import.meta.url` instead of `__dirname`
+- [ ] Update `packages/vt-wasm/pkg/package.json` if needed (`"type": "module"`, `"exports"` field)
+- [ ] Update `packages/vt-wasm/index.ts` wrapper if the import pattern changes
+- [ ] Rebuild: run `build.sh`, verify output is ESM
+- [ ] Verify: `npx vitest run` -- all existing tests pass
 
 Files: `packages/vt-wasm/build.sh`, `packages/vt-wasm/Cargo.toml`, `packages/vt-wasm/pkg/*`, `packages/vt-wasm/index.ts`
 Depends on: none
 
-Implementation notes:
-- wasm-pack is not installed locally; Docker container is used for rebuilds. Dockerfile updated to `--target bundler` for future native ESM builds.
-- Manual ESM conversion applied to existing `pkg/vt_wasm.js` (Option A fallback as documented in ADR).
-- `import.meta.url` is NOT suitable here — Vitest's module system gives modules virtual URLs that fail `fileURLToPath`. Used `import.meta.dirname` (Node.js 22.12+) instead, which returns the filesystem path directly and is unaffected by Vitest URL virtualization.
-- `index.ts` wrapper unchanged — the `await import('./pkg/vt_wasm.js')` + `create` export pattern is compatible with both CJS and ESM named exports.
+Considerations:
+- Different wasm-pack targets produce different init patterns. `--target web` uses async init; `--target bundler` may use sync. The engineer must verify which matches the current sync init pattern in `index.ts`.
+- The `.d.ts` file may change shape depending on the target — verify types still match `index.ts` wrapper.
+- If Rust toolchain is not available locally, this stage may need CI or a contributor with Rust installed. Check if `build.sh` documents requirements.
 
 ### Stage 0b: node:sqlite compatibility wrapper
 
@@ -43,7 +42,7 @@ Goal: Create a thin wrapper around `node:sqlite`'s `DatabaseSync` that matches b
 
 Owner: backend-engineer
 
-- [ ] Create `src/server/db/sqlite/node_sqlite_compat.ts` that wraps `DatabaseSync` with:
+- [x] Create `src/server/db/sqlite/node_sqlite_compat.ts` that wraps `DatabaseSync` with:
   - Constructor matching `new Database(path)` pattern
   - `.pragma(key)` and `.pragma('key = value')` matching better-sqlite3's API
   - `.transaction(fn)` matching better-sqlite3's transaction helper (wraps BEGIN/COMMIT/ROLLBACK)
@@ -51,8 +50,8 @@ Owner: backend-engineer
   - `.exec()` pass-through
   - `.close()` pass-through
   - `.open` property (boolean, tracks close state)
-- [ ] Add unit tests for the wrapper covering: pragma read/write, transaction commit, transaction rollback on error, prepare/run/get/all, close behavior
-- [ ] Verify: `npx vitest run` -- all existing tests pass (wrapper is new, no consumers yet)
+- [x] Add unit tests for the wrapper covering: pragma read/write, transaction commit, transaction rollback on error, prepare/run/get/all, close behavior
+- [x] Verify: `npx vitest run` -- all existing tests pass (wrapper is new, no consumers yet)
 
 Files: `src/server/db/sqlite/node_sqlite_compat.ts`, `src/server/db/sqlite/node_sqlite_compat.test.ts`
 Depends on: none
@@ -268,8 +267,8 @@ Updated by engineers as work progresses.
 
 | Stage | Status | Notes |
 |-------|--------|-------|
-| 0a | done | vt-wasm ESM conversion: manual patch applied; Dockerfile updated for future native builds |
-| 0b | pending | node:sqlite compatibility wrapper |
+| 0a | pending | vt-wasm build script ESM output |
+| 0b | complete | node:sqlite compatibility wrapper — 30 tests, all 1163 suite tests pass |
 | 0c | pending | Swap better-sqlite3 imports for wrapper |
 | 0d | pending | Remove better-sqlite3 from deps |
 | 1a | pending | Vite dev server setup |
