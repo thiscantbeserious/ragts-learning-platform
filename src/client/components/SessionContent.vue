@@ -52,7 +52,7 @@ const preambleLines = computed(() => {
 <template>
   <div class="terminal-chrome">
     <OverlayScrollbar
-      v-if="snapshot || sections.length > 0"
+      v-if="sections.length > 0"
       class="terminal-scroll"
     >
       <!-- Lines before first section -->
@@ -100,7 +100,28 @@ const preambleLines = computed(() => {
       </template>
     </OverlayScrollbar>
 
-    <!-- Loading / empty states -->
+    <!-- State A: completed + 0 sections + snapshot exists → full snapshot with info banner -->
+    <template v-else-if="detectionStatus === 'completed' && snapshot">
+      <div class="session-content-banner session-content-banner--info">
+        Section boundaries were not detected for this session.
+      </div>
+      <OverlayScrollbar class="terminal-scroll">
+        <TerminalSnapshotComponent
+          :lines="snapshot.lines"
+          :start-line-number="1"
+        />
+      </OverlayScrollbar>
+    </template>
+
+    <!-- State A (no snapshot): completed + 0 sections + no snapshot -->
+    <div
+      v-else-if="detectionStatus === 'completed'"
+      class="terminal-empty"
+    >
+      No content available for this session.
+    </div>
+
+    <!-- Fallback for other states (will be extended in Stage 4) -->
     <div
       v-else
       class="terminal-empty"
@@ -143,5 +164,17 @@ const preambleLines = computed(() => {
   text-align: center;
   color: var(--text-disabled);
   font-style: italic;
+}
+
+.session-content-banner {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  line-height: var(--lh-sm);
+}
+
+.session-content-banner--info {
+  background: var(--status-info-subtle, rgba(0, 150, 255, 0.08));
+  color: var(--status-info, #4da6ff);
+  border-bottom: 1px solid var(--status-info-subtle, rgba(0, 150, 255, 0.12));
 }
 </style>
