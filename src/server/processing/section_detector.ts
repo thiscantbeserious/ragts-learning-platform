@@ -2,14 +2,15 @@
  * SectionDetector - Detects section boundaries in asciicast sessions.
  *
  * Uses multiple signals to identify natural breaking points:
- * - Signal 1: Timing gaps (co-primary)
- * - Signal 2: Screen clear sequences (co-primary)
- * - Signal 3: Alternate screen transitions
+ * - Signal 1: Timing gaps (co-primary, gated on timing reliability)
+ * - Signal 2: Screen clear sequences (\x1b[2J) (co-primary)
+ * - Signal 3: Alternate screen transitions (\x1b[?1049l)
  * - Signal 4: Output volume bursts (tiebreaker, requires reliable timing)
+ * - Signal 5: Erase to end of display (\x1b[J / \x1b[0J) — for TUI apps like Codex
  *
  * Processing steps:
  * 1. Collect candidates from all signals
- * 2. Check timing reliability (disable timing-based signals if median gap < 0.1s)
+ * 2. Check timing reliability (disable timing-based signals if no gap >= 0.5s)
  * 3. Merge nearby candidates (within 50 events)
  * 4. Filter by minimum section size (>= 100 events)
  * 5. Cap at maximum sections (top 50 by score)
@@ -36,8 +37,11 @@ export class SectionDetector {
   private readonly MIN_SECTION_SIZE = 100;
   private readonly MAX_SECTIONS = 50;
   private readonly MERGE_WINDOW = 50;
+  // Gemini has gaps > 5s; Codex max is 4.6s (relies on erase_to_end instead). Keep at 5s.
   private readonly TIMING_GAP_THRESHOLD = 5; // seconds
-  private readonly TIMING_RELIABILITY_THRESHOLD = 0.1; // median gap threshold
+  // Timing is considered reliable if at least one gap exceeds this floor.
+  // Replaces the old median-based check which failed for TUI apps with fast redraw ticks.
+  private readonly TIMING_SIGNIFICANCE_FLOOR = 0.5; // seconds
 
   constructor(private readonly events: AsciicastEvent[]) {}
 
@@ -61,7 +65,11 @@ export class SectionDetector {
       candidates.push(...this.detectTimingGaps());
     }
 
-    candidates.push(...this.detectScreenClears(), ...this.detectAltScreenExits());
+    candidates.push(
+      ...this.detectScreenClears(),
+      ...this.detectAltScreenExits(),
+      ...this.detectEraseToEnd(),
+    );
 
     if (timingReliable) {
       candidates.push(...this.detectVolumeBursts());
@@ -166,28 +174,15 @@ export class SectionDetector {
   }
 
   /**
-   * Check if timing data is reliable.
-   * Returns false if median gap < 0.1s (compressed timestamps).
+   * Check if timing data is reliable enough to enable timing-based signals.
+   * Returns true if at least one gap meets the significance floor (>= 0.5s).
+   * This replaces the old median-based check, which failed for TUI apps where
+   * fast redraw ticks dominate but real user-think-time gaps still exist.
    */
   private isTimingReliable(): boolean {
     if (this.events.length < 2) return false;
 
-    // Collect all timing gaps
-    const gaps = this.events.map((event) => event[0]).filter((gap) => gap > 0);
-
-    if (gaps.length === 0) return false;
-
-    // Calculate median
-    const sortedGaps = [...gaps].sort((a, b) => a - b);
-    const midHigh = sortedGaps[sortedGaps.length / 2] ?? 0;
-    const midLow = sortedGaps[sortedGaps.length / 2 - 1] ?? 0;
-    const midFloor = sortedGaps[Math.floor(sortedGaps.length / 2)] ?? 0;
-    const median =
-      sortedGaps.length % 2 === 0
-        ? (midLow + midHigh) / 2
-        : midFloor;
-
-    return median >= this.TIMING_RELIABILITY_THRESHOLD;
+    return this.events.some((event) => event[0] >= this.TIMING_SIGNIFICANCE_FLOOR);
   }
 
   /**
@@ -265,6 +260,38 @@ export class SectionDetector {
             signals: ['alt_screen_exit'],
           });
         }
+      }
+    }
+
+    return candidates;
+  }
+
+  /**
+   * Signal 5: Detect erase-to-end-of-display sequences (\x1b[J / \x1b[0J).
+   * Used by TUI apps like Codex that redraw the screen without \x1b[2J.
+   * Not gated on timing reliability — applies regardless of timestamp quality.
+   * Does NOT fire on \x1b[2J or \x1b[3J (handled by detectScreenClears).
+   */
+  private detectEraseToEnd(): BoundaryCandidate[] {
+    const candidates: BoundaryCandidate[] = [];
+
+    for (let i = 0; i < this.events.length; i++) {
+      const event = this.events[i];
+      if (event === undefined) continue;
+      if (event[1] !== 'o' || typeof event[2] !== 'string') continue;
+
+      const data = event[2];
+      // Exclude events that contain numbered variants (ESC[2J, ESC[3J) to avoid overlap
+      // with detectScreenClears(). These use the same ESC[ prefix but different semantics.
+      if (data.includes('\x1b[2J') || data.includes('\x1b[3J')) continue;
+
+      // Detect ESC[J (bare) or ESC[0J (explicit zero) — erase to end of display
+      if (data.includes('\x1b[J') || data.includes('\x1b[0J')) {
+        candidates.push({
+          eventIndex: i,
+          score: 0.8,
+          signals: ['erase_to_end'],
+        });
       }
     }
 

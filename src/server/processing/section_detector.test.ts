@@ -1,3 +1,4 @@
+// @vitest-environment node
 /**
  * Tests for SectionDetector - Section boundary detection for asciicast sessions.
  *
@@ -7,11 +8,25 @@
  * - Alternate screen transitions
  * - Output volume bursts
  * - Marker precedence
+ * - Fixture-based integration tests for Codex, Gemini, Claude sessions
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { SectionDetector } from './section_detector.js';
 import type { AsciicastEvent } from '../../shared/types/asciicast.js';
+
+/**
+ * Load events from a fixture .cast file.
+ * First line is the header; remaining lines are events [timestamp, type, data].
+ * Timestamps are deltas (asciicast v3 format).
+ */
+function loadFixtureEvents(fixtureName: string): AsciicastEvent[] {
+  const content = readFileSync(join(process.cwd(), 'fixtures', fixtureName), 'utf-8');
+  const lines = content.split('\n').filter(l => l.trim());
+  return lines.slice(1).map(line => JSON.parse(line) as AsciicastEvent);
+}
 
 describe('SectionDetector', () => {
   describe('basic scenarios', () => {
@@ -335,6 +350,120 @@ describe('SectionDetector', () => {
     });
   });
 
+  describe('isTimingReliable() — relaxed presence check', () => {
+    it('returns true when events have at least one significant gap (>= 0.5s)', () => {
+      // Gaps: [0.0, 0.0, 0.0, 2.0, 0.0, 0.0] — one significant gap among fast ticks
+      // Must use >= 100 events to avoid MIN_SESSION_SIZE early return; we test via detect()
+      // Use a simpler approach: create 100 events where only one gap > 0.5s
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 50 }, () => [0.0, 'o', 'x'] as AsciicastEvent),
+        [2.0, 'o', 'significant gap'] as AsciicastEvent,
+        ...Array.from({ length: 149 }, () => [0.0, 'o', 'x'] as AsciicastEvent),
+        // Place a timing gap > 5s so timing detection fires if timing is deemed reliable
+        [10.0, 'o', 'big gap'] as AsciicastEvent,
+        ...Array.from({ length: 100 }, () => [0.0, 'o', 'x'] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // If isTimingReliable returns true, timing gap at index 300 should be detected
+      expect(boundaries.some(b => b.signals.includes('timing_gap'))).toBe(true);
+    });
+
+    it('returns false (no timing boundaries) when all gaps are < 0.01s', () => {
+      // All gaps are truly compressed — no significant pauses at all
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, () => [0.005, 'o', 'x'] as AsciicastEvent),
+        [0.005, 'o', 'still compressed'] as AsciicastEvent,
+        ...Array.from({ length: 100 }, () => [0.005, 'o', 'x'] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // No timing_gap boundaries when timing is unreliable
+      expect(boundaries.every(b => !b.signals.includes('timing_gap'))).toBe(true);
+    });
+  });
+
+  describe('Signal 5: Erase to end of display (ESC[J / ESC[0J)', () => {
+    it('detects \\x1b[J as boundary with score 0.8 and signal erase_to_end', () => {
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'o', '\x1b[J'] as AsciicastEvent, // erase to end at 100
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i + 100}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      expect(boundaries.length).toBe(1);
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('erase_to_end');
+      expect(boundaries[0]!.score).toBeCloseTo(0.8);
+    });
+
+    it('detects \\x1b[0J as boundary with signal erase_to_end', () => {
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'o', '\x1b[0J'] as AsciicastEvent, // erase to end (explicit 0) at 100
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i + 100}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      expect(boundaries.length).toBe(1);
+      expect(boundaries[0]!.eventIndex).toBe(100);
+      expect(boundaries[0]!.signals).toContain('erase_to_end');
+    });
+
+    it('does NOT fire on events containing \\x1b[2J (handled by screen_clear)', () => {
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'o', '\x1b[2J'] as AsciicastEvent, // full screen clear — not erase_to_end
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i + 100}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // Should detect via screen_clear signal, NOT erase_to_end
+      expect(boundaries.length).toBe(1);
+      expect(boundaries[0]!.signals).toContain('screen_clear');
+      expect(boundaries[0]!.signals).not.toContain('erase_to_end');
+    });
+
+    it('does NOT fire on events containing \\x1b[3J', () => {
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'o', '\x1b[3J'] as AsciicastEvent, // erase scrollback — not erase_to_end
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i + 100}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // ESC[3J is not detected by any current signal (no screen_clear, no erase_to_end)
+      expect(boundaries.every(b => !b.signals.includes('erase_to_end'))).toBe(true);
+    });
+
+    it('does NOT fire on non-output events', () => {
+      const events: AsciicastEvent[] = [
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i}\n`] as AsciicastEvent),
+        [0.1, 'i', '\x1b[J'] as AsciicastEvent, // input event — should be ignored
+        ...Array.from({ length: 100 }, (_, i) => [0.1, 'o', `line ${i + 100}\n`] as AsciicastEvent),
+      ];
+
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // No erase_to_end detected from input event
+      expect(boundaries.every(b => !b.signals.includes('erase_to_end'))).toBe(true);
+    });
+  });
+
   describe('markers take precedence', () => {
     it('uses marker positions as fixed boundaries', () => {
       const events: AsciicastEvent[] = [
@@ -408,6 +537,50 @@ describe('SectionDetector', () => {
       expect(boundaries.length).toBe(1);
       expect(boundaries[0]!.eventIndex).toBe(100);
       expect(boundaries[0]!.label).toBe('Manual Marker');
+    });
+  });
+
+  describe('Fixture integration tests', () => {
+    it('codex-medium: detects boundaries via erase_to_end signal (3-20 boundaries)', () => {
+      const events = loadFixtureEvents('codex-medium.cast');
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // Codex uses ESC[J (erase to end) for redraw — should detect 3-20 sections
+      expect(boundaries.length).toBeGreaterThanOrEqual(3);
+      expect(boundaries.length).toBeLessThanOrEqual(20);
+
+      // At least one boundary must have the erase_to_end signal
+      const hasEraseToEnd = boundaries.some(b => b.signals.includes('erase_to_end'));
+      expect(hasEraseToEnd).toBe(true);
+    });
+
+    it('gemini-medium: detects at least one boundary via timing_gap signal', () => {
+      const events = loadFixtureEvents('gemini-medium.cast');
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // Gemini has large timing gaps (up to 13640s) between user interactions.
+      // Most gaps cluster at event indices 2-42 and 642-670, which are near session
+      // start/end and get filtered by MIN_SECTION_SIZE=100. At least one boundary
+      // at index ~232 (42.7s gap) survives the filter in the middle section.
+      expect(boundaries.length).toBeGreaterThanOrEqual(1);
+      expect(boundaries.length).toBeLessThanOrEqual(20);
+
+      // At least one boundary must have the timing_gap signal
+      const hasTimingGap = boundaries.some(b => b.signals.includes('timing_gap'));
+      expect(hasTimingGap).toBe(true);
+    });
+
+    it('claude-medium: preserves screen_clear detection (regression guard)', () => {
+      const events = loadFixtureEvents('claude-medium.cast');
+      const detector = new SectionDetector(events);
+      const boundaries = detector.detect();
+
+      // Claude uses ESC[2J for screen clears — existing behavior must be preserved
+      expect(boundaries.length).toBeGreaterThanOrEqual(1);
+      const hasScreenClear = boundaries.some(b => b.signals.includes('screen_clear'));
+      expect(hasScreenClear).toBe(true);
     });
   });
 });

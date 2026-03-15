@@ -203,6 +203,30 @@ describe('SessionCard', () => {
     });
   });
 
+  describe('zero-section completed session', () => {
+    it('renders without error or warning indicators', async () => {
+      const session = makeSession({
+        detection_status: 'completed',
+        detected_sections_count: 0,
+      });
+      const wrapper = mountCard(session);
+
+      // Should show ready (green) dot, not failed
+      expect(wrapper.find('.session-card__status-dot--ready').exists()).toBe(true);
+      expect(wrapper.find('.session-card__status-dot--failed').exists()).toBe(false);
+
+      // Should show "0 sections" text, not an error message
+      expect(wrapper.text()).toContain('0 sections');
+
+      // Should not be in processing state
+      expect(wrapper.find('.session-card--processing').exists()).toBe(false);
+
+      // Should be clickable — triggers navigation on click
+      await wrapper.find('.session-card').trigger('click');
+      expect(mockPush).toHaveBeenCalledWith('/session/sess-1');
+    });
+  });
+
   describe('processing card', () => {
     it('applies processing modifier class when statusGroup is processing', () => {
       const wrapper = mountCard(makeSession({ detection_status: 'processing' }));
