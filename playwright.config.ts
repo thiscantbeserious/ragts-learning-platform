@@ -5,7 +5,6 @@ import { config } from 'dotenv';
 // so visual tests never touch the developer's local database.
 config({ path: '.env.test' });
 
-const SERVER_PORT = process.env.PORT || '3001';
 const DEV_SERVER_PORT = process.env.DEV_SERVER_PORT || '5174';
 const DATA_DIR = process.env.DATA_DIR || 'tests/.test-data';
 
