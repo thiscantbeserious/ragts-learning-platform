@@ -253,12 +253,12 @@ jobs:
           **To update baselines:** comment `/update-snapshots` on this PR.
           COMMENT
           )"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fail if visual tests failed
         if: steps.visual.outputs.exit_code != '0'
         run: exit 1
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test-migrations:
     name: SQLite Schema Migration
