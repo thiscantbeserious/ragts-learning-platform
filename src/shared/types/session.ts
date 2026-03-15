@@ -28,8 +28,10 @@ export interface Session {
   /** ISO 8601 creation timestamp. */
   created_at: string & tags.MinLength<1>;
   agent_type?: string | null;
-  event_count?: number | null;
-  detected_sections_count?: number | null;
+  /** Total event count after validation. 0 or more. */
+  event_count?: (number & tags.Type<'uint32'> & tags.Minimum<0>) | null;
+  /** Number of detected sections. 0 or more. */
+  detected_sections_count?: (number & tags.Type<'uint32'> & tags.Minimum<0>) | null;
   detection_status?: 'pending' | 'processing' | 'queued' | 'validating' | 'detecting' | 'replaying' | 'deduplicating' | 'storing' | 'completed' | 'failed' | 'interrupted';
   snapshot?: string | null;  // Full getAllLines() JSON from VT terminal
 }

@@ -15,8 +15,8 @@ import type { tags } from 'typia';
  * so all downstream consumers can use `header.width`/`header.height`.
  */
 export interface AsciicastHeader {
-  /** asciicast format version — must be 2 or higher. */
-  version: number & tags.Type<'uint32'> & tags.Minimum<2>;
+  /** asciicast format version — only version 3 is supported by the parser. */
+  version: number & tags.Type<'uint32'> & tags.Minimum<3> & tags.Maximum<3>;
   /** Terminal width in columns — must be at least 1. Normalized from term.cols for v3. */
   width: number & tags.Type<'uint32'> & tags.Minimum<1>;
   /** Terminal height in rows — must be at least 1. Normalized from term.rows for v3. */
