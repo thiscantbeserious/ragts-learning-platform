@@ -46,7 +46,7 @@ export default defineConfig({
       timeout: 30000,
     },
     {
-      command: `VITE_PORT=${CLIENT_PORT} VITE_API_PORT=${SERVER_PORT} npx vite`,
+      command: `PORT=${SERVER_PORT} VITE_PORT=${CLIENT_PORT} npx vite`,
       url: `http://localhost:${CLIENT_PORT}`,
       reuseExistingServer: false,
       timeout: 30000,
