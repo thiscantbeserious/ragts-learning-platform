@@ -5,6 +5,8 @@
  * Event timestamps are relative (delta from previous) - must compute cumulative for display.
  */
 
+import type { tags } from 'typia';
+
 /**
  * asciicast v3 header. First line of .cast file.
  *
@@ -13,16 +15,22 @@
  * so all downstream consumers can use `header.width`/`header.height`.
  */
 export interface AsciicastHeader {
-  version: number;
-  width: number;   // normalized from term.cols if v3 format
-  height: number;  // normalized from term.rows if v3 format
+  /** asciicast format version — must be 2 or higher. */
+  version: number & tags.Type<'uint32'> & tags.Minimum<2>;
+  /** Terminal width in columns — must be at least 1. Normalized from term.cols for v3. */
+  width: number & tags.Type<'uint32'> & tags.Minimum<1>;
+  /** Terminal height in rows — must be at least 1. Normalized from term.rows for v3. */
+  height: number & tags.Type<'uint32'> & tags.Minimum<1>;
   term?: {
-    cols: number;
-    rows: number;
+    /** Terminal width in columns — must be at least 1. */
+    cols: number & tags.Type<'uint32'> & tags.Minimum<1>;
+    /** Terminal height in rows — must be at least 1. */
+    rows: number & tags.Type<'uint32'> & tags.Minimum<1>;
     type?: string;
     version?: string;
     theme?: { fg?: string; bg?: string; palette?: string };
   };
+  /** Unix timestamp of recording start. */
   timestamp?: number;
   idle_time_limit?: number;
   command?: string;
@@ -59,9 +67,12 @@ export interface ParsedEvent {
  * Marker extracted from events (type "m").
  */
 export interface Marker {
-  time: number;     // cumulative timestamp
-  label: string;    // marker text
-  index: number;    // event index in events array
+  /** Cumulative timestamp in seconds from recording start — 0 or greater. */
+  time: number & tags.Minimum<0>;
+  /** Non-empty marker text label. */
+  label: string & tags.MinLength<1>;
+  /** Event index in the events array — 0 or greater. */
+  index: number & tags.Type<'uint32'> & tags.Minimum<0>;
 }
 
 /**

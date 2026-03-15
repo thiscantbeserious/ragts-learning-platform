@@ -186,22 +186,28 @@ Goal: Annotate ALL API-boundary TypeScript interfaces with Typia validation tags
 
 Owner: backend-engineer
 
-- [ ] Add Typia tag imports to `src/shared/types/asciicast.ts`:
-  - `AsciicastHeader.version` -- `@minimum 2`
-  - `AsciicastHeader.width`, `.height` -- `@type uint32 & @minimum 1`
-  - Other fields as appropriate
-- [ ] Add Typia tags to `src/shared/types/session.ts`:
-  - `Session.id` -- `@format nanoid` or `@minLength 1`
-  - `SessionCreate.filename` -- `@minLength 1`
-  - `SessionCreate.size_bytes` -- `@minimum 1`
-- [ ] Add Typia tags to `src/shared/types/section.ts`:
-  - `Section.id`, `.session_id` -- string constraints
-  - `Section.startEvent`, `.endEvent` -- `@minimum 0`
-- [ ] Add Typia tags to `src/shared/types/api.ts`:
-  - Response shapes -- validate what the server sends to the client
-- [ ] Add Typia tags to `src/shared/types/pipeline.ts`:
-  - `PipelineEvent` discriminated union validation
-- [ ] Verify: `npx vitest run` -- all existing tests pass (tags are compile-time annotations, no runtime effect until middleware wires them)
+- [x] Add Typia tag imports to `src/shared/types/asciicast.ts`:
+  - `AsciicastHeader.version` -- `tags.Type<'uint32'> & tags.Minimum<2>`
+  - `AsciicastHeader.width`, `.height` -- `tags.Type<'uint32'> & tags.Minimum<1>`
+  - `term.cols`, `term.rows` -- `tags.Type<'uint32'> & tags.Minimum<1>`
+- [x] Add Typia tags to `src/shared/types/session.ts`:
+  - `Session.id`, `.filename`, `.filepath`, `.uploaded_at`, `.created_at` -- `tags.MinLength<1>`
+  - `Session.size_bytes` -- `tags.Type<'uint32'> & tags.Minimum<1>`
+  - `Session.marker_count` -- `tags.Type<'uint32'> & tags.Minimum<0>`
+  - `SessionCreate` -- same tags on all matching fields
+- [x] Add Typia tags to `src/shared/types/section.ts`:
+  - `Section.id`, `.label` -- `tags.MinLength<1>`
+  - `Section.startEvent`, `.endEvent` -- `tags.Type<'uint32'> & tags.Minimum<0>`
+- [x] Add Typia tags to `src/shared/types/api.ts`:
+  - `SessionDetailResponse.id`, `.filename` -- `tags.MinLength<1>`
+  - `SessionStatusResponse.sessionId`, `.status` -- `tags.MinLength<1>`
+  - `SessionStatusResponse.attempts` -- `tags.Type<'uint32'> & tags.Minimum<0>`
+  - `SessionStatusResponse.maxAttempts` -- `tags.Type<'uint32'> & tags.Minimum<1>`
+- [x] Add Typia tags to `src/shared/types/pipeline.ts`:
+  - All `PipelineEvent` variants: `sessionId` and `filename`/`error` -- `tags.MinLength<1>`
+  - Count fields (`eventCount`, `sectionCount`, `lineCount`, `rawLines`, `cleanLines`) -- `tags.Type<'uint32'> & tags.Minimum<0>`
+  - `attempt` field -- `tags.Type<'uint32'> & tags.Minimum<1>`
+- [x] Verify: `npx vitest run` -- all 1172 tests pass (tags are compile-time annotations, no runtime effect until middleware wires them)
 
 Files: `src/shared/types/asciicast.ts`, `src/shared/types/session.ts`, `src/shared/types/section.ts`, `src/shared/types/api.ts`, `src/shared/types/pipeline.ts`
 Depends on: Stage 1a (Typia unplugin must be in the Vite pipeline)
@@ -276,5 +282,5 @@ Updated by engineers as work progresses.
 | 0d | blocked | package.json outside backend-engineer write scope; coordinator must apply the 2-line removal |
 | 1a | partial | Sub-step 1 complete (server refactor, 9205bf6). Sub-steps 2+3 need vite.config.ts + package.json changes — see stage-1a-config-changes.md |
 | 1b | complete | Production build fixed (index.js added); tsx retained for migrate:v2; 1172 tests pass |
-| 2a | pending | Typia validation tags on all types |
+| 2a | complete | Typia validation tags on all 5 shared types — intersection tag approach; 1172 tests pass |
 | 2b | pending | Validation middleware on all routes |

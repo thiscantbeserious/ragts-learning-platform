@@ -5,6 +5,8 @@
  * (SSE event parsing). Keep this type-only — no runtime logic here.
  */
 
+import type { tags } from 'typia';
+
 /**
  * All valid values for the detection_status column.
  * Includes terminal states (pending, processing, completed, failed) and
@@ -35,16 +37,20 @@ export enum PipelineStage {
 /**
  * Discriminated union of all pipeline events.
  * The `type` field is the discriminant — narrow with `switch (event.type)`.
+ *
+ * All `sessionId` fields are non-empty strings. Numeric payload fields
+ * carry Typia tags for minimum bounds — these activate when validation
+ * middleware (Stage 2b) calls typia.validate() on the event.
  */
 export type PipelineEvent =
-  | { type: 'session.uploaded';  sessionId: string; filename: string }
-  | { type: 'session.validated'; sessionId: string; eventCount: number }
-  | { type: 'session.detected';  sessionId: string; sectionCount: number }
-  | { type: 'session.replayed';  sessionId: string; lineCount: number }
-  | { type: 'session.deduped';   sessionId: string; rawLines: number; cleanLines: number }
-  | { type: 'session.ready';     sessionId: string }
-  | { type: 'session.failed';    sessionId: string; stage: PipelineStage; error: string }
-  | { type: 'session.retrying';  sessionId: string; stage: PipelineStage; attempt: number };
+  | { type: 'session.uploaded';  sessionId: string & tags.MinLength<1>; filename: string & tags.MinLength<1> }
+  | { type: 'session.validated'; sessionId: string & tags.MinLength<1>; eventCount: number & tags.Type<'uint32'> & tags.Minimum<0> }
+  | { type: 'session.detected';  sessionId: string & tags.MinLength<1>; sectionCount: number & tags.Type<'uint32'> & tags.Minimum<0> }
+  | { type: 'session.replayed';  sessionId: string & tags.MinLength<1>; lineCount: number & tags.Type<'uint32'> & tags.Minimum<0> }
+  | { type: 'session.deduped';   sessionId: string & tags.MinLength<1>; rawLines: number & tags.Type<'uint32'> & tags.Minimum<0>; cleanLines: number & tags.Type<'uint32'> & tags.Minimum<0> }
+  | { type: 'session.ready';     sessionId: string & tags.MinLength<1> }
+  | { type: 'session.failed';    sessionId: string & tags.MinLength<1>; stage: PipelineStage; error: string & tags.MinLength<1> }
+  | { type: 'session.retrying';  sessionId: string & tags.MinLength<1>; stage: PipelineStage; attempt: number & tags.Type<'uint32'> & tags.Minimum<1> };
 
 /** All possible `type` string values — useful for type-safe handler maps. */
 export type PipelineEventType = PipelineEvent['type'];
