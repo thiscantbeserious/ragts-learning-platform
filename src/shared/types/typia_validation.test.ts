@@ -61,9 +61,8 @@ describe('AsciicastHeader Typia validation', () => {
       const header = { version: 2, width: 80, height: 24 };
       const result = typia.validate<AsciicastHeader>(header);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors.some((e) => e.path.includes('version'))).toBe(true);
-      }
+      assert(!result.success);
+      expect(result.errors.some((e) => e.path.includes('version'))).toBe(true);
     });
 
     it('rejects version 1', () => {
@@ -78,9 +77,8 @@ describe('AsciicastHeader Typia validation', () => {
       const header = { version: 4, width: 80, height: 24 };
       const result = typia.validate<AsciicastHeader>(header);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors.some((e) => e.path.includes('version'))).toBe(true);
-      }
+      assert(!result.success);
+      expect(result.errors.some((e) => e.path.includes('version'))).toBe(true);
     });
 
     it('rejects width of 0', () => {
