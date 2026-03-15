@@ -16,10 +16,14 @@ fi
 REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || _resolve .)
 RESOLVED=$(_resolve "$FILE_PATH")
 
-# Must be inside the repo and under .state/
+# Must be inside the repo and under .state/ OR be VISIONBOOK.md in root
 if [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
   exit 0
 fi
 
-echo "Blocked: Write is restricted to .state/ directories within the repo." >&2
+if [[ "$RESOLVED" == "$REPO_ROOT/VISIONBOOK.md" ]]; then
+  exit 0
+fi
+
+echo "Blocked: Write is restricted to .state/ directories and VISIONBOOK.md within the repo." >&2
 exit 2

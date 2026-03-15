@@ -148,3 +148,39 @@ Phase 2 — **LanceDB + Transformers.js** for semantic similarity. Embed section
 - Generate from code (Mermaid → SVG) or hand-crafted?
 - Include query patterns (which layer answers which API endpoint)?
 - Version it — does the diagram evolve per branch or only on main?
+
+## Detection Confidence Scoring
+
+> [!info] Status: Backlog
+
+**Core idea:** Rather than binary "sections or no sections," the section detector could emit a confidence level per boundary. Sessions with low-confidence boundaries could show sections with a subtle "approximate boundaries" indicator, giving the user useful structure without false precision.
+
+**What it enables:**
+
+- Users see section boundaries but know they're approximate
+- Future ML-based detection can express uncertainty naturally
+- UI can offer "refine these boundaries" when confidence is low
+
+**Open questions:**
+
+- Confidence per-boundary or per-session?
+- UI treatment: subtle label? different fold styling? tooltip?
+- Threshold: below what confidence do we fall back to unsectioned view?
+
+## Manual Section Marking
+
+> [!info] Status: Backlog
+
+**Core idea:** When a user sees an unsectioned session (or one with bad boundaries), they are looking at the content and naturally forming opinions about where sections should be. A "mark section here" interaction would let users define their own boundaries.
+
+**What it enables:**
+
+- Users fix what the detector missed
+- Training signal for future detection improvements
+- Works naturally with the continuous document view (from the empty session fix)
+
+**Open questions:**
+
+- Persist where? Separate table? Inline in sections table with a `source: 'manual'` flag?
+- Can manual marks override detected ones?
+- Collaborative: if multiple users mark the same session, merge or per-user?
