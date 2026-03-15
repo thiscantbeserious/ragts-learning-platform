@@ -1,14 +1,16 @@
 import { serve } from '@hono/node-server';
-import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import app from './index.js';
 import { logger } from './logger.js';
 
-const require = createRequire(import.meta.url);
-const { name } = require('../../../package.json') as { name: string };
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(resolve(__dirname, '../../package.json'), 'utf-8')) as { name: string };
 
 const port = Number(process.env.PORT) || 3000;
 
-logger.info({ port, name }, `Starting ${name} server`);
+logger.info({ port, name: pkg.name }, `Starting ${pkg.name} server`);
 
 const server = serve(
   { fetch: app.fetch, port },
