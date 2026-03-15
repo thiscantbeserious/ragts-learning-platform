@@ -29,8 +29,16 @@ export async function handleUpload(
     const result = await service.upload(file);
 
     if (!result.ok) {
-      const { error, details, line } = result;
-      return c.json({ error, ...(details !== undefined && { details }), ...(line !== undefined && { line }) }, result.status);
+      const { error, details, line, fields } = result;
+      return c.json(
+        {
+          error,
+          ...(details !== undefined && { details }),
+          ...(line !== undefined && { line }),
+          ...(fields !== undefined && { fields }),
+        },
+        result.status,
+      );
     }
 
     return c.json(result.session, 201);

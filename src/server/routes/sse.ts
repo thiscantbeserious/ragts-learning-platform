@@ -24,6 +24,7 @@ import {
   getMissedEvents,
   type PendingEvent,
 } from '../services/index.js';
+import { validatePathId } from './route_validation.js';
 import { startKeepalive } from '../utils/sse_keepalive.js';
 import { acquireConnection, releaseConnection } from '../utils/sse_connections.js';
 
@@ -52,6 +53,8 @@ export async function handleSseEvents(
   eventLog: EventLogAdapter
 ): Promise<Response> {
   const id = c.req.param('id');
+  const invalidId = validatePathId(c, id);
+  if (invalidId) return invalidId;
 
   if (!acquireConnection(id)) {
     return c.json({ error: 'Too many SSE connections' }, 429);

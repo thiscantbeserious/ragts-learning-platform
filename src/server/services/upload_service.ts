@@ -8,8 +8,10 @@
  * JobQueueAdapter (jobs/), EventBusAdapter (events/).
  */
 
+import typia from 'typia';
 import { nanoid } from 'nanoid';
-import { validateAsciicast } from '../../shared/parsers/asciicast.js';
+import { validateAsciicast, normalizeHeader } from '../../shared/parsers/asciicast.js';
+import type { AsciicastHeader } from '../../shared/types/asciicast.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { StorageAdapter } from '../storage/storage_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
@@ -28,7 +30,14 @@ export interface UploadServiceDeps {
 
 export type UploadResult =
   | { ok: true; session: Record<string, unknown> }
-  | { ok: false; status: 400 | 413 | 500; error: string; details?: string; line?: number };
+  | { ok: false; status: 400 | 413 | 422 | 500; error: string; details?: string; line?: number; fields?: HeaderValidationError[] };
+
+/** Typia-level header field validation error, mapped from IValidation.IError. */
+export interface HeaderValidationError {
+  path: string;
+  expected: string;
+  value: unknown;
+}
 
 /**
  * UploadService handles file upload validation, session creation, and pipeline triggering.
@@ -69,6 +78,11 @@ export class UploadService {
         details: validation.error,
         line: validation.line,
       };
+    }
+
+    const headerResult = validateHeader(content);
+    if (!headerResult.ok) {
+      return headerResult.error;
     }
 
     const id = nanoid();
@@ -133,6 +147,34 @@ export class UploadService {
       log.warn({ err: cleanupErr }, 'Failed to clean up file after DB error');
     }
   }
+}
+
+/**
+ * Validate the asciicast header using Typia AOT tags.
+ * Returns ok:true on success, or ok:false with a ready UploadResult error on failure.
+ */
+function validateHeader(content: string): { ok: true } | { ok: false; error: Extract<UploadResult, { ok: false }> } {
+  const firstLine = content.split('\n').find((l) => l.trim().length > 0) ?? '';
+  let raw: unknown;
+  try {
+    raw = JSON.parse(firstLine);
+  } catch {
+    return { ok: false, error: { ok: false, status: 400, error: 'Invalid asciicast header JSON' } };
+  }
+  const header = normalizeHeader(raw as Record<string, unknown>);
+  const result = typia.validate<AsciicastHeader>(header);
+  if (!result.success) {
+    return {
+      ok: false,
+      error: {
+        ok: false,
+        status: 422,
+        error: 'Asciicast header failed validation',
+        fields: result.errors.slice(0, 10).map((e) => ({ path: e.path, expected: e.expected, value: e.value })),
+      },
+    };
+  }
+  return { ok: true };
 }
 
 /** Sanitize an uploaded filename: keep only safe characters, enforce max length. */

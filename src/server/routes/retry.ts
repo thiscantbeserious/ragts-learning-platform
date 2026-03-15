@@ -6,6 +6,7 @@
 
 import type { Context } from 'hono';
 import type { RetryService } from '../services/index.js';
+import { validatePathId } from './route_validation.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'routes/retry' });
@@ -20,6 +21,8 @@ export async function handleRetry(
 ): Promise<Response> {
   try {
     const id = c.req.param('id');
+    const invalid = validatePathId(c, id);
+    if (invalid) return invalid;
     const result = await service.retry(id);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);

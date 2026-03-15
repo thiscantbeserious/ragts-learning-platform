@@ -3,8 +3,11 @@
  * Thin route layer — delegates to SessionService.
  */
 
+import typia from 'typia';
 import type { Context } from 'hono';
 import type { SessionService } from '../services/index.js';
+import type { SessionDetailResponse } from '../../shared/types/api.js';
+import { validatePathId } from './route_validation.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'routes/sessions' });
@@ -36,9 +39,15 @@ export async function handleGetSession(
 ): Promise<Response> {
   try {
     const id = c.req.param('id');
+    const invalid = validatePathId(c, id);
+    if (invalid) return invalid;
     const result = await service.getSession(id);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);
+    }
+    const validation = typia.validate<SessionDetailResponse>(result.data);
+    if (!validation.success) {
+      log.warn({ errors: validation.errors }, 'Response validation warning: session detail shape mismatch');
     }
     return c.json(result.data);
   } catch (err) {
@@ -57,6 +66,8 @@ export async function handleDeleteSession(
 ): Promise<Response> {
   try {
     const id = c.req.param('id');
+    const invalid = validatePathId(c, id);
+    if (invalid) return invalid;
     const result = await service.deleteSession(id);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);
@@ -79,6 +90,8 @@ export async function handleRedetect(
 ): Promise<Response> {
   try {
     const id = c.req.param('id');
+    const invalid = validatePathId(c, id);
+    if (invalid) return invalid;
     const result = await service.redetectSession(id);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);

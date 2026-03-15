@@ -7,6 +7,7 @@
 
 import type { Context } from 'hono';
 import type { EventLogService } from '../services/index.js';
+import { validateQueryParam } from './route_validation.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'routes/events' });
@@ -22,6 +23,10 @@ export async function handleGetEventLog(
 ): Promise<Response> {
   try {
     const sessionId = c.req.query('sessionId');
+    if (sessionId !== undefined) {
+      const invalid = validateQueryParam(c, 'sessionId', sessionId);
+      if (invalid) return invalid;
+    }
     const result = await service.getEvents(sessionId);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);

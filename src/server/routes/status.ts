@@ -4,8 +4,11 @@
  * Connections: StatusService (services/).
  */
 
+import typia from 'typia';
 import type { Context } from 'hono';
 import type { StatusService } from '../services/index.js';
+import type { SessionStatusResponse } from '../../shared/types/api.js';
+import { validatePathId } from './route_validation.js';
 import { logger } from '../logger.js';
 
 const log = logger.child({ module: 'routes/status' });
@@ -20,9 +23,15 @@ export async function handleGetStatus(
 ): Promise<Response> {
   try {
     const id = c.req.param('id');
+    const invalid = validatePathId(c, id);
+    if (invalid) return invalid;
     const result = await service.getStatus(id);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);
+    }
+    const validation = typia.validate<SessionStatusResponse>(result.data);
+    if (!validation.success) {
+      log.warn({ errors: validation.errors }, 'Response validation warning: session status shape mismatch');
     }
     return c.json(result.data);
   } catch (err) {
