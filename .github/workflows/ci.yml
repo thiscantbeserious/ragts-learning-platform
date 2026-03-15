@@ -204,15 +204,20 @@ jobs:
         if: steps.visual.outputs.exit_code != '0'
         id: diffs
         run: |
-          # Extract mismatched file names and pixel diff ratios from Playwright output
-          DIFF_DETAILS=$(grep -E "Expected:|ratio [0-9]|toHaveScreenshot" /tmp/playwright-output.txt | head -30 || echo "")
-          FAILED_TESTS=$(grep -E "^\s+\[chromium\].*›.*failed" /tmp/playwright-output.txt || echo "")
-          FAILED_COUNT=$(echo "$FAILED_TESTS" | grep -c "›" || echo "0")
+          # Extract failed test lines from Playwright output
+          FAILED_TESTS=$(grep -E "\[chromium\].*›" /tmp/playwright-output.txt | grep -v "passed" | head -20 || true)
+          FAILED_COUNT=$(echo "$FAILED_TESTS" | grep -c "." || true)
+          if [ -z "$FAILED_TESTS" ]; then
+            FAILED_COUNT="0"
+            FAILED_TESTS="(no details captured)"
+          fi
 
-          echo "count=$FAILED_COUNT" >> "$GITHUB_OUTPUT"
-          echo "details<<EODIFF" >> "$GITHUB_OUTPUT"
-          echo "$FAILED_TESTS" >> "$GITHUB_OUTPUT"
-          echo "EODIFF" >> "$GITHUB_OUTPUT"
+          echo "count=${FAILED_COUNT}" >> "$GITHUB_OUTPUT"
+          {
+            echo "details<<EODIFF"
+            echo "$FAILED_TESTS"
+            echo "EODIFF"
+          } >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
