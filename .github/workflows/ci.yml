@@ -207,34 +207,43 @@ jobs:
           # Strip ANSI codes for reliable grep
           sed 's/\x1b\[[0-9;]*m//g' /tmp/playwright-output.txt > /tmp/pw-clean.txt
 
-          # Build a table: for each failed test, find its pixel diff on the next lines
+          # Build a table: for each failed test, extract file path, test name, screenshot, and pixel diff
           # Playwright output format:
-          #   [chromium] › file:line › Suite › test name
+          #   [chromium] › tests/visual/file.ts:65:3 › Suite › test name
+          #     Expected: tests/visual/__screenshots__/file.ts/screenshot.png
           #     Expected an image 93px by 28px, received 92px by 28px. 121 pixels (ratio 0.05 ...)
           TABLE=""
           FAILED_COUNT="0"
+          CURRENT_FILE=""
           CURRENT_TEST=""
+          CURRENT_SCREENSHOT=""
           while IFS= read -r line; do
             if echo "$line" | grep -qE "\[chromium\].*›" && ! echo "$line" | grep -q "passed"; then
-              # New test name — extract after last ›
+              # Extract file:line and test name
+              CURRENT_FILE=$(echo "$line" | sed 's/.*› \(tests\/[^[:space:]]*\).*/\1/')
               CURRENT_TEST=$(echo "$line" | sed 's/.*› //' | sed 's/^[[:space:]]*//')
+              CURRENT_SCREENSHOT=""
+            elif echo "$line" | grep -qE "Expected:.*\.png" && [ -n "$CURRENT_TEST" ]; then
+              CURRENT_SCREENSHOT=$(echo "$line" | sed 's/.*\///' | sed 's/^[[:space:]]*//')
             elif echo "$line" | grep -qE "pixels \(ratio" && [ -n "$CURRENT_TEST" ]; then
-              # Pixel diff line — extract the key info
               DIFF=$(echo "$line" | sed 's/^[[:space:]]*//' | sed 's/^- //')
-              TABLE="${TABLE}| ${CURRENT_TEST} | ${DIFF} |\n"
+              SCREENSHOT="${CURRENT_SCREENSHOT:-unknown}"
+              TABLE="${TABLE}| \`${CURRENT_FILE}\` | ${CURRENT_TEST} | \`${SCREENSHOT}\` | ${DIFF} |\n"
               FAILED_COUNT=$((FAILED_COUNT + 1))
               CURRENT_TEST=""
+              CURRENT_FILE=""
+              CURRENT_SCREENSHOT=""
             fi
           done < /tmp/pw-clean.txt
 
           if [ "$FAILED_COUNT" = "0" ]; then
-            # Fallback: tests failed but no pixel diffs (structural failure)
             FAILED_TESTS=$(grep -E "\[chromium\].*›" /tmp/pw-clean.txt | grep -v "passed" | sort -u | head -10 || true)
             FAILED_COUNT=$(echo "$FAILED_TESTS" | grep -c "." || true)
             TABLE=$(echo "$FAILED_TESTS" | while IFS= read -r t; do
               [ -z "$t" ] && continue
+              file=$(echo "$t" | sed 's/.*› \(tests\/[^[:space:]]*\).*/\1/')
               name=$(echo "$t" | sed 's/.*› //')
-              echo "| $name | structural failure |"
+              echo "| \`$file\` | $name | — | structural failure |"
             done)
           fi
 
@@ -259,8 +268,8 @@ jobs:
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body "**Visual snapshot mismatch** — ${{ steps.diffs.outputs.count }} test(s) differ from baselines.
 
-          | Test | Pixel diff |
-          |------|-----------|
+          | File | Test | Screenshot | Pixel diff |
+          |------|------|-----------|-----------|
           ${{ steps.diffs.outputs.table }}
 
           > Download the \`playwright-report\` artifact to review visually. To accept changes, comment \`/update-snapshots\`."
