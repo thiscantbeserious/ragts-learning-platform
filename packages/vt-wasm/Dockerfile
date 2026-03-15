@@ -3,4 +3,4 @@ RUN cargo install wasm-pack
 WORKDIR /build
 COPY Cargo.toml ./
 COPY src/ src/
-CMD ["wasm-pack", "build", "--target", "nodejs", "--release", "--out-dir", "/output/pkg"]
+CMD ["wasm-pack", "build", "--target", "bundler", "--release", "--out-dir", "/output/pkg"]
