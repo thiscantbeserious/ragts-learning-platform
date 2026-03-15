@@ -2,6 +2,7 @@
 name: architect
 description: Architect agent for solution design. Creates ADR and PLAN documents with options analysis and execution stages.
 model: opus
+memory: project
 tools:
   - Read
   - Grep

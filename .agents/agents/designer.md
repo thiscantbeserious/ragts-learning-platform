@@ -2,6 +2,7 @@
 name: designer
 description: Designer agent for visual design and mockups as HTML+CSS files. Uses Playwright MCP for headless screenshots and visual verification.
 model: opus
+memory: project
 tools:
   - Read
   - Write
