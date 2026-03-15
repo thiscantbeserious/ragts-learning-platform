@@ -101,6 +101,25 @@ Phase 2 — **LanceDB + Transformers.js** for semantic similarity. Embed section
 - Redis Stack vs plain Redis? Stack includes FalkorDB, RedisJSON, RediSearch out of the box.
 - Session storage: keep in SQLite or move hot data to Redis?
 
+## SSE Connection Priority Queue
+
+> [!info] Status: Backlog
+
+**Core idea:** When multiple sessions are processing simultaneously, the currently viewed session should always get a real-time SSE connection — even if all 3 budget slots are taken by background sessions.
+
+**Current behavior:** First-come-first-served. Whichever `SessionCard` components mount first grab the SSE slots. If 3 background sessions are processing and the user clicks a 4th, it falls back to 10s polling instead of real-time updates.
+
+**Proposed behavior:** Priority queue with eviction. When the user selects a session that's processing:
+1. If a slot is free, use it
+2. If all slots are taken, evict the least-important connection (oldest background session) and give the slot to the selected session
+3. The evicted session falls back to polling
+
+**Priority order:** Selected session > most recently uploaded > oldest upload
+
+**Why deferred:** Requires 4+ sessions processing simultaneously, which is rare in typical usage (1-2 uploads at a time). The 3-slot budget handles normal load without priority logic.
+
+**When to implement:** When Erika supports batch uploads, CI integration, or multi-user scenarios where many sessions process at once.
+
 ## Storage Layer Visualization
 
 > [!info] Status: Backlog
