@@ -67,14 +67,14 @@ Goal: Replace the better-sqlite3 import with the compat wrapper across the entir
 
 Owner: backend-engineer
 
-- [ ] Update `sqlite_database_impl.ts`: change import from `better-sqlite3` to `node_sqlite_compat`
-- [ ] Update `sqlite_session_impl.ts`: change type import
-- [ ] Update `sqlite_section_impl.ts`: change type import
-- [ ] Update `sqlite_job_queue_impl.ts`: change type import
-- [ ] Update `sqlite_event_log_impl.ts`: change type import
-- [ ] Update migration files (002, 003, 004): change type imports
-- [ ] Update test files: change value imports
-- [ ] Verify: `npx vitest run` -- all existing tests pass
+- [x] Update `sqlite_database_impl.ts`: change import from `better-sqlite3` to `node_sqlite_compat`
+- [x] Update `sqlite_session_impl.ts`: change type import
+- [x] Update `sqlite_section_impl.ts`: change type import
+- [x] Update `sqlite_job_queue_impl.ts`: change type import
+- [x] Update `sqlite_event_log_impl.ts`: change type import
+- [x] Update migration files (002, 003, 004): change type imports
+- [x] Update test files: change value imports (004_pipeline_jobs_events.test.ts, tests/integration/db/*.test.ts)
+- [x] Verify: `npx vitest run` -- all existing tests pass (1172 tests)
 - [ ] Verify: start dev server, upload a fixture, confirm full pipeline works
 
 Files: all files currently importing `better-sqlite3` (9 source + 2 test)
@@ -269,8 +269,8 @@ Updated by engineers as work progresses.
 |-------|--------|-------|
 | 0a | pending | vt-wasm build script ESM output |
 | 0b | complete | node:sqlite compatibility wrapper — 30 tests, all 1163 suite tests pass |
-| 0c | pending | Swap better-sqlite3 imports for wrapper |
-| 0d | pending | Remove better-sqlite3 from deps |
+| 0c | complete | Swap better-sqlite3 imports for wrapper — 1172 tests pass, 11 files updated |
+| 0d | blocked | package.json outside backend-engineer write scope; coordinator must apply the 2-line removal |
 | 1a | pending | Vite dev server setup |
 | 1b | pending | Dev server parity verification |
 | 2a | pending | Typia validation tags on all types |
