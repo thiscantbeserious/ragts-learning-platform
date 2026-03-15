@@ -5,7 +5,7 @@ Proposed
 
 ## Context
 
-Uploading terminal session recordings from tools other than Claude Code (e.g. Codex, Gemini CLI) produces zero detected section boundaries. The server marks the job `detection_status: 'completed'` with `detected_sections_count: 0`. The client has no rendering branch for this state and shows a blank page. This is a two-layer problem requiring architectural decisions on both the server (detection heuristics) and the client (rendering contract).
+Uploading terminal session recordings from tools other than Claude Code (e.g. Codex, Gemini CLI) produces zero detected section boundaries. The server marks the job `detection_status: 'completed'` with `sections: []` (zero sections). The client has no rendering branch for this state and shows a misleading UI. This is a two-layer problem requiring architectural decisions on both the server (detection heuristics) and the client (rendering contract).
 
 ### Server Investigation Findings
 
@@ -37,11 +37,19 @@ The rendering pipeline currently works like this:
 
 1. `useSession.ts` composable fetches session data, exposes `sections`, `snapshot`, `detectionStatus`, `error`, `loading`
 2. `SessionDetailView.vue` checks `loading` > `error` > `!hasContent` > renders `SessionContent`
-3. `SessionContent.vue` renders exclusively via `v-for` over sections -- zero sections = empty chrome
+3. `SessionContent.vue` checks `v-if="snapshot || sections.length > 0"` to decide between `OverlayScrollbar` and the `v-else` "No content available" block
+
+**Actual behavior with zero sections:**
+- When `snapshot` is non-null and `sections.length === 0`: `SessionContent.vue` line 51 (`v-if="snapshot || sections.length > 0"`) passes, the `OverlayScrollbar` renders, but the `v-for` over sections produces nothing. The preamble logic returns `[]` because `sections.length === 0`. Result: an empty scrollable container with no visible content -- the terminal chrome shell renders but nothing is inside it.
+- When `snapshot` is also null: the `v-else` block shows "No content available" -- a generic message with no context about what happened or why.
+
+Neither state communicates to the user that section detection completed but found no boundaries, or that the session content is still viewable as a raw snapshot.
 
 The composable already exposes `detectionStatus` but `SessionDetailView.vue` does not use it. The `snapshot` is parsed and available but has no rendering path when `sections.length === 0`.
 
-**Key architectural requirement:** The requirements mandate a **platform rendering contract** -- the rendering decision must be driven exclusively by `detection_status` + `detected_sections_count`, extensible to future status values without new per-case client code. This is not just "add an if-branch" -- it is a rendering state machine.
+**Note on snapshot wire format:** `SessionDetailResponse.snapshot` is typed as `string | TerminalSnapshot | null | undefined` on the wire. The `useSession` composable handles the string-to-object parsing (JSON.parse for string values, passthrough for already-parsed objects). All rendering branches downstream operate on the parsed `TerminalSnapshot | null`.
+
+**Key architectural requirement:** The requirements mandate a **platform rendering contract** -- the rendering decision must be driven by `detection_status` + `sections.length` + `snapshot`, with clear ownership split between components. Server-side Typia validation ensures the client can trust the response shape.
 
 ## Options Considered
 
@@ -79,17 +87,42 @@ Add `v-if`/`v-else-if` branches directly in `SessionContent.vue` and `SessionDet
 
 #### Client Option B: Use the Session Model Directly
 
-The `Session` type in `src/shared/types/session.ts` already carries `detection_status`, `detected_sections_count`, and `snapshot`. This IS the rendering model — the client just needs to handle all its states instead of only the "has sections" case. No new types, no new abstractions. The shared `Session` type is the contract between server and client.
+The `SessionDetailResponse` type in `src/shared/types/api.ts` already carries `detection_status`, `sections`, and `snapshot`. This IS the rendering model — the client just needs to handle all its states instead of only the "has sections" case. No new types, no new abstractions. Typia validates this shape server-side (in `sessions.ts` route handler via `typia.validate<SessionDetailResponse>`), so the client can trust the shape it receives.
 
-The client components check the Session fields directly:
-- `sections.length > 0` → render sections (existing behavior)
-- `detection_status === 'completed'` + `sections.length === 0` + `snapshot` exists → render full snapshot + info banner
-- `detection_status === 'failed'` + `snapshot` exists → render snapshot + error banner
-- `detection_status === 'failed'` + no `snapshot` → error state
-- Non-terminal status → loading state (existing behavior)
+Rendering responsibility is split between two components:
 
-- **Pros:** Zero new abstractions; the shared Session model IS the contract; no indirection between data and rendering; obvious to read; nothing to maintain beyond the existing type
-- **Cons:** Rendering logic is in the template rather than extracted — but for 4-5 branches this is simpler than a composable
+**`SessionDetailView.vue`** owns top-level routing (HTTP-level states):
+- `loading` → skeleton
+- `error` (fetch failure, 404) → error message
+- Otherwise → pass `detection_status`, `sections`, `snapshot` to `SessionContent`
+
+**`SessionContent.vue`** owns all terminal rendering states (receives `detection_status` as a new prop):
+- `sections.length > 0` → render sections with fold/unfold (existing behavior)
+- `detection_status === 'completed'` + `sections.length === 0` + `snapshot` exists → render full snapshot + info banner ("No section boundaries detected -- showing full session")
+- `detection_status === 'completed'` + `sections.length === 0` + `snapshot` is null → "No content" state
+- `detection_status === 'failed'` or `'interrupted'` + `snapshot` exists → render snapshot + error banner
+- `detection_status === 'failed'` or `'interrupted'` + no `snapshot` → error state
+- Non-terminal status → processing/loading indicator
+
+This split keeps all terminal rendering in `SessionContent.vue` (which already knows how to render snapshots and sections) while `SessionDetailView.vue` handles only HTTP-level concerns.
+
+- **Pros:** Zero new abstractions; the shared SessionDetailResponse model IS the contract; no indirection between data and rendering; obvious to read; nothing to maintain beyond the existing type; terminal rendering stays in the terminal rendering component
+- **Cons:** `SessionContent.vue` gains a `detection_status` prop dependency — but this is a natural extension of its existing role
+
+##### Rendering State Table
+
+The client renders based on the SessionDetailResponse fields directly — no intermediate mapping:
+
+| `detection_status` | `sections.length` | `snapshot` | Component | Renders |
+|---|---|---|---|---|
+| `completed` | > 0 | any | `SessionContent` | Sections with fold/unfold (existing) |
+| `completed` | 0 | exists | `SessionContent` | Full snapshot + info banner |
+| `completed` | 0 | null | `SessionContent` | "No content" state |
+| `failed` / `interrupted` | any | exists | `SessionContent` | Full snapshot + error banner |
+| `failed` / `interrupted` | any | null | `SessionContent` | Error state |
+| non-terminal | any | any | `SessionContent` | Processing indicator |
+| (fetch error / 404) | n/a | n/a | `SessionDetailView` | Error message |
+| (loading) | n/a | n/a | `SessionDetailView` | Skeleton |
 
 #### Client Option C: Strategy Pattern via Component Registry
 
@@ -105,42 +138,28 @@ Define a mapping from `(detectionStatus, hasSections, hasSnapshot)` to a Vue com
 1. **Simplest change that solves the problem.** The Codex fixture has ~32 `\x1b[J` events. After merge (50-event window) and minimum section size (100 events) filters, these collapse into a reasonable number of boundaries.
 2. **Option B does not solve this case.** The timing is genuinely uniform -- no meaningful pauses exist.
 3. **Option C adds complexity for marginal benefit.** The merge pipeline already handles corroboration naturally.
-4. **Low regression risk.** Claude Code uses `\x1b[2J` / `\x1b[3J`, not `\x1b[J`.
+4. **Low regression risk.** Claude Code uses `\x1b[2J` (which is detected) and `\x1b[3J` (which is not currently detected but is not a section boundary signal -- it clears the scrollback buffer, not the visible screen). Neither overlaps with `\x1b[J`.
 
 ### Client: Option B -- Use the Session Model Directly
 
-1. **The contract already exists.** The `Session` type in `src/shared/types/session.ts` is the shared model. Both server and client already use it. No new type needed.
-2. **Zero abstraction overhead.** The client checks `detection_status`, `sections.length`, and `snapshot` directly. 4-5 template branches are readable and obvious.
-3. **Extensible enough.** A new `detection_status` value means adding a branch — straightforward for this scale.
-4. **Option A (scattered conditionals across multiple components) is rejected** — the rendering decision should be in one component, not spread across templates.
-5. **Option C (component registry) is rejected** — overkill for 4-5 states.
-
-### Client: Rendering Based on Session Model
-
-The client renders based on the Session fields directly — no intermediate mapping:
-
-| `detection_status` | `sections.length` | `snapshot` | Renders |
-|---|---|---|---|
-| `completed` | > 0 | any | Sections with fold/unfold (existing) |
-| `completed` | 0 | exists | Full snapshot + info banner |
-| `completed` | 0 | null | "No content" state |
-| `failed` / `interrupted` | any | exists | Full snapshot + error banner |
-| `failed` / `interrupted` | any | null | Error state |
-| non-terminal | any | any | Loading (existing) |
-
-`SessionDetailView.vue` owns this decision tree. `SessionContent.vue` renders what it's given.
+1. **The contract already exists.** The `SessionDetailResponse` type in `src/shared/types/api.ts` is the shared model. The server validates it with `typia.validate<SessionDetailResponse>()` before sending (warn-only, non-blocking). Both server and client already use it. No new type needed.
+2. **Zero abstraction overhead.** The client checks `detection_status`, `sections.length`, and `snapshot` directly in the template. `v-if`/`v-else-if` branches are readable and obvious. `useSession` already exposes all three fields — no composable changes needed.
+3. **Natural component split.** `SessionDetailView.vue` handles HTTP-level states (loading, fetch errors). `SessionContent.vue` handles all terminal rendering states — it already knows how to render snapshots and sections, so the zero-section fallback belongs there.
+4. **Option A (scattered conditionals across multiple components with no clear ownership) is rejected** — each component should own a coherent set of states.
+5. **Option C (component registry) is rejected** — overkill for the number of states involved.
 
 ## Consequences
 
 ### What becomes easier
 - Sessions from TUI-based tools that use `\x1b[J` will get section boundaries
-- Zero-section and failed sessions never produce blank pages
-- Adding new detection statuses or rendering states: update one composable mapping
-- Testing rendering decisions: unit test the composable without mounting components
+- Zero-section and failed sessions never produce blank pages or empty scrollable containers
+- Adding new detection statuses or rendering states: add a template branch in `SessionContent.vue`
+- Testing rendering decisions: mount `SessionContent.vue` with props — the decision tree is in the template
 - Future detection signals (adaptive timing, scroll regions) can be added incrementally
 
 ### What becomes harder
-- Developers must understand the render mode abstraction (but it is a simple mapping table)
+- `SessionContent.vue` gains awareness of `detection_status` (previously it only cared about sections and snapshot)
+- Developers must understand the rendering split: HTTP states in `SessionDetailView`, terminal states in `SessionContent`
 
 ### Follow-ups to scope for later
 - Adaptive timing thresholds (Server Option B) for sessions with meaningful but small timing gaps
@@ -152,5 +171,5 @@ The client renders based on the Session fields directly — no intermediate mapp
 
 1. Investigation confirmed Codex uses `\x1b[J` (erase from cursor to end) instead of `\x1b[2J` (erase entire display), with no alt-screen transitions or meaningful timing gaps.
 2. Chose Server Option A (erase-to-end) over adaptive timing because the fixture has genuinely uniform timing -- the problem is escape sequence detection, not timing sensitivity.
-3. Chose Client Option B (state machine composable) over inline conditionals to satisfy the platform rendering contract requirement. The composable provides a single mapping from data model to render mode.
-4. Rejected Client Option C (component registry) as over-engineered for 4-5 rendering states.
+3. Chose Client Option B (direct SessionDetailResponse model usage) over inline conditionals scattered across multiple components. `SessionDetailView.vue` handles HTTP states; `SessionContent.vue` handles all terminal rendering states including zero-section fallback, checking `detection_status`, `sections.length`, and `snapshot`. Typia validates the response shape server-side.
+4. Rejected Client Option C (component registry) as over-engineered for the number of rendering states.
