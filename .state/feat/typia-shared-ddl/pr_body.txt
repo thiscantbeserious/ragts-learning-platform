@@ -1,0 +1,26 @@
+## Summary
+
+- Adds `packages/vt-wasm/index.js` and `packages/vt-wasm/types.js` as compiled JS outputs of their TypeScript counterparts
+- Fixes `ERR_MODULE_NOT_FOUND` when running `node dist/server/start.js` in production: the import map `#vt-wasm -> ./packages/vt-wasm/index.js` now resolves correctly
+- The vt-wasm pkg remains external in the Vite SSR build so `import.meta.dirname` inside `vt_wasm.js` correctly points to `packages/vt-wasm/pkg/` where the WASM binary lives
+- `tsx` is retained for `migrate:v2` — `node --experimental-strip-types` does not remap `.js` extensions to `.ts`, and `vite-node` is not installed as a dependency
+
+## Root cause
+
+Stage 1a switched the server build from `tsc` to `vite build --config vite.config.server.ts`. The resulting `dist/server/start.js` keeps `#vt-wasm` as an import map specifier (vt-wasm is externalized to preserve `import.meta.dirname` for the WASM binary path). At runtime Node resolves `#vt-wasm` via the `imports` field in `package.json` to `./packages/vt-wasm/index.js` — but only `index.ts` existed.
+
+## Verification
+
+- `npm run build && npm run start` — production server starts and `GET /api/sessions` returns `[]`
+- `npx vitest run` — 1172 tests, all pass
+
+## tsx decision
+
+Tasks 2 and 3 (update migrate:v2, remove tsx) cannot be completed without adding a new dependency or a separate build step:
+- `node --experimental-strip-types` fails: doesn't remap `.js` imports to `.ts`
+- `vite-node` is not installed (not bundled with the `vite` package alone)
+- PLAN.md explicitly allows: "keep tsx for this one script if the build approach is too awkward"
+
+tsx stays. If a future stage adds `vitest` to the runtime dependencies (which bundles vite-node), the switch can happen then.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

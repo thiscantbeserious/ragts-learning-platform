@@ -1,9 +1,6 @@
 FROM node:24-alpine AS build
 WORKDIR /app
 
-# Native deps for better-sqlite3
-RUN apk add --no-cache build-base python3
-
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -37,4 +34,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -q --spider http://localhost:3000/api/health || exit 1
 
-CMD ["node", "dist/server/src/server/start.js"]
+CMD ["node", "dist/server/start.js"]

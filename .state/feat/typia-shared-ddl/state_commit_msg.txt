@@ -1,0 +1,3 @@
+chore(agents): Stage 1b — mark complete in PLAN.md
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

@@ -1,0 +1,20 @@
+feat(server): Stage 1b — add vt-wasm compiled JS to fix production start
+
+The import map in package.json resolves #vt-wasm to
+packages/vt-wasm/index.js, which did not exist (only index.ts did).
+This caused ERR_MODULE_NOT_FOUND when running node dist/server/start.js.
+
+Add index.js as the compiled JS output of index.ts so the import map
+resolves correctly at runtime. The vt-wasm pkg stays external in the
+Vite SSR build so import.meta.dirname in vt_wasm.js keeps pointing to
+packages/vt-wasm/pkg/ where the WASM binary lives.
+
+Also add types.js to satisfy the #vt-wasm/types import map entry.
+
+tsx is retained for migrate:v2 — node --experimental-strip-types does
+not remap .js extensions to .ts, and vite-node is not installed.
+
+Verified: npm run build && npm run start responds to GET /api/sessions.
+All 1172 tests pass.
+
+Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>

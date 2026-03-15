@@ -5,6 +5,8 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import type { Plugin } from 'vite';
+import devServer from '@hono/vite-dev-server';
+import UnpluginTypia from '@typia/unplugin/vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,7 +37,19 @@ function cssCacheBust(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [vue(), cssCacheBust()],
+  plugins: [
+    UnpluginTypia({}),
+    vue(),
+    cssCacheBust(),
+    devServer({
+      entry: 'src/server/dev.ts',
+      exclude: [
+        // Exclude everything EXCEPT /api/* — Vite handles all non-API requests
+        // (client routes, static assets, HMR, etc.)
+        /^(?!\/api\/).*/,
+      ],
+    }),
+  ],
   resolve: {
     alias: {
       '@client': path.resolve(__dirname, './src/client'),
@@ -44,12 +58,6 @@ export default defineConfig({
   },
   server: {
     port: Number(process.env.DEV_SERVER_PORT || 5173),
-    proxy: {
-      '/api': {
-        target: `http://localhost:${process.env.PORT || 3000}`,
-        changeOrigin: true,
-      },
-    },
   },
   build: {
     outDir: 'dist/client',
@@ -81,6 +89,11 @@ export default defineConfig({
         'packages/vt-wasm/pkg/**',
         'tests/helpers/**',
         'src/server/routes/**',
+        'src/server/start.ts',
+        'src/server/index.ts',
+        'src/server/app.ts',
+        'src/server/bootstrap.ts',
+        'src/server/dev.ts',
       ],
       thresholds: {
         lines: 90,
