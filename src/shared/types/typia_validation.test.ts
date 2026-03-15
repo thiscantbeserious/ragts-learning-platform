@@ -12,6 +12,7 @@
  */
 
 // @vitest-environment node
+import assert from 'node:assert';
 import { describe, it, expect } from 'vitest';
 import typia from 'typia';
 import type { AsciicastHeader } from './asciicast.js';
@@ -58,27 +59,24 @@ describe('AsciicastHeader Typia validation', () => {
       const header = { version: 1, width: 80, height: 24 };
       const result = typia.validate<AsciicastHeader>(header);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors.some((e) => e.path.includes('version'))).toBe(true);
-      }
+      assert(!result.success);
+      expect(result.errors.some((e) => e.path.includes('version'))).toBe(true);
     });
 
     it('rejects width of 0', () => {
       const header = { version: 2, width: 0, height: 24 };
       const result = typia.validate<AsciicastHeader>(header);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors.some((e) => e.path.includes('width'))).toBe(true);
-      }
+      assert(!result.success);
+      expect(result.errors.some((e) => e.path.includes('width'))).toBe(true);
     });
 
     it('rejects height of 0', () => {
       const header = { version: 2, width: 80, height: 0 };
       const result = typia.validate<AsciicastHeader>(header);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.errors.some((e) => e.path.includes('height'))).toBe(true);
-      }
+      assert(!result.success);
+      expect(result.errors.some((e) => e.path.includes('height'))).toBe(true);
     });
   });
 });
