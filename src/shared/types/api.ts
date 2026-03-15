@@ -11,15 +11,24 @@ import type { DetectionStatus } from './pipeline.js';
 import type { Section } from './section.js';
 import type { TerminalSnapshot } from '#vt-wasm/types';
 
+/** Non-empty string. */
+type NonEmptyString = string & tags.MinLength<1>;
+
+/** Non-negative uint32. */
+type UInt32 = number & tags.Type<'uint32'> & tags.Minimum<0>;
+
+/** Positive uint32 (at least 1). */
+type PositiveUInt32 = number & tags.Type<'uint32'> & tags.Minimum<1>;
+
 /**
  * Response shape for GET /api/sessions/:id.
  * Content is stripped to header + markers only (raw events are not sent to the client).
  */
 export interface SessionDetailResponse {
   /** Non-empty session identifier. */
-  id: string & tags.MinLength<1>;
+  id: NonEmptyString;
   /** Non-empty original filename of the .cast file. */
-  filename: string & tags.MinLength<1>;
+  filename: NonEmptyString;
   content: { header: AsciicastHeader; markers: Marker[] };
   /** Session-level terminal snapshot. May arrive as a JSON string or already-parsed object. */
   snapshot?: string | TerminalSnapshot | null;
@@ -33,14 +42,14 @@ export interface SessionDetailResponse {
  */
 export interface SessionStatusResponse {
   /** Non-empty session identifier. */
-  sessionId: string & tags.MinLength<1>;
+  sessionId: NonEmptyString;
   /** Non-empty current status value. */
-  status: string & tags.MinLength<1>;
-  currentStage: (string & tags.MinLength<1>) | null;
+  status: NonEmptyString;
+  currentStage: NonEmptyString | null;
   /** Current attempt count — 0 or more. */
-  attempts: number & tags.Type<'uint32'> & tags.Minimum<0>;
+  attempts: UInt32;
   /** Maximum allowed attempts — at least 1. */
-  maxAttempts: number & tags.Type<'uint32'> & tags.Minimum<1>;
+  maxAttempts: PositiveUInt32;
   lastError: string | null;
   startedAt: string | null;
   completedAt: string | null;

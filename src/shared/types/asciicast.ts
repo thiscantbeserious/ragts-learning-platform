@@ -7,6 +7,18 @@
 
 import type { tags } from 'typia';
 
+/** Exact version 3 (only supported version). */
+type Version3 = number & tags.Type<'uint32'> & tags.Minimum<3> & tags.Maximum<3>;
+
+/** Positive uint32 (at least 1). */
+type PositiveUInt32 = number & tags.Type<'uint32'> & tags.Minimum<1>;
+
+/** Non-negative uint32 (0 or more). */
+type UInt32 = number & tags.Type<'uint32'> & tags.Minimum<0>;
+
+/** Non-empty string. */
+type NonEmptyString = string & tags.MinLength<1>;
+
 /**
  * asciicast v3 header. First line of .cast file.
  *
@@ -16,16 +28,16 @@ import type { tags } from 'typia';
  */
 export interface AsciicastHeader {
   /** asciicast format version — only version 3 is supported by the parser. */
-  version: number & tags.Type<'uint32'> & tags.Minimum<3> & tags.Maximum<3>;
+  version: Version3;
   /** Terminal width in columns — must be at least 1. Normalized from term.cols for v3. */
-  width: number & tags.Type<'uint32'> & tags.Minimum<1>;
+  width: PositiveUInt32;
   /** Terminal height in rows — must be at least 1. Normalized from term.rows for v3. */
-  height: number & tags.Type<'uint32'> & tags.Minimum<1>;
+  height: PositiveUInt32;
   term?: {
     /** Terminal width in columns — must be at least 1. */
-    cols: number & tags.Type<'uint32'> & tags.Minimum<1>;
+    cols: PositiveUInt32;
     /** Terminal height in rows — must be at least 1. */
-    rows: number & tags.Type<'uint32'> & tags.Minimum<1>;
+    rows: PositiveUInt32;
     type?: string;
     version?: string;
     theme?: { fg?: string; bg?: string; palette?: string };
@@ -70,9 +82,9 @@ export interface Marker {
   /** Cumulative timestamp in seconds from recording start — 0 or greater. */
   time: number & tags.Minimum<0>;
   /** Non-empty marker text label. */
-  label: string & tags.MinLength<1>;
+  label: NonEmptyString;
   /** Event index in the events array — 0 or greater. */
-  index: number & tags.Type<'uint32'> & tags.Minimum<0>;
+  index: UInt32;
 }
 
 /**
