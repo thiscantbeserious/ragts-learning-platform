@@ -9,11 +9,10 @@ The Software Development Life Cycle using orchestrated agents. Each cycle delive
 | Coordinator | Orchestration | Assesses tasks, spawns agents dynamically, gates transitions |
 | Product Owner | Requirements | Gathers requirements, validates final result |
 | Architect | Design | Creates ADR + PLAN, proposes options |
-| Frontend Designer | Visual Design | Creates HTML + CSS mockups, iterates with user |
-| Frontend Engineer | Frontend Code | Implements client-side code to match approved designs |
+| Designer | Visual Design | Creates HTML + CSS mockups (2-3 drafts), iterates with user |
+| Frontend Engineer | Frontend Code | Implements client-side code, extracts from approved mockups |
 | Backend Engineer | Backend Code | Implements server-side code, APIs, DB, WASM |
-| Implementer | General Code | Full-stack fallback when scope crosses boundaries |
-| Reviewer | Validation | Validates against plan (pair, internal, coderabbit phases) |
+| Reviewer | Validation | Per-stage adversarial review + final gate with external triage |
 | Maintainer | Deploy | Merges PR, handles releases |
 
 ## Dynamic Agent Selection
@@ -25,27 +24,30 @@ The Coordinator assesses each task and spawns only the agents needed. Not every 
 | UI feature | PO → Architect → Designer → Frontend Engineer → Reviewer → Maintainer |
 | API/backend feature | PO → Architect → Backend Engineer → Reviewer → Maintainer |
 | Full-stack feature | PO → Architect → (Designer if UI) → Frontend + Backend Engineers → Reviewer → Maintainer |
-| Config/docs/chore | PO → Architect → Implementer → Reviewer → Maintainer |
-| Bug fix | PO → Implementer or specialized engineer → Reviewer → Maintainer |
+| Config/docs/chore | PO → Architect → Engineer (coordinator picks) → Reviewer → Maintainer |
+| Bug fix | PO → Architect → specialized engineer → Reviewer → Maintainer |
 
 ## Flow
 
-```text
 1. Requirements → Product Owner gathers requirements
-2. Design       → Architect creates .state/<branch>/ADR.md + PLAN.md
-3. Visual Design→ [Optional] Frontend Designer creates mockups (when UI work present)
-4. Code         → Engineer(s) or Implementer follow plan
-5. Test         → Reviewer validates (pair → internal → coderabbit)
-6. Feedback     → Product Owner reviews spec compliance
-7. Deploy       → Maintainer merges after approvals
-```
+2. Design → Architect creates .state/<branch>/ADR.md + PLAN.md
+3. Visual Design → [Optional] Designer creates 2-3 drafts, user approves (when UI work present)
+4. Code → Engineer(s) implement per PLAN stages
+5. Review → Reviewer validates per stage (blocking → fix loop) + final review
+6. Feedback → Product Owner reviews spec compliance
+7. Deploy → Maintainer merges after approvals
 
 ## Iterative Cycle
 
-```text
-Requirements → Design → [Visual Design] → Code → Test → Feedback → Deploy
-     ^                                                                |
-     +----------------------------------------------------------------+
+```mermaid
+graph LR
+    R[Requirements] --> D[Design]
+    D --> V[Visual Design]
+    V --> C[Code]
+    C --> T[Review]
+    T --> F[Feedback]
+    F --> M[Deploy]
+    M -->|next cycle| R
 ```
 
 Product Owner decides when to ship vs iterate.

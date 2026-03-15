@@ -120,9 +120,9 @@ Limits: max 3 per phase, max 2 follow-ups per question, lead agent owns their ar
 | Requirements | Product Owner | Architect | Feasibility, scope |
 | Design | Architect | Product Owner | Intent, alignment |
 
-## 9. Reviewer Agents
+## 9. Review
 
-Two reviewer agents with distinct roles:
+One reviewer agent used at two points in the lifecycle:
 
-- **pair-reviewer:** Collaborative incremental review during implementation (per stage). Questions and flags, no severity classification.
-- **reviewer:** Adversarial post-implementation review. Severity-classified findings, optional triage of external inputs (pair review observations, CodeRabbit, SonarCloud).
+- **Per-stage review:** After each PLAN stage, the `reviewer` runs adversarial analysis on the stage diff. BLOCKING findings must be fixed before the next stage.
+- **Final review:** After all stages complete, the `reviewer` runs a full review including triage of external findings (CodeRabbit, SonarCloud) when available.

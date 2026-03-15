@@ -7,10 +7,10 @@ graph TD
     VD[vision-drafter] --> SW[story-writer]
     SW --> PO1[product-owner]
     PO1 --> Arch[architect]
-    Arch --> Impl[implementer]
-    Impl --> Rev[reviewer]
+    Arch --> Eng[engineer - coordinator picks]
+    Eng --> Rev[reviewer]
     Rev -->|pass| M[maintainer]
-    Rev -->|blocking| Impl
+    Rev -->|blocking| Eng
 ```
 
 ## Phases
@@ -21,11 +21,11 @@ graph TD
 | 1 | `story-writer` | User approves or modifies stories |
 | 2 | `product-owner` | REQUIREMENTS.md signed off (can be lightweight) |
 | 3 | `architect` | ADR.md + PLAN.md approved (can be minimal) |
-| 4 | `implementer` | All PLAN stages complete |
+| 4 | Engineer (coordinator picks based on files) | All PLAN stages complete |
 | 5 | `reviewer` | No blocking findings (includes triage of CodeRabbit/external findings when available) |
 | 6 | `maintainer` | CI green, all approvals |
 
-No pair review — chore tasks are typically small and don't benefit from incremental stage review.
+Phase 4 engineer selection: `backend-engineer` for server/package changes, `frontend-engineer` for client/design changes, coordinator handles config/docs/CI directly.
 
 ## Git Contract
 

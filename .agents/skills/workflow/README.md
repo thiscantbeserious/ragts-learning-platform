@@ -22,83 +22,32 @@ Shared protocols (blocked request protocol, cross-consultation, verification, ph
 
 ## Flow
 
+SDLC phases (top-down):
+
+```mermaid
+graph TD
+    U[User Request] --> C[Coordinator]
+    C --> SW[Story Writer]
+    SW --> PO1[Product Owner]
+    PO1 --> Arch[Architect]
+    Arch --> Des{Visual work?}
+    Des -->|yes| D[Designer: 2-3 drafts]
+    Des -->|no| Impl
+    D -->|user approves| Impl[Implementation]
+    Impl --> Val[Product Owner validates]
+    Val --> M[Maintainer merges]
 ```
-User Request
-     │
-     ▼
-┌─────────────┐
-│ Coordinator │  Assesses task, spawns agents dynamically
-└──────┬──────┘
-       │
-       ▼
-┌─────────────────┐
-│  Story Writer   │  Translates technical request into
-│                 │  user stories (multiple perspectives)
-└────────┬────────┘
-         │  User approves/modifies
-         ▼
-┌─────────────────┐
-│  Product Owner  │  Requirements interview
-│                 │  ◄── cross-consult: Architect (feasibility)
-└────────┬────────┘
-         │
-         ▼
-   ┌──────────────┐
-   │REQUIREMENTS.md│  What needs to be built
-   └───────┬──────┘
-           │
-           ▼
-   ┌─────────────┐     ┌─────────┐
-   │  Architect  │────▶│ ADR.md  │◀──────────────────────┐
-   │             │     └─────────┘                       │
-   │ ◄── cross-  │    Decision record (immutable)       │
-   │  consult:PO │                                      │
-   └──────┬──────┘                                      │
-          │            ┌──────────┐                     │
-          └───────────▶│ PLAN.md  │◀────────────┐       │
-                       └────┬─────┘             │       │
-                       Execution (mutable)      │       │
-                            │                   │       │
-                            ▼                   │       │
-               ┌────────────────────────┐       │       │
-               │ [Frontend Designer]    │       │       │
-               │ (optional, if UI work) │       │       │
-               └───────────┬────────────┘       │       │
-                           │                    │       │
-                           ▼                    │       │
-              ┌──────────────────────┐          │       │
-              │ Frontend Engineer /  │  Works ──┘       │
-              │ Backend Engineer /   │  from PLAN       │
-              │ Implementer          │                  │
-              └──────────┬───────────┘                  │
-                         │                              │
-                   ┌─────┴──────┐                       │
-                   │ Per-stage: │                       │
-                   │ Pair Review│ questions/flags       │
-                   └─────┬──────┘                       │
-                         │                              │
-                         ▼                              │
-                   [Draft PR]                           │
-                         │                              │
-                         ▼                              │
-                ┌─────────────────┐                     │
-                │ Reviewer        │ Adversarial review  │
-                │                 │ + triage external   │
-                └────────┬────────┘ findings if any     │
-                         │                              │
-                    ┌────┴────┐                         │
-                    │  Gate   │ Mark PR ready only      │
-                    └────┬────┘ after review pass       │
-                         │                              │
-                         ▼                              │
-                ┌─────────────────┐  Validates ─────────┘
-                │  Product Owner  │  against REQUIREMENTS
-                └────────┬────────┘
-                         │
-                         ▼
-                ┌─────────────────┐
-                │   Maintainer    │  Merges, updates ADR Status
-                └─────────────────┘
+
+Implementation loop (left-right):
+
+```mermaid
+graph LR
+    Eng[Frontend / Backend Engineer] --> Rev[Reviewer]
+    Rev -->|blocking| Eng
+    Rev -->|pass, more stages| Eng
+    Rev -->|all stages done| Final[Final Review + external triage]
+    Final -->|blocking| Eng
+    Final -->|pass| Done[Ready for validation]
 ```
 
 ## Design Documents
@@ -124,12 +73,12 @@ Mutable during implementation. Detailed work tracking.
 
 | Section | Purpose |
 |---------|---------|
-| Open Questions | Implementation challenges for implementer to solve |
+| Open Questions | Implementation challenges for engineers to solve |
 | Stages | Tasks with goals, files, considerations |
 | Dependencies | What must complete before what |
-| Progress | Status tracking updated by implementer |
+| Progress | Status tracking updated by engineers |
 
-Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR loop)
+Modified by: Engineers (progress), Architect (scope changes via ADR loop)
 
 ## Agents
 
@@ -140,7 +89,7 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Spawns other agents with fresh context
 - Gates transitions between phases
 - Orchestrates cross-consultation between PO and Architect
-- Manages pair review lifecycle during implementation
+- Spawns reviewer after each PLAN stage during implementation
 
 ### Story Writer
 - Translates requests into user stories from multiple stakeholder perspectives
@@ -174,35 +123,29 @@ Modified by: Implementer/Engineer (progress), Architect (scope changes via ADR l
 - Hands off only after explicit approval
 - Can be consulted during PO phase for feasibility checks
 
-### Frontend Designer
+### Designer
 - Creates visual mockups and designs as HTML + CSS files, verified via browser MCP
 - Iterates with user (max 5 iterations per design element)
 - Hands off approved designs with screenshots and notes (via Coordinator)
 - Does NOT write application code
 
 ### Frontend Engineer
-- Specialized implementer scoped to client-side code (`src/client/`, `src/shared/`)
+- Scoped to client-side code (`src/client/`, `src/shared/`, `design/`)
 - Implements UI to match approved designer mockups
 - Works from PLAN.md stages
-- Creates PR when done
+- Can run in parallel with Backend Engineer when stages don't overlap
 
 ### Backend Engineer
-- Specialized implementer scoped to server-side code (`src/server/`, `packages/`)
+- Scoped to server-side code (`src/server/`, `packages/`)
 - Handles Hono routes, DB layer, WASM packages
 - Works from PLAN.md stages
-- Creates PR when done
-
-### Implementer
-- General-purpose implementation agent (full-stack fallback)
-- Used when scope crosses both frontend and backend, or when the specialized split is unnecessary
-- Works from PLAN.md stages
-- Creates PR when done
-
-### Pair Reviewer
-- Collaborative incremental review during implementation (per PLAN stage). Asks questions, makes observations, flags potential issues. Not adversarial.
+- Can run in parallel with Frontend Engineer when stages don't overlap
 
 ### Reviewer
-- Adversarial post-implementation review. Performs thorough code analysis, security review, and ADR compliance check. Optionally triages external findings (CodeRabbit, SonarCloud, pair review observations) when provided by the coordinator.
+- Adversarial review used at two points: per-stage (after each PLAN stage) and post-implementation (final gate)
+- Severity-classified findings: BLOCKING / WARNING / NIT
+- BLOCKING findings trigger a fix loop — engineer must address before next stage
+- Optionally triages external findings (CodeRabbit, SonarCloud) when provided by the coordinator
 
 ### Maintainer
 - Merges PR after approvals
@@ -236,9 +179,9 @@ echo 'feat(invalid): test' | bash .husky/commit-msg /dev/stdin
 8. Dynamic agent selection - Coordinator picks only the agents needed per task
 9. Agent isolation - each agent is a standalone black box with defined inputs and outputs; agents never address other agents directly; the Coordinator is the only component aware of the full topology and acts as a transparent routing layer
 
-## Reviewer Agents
+## Review Strategy
 
-Two reviewer agents with distinct roles, each a standalone agent file in `.agents/agents/`.
+One `reviewer` agent, used twice per cycle:
 
-- **pair-reviewer:** Collaborative review during implementation (per stage). Uses questions/observations/flags format. Spawned by Coordinator after each PLAN stage completion.
-- **reviewer:** Adversarial review after full implementation. Uses severity-classified findings. Optionally triages external inputs (pair review observations, CodeRabbit, SonarCloud) when coordinator provides them. Spawned before PR is marked ready.
+1. **Per-stage:** After each PLAN stage completes, the coordinator spawns `reviewer` on the stage diff. BLOCKING findings must be fixed before the next stage proceeds. This catches issues early instead of accumulating them.
+2. **Final gate:** After all stages complete, the coordinator spawns `reviewer` for a full review including external findings (CodeRabbit, SonarCloud). No blocking findings → PR is ready for merge.

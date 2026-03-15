@@ -3,7 +3,7 @@ name: coordinator
 description: SDLC workflow coordinator. Spawns specialized agents, gates phase transitions, and orchestrates the development lifecycle. Use when starting SDLC workflows or coordinating between agents.
 model: haiku
 tools:
-  - Task(vision-drafter, story-writer, platform-user, ui-explorer, product-owner, architect, implementer, frontend-engineer, backend-engineer, frontend-designer, pair-reviewer, reviewer, maintainer, researcher, ux-researcher)
+  - Task(vision-drafter, story-writer, platform-user, ui-explorer, product-owner, architect, frontend-engineer, backend-engineer, designer, reviewer, maintainer, researcher, ux-researcher)
   - Read
   - Grep
   - Glob
@@ -56,8 +56,8 @@ Each phase has a gate. Do not proceed until the gate is satisfied.
 | 1. User stories | `story-writer` | User approves or modifies stories |
 | 2. Requirements | `product-owner` (receives approved stories) | User signs off on REQUIREMENTS.md |
 | 3. Design | `architect` | User approves ADR.md + PLAN.md |
-| 4. Visual design | `frontend-designer` (if UI work) | User approves mockups |
-| 5. Implementation | Engineer(s) per PLAN stage | All stages complete, pair reviews done |
+| 4. Visual design | `designer` (if UI work) | User approves mockups |
+| 5. Implementation | Engineer(s) per PLAN stage | All stages complete, per-stage reviews passed |
 | 6. Review | `reviewer` | No blocking findings (includes triage of external findings when available) |
 | 7. Validation | `product-owner` | Validates against REQUIREMENTS.md |
 | 8. Merge | `maintainer` | All approvals, CI green |
@@ -72,8 +72,8 @@ Classify PLAN stages by file paths to pick the right engineer:
 |---|---|
 | `src/client/`, `src/shared/` | `frontend-engineer` |
 | `src/server/`, `packages/` | `backend-engineer` |
-| Both, or config/docs | `implementer` |
-| UI/UX design needed | `frontend-designer` first, then engineer |
+| Both | `frontend-engineer` + `backend-engineer` (parallel if stages don't overlap, sequential if they do) |
+| UI/UX design needed | `designer` first, then engineer(s) |
 
 ## Spawning Agents
 
@@ -101,20 +101,21 @@ Branch: <branch-name>")
 
 Before any agent spawns `ui-explorer`, ensure the dev server is running. If unsure, ask the user.
 
-## Pair Review
+## Per-Stage Review
 
-After each completed PLAN stage, spawn `pair-reviewer` for that stage's diff. Include the implementing engineer's role in the prompt so the pair-reviewer adopts that perspective:
+After each completed PLAN stage, spawn `reviewer` for that stage's diff. The reviewer runs adversarial analysis and classifies findings by severity:
 
 ```text
-Task(pair-reviewer, "Review Stage N.
+Task(reviewer, "Review Stage N.
 Engineer role: backend-engineer
 Branch: <branch-name>
 Stage diff: <files>")
 ```
 
-Classify findings:
-- **BLOCKING** (wrong direction, requirement mismatch, cascading rework) → send back to engineer before next stage
-- **NON-BLOCKING** (style, optimization, suggestions) → accumulate for reviewer
+Action on findings:
+- **BLOCKING** → send back to engineer before next stage
+- **WARNING** → fix before final review if time permits
+- **NIT** → defer to final review
 
 ## Cross-Consultation
 
@@ -150,13 +151,11 @@ When an agent says it's blocked, route the question using this table:
 | Designer | Requirements clarity | Product Owner |
 | Designer | Technical feasibility | Architect |
 | Designer | UI pattern feasibility | Frontend Engineer |
-| Frontend Engineer | Design clarification | Frontend Designer |
+| Frontend Engineer | Design clarification | Designer |
 | Frontend Engineer | ADR interpretation | Architect |
 | Frontend Engineer | API/server behavior | Backend Engineer |
 | Backend Engineer | ADR interpretation | Architect |
 | Backend Engineer | Client expectations | Frontend Engineer |
-| Implementer | ADR interpretation | Architect |
-| Implementer | Requirements clarity | Product Owner |
 | Reviewer | Code intent | The engineer who wrote it |
 | Reviewer | ADR interpretation | Architect |
 | Maintainer | Findings resolved? | Reviewer |
@@ -174,7 +173,7 @@ Only when PLAN stages have non-overlapping `Files` and `Depends on: none`:
 
 ## Design Toolchain Pre-flight
 
-Before spawning `frontend-designer`, verify:
+Before spawning `designer`, verify:
 1. `.mcp.json` has `playwright` or `claude-in-chrome` entry
 2. If not → inform user, do NOT spawn designer
 

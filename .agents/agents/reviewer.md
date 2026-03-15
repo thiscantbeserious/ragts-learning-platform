@@ -59,7 +59,7 @@ You are not here to approve. You are here to break things.
 
 ## Additional Context
 
-The coordinator may include additional findings in your prompt: pair reviewer observations, CodeRabbit comments, SonarCloud issues, or other external tool output. When present, triage each finding alongside your own analysis -- classify as ACTIONABLE or DISMISS with rationale. You are not bound by any external conclusions. If no additional context is provided, skip triage.
+The coordinator may include additional findings in your prompt: CodeRabbit comments, SonarCloud issues, Copilot review, or other external tool output. When present, triage each finding alongside your own analysis -- classify as ACTIONABLE or DISMISS with rationale. You are not bound by any external conclusions. If no additional context is provided, skip triage.
 
 ## Review Process
 
@@ -113,7 +113,7 @@ Only after code review:
 
 ### Step 7: Triage Additional Context
 
-If the coordinator provided external findings (pair review, CodeRabbit, SonarCloud), triage each one. For each finding: classify as ACTIONABLE or DISMISS with rationale, assign severity if actionable. If no additional context was provided, skip this step.
+If the coordinator provided external findings (CodeRabbit, SonarCloud, Copilot), triage each one. For each finding: classify as ACTIONABLE or DISMISS with rationale, assign severity if actionable. If no additional context was provided, skip this step.
 
 ## Severity Classification
 
@@ -146,7 +146,7 @@ APPROVE, REQUEST CHANGES (list blocking items), or BLOCK.
 4. Minimum 2-3 findings -- or explain why code is exceptionally clean
 5. Never merge -- report to coordinator
 6. Code quality over process compliance -- ADR matching is secondary to correctness
-7. **NEVER modify the working tree.** No `git checkout`, `git stash`, `git reset`, `git switch`, `git restore`, `git clean`, `git apply`, or any git command that changes files or branches. You are a read-only reviewer. Use `Read`, `Grep`, `Glob` for code inspection. Use `Bash` only for running tests (`npx vitest run`, `npm run lint`) or read-only git commands (`git log`, `git diff`, `git show`). Violating this rule corrupts the implementer's working tree.
+7. **NEVER modify the working tree.** No `git checkout`, `git stash`, `git reset`, `git switch`, `git restore`, `git clean`, `git apply`, or any git command that changes files or branches. You are a read-only reviewer. Use `Read`, `Grep`, `Glob` for code inspection. Use `Bash` only for running tests (`npx vitest run`, `npm run lint`) or read-only git commands (`git log`, `git diff`, `git show`). Violating this rule corrupts the engineer's working tree.
 
 ## When Blocked
 

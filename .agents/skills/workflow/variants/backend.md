@@ -7,10 +7,10 @@ graph TD
     VD[vision-drafter] --> SW[story-writer]
     SW --> PO1[product-owner]
     PO1 --> Arch[architect]
-    Arch --> BE[backend-engineer + pair-reviewer]
-    BE -->|all stages done| Rev[reviewer]
-    Rev -->|pass| PO2[product-owner]
+    Arch --> BE[backend-engineer]
+    BE -->|per stage| Rev[reviewer]
     Rev -->|blocking| BE
+    Rev -->|all stages done| PO2[product-owner]
     PO2 --> M[maintainer]
 ```
 
@@ -22,8 +22,8 @@ graph TD
 | 1 | `story-writer` | User approves or modifies stories |
 | 2 | `product-owner` | REQUIREMENTS.md signed off |
 | 3 | `architect` | ADR.md + PLAN.md approved |
-| 4 | `backend-engineer` + `pair-reviewer` | Per stage: implement → pair review → fix blocking → next stage. All stages complete. |
-| 5 | `reviewer` | No blocking findings (includes triage of CodeRabbit/external findings when available) |
+| 4 | `backend-engineer` + `reviewer` | Per stage: implement → review → fix blocking → next stage. All stages complete. |
+| 5 | `reviewer` | Final review — no blocking findings (includes triage of CodeRabbit/external findings when available) |
 | 6 | `product-owner` | Validates against REQUIREMENTS.md |
 | 7 | `maintainer` | CI green, all approvals |
 

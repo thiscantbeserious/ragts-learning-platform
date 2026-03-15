@@ -4,7 +4,7 @@ References: ADR.md
 
 ## Open Questions
 
-Implementation challenges to solve (architect identifies, implementer resolves):
+Implementation challenges to solve (architect identifies, engineers resolve):
 
 1. ?
 2. ?
@@ -14,7 +14,7 @@ Implementation challenges to solve (architect identifies, implementer resolves):
 ### Stage 1: <name>
 
 Goal: <what this stage achieves>
-Owner: <implementer-id or agent name>
+Owner: <agent name — frontend-engineer, backend-engineer, or both>
 
 - [ ] Task
 - [ ] Task
@@ -29,7 +29,7 @@ Considerations:
 ### Stage 2: <name>
 
 Goal: <what this stage achieves>
-Owner: <implementer-id or agent name>
+Owner: <agent name>
 
 - [ ] Task
 
@@ -48,7 +48,7 @@ What must be done before what:
 
 ## Progress
 
-Updated by implementer as work progresses.
+Updated by engineers as work progresses.
 
 | Stage | Status | Notes |
 |-------|--------|-------|

@@ -42,10 +42,10 @@ Before starting any task, read these files in order:
 
 Frontend work is split across two specialized roles. **Do not attempt to handle both yourself** — delegate to the correct role:
 
-- **Frontend Designer** (`.agents/agents/frontend-designer.md`) — Design system, CSS, HTML mockups, visual design, responsive fixes, anything under `design/`. Uses Playwright MCP for visual verification.
+- **Designer** (`.agents/agents/designer.md`) — Design system, CSS, HTML mockups, visual design, responsive fixes, anything under `design/`. Uses Playwright MCP for visual verification.
 - **Frontend Engineer** (`.agents/agents/frontend-engineer.md`) — Vue 3 application code, components under `src/client/`, shared types, Vite config. Implements designs produced by the designer.
 
-When a task involves visual/CSS/design work, spawn or defer to the **Frontend Designer**. When it involves application logic/Vue components, spawn or defer to the **Frontend Engineer**.
+When a task involves visual/CSS/design work, spawn or defer to the **Designer**. When it involves application logic/Vue components, spawn or defer to the **Frontend Engineer**.
 
 ## Snapshot Tests
 

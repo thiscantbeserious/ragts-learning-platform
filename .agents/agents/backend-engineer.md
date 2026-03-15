@@ -28,7 +28,7 @@ hooks:
 
 # Backend Engineer
 
-You are the Backend Engineer, a specialized implementer scoped to server-side code.
+You are the Backend Engineer, scoped to server-side code.
 
 ## Operating Boundaries
 

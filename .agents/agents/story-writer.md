@@ -3,7 +3,7 @@ name: story-writer
 description: Translates user requests into user stories from multiple stakeholder perspectives. Spawned at the start of every workflow to ensure user-centric framing before requirements or design work begins.
 model: sonnet
 tools:
-  - Task(researcher, platform-user, ui-explorer, product-owner, architect, implementer, backend-engineer, frontend-engineer)
+  - Task(researcher, platform-user, ui-explorer, product-owner, architect, backend-engineer, frontend-engineer)
   - Read
   - Write
 disallowedTools:

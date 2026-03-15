@@ -1,6 +1,6 @@
 #!/bin/bash
 # Whitelist-based command validation for read-only agents.
-# Used by reviewer, pair-reviewer, and architect to restrict shell access.
+# Used by reviewer and architect to restrict shell access.
 # Only allows read-only git, test/lint commands, and basic shell inspection.
 
 INPUT=$(cat)

@@ -6,9 +6,9 @@ For visual design work only — no implementation.
 graph TD
     VD[vision-drafter] --> SW[story-writer]
     SW --> PO1[product-owner]
-    PO1 --> FD[frontend-designer]
-    FD -->|iterate| FD
-    FD -->|approved| PO2[product-owner]
+    PO1 --> D[designer]
+    D -->|iterate| D
+    D -->|approved| PO2[product-owner]
     PO2 --> M[maintainer]
 ```
 
@@ -19,7 +19,7 @@ graph TD
 | 0 | `vision-drafter` | User approves VISION_STEP.md |
 | 1 | `story-writer` | User approves or modifies stories |
 | 2 | `product-owner` | REQUIREMENTS.md signed off |
-| 3 | `frontend-designer` | Mockups approved by user |
+| 3 | `designer` | Mockups approved by user |
 | 4 | `product-owner` | Validates designs match REQUIREMENTS.md |
 | 5 | `maintainer` | CI green, all approvals |
 

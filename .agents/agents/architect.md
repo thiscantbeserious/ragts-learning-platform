@@ -120,7 +120,7 @@ The Coordinator will decide whether to spawn a consultation.
 **Output:**
 ```
 .state/<branch-name>/ADR.md   # Decision record (immutable after approval)
-.state/<branch-name>/PLAN.md  # Execution tasks (mutable by implementer)
+.state/<branch-name>/PLAN.md  # Execution tasks (mutable by engineers)
 ```
 
 Copy templates to `.state/<branch-name>/` and fill in. Structure adapts to task size. A bug fix might have minimal ADR. A feature needs full ADR + detailed PLAN.
