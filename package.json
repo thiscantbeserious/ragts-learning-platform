@@ -29,7 +29,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "dev:design": "serve design -l 3333 --no-clipboard",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:server": "tsx watch src/server/start.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
