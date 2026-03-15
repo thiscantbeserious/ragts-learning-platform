@@ -36,11 +36,15 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
+    "@hono/typia-validator": "^0.1.2",
+    "@hono/vite-dev-server": "^0.25.1",
+    "@typia/unplugin": "^12.0.1",
     "better-sqlite3": "^12.6.2",
     "hono": "^4.11.9",
     "hono-pino": "^0.10.3",
     "nanoid": "^5.1.6",
     "pino": "^10.3.1",
+    "typia": "^12.0.1",
     "vue": "^3.5.28",
     "vue-router": "^4.5.0"
   },
