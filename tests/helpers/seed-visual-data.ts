@@ -10,7 +10,7 @@ import type { Page } from '@playwright/test';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const API_BASE = 'http://localhost:3000';
+const API_BASE = `http://localhost:${process.env.PORT || '3001'}`;
 const FIXTURES_DIR = join(__dirname, '..', 'fixtures');
 
 /**
