@@ -207,27 +207,42 @@ jobs:
           # Strip ANSI codes for reliable grep
           sed 's/\x1b\[[0-9;]*m//g' /tmp/playwright-output.txt > /tmp/pw-clean.txt
 
-          # Extract failed test names
-          FAILED_TESTS=$(grep -E "\[chromium\].*›" /tmp/pw-clean.txt | grep -v "passed" | head -20 || true)
-
-          # Extract pixel diff details (e.g. "Expected an image 93px by 28px, received 92px by 28px. 121 pixels (ratio 0.05)")
-          PIXEL_DIFFS=$(grep -E "pixels \(ratio" /tmp/pw-clean.txt | sort -u | head -20 || true)
-
+          # Build a table: for each failed test, find its pixel diff on the next lines
+          # Playwright output format:
+          #   [chromium] › file:line › Suite › test name
+          #     Expected an image 93px by 28px, received 92px by 28px. 121 pixels (ratio 0.05 ...)
+          TABLE=""
           FAILED_COUNT="0"
-          if [ -n "$FAILED_TESTS" ]; then
-            FAILED_COUNT=$(echo "$FAILED_TESTS" | wc -l | tr -d ' ')
+          CURRENT_TEST=""
+          while IFS= read -r line; do
+            if echo "$line" | grep -qE "\[chromium\].*›" && ! echo "$line" | grep -q "passed"; then
+              # New test name — extract after last ›
+              CURRENT_TEST=$(echo "$line" | sed 's/.*› //' | sed 's/^[[:space:]]*//')
+            elif echo "$line" | grep -qE "pixels \(ratio" && [ -n "$CURRENT_TEST" ]; then
+              # Pixel diff line — extract the key info
+              DIFF=$(echo "$line" | sed 's/^[[:space:]]*//' | sed 's/^- //')
+              TABLE="${TABLE}| ${CURRENT_TEST} | ${DIFF} |\n"
+              FAILED_COUNT=$((FAILED_COUNT + 1))
+              CURRENT_TEST=""
+            fi
+          done < /tmp/pw-clean.txt
+
+          if [ "$FAILED_COUNT" = "0" ]; then
+            # Fallback: tests failed but no pixel diffs (structural failure)
+            FAILED_TESTS=$(grep -E "\[chromium\].*›" /tmp/pw-clean.txt | grep -v "passed" | sort -u | head -10 || true)
+            FAILED_COUNT=$(echo "$FAILED_TESTS" | grep -c "." || true)
+            TABLE=$(echo "$FAILED_TESTS" | while IFS= read -r t; do
+              [ -z "$t" ] && continue
+              name=$(echo "$t" | sed 's/.*› //')
+              echo "| $name | structural failure |"
+            done)
           fi
 
           echo "count=${FAILED_COUNT}" >> "$GITHUB_OUTPUT"
           {
-            echo "details<<EODIFF"
-            echo "$FAILED_TESTS"
-            echo "EODIFF"
-          } >> "$GITHUB_OUTPUT"
-          {
-            echo "pixel_diffs<<EOPIXEL"
-            echo "$PIXEL_DIFFS"
-            echo "EOPIXEL"
+            echo "table<<EOTABLE"
+            echo -e "$TABLE"
+            echo "EOTABLE"
           } >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
@@ -242,36 +257,13 @@ jobs:
       - name: Notify snapshot mismatch
         if: steps.visual.outputs.exit_code != '0' && github.event_name == 'pull_request'
         run: |
-          # Delete any previous snapshot mismatch comments so info is always fresh
-          OLD_IDS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-            --jq '[.[] | select(.body | contains("Visual snapshot mismatch")) | .id] | .[]' || true)
-          for id in $OLD_IDS; do
-            gh api repos/${{ github.repository }}/issues/comments/$id -X DELETE || true
-          done
-          gh pr comment ${{ github.event.pull_request.number }} --body "$(cat <<'COMMENT'
-          **Visual snapshot mismatch detected** — ${{ steps.diffs.outputs.count }} test(s) failed.
+          gh pr comment ${{ github.event.pull_request.number }} --body "**Visual snapshot mismatch** — ${{ steps.diffs.outputs.count }} test(s) differ from baselines.
 
-          <details><summary>Failed tests</summary>
+          | Test | Pixel diff |
+          |------|-----------|
+          ${{ steps.diffs.outputs.table }}
 
-          ```
-          ${{ steps.diffs.outputs.details }}
-          ```
-
-          </details>
-
-          <details><summary>Pixel diffs</summary>
-
-          ```
-          ${{ steps.diffs.outputs.pixel_diffs }}
-          ```
-
-          </details>
-
-          **To review:** download the `playwright-report` artifact from this workflow run.
-
-          **To update baselines:** comment `/update-snapshots` on this PR.
-          COMMENT
-          )"
+          > Download the \`playwright-report\` artifact to review visually. To accept changes, comment \`/update-snapshots\`."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
