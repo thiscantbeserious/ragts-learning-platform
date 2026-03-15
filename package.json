@@ -12,9 +12,10 @@
     "#vt-wasm/types": "./packages/vt-wasm/types.js"
   },
   "scripts": {
+    "predev": "node -e \"try{process.kill(+(require('child_process').execSync('lsof -ti:3000 2>/dev/null').toString().trim()),9)}catch{}\"",
     "dev:client": "vite",
     "dev:server": "tsx watch src/server/start.ts",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev": "concurrently --kill-others \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build && tsc -p tsconfig.build.json",
     "build:server": "tsc -p tsconfig.build.json",
     "build:wasm": "cd packages/vt-wasm && ./build.sh",
