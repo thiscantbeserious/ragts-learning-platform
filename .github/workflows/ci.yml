@@ -231,12 +231,12 @@ jobs:
       - name: Notify snapshot mismatch
         if: steps.visual.outputs.exit_code != '0' && github.event_name == 'pull_request'
         run: |
-          EXISTING=$(gh pr view ${{ github.event.pull_request.number }} --comments --json comments \
-            --jq '[.comments[] | select(.body | contains("Visual snapshot mismatch"))] | length')
-          if [ "$EXISTING" -gt 0 ]; then
-            echo "Snapshot mismatch comment already posted, skipping"
-            exit 0
-          fi
+          # Delete any previous snapshot mismatch comments so info is always fresh
+          OLD_IDS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            --jq '[.[] | select(.body | contains("Visual snapshot mismatch")) | .id] | .[]' || true)
+          for id in $OLD_IDS; do
+            gh api repos/${{ github.repository }}/issues/comments/$id -X DELETE || true
+          done
           gh pr comment ${{ github.event.pull_request.number }} --body "$(cat <<'COMMENT'
           **Visual snapshot mismatch detected** — ${{ steps.diffs.outputs.count }} test(s) failed.
 
