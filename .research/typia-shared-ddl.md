@@ -59,14 +59,16 @@ Benefits:
 
 ### Benchmark: Cold Start (2026-03-15, MacOS, Node 25.5.0)
 
-Tested vite-node (before discovering it was deprecated) to validate that the Vite pipeline approach has acceptable performance:
+Benchmarked `@hono/vite-dev-server` + `@typia/unplugin` directly against `tsx`:
 
 | | Run 1 | Run 2 | Run 3 | Avg |
 |---|---|---|---|---|
-| **tsx** | 1.331s | 0.728s | 0.726s | **0.93s** |
-| **Vite pipeline + @typia/unplugin** | 1.201s | 1.213s | 1.197s | **1.20s** |
+| **tsx** | 1.314s | 0.860s | 0.866s | **1.01s** |
+| **@hono/vite-dev-server + @typia/unplugin** | 1.056s | 1.074s | 1.057s | **1.06s** |
 
-**Delta: ~300ms slower** — imperceptible in practice. Typia plugin confirmed active. Server boots and responds 200. @hono/vite-dev-server uses the same Vite pipeline, so performance should be comparable.
+**Delta: ~50ms** — essentially identical. vite-dev-server is actually more consistent (no cold/warm variance). Typia plugin confirmed active (`[unplugin-typia] Cache disabled` on every run). Server responds 200 with real session data from SQLite.
+
+**WASM compatibility note:** The pre-built `packages/vt-wasm/pkg/vt_wasm.js` uses CJS (`exports`, `require('fs')`, `__dirname`). These break under Vite's ESM SSR evaluator. Quick ESM conversion (3 lines) fixes it. This should be done as Stage 0 of the migration plan.
 
 ## Official Integration Stack
 
