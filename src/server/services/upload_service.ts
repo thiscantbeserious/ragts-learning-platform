@@ -175,7 +175,7 @@ export function validateHeader(content: string): { ok: true } | { ok: false; err
 }
 
 /** Sanitize an uploaded filename: keep only safe characters, enforce max length. */
-function sanitizeFilename(name: string): string {
+export function sanitizeFilename(name: string): string {
   const base = name.split(/[/\\]/).pop() ?? 'unnamed.cast';
   const clean = base.replaceAll(/[^a-zA-Z0-9._-]/g, '_');
   const trimmed = clean.slice(0, 255);
@@ -183,7 +183,7 @@ function sanitizeFilename(name: string): string {
 }
 
 /** Count the number of marker events in a raw .cast file (NDJSON lines with type 'm'). */
-function countMarkers(content: string): number {
+export function countMarkers(content: string): number {
   let count = 0;
   for (const line of content.split('\n')) {
     if (line.includes('"m"')) {
