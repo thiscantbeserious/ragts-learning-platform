@@ -46,7 +46,7 @@ export async function resolveWorkerScript(tsEntryPoint: string): Promise<BuiltWo
  * Only used in development — production uses the Vite-compiled output.
  */
 async function buildWorkerScript(entryPoint: string): Promise<BuiltWorker> {
-  const { build, type: _Plugin } = await import('esbuild');
+  const esbuild = await import('esbuild');
   type Plugin = import('esbuild').Plugin;
 
   const { mkdirSync } = await import('node:fs');
@@ -80,7 +80,7 @@ async function buildWorkerScript(entryPoint: string): Promise<BuiltWorker> {
     },
   };
 
-  await build({
+  await esbuild.build({
     entryPoints: [entryPoint],
     bundle: true,
     platform: 'node',
