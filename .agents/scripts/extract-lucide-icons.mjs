@@ -5,7 +5,7 @@
  * Fetches Lucide SVGs from Iconify API, normalizes attributes, URL-encodes
  * them, and writes CSS mask-image declarations to design/styles/icons-lucide-output.css
  *
- * Usage: node design/extract-lucide-icons.mjs
+ * Usage: node .agents/scripts/extract-lucide-icons.mjs
  *
  * To add a new icon:
  *   1. Find the Lucide icon name at https://lucide.dev/icons/
