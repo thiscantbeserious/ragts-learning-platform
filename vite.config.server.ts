@@ -42,8 +42,10 @@ export default defineConfig({
         'pino',
         'pino-pretty',
         'esbuild',
-        // Dev-only worker compilation — never used in production
+        // Dev-only worker compilation — never used in production.
+        // Matches both relative (./build_worker_dev.js) and absolute paths.
         /build_worker_dev/,
+        /build_worker_dev\.js/,
         // vt-wasm loads .wasm binary via readFileSync relative to import.meta.dirname
         // Must stay external so the path resolves correctly at runtime
         /.*vt-wasm.*/,
