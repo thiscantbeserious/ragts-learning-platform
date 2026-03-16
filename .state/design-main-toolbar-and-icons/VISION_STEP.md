@@ -32,7 +32,7 @@ The approved design (Draft 2b) establishes a **glass pill** paradigm -- a froste
 
 - **Emotional tone:** The toolbar should feel like a **cockpit instrument cluster** -- compact, always-visible, information-dense but never noisy. When nothing is processing, the pipeline ring shows "0" in a dormant state. When activity happens, the ring animates to life with the cyan glow. The user should feel oriented and informed without having to look for information.
 
-**Icon visual language after migration:** Lucide icons at 24x24 native viewBox, stroke-width 2 (default), round linecap and linejoin. The rounder stroke terminals give a slightly warmer, more approachable feel compared to the current butt/miter style. The mask-image rendering approach is preserved -- Lucide SVGs are encoded as data URIs in `icons.css`, maintaining the `currentColor` inheritance model and all existing size classes. No runtime JavaScript, no font loading, no network requests for icons.
+**Icon visual language after migration:** Lucide SVGs use a 24x24 internal coordinate space (viewBox), but the rendered size is unchanged -- all existing CSS size classes (`.icon--xs` 12px through `.icon--2xl` 48px) continue to control the actual pixel size, exactly as today. The viewBox is an internal detail, not a sizing change. Stroke-width 2 (Lucide default), round linecap and linejoin. The rounder stroke terminals give a slightly warmer, more approachable feel compared to the current butt/miter style. The mask-image rendering approach is preserved -- Lucide SVGs are encoded as data URIs in `icons.css`, maintaining the `currentColor` inheritance model and all existing size classes. No icon sizes change. No runtime JavaScript, no font loading, no network requests for icons.
 
 ## Key Interactions
 
@@ -56,6 +56,10 @@ The gear icon sits between the pipeline and the avatar, inside the pill. It is a
 
 After the Lucide migration, every icon across the entire application -- sidebar, session cards, section headers, toolbar, empty states, upload zone -- speaks the same visual language. The settings icon is unambiguously a gear. The filter icon is a clean funnel variant (Lucide `list-filter`). New features can draw from 1700+ professionally designed icons without any manual SVG work. The user does not consciously notice the change (icons should be invisible infrastructure), but the cumulative effect is an application that feels more polished and internally consistent.
 
+### 6. Collapsing the toolbar to save space
+
+The toolbar should be able to collapse/shrink with a smooth animation -- for example, when clicking the user avatar. In collapsed state, the toolbar reduces to a minimal footprint (perhaps just the avatar or a small icon) while the full glass pill is hidden. Clicking again expands it back. This gives users control over header real estate, especially useful when they want maximum content area for reading sessions. The animation should use the design system's transition tokens (`--duration-normal`, `--easing-default`).
+
 ## Opportunities
 
 **1. Pipeline dropdown as a navigation shortcut.** The dropdown lists session names. Making them clickable links that navigate to that session would turn the pipeline status from a read-only display into a navigation tool. The user uploads a file, continues working, sees it finish in the dropdown, clicks the name, and lands on the completed session. This closes the loop between "I started something" and "I can see the result" without touching the sidebar.
@@ -77,6 +81,10 @@ After the Lucide migration, every icon across the entire application -- sidebar,
 - **Backend pipeline API exists.** SSE events and session status are already available. The toolbar reads existing data; it does not require new API endpoints. The pipeline dropdown sources its data from the same session list and status information already consumed by sidebar components.
 
 - **Lucide license compatibility.** Lucide is ISC-licensed (functionally MIT). This is compatible with both AGPL-3.0 (application code) and ELv2 (design system). The SVG paths themselves are ISC-licensed data embedded in the ELv2-licensed `icons.css` file. No license conflict.
+
+- **Lucide license attribution is a hard deliverable.** The Lucide ISC + MIT license MUST be honored with proper attribution. A `THIRD-PARTY-LICENSES` or `NOTICES` file must be added to the repository root listing Lucide's copyright and license text. The project's `LICENSE` file or `README` should reference the third-party notices. This is not optional polish -- it is a legal requirement for ISC/MIT licensed code and must be treated as a mandatory deliverable in the implementation plan.
+
+- **Mockup-first implementation.** The frontend engineer MUST start by copying the approved HTML/CSS from `draft-2b-lucide.html` verbatim into a Vue component, then progressively enhance it with reactivity, data binding, and composables. The engineer does NOT reimplement the design from scratch or from memory. The mockup IS the source of truth for all visual details -- spacing, colors, border radii, backdrop blur values, animation timings. This ensures zero design drift between the approved mockup and the shipped component.
 
 - **Vue 3 Composition API.** All new components use `<script setup>` with composables for state. No Pinia. No Options API.
 
