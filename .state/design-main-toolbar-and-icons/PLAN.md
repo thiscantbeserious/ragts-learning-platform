@@ -63,7 +63,7 @@ Owner: frontend-engineer
 
 Files:
 - `src/client/components/ShellHeader.vue` (modify: add overflow change, mount ToolbarPill)
-- `src/client/components/ToolbarPill.vue` (create)
+- `src/client/components/toolbar/ToolbarPill.vue` (create)
 - `src/client/composables/usePipelineStatus.ts` (create)
 - `src/client/composables/usePipelineStatus.test.ts` (create)
 - `design/styles/shell.css` (modify: add z-index to `.spatial-shell__header`)
@@ -136,9 +136,9 @@ Owner: frontend-engineer
 - [ ] Write unit tests: ring count reflects processing+queued total, dormant state when count is 0, active state when count > 0
 
 Files:
-- `src/client/components/PipelineRingTrigger.vue` (create)
-- `src/client/components/PipelineRingTrigger.test.ts` (create)
-- `src/client/components/ToolbarPill.vue` (modify: mount PipelineRingTrigger)
+- `src/client/components/toolbar/PipelineRingTrigger.vue` (create)
+- `src/client/components/toolbar/PipelineRingTrigger.test.ts` (create)
+- `src/client/components/toolbar/ToolbarPill.vue` (modify: mount PipelineRingTrigger)
 
 Depends on: Stage 2, Stage 2b
 Complexity: M
@@ -172,10 +172,10 @@ Owner: frontend-engineer
 - [ ] Write unit tests: dropdown renders sections based on session statuses, close on Escape, aria-expanded binding
 
 Files:
-- `src/client/components/PipelineDropdown.vue` (create)
-- `src/client/components/PipelineDropdown.test.ts` (create)
-- `src/client/components/PipelineRingTrigger.vue` (modify: add click handler, aria-expanded)
-- `src/client/components/ToolbarPill.vue` (modify: wire dropdown open state)
+- `src/client/components/toolbar/PipelineDropdown.vue` (create)
+- `src/client/components/toolbar/PipelineDropdown.test.ts` (create)
+- `src/client/components/toolbar/PipelineRingTrigger.vue` (modify: add click handler, aria-expanded)
+- `src/client/components/toolbar/ToolbarPill.vue` (modify: wire dropdown open state)
 
 Depends on: Stage 3
 Complexity: L
@@ -204,11 +204,11 @@ Owner: frontend-engineer
 - [ ] Write unit tests: buttons render with correct aria-labels, avatar renders initial, separator dividers present
 
 Files:
-- `src/client/components/ToolbarButton.vue` (create)
-- `src/client/components/ToolbarButton.test.ts` (create)
-- `src/client/components/ToolbarAvatar.vue` (create)
-- `src/client/components/ToolbarAvatar.test.ts` (create)
-- `src/client/components/ToolbarPill.vue` (modify: mount buttons, avatar, separators)
+- `src/client/components/toolbar/ToolbarButton.vue` (create)
+- `src/client/components/toolbar/ToolbarButton.test.ts` (create)
+- `src/client/components/toolbar/ToolbarAvatar.vue` (create)
+- `src/client/components/toolbar/ToolbarAvatar.test.ts` (create)
+- `src/client/components/toolbar/ToolbarPill.vue` (modify: mount buttons, avatar, separators)
 
 Depends on: Stage 2 (needs the pill shell; can run in parallel with Stages 3-4 since it owns different files)
 Complexity: M
@@ -237,8 +237,8 @@ Owner: frontend-engineer
 - [ ] Write unit tests: clicking avatar toggles collapsed state, collapsed class applied, elements hidden
 
 Files:
-- `src/client/components/ToolbarPill.vue` (modify: collapse state, CSS transitions)
-- `src/client/components/ToolbarAvatar.vue` (modify: emit click event for collapse toggle)
+- `src/client/components/toolbar/ToolbarPill.vue` (modify: collapse state, CSS transitions)
+- `src/client/components/toolbar/ToolbarAvatar.vue` (modify: emit click event for collapse toggle)
 
 Depends on: Stage 5
 Complexity: M
@@ -265,7 +265,7 @@ Owner: frontend-engineer
 
 Files:
 - `src/client/composables/usePipelineStatus.ts` (modify: add connection health tracking)
-- `src/client/components/PipelineRingTrigger.vue` (modify: add disconnection visual state)
+- `src/client/components/toolbar/PipelineRingTrigger.vue` (modify: add disconnection visual state)
 
 Depends on: Stage 3
 Complexity: M
@@ -293,10 +293,10 @@ Owner: frontend-engineer
 - [ ] Write integration-style test: simulate tab navigation through toolbar controls, verify focus order
 
 Files:
-- `src/client/components/ToolbarPill.vue` (modify: verify tab order)
-- `src/client/components/PipelineDropdown.vue` (modify: arrow key navigation)
-- `src/client/components/ToolbarButton.vue` (verify: focus styles)
-- `src/client/components/ToolbarAvatar.vue` (verify: focus styles, button semantics)
+- `src/client/components/toolbar/ToolbarPill.vue` (modify: verify tab order)
+- `src/client/components/toolbar/PipelineDropdown.vue` (modify: arrow key navigation)
+- `src/client/components/toolbar/ToolbarButton.vue` (verify: focus styles)
+- `src/client/components/toolbar/ToolbarAvatar.vue` (verify: focus styles, button semantics)
 
 Depends on: Stages 4, 5
 Complexity: S
@@ -322,11 +322,11 @@ Owner: frontend-engineer
 - [ ] Write a grep-based verification: no raw `rgba(` or `rgb(` values in toolbar component `<style>` blocks
 
 Files:
-- `src/client/components/ToolbarPill.vue` (modify: replace raw values)
-- `src/client/components/PipelineRingTrigger.vue` (modify: replace raw values)
-- `src/client/components/PipelineDropdown.vue` (modify: replace raw values)
-- `src/client/components/ToolbarButton.vue` (modify: replace raw values)
-- `src/client/components/ToolbarAvatar.vue` (modify: replace raw values)
+- `src/client/components/toolbar/ToolbarPill.vue` (modify: replace raw values)
+- `src/client/components/toolbar/PipelineRingTrigger.vue` (modify: replace raw values)
+- `src/client/components/toolbar/PipelineDropdown.vue` (modify: replace raw values)
+- `src/client/components/toolbar/ToolbarButton.vue` (modify: replace raw values)
+- `src/client/components/toolbar/ToolbarAvatar.vue` (modify: replace raw values)
 - `design/styles/layout.css` (modify: add new tokens if promoted to design system)
 
 Depends on: Stages 4, 5, 6
@@ -355,7 +355,7 @@ Owner: frontend-engineer
 - [ ] Run full test suite: `npx vitest run` + `npx playwright test`
 
 Files:
-- `src/client/components/__tests__/toolbar.visual.test.ts` (create: Playwright visual tests)
+- `src/client/components/toolbar/__tests__/toolbar.visual.test.ts` (create: Playwright visual tests)
 - `tests/visual/` or existing Playwright test directory (create/modify)
 
 Depends on: All previous stages (9)

@@ -52,7 +52,7 @@ One component contains all toolbar HTML, state, and styles. The mockup HTML is p
 - **Cons:** Large file, hard to test individual behaviors (dropdown, collapse, ring), hard to reuse sub-elements
 
 #### Option B: Decomposed component tree
-`ToolbarPill.vue` (shell) > `PipelineRingTrigger.vue` + `PipelineDropdown.vue` + `ToolbarButton.vue` + `ToolbarAvatar.vue`. State managed by a `usePipelineStatus` composable.
+`toolbar/ToolbarPill.vue` (shell) > `toolbar/PipelineRingTrigger.vue` + `toolbar/PipelineDropdown.vue` + `toolbar/ToolbarButton.vue` + `toolbar/ToolbarAvatar.vue`. State managed by a `usePipelineStatus` composable.
 
 - **Pros:** Each component is independently testable, dropdown can be unit-tested without full toolbar, composable is reusable, reviewable in stages
 - **Cons:** More files, slightly more wiring, need to ensure mockup CSS is faithfully split across components
