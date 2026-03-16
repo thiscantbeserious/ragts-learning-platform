@@ -167,7 +167,7 @@ export class PipelineOrchestrator {
 
       // Stage 3: replay
       await this.advanceStage(job.id, sessionId, PipelineStage.Replay);
-      const replayResult = replay(validateResult.header, validateResult.events, detectResult.boundaries);
+      const replayResult = await replay(validateResult.header, validateResult.events, detectResult.boundaries);
       this.eventBus.emit({ type: 'session.replayed', sessionId, lineCount: replayResult.rawSnapshot.lines.length });
       await new Promise(resolve => setImmediate(resolve));
 

@@ -14,6 +14,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { generateLargeCast } from './generate_large_cast.js';
 import type { Server } from 'node:http';
 import { serve } from '@hono/node-server';
 import { SqliteDatabaseImpl } from '../../src/server/db/sqlite/sqlite_database_impl.js';
@@ -71,16 +72,30 @@ interface TestState {
 const state: Partial<TestState> = {};
 
 /** Poll a session until it reaches a terminal status or the timeout expires. */
-async function waitForPipeline(baseUrl: string, sessionId: string, pollStart: number): Promise<string> {
+async function waitForPipeline(
+  baseUrl: string,
+  sessionId: string,
+  pollStart: number,
+  timeoutMs: number = PIPELINE_TIMEOUT_MS,
+): Promise<string> {
   let status = 'pending';
   while (status !== 'completed' && status !== 'failed') {
-    if (performance.now() - pollStart > PIPELINE_TIMEOUT_MS) {
+    if (performance.now() - pollStart > timeoutMs) {
       throw new Error(`Timeout waiting for session ${sessionId} to complete (still '${status}')`);
     }
     await new Promise<void>((r) => setTimeout(r, POLL_INTERVAL_MS));
-    const res = await fetch(`${baseUrl}/api/sessions/${sessionId}`);
-    const data = await res.json() as { detection_status: string };
-    status = data.detection_status;
+    try {
+      const res = await fetch(`${baseUrl}/api/sessions/${sessionId}`);
+      const data = await res.json() as { detection_status: string };
+      status = data.detection_status;
+    } catch (err) {
+      // Transient connection errors (ECONNRESET, ECONNREFUSED) can occur when
+      // the server event loop is saturated by WASM processing. Retry next poll.
+      // Node.js native fetch wraps socket errors as TypeError with a cause.
+      const code = (err as NodeJS.ErrnoException).code ??
+        ((err as { cause?: NodeJS.ErrnoException }).cause?.code);
+      if (code !== 'ECONNRESET' && code !== 'ECONNREFUSED') throw err;
+    }
   }
   return status;
 }
@@ -261,4 +276,121 @@ describe('Pipeline stress test — bulk upload with responsiveness', () => {
 
     expect(finalStatus, 'Session should complete successfully').toBe('completed');
   }, 60_000);
+});
+
+/** Upload a pre-built Buffer as a cast file and return the session id. */
+async function uploadBuffer(baseUrl: string, content: Buffer, name: string): Promise<{ id: string; uploadMs: number }> {
+  const start = performance.now();
+  const formData = new FormData();
+  formData.append('file', new Blob([content]), name);
+  const res = await fetch(`${baseUrl}/api/upload`, { method: 'POST', body: formData });
+  const uploadMs = performance.now() - start;
+  expect(res.status, `Upload ${name} should return 201`).toBe(201);
+  const data = await res.json() as { id: string };
+  return { id: data.id, uploadMs };
+}
+
+/**
+ * Performance budgets — if these fail, the fix is insufficient and we need
+ * intra-stage yielding (Option B) or worker threads.
+ */
+const PERF = {
+  /** Max wall-clock for the entire pipeline on a 5MB session */
+  MAX_PIPELINE_5MB_MS: 30_000,
+  /** Max wall-clock for the entire pipeline on a 10MB session */
+  MAX_PIPELINE_10MB_MS: 60_000,
+  /** Max latency for any single health check during processing */
+  MAX_HEALTH_LATENCY_MS: 1_000,
+  /** Health probe interval */
+  PROBE_INTERVAL_MS: 100,
+} as const;
+
+/**
+ * Runs a session through the full pipeline while continuously probing
+ * the server for responsiveness. Returns timing data for assertions.
+ */
+async function runWithResponsivenessProbe(
+  baseUrl: string,
+  sessionId: string,
+  budgetMs: number,
+): Promise<{
+  status: string;
+  pipelineMs: number;
+  healthProbes: number[];
+  failedProbes: number;
+}> {
+  const healthProbes: number[] = [];
+  let failedProbes = 0;
+  let done = false;
+
+  // Probe health continuously while pipeline runs
+  const prober = (async () => {
+    while (!done) {
+      const t0 = performance.now();
+      try {
+        const res = await fetch(`${baseUrl}/api/health`);
+        if (res.status !== 200) failedProbes++;
+        healthProbes.push(performance.now() - t0);
+      } catch {
+        failedProbes++;
+        healthProbes.push(performance.now() - t0);
+      }
+      await new Promise<void>(r => setTimeout(r, PERF.PROBE_INTERVAL_MS));
+    }
+  })();
+
+  const t0 = performance.now();
+  const status = await waitForPipeline(baseUrl, sessionId, t0, budgetMs);
+  const pipelineMs = performance.now() - t0;
+  done = true;
+  await prober;
+
+  return { status, pipelineMs, healthProbes, failedProbes };
+}
+
+function reportResults(label: string, sizeMB: string, result: Awaited<ReturnType<typeof runWithResponsivenessProbe>>) {
+  const { pipelineMs, healthProbes, failedProbes } = result;
+  const max = healthProbes.length > 0 ? Math.max(...healthProbes) : 0;
+  const avg = healthProbes.length > 0 ? healthProbes.reduce((a, b) => a + b, 0) / healthProbes.length : 0;
+  const min = healthProbes.length > 0 ? Math.min(...healthProbes) : 0;
+  console.log(`\n=== ${label} ===`);
+  console.log(`File: ${sizeMB}MB | Pipeline: ${(pipelineMs / 1000).toFixed(2)}s | Status: ${result.status}`);
+  console.log(`Health probes: ${healthProbes.length} total, ${failedProbes} failed`);
+  console.log(`  Latency — min: ${min.toFixed(1)}ms | avg: ${avg.toFixed(1)}ms | max: ${max.toFixed(1)}ms`);
+}
+
+describe('Synthetic large session tests', () => {
+  it('5MB / 50 sections / resizes — completes within budget, server stays responsive', async () => {
+    const baseUrl = state.baseUrl!;
+    const buf = generateLargeCast({ sections: 50, targetSizeMB: 5, includeResizes: true, resizeInterval: 10 });
+    const sizeMB = (buf.length / 1024 / 1024).toFixed(2);
+
+    const { id } = await uploadBuffer(baseUrl, buf, 'synthetic-5mb.cast');
+    const result = await runWithResponsivenessProbe(baseUrl, id, PERF.MAX_PIPELINE_5MB_MS);
+    reportResults('5MB / 50 sections / resizes', sizeMB, result);
+
+    // Hard assertions — if any fail, the fix is insufficient
+    expect(result.status, 'Pipeline must complete (no RangeError)').toBe('completed');
+    expect(result.pipelineMs, `Pipeline exceeded ${PERF.MAX_PIPELINE_5MB_MS / 1000}s budget`).toBeLessThan(PERF.MAX_PIPELINE_5MB_MS);
+    // Allow up to 1 failed probe — worker thread init can cause a brief connection hiccup
+    expect(result.failedProbes, `Too many failed health probes (${result.failedProbes})`).toBeLessThanOrEqual(1);
+    const maxLatency = result.healthProbes.length > 0 ? Math.max(...result.healthProbes) : 0;
+    expect(maxLatency, `Max health latency ${maxLatency.toFixed(0)}ms exceeds ${PERF.MAX_HEALTH_LATENCY_MS}ms`).toBeLessThan(PERF.MAX_HEALTH_LATENCY_MS);
+  }, PERF.MAX_PIPELINE_5MB_MS + 5_000);
+
+  it('10MB / 100 sections / resizes — completes within budget, server stays responsive', async () => {
+    const baseUrl = state.baseUrl!;
+    const buf = generateLargeCast({ sections: 100, targetSizeMB: 10, includeResizes: true, resizeInterval: 10 });
+    const sizeMB = (buf.length / 1024 / 1024).toFixed(2);
+
+    const { id } = await uploadBuffer(baseUrl, buf, 'synthetic-10mb.cast');
+    const result = await runWithResponsivenessProbe(baseUrl, id, PERF.MAX_PIPELINE_10MB_MS);
+    reportResults('10MB / 100 sections / resizes', sizeMB, result);
+
+    expect(result.status, 'Pipeline must complete (no RangeError)').toBe('completed');
+    expect(result.pipelineMs, `Pipeline exceeded ${PERF.MAX_PIPELINE_10MB_MS / 1000}s budget`).toBeLessThan(PERF.MAX_PIPELINE_10MB_MS);
+    expect(result.failedProbes, `Too many failed health probes (${result.failedProbes})`).toBeLessThanOrEqual(1);
+    const maxLatency = result.healthProbes.length > 0 ? Math.max(...result.healthProbes) : 0;
+    expect(maxLatency, `Max health latency ${maxLatency.toFixed(0)}ms exceeds ${PERF.MAX_HEALTH_LATENCY_MS}ms`).toBeLessThan(PERF.MAX_HEALTH_LATENCY_MS);
+  }, PERF.MAX_PIPELINE_10MB_MS + 5_000);
 });
