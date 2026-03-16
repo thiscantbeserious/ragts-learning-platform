@@ -74,6 +74,16 @@ export default defineConfig({
       'tests/visual/**',
       'node_modules/**',
     ],
+    // Integration tests that spawn PipelineOrchestrator (which creates worker
+    // threads) must run sequentially to avoid resource cleanup races.
+    // Unit tests and client tests still run in parallel for speed.
+    sequence: {
+      sequentialFiles: [
+        'tests/integration/**',
+        'src/server/routes/route_validation_integration*',
+        'src/server/workers/pipeline_worker*',
+      ],
+    },
     environmentMatchGlobs: [
       ['packages/**', 'node'],
       ['src/server/**', 'node'],
