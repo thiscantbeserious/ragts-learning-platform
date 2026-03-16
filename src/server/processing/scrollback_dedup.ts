@@ -306,12 +306,23 @@ export function buildCleanDocument(
     stutterSkip: detectStutters(rawLines),
   };
 
+  // Clamp epoch boundaries to actual snapshot size.
+  // Epoch boundaries record line counts mid-replay, but the final snapshot
+  // may have fewer lines due to VT resize reflow or trailing-line trimming.
+  const clampedBoundaries: EpochBoundary[] = [];
+  for (const b of epochBoundaries) {
+    const clamped = Math.min(b.rawLineCount, rawLines.length);
+    if (clampedBoundaries.length === 0 || clampedBoundaries.at(-1)!.rawLineCount !== clamped) {
+      clampedBoundaries.push({ ...b, rawLineCount: clamped });
+    }
+  }
+
   // Process all epochs (including epoch 0).
   // For each line, find the longest contiguous block starting at that position
   // that matches consecutive lines in the clean doc. Blocks >= MIN_MATCH are
   // treated as re-renders. Non-matching lines are appended as new content
   // and immediately indexed — so within-epoch AND cross-epoch duplicates are caught.
-  const epochRanges = buildEpochRanges(epochBoundaries, rawLines.length);
+  const epochRanges = buildEpochRanges(clampedBoundaries, rawLines.length);
   for (const { start, end } of epochRanges) {
     processEpoch(state, start, end);
   }

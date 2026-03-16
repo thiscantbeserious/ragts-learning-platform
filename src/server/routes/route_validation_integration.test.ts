@@ -41,7 +41,6 @@ beforeEach(async () => {
   const eventBus = new EmitterEventBusImpl();
   orchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, {
     sessionRepository: ctx.sessionRepository,
-    storageAdapter: ctx.storageAdapter,
   });
   await orchestrator.start();
 

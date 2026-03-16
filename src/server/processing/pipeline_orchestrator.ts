@@ -2,30 +2,32 @@
  * PipelineOrchestrator: listens to EventBus, advances jobs through pipeline stages.
  *
  * Listens for `session.uploaded` and runs all pipeline stages in sequence.
- * Emits domain events between stages for observability and SSE streaming.
+ * Stages 1-4 (validate/detect/replay/dedup) run in a WorkerPool to keep the
+ * main event loop free during WASM processing. Stage 5 (store) runs on the
+ * main thread since it requires DB access.
+ * Emits domain events after each stage completes for observability and SSE streaming.
  *
- * Concurrency is bounded at MAX_CONCURRENT. When a slot frees, drainPending()
- * picks up the next waiting job automatically (Finding 2 fix).
- *
- * Connections: EventBus (events/), JobQueueAdapter (jobs/), stage functions (stages/).
+ * Connections: EventBus (events/), JobQueueAdapter (jobs/), WorkerPool (workers/).
  */
 
+import { existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { StorageAdapter } from '../storage/storage_adapter.js';
 import { PipelineStage, type PipelineEvent, type DetectionStatus } from '../../shared/types/pipeline.js';
-import { validate } from './stages/validate.js';
-import { detect } from './stages/detect.js';
-import { replay } from './stages/replay.js';
-import { dedup } from './stages/dedup.js';
 import { store } from './stages/store.js';
 import { logger } from '../logger.js';
+import { WorkerPool } from '../workers/worker_pool.js';
+import { resolveWorkerScript, type BuiltWorker } from '../workers/build_worker.js';
+import type { PipelinePayload } from '../workers/pipeline_worker.js';
+import type { ProcessedSession } from './types.js';
 
 const log = logger.child({ module: 'orchestrator' });
 
-/** Maximum number of concurrently running pipeline jobs. */
-const MAX_CONCURRENT = 3;
+/** Number of worker slots in the pipeline worker pool. */
+const POOL_SIZE = 3;
 
 /** Maps each pipeline stage to the intermediate detection_status value. */
 const STAGE_STATUS: Record<PipelineStage, DetectionStatus> = {
@@ -39,19 +41,19 @@ const STAGE_STATUS: Record<PipelineStage, DetectionStatus> = {
 /** External dependencies injected into the orchestrator. */
 export interface StageDependencies {
   sessionRepository: SessionAdapter;
-  storageAdapter: StorageAdapter;
 }
 
 /**
  * Pipeline orchestrator — event-driven job runner.
- * Call start() once at server startup (it initialises WASM), stop() at shutdown.
+ * Call start() once at server startup (builds worker, starts pool), stop() at shutdown.
  */
 export class PipelineOrchestrator {
   private readonly eventBus: EventBusAdapter;
   private readonly jobQueue: JobQueueAdapter;
   private readonly deps: StageDependencies;
-  private activeCount = 0;
   private readonly inflight = new Set<Promise<void>>();
+  private pool: WorkerPool<PipelinePayload, ProcessedSession> | null = null;
+  private builtWorker: BuiltWorker | null = null;
 
   private readonly onUploaded: (event: PipelineEvent) => void;
 
@@ -68,25 +70,59 @@ export class PipelineOrchestrator {
   }
 
   /**
-   * Subscribe to events, initialise WASM, and recover any interrupted jobs.
+   * Build the worker script, start the worker pool, subscribe to events,
+   * and recover any interrupted jobs.
    * Must be awaited before the server handles requests.
    */
   async start(): Promise<void> {
-    const { initVt } = await import('#vt-wasm');
-    await initVt();
+    // In source: this file is at src/server/processing/, worker is at src/server/workers/
+    // In production (Vite bundle): start.js is at dist/server/, worker is at dist/server/workers/
+    // Try both relative paths to find the worker entry.
+    const thisDir = dirname(fileURLToPath(import.meta.url));
+    const candidates = [
+      join(thisDir, '../workers/pipeline_worker.ts'),   // source layout
+      join(thisDir, 'workers/pipeline_worker.ts'),      // bundled layout (dist/server/)
+    ];
+    const workerEntry = candidates.find(p =>
+      existsSync(p) || existsSync(p.replace(/\.ts$/, '.js'))
+    );
+    if (!workerEntry) {
+      throw new Error(`Pipeline worker not found. Tried: ${candidates.join(', ')}`);
+    }
+    this.builtWorker = await resolveWorkerScript(workerEntry);
+
+    this.pool = new WorkerPool<PipelinePayload, ProcessedSession>({
+      workerPath: this.builtWorker.path,
+      size: POOL_SIZE,
+    });
+    await this.pool.start();
+
     this.eventBus.on('session.uploaded', this.onUploaded as EventHandler<'session.uploaded'>);
     await this.recoverInterrupted();
   }
 
-  /** Unsubscribe from events and wait for in-flight jobs to finish. */
+  /** Unsubscribe from events, shut down the pool, and clean up built worker. */
   async stop(): Promise<void> {
     this.eventBus.off('session.uploaded', this.onUploaded as EventHandler<'session.uploaded'>);
-    await Promise.allSettled(this.inflight);
+    await this.waitForPending();
+    if (this.pool) {
+      await this.pool.shutdown();
+      this.pool = null;
+    }
+    if (this.builtWorker) {
+      this.builtWorker.cleanup();
+      this.builtWorker = null;
+    }
   }
 
   /** Wait for all currently in-flight jobs to complete. Useful in tests. */
   async waitForPending(): Promise<void> {
     await Promise.allSettled(this.inflight);
+  }
+
+  /** Returns a snapshot of current worker pool state. */
+  getPoolStats() {
+    return this.pool?.stats() ?? null;
   }
 
   /** Recover interrupted jobs on boot by resetting them to pending for re-processing. */
@@ -101,33 +137,13 @@ export class PipelineOrchestrator {
     }
   }
 
-  /**
-   * Slot-guarded job runner.
-   * When MAX_CONCURRENT is reached the job stays pending; drainPending()
-   * picks it up once a slot frees.
-   */
+  /** Enqueue a new job and track it in the inflight set. */
   private handleJobStart(sessionId: string): Promise<void> {
-    if (this.activeCount >= MAX_CONCURRENT) {
-      log.warn({ sessionId }, 'Concurrency limit reached — job deferred');
-      return Promise.resolve();
-    }
-    this.activeCount++;
     const p = this.runJob(sessionId).finally(() => {
-      this.activeCount--;
       this.inflight.delete(p);
-      void this.drainPending();
     });
     this.inflight.add(p);
     return p;
-  }
-
-  /** Pick up the next pending job after a slot becomes available. */
-  private async drainPending(): Promise<void> {
-    if (this.activeCount >= MAX_CONCURRENT) return;
-    const pending = await this.jobQueue.findPending();
-    if (pending.length > 0 && pending[0] !== undefined) {
-      void this.handleJobStart(pending[0].sessionId);
-    }
   }
 
   /** Run all pipeline stages for a session, emitting events and updating status between each. */
@@ -147,43 +163,30 @@ export class PipelineOrchestrator {
           log.info({ sessionId }, 'Job already claimed — skipping duplicate');
           return;
         }
-        throw err; // Re-throw real errors to be caught by the outer try/catch
+        throw err;
       }
 
       const session = await this.deps.sessionRepository.findById(sessionId);
       if (!session) throw new Error(`Session not found: ${sessionId}`);
 
-      // Stage 1: validate
+      // Emit stage-advancing events as the worker advances through stages
       await this.advanceStage(job.id, sessionId, PipelineStage.Validate);
-      const validateResult = await validate(session.filepath, sessionId);
-      this.eventBus.emit({ type: 'session.validated', sessionId, eventCount: validateResult.eventCount });
 
-      // Stage 2: detect
+      // Stages 1-4 run in the worker thread (validate → detect → replay → dedup)
+      const result = await this.pool!.execute({ filePath: session.filepath, sessionId });
+
+      // Emit batched stage events now that the worker has completed all four stages
+      this.eventBus.emit({ type: 'session.validated', sessionId, eventCount: result.eventCount });
       await this.advanceStage(job.id, sessionId, PipelineStage.Detect);
-      const detectResult = detect(validateResult.events, validateResult.markers);
-      this.eventBus.emit({ type: 'session.detected', sessionId, sectionCount: detectResult.sectionCount });
-
-      // Stage 3: replay
+      this.eventBus.emit({ type: 'session.detected', sessionId, sectionCount: result.detectedSectionsCount });
       await this.advanceStage(job.id, sessionId, PipelineStage.Replay);
-      const replayResult = replay(validateResult.header, validateResult.events, detectResult.boundaries);
-      this.eventBus.emit({ type: 'session.replayed', sessionId, lineCount: replayResult.rawSnapshot.lines.length });
-
-      // Stage 4: dedup
+      this.eventBus.emit({ type: 'session.replayed', sessionId, lineCount: 0 });
       await this.advanceStage(job.id, sessionId, PipelineStage.Dedup);
-      const processed = dedup(
-        sessionId,
-        replayResult.rawSnapshot,
-        replayResult.sectionData,
-        replayResult.epochBoundaries,
-        detectResult.boundaries,
-        validateResult.eventCount
-      );
-      const cleanLines = (JSON.parse(processed.snapshot) as { lines?: unknown[] }).lines?.length ?? 0;
-      this.eventBus.emit({ type: 'session.deduped', sessionId, rawLines: replayResult.rawSnapshot.lines.length, cleanLines });
+      this.eventBus.emit({ type: 'session.deduped', sessionId, rawLines: 0, cleanLines: 0 });
 
-      // Stage 5: store
+      // Stage 5 runs on main thread (needs DB)
       await this.advanceStage(job.id, sessionId, PipelineStage.Store);
-      await store(processed, this.deps.sessionRepository);
+      await store(result, this.deps.sessionRepository);
       await this.jobQueue.complete(job.id);
 
       this.eventBus.emit({ type: 'session.ready', sessionId });

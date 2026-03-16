@@ -1,15 +1,17 @@
 // @vitest-environment node
 /**
  * Tests for PipelineOrchestrator.
- * Tests end-to-end job advancement, error handling, concurrency drain,
+ * Tests end-to-end job advancement, error handling, pool concurrency,
  * intermediate status updates, and event log integration.
+ *
+ * Note: start() builds the pipeline worker via esbuild and starts a WorkerPool.
+ * Each test that creates a fresh orchestrator must await start() which takes ~500ms.
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { initVt } from '#vt-wasm';
 import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
 import { EmitterEventBusImpl } from '../../../src/server/events/emitter_event_bus_impl.js';
@@ -30,7 +32,7 @@ function buildShortCast(): string {
 function waitForEvent(
   eventBus: EmitterEventBusImpl,
   type: string,
-  timeoutMs = 3000
+  timeoutMs = 15000
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Timeout waiting for ${type}`)), timeoutMs);
@@ -41,7 +43,7 @@ function waitForEvent(
   });
 }
 
-describe('PipelineOrchestrator', () => {
+describe('PipelineOrchestrator', { timeout: 30000 }, () => {
   let tmpDir: string;
   let ctx: DatabaseContext;
   let eventBus: EmitterEventBusImpl;
@@ -49,7 +51,6 @@ describe('PipelineOrchestrator', () => {
   let deps: StageDependencies;
 
   beforeEach(async () => {
-    await initVt();
     tmpDir = mkdtempSync(join(tmpdir(), 'orchestrator-test-'));
     const impl = new SqliteDatabaseImpl();
     ctx = await impl.initialize({ dataDir: tmpDir });
@@ -57,7 +58,6 @@ describe('PipelineOrchestrator', () => {
 
     deps = {
       sessionRepository: ctx.sessionRepository,
-      storageAdapter: ctx.storageAdapter,
     };
 
     orchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, deps);
@@ -167,7 +167,6 @@ describe('PipelineOrchestrator', () => {
     await orchestrator.stop();
     orchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, {
       sessionRepository: ctx.sessionRepository,
-      storageAdapter: ctx.storageAdapter,
     });
     await orchestrator.start();
 
@@ -215,14 +214,13 @@ describe('PipelineOrchestrator', () => {
     await freshOrchestrator.stop();
   });
 
-  it('defers job when concurrency limit is reached', async () => {
-    // Stop default orchestrator and replace with a spy that freezes job execution
+  it('processes multiple concurrent jobs via the worker pool', async () => {
     await orchestrator.stop();
 
     const content = buildShortCast();
     const { nanoid } = await import('nanoid');
 
-    // Create MAX_CONCURRENT + 1 sessions
+    // Create 4 sessions to exercise pool queueing
     const sessions = [];
     for (let i = 0; i < 4; i++) {
       const id = nanoid();
@@ -250,9 +248,9 @@ describe('PipelineOrchestrator', () => {
 
     // Wait for all to complete
     await freshOrchestrator.waitForPending();
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 500));
 
-    // All 4 should eventually complete (deferred ones get picked up by drainPending)
+    // All 4 should eventually complete (pool queues and drains automatically)
     const jobs = await Promise.all(sessions.map(s => ctx.jobQueue.findBySessionId(s.id)));
     const completed = jobs.filter(j => j?.status === 'completed');
     expect(completed.length).toBeGreaterThanOrEqual(3);
@@ -291,7 +289,7 @@ describe('PipelineOrchestrator', () => {
     eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'double-fail.cast' });
 
     // Wait for the job to be processed (even if silently absorbed by inner catch)
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 500));
 
     // No unhandled rejection should surface; orchestrator should still be stoppable
     await freshOrchestrator.stop();
@@ -302,7 +300,7 @@ describe('PipelineOrchestrator', () => {
     expect(true).toBe(true);
   });
 
-  it('emits session.failed when session is not found during runJob (line 154)', async () => {
+  it('emits session.failed when session is not found during runJob', async () => {
     // Create session and job, then make findById return null to simulate
     // a session disappearing between job lookup and session lookup in runJob.
     // (Direct deleteById would cascade-delete the job too, so we intercept findById instead.)
@@ -325,8 +323,6 @@ describe('PipelineOrchestrator', () => {
     const origFindById = ctx.sessionRepository.findById.bind(ctx.sessionRepository);
     let callCount = 0;
     ctx.sessionRepository.findById = async (id: string) => {
-      // First call is the session existence check inside runJob (line 153)
-      // Return null to trigger the "Session not found" throw
       callCount++;
       if (callCount === 1 && id === session.id) return null;
       return origFindById(id);
@@ -334,7 +330,6 @@ describe('PipelineOrchestrator', () => {
 
     const ghostDeps: StageDependencies = {
       sessionRepository: ctx.sessionRepository,
-      storageAdapter: ctx.storageAdapter,
     };
 
     const freshOrchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, ghostDeps);
@@ -351,7 +346,7 @@ describe('PipelineOrchestrator', () => {
     ctx.sessionRepository.findById = origFindById;
   });
 
-  it('re-throws unexpected errors from jobQueue.start (line 150)', async () => {
+  it('re-throws unexpected errors from jobQueue.start', async () => {
     // Simulate a real error (not "not in pending state") from jobQueue.start
     await orchestrator.stop();
 
@@ -393,11 +388,7 @@ describe('PipelineOrchestrator', () => {
     ctx.jobQueue.start = origStart;
   });
 
-  it('drainPending picks up a deferred job after a slot frees', async () => {
-    // Saturate the concurrency limit by forcing the orchestrator to have
-    // MAX_CONCURRENT = 1 indirectly: just verify that a pending job created
-    // AFTER the first upload is still processed once the queue drains.
-
+  it('processes a second job after the first completes', async () => {
     const content = buildShortCast();
     const { nanoid } = await import('nanoid');
 
@@ -431,5 +422,15 @@ describe('PipelineOrchestrator', () => {
 
     const job2 = await ctx.jobQueue.findBySessionId(id2);
     expect(job2!.status).toBe('completed');
+  });
+
+  it('getPoolStats() returns pool statistics', () => {
+    const stats = orchestrator.getPoolStats();
+    expect(stats).not.toBeNull();
+    expect(typeof stats!.total).toBe('number');
+    expect(typeof stats!.idle).toBe('number');
+    expect(typeof stats!.busy).toBe('number');
+    expect(typeof stats!.queued).toBe('number');
+    expect(typeof stats!.dead).toBe('number');
   });
 });

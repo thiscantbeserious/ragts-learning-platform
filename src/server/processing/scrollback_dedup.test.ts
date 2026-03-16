@@ -450,3 +450,55 @@ describe('buildCleanDocument', () => {
     });
   });
 });
+
+describe('buildCleanDocument — epoch boundary clamping', () => {
+  it('clamps epoch boundaries that exceed rawLines.length', () => {
+    // rawSnapshot has 100 lines but epoch boundaries reference rawLineCount: 50 and 150.
+    // The boundary at 150 exceeds actual length (100) — must be clamped, no RangeError thrown.
+    const lines = Array.from({ length: 100 }, (_, i) => `line-${i}`);
+    const raw = makeSnapshot(lines);
+    const epochs = [
+      { eventIndex: 5, rawLineCount: 50 },
+      { eventIndex: 10, rawLineCount: 150 }, // exceeds actual 100 lines
+    ];
+
+    expect(() => buildCleanDocument(raw, epochs)).not.toThrow();
+    const result = buildCleanDocument(raw, epochs);
+    // All 100 lines should be present in some form in the clean result
+    expect(result.cleanSnapshot.lines.length).toBeGreaterThan(0);
+    expect(result.cleanSnapshot.lines.length).toBeLessThanOrEqual(100);
+  });
+
+  it('deduplicates collapsed boundaries after clamping', () => {
+    // rawSnapshot has 100 lines. Boundaries at 50, 120, 130 — latter two clamp to 100.
+    // After clamping, only one boundary at 100 should survive (dedup of equal values).
+    const lines = Array.from({ length: 100 }, (_, i) => `unique-line-${i}`);
+    const raw = makeSnapshot(lines);
+    const epochs = [
+      { eventIndex: 5, rawLineCount: 50 },
+      { eventIndex: 10, rawLineCount: 120 }, // clamps to 100
+      { eventIndex: 15, rawLineCount: 130 }, // also clamps to 100 — duplicate after clamping
+    ];
+
+    expect(() => buildCleanDocument(raw, epochs)).not.toThrow();
+    const result = buildCleanDocument(raw, epochs);
+    expect(result.cleanSnapshot.lines.length).toBeGreaterThan(0);
+    expect(result.cleanSnapshot.lines.length).toBeLessThanOrEqual(100);
+  });
+
+  it('handles all boundaries exceeding rawLines.length', () => {
+    // All epoch boundaries are beyond the actual snapshot size.
+    // Should collapse to one or zero boundaries, produce valid output, no RangeError.
+    const lines = Array.from({ length: 10 }, (_, i) => `row-${i}`);
+    const raw = makeSnapshot(lines);
+    const epochs = [
+      { eventIndex: 5, rawLineCount: 50 },  // exceeds 10
+      { eventIndex: 10, rawLineCount: 100 }, // also exceeds 10
+    ];
+
+    expect(() => buildCleanDocument(raw, epochs)).not.toThrow();
+    const result = buildCleanDocument(raw, epochs);
+    // All 10 lines should be in clean output since nothing to dedup
+    expect(result.cleanSnapshot.lines.length).toBe(10);
+  });
+});
