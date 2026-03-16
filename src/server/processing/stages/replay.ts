@@ -47,7 +47,14 @@ export function replay(
       workerData: { header, events, boundaries },
     });
 
+    // Guard against double-settlement: if the worker crashes, both 'error' and
+    // 'exit' fire. Without this flag, reject() would be called twice — an
+    // unhandled rejection under --unhandled-rejections=throw (Node 15+ default).
+    let settled = false;
+
     worker.once('message', (msg: { ok: boolean; result?: ReplayResult; error?: string }) => {
+      if (settled) return;
+      settled = true;
       if (msg.ok && msg.result !== undefined) {
         resolve(msg.result);
       } else {
@@ -55,9 +62,16 @@ export function replay(
       }
     });
 
-    worker.once('error', reject);
+    worker.once('error', (err) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    });
+
     worker.once('exit', (code) => {
+      if (settled) return;
       if (code !== 0) {
+        settled = true;
         reject(new Error(`Replay worker exited with code ${code}`));
       }
     });
