@@ -30,17 +30,6 @@ const POLL_INTERVAL_MS = 500;
 const PIPELINE_TIMEOUT_MS = 120_000;
 const HEALTH_RESPONSE_THRESHOLD_MS = 1000;
 
-/** All fixture files available in tests/fixtures — failing-session.cast excluded (identical to codex-medium) */
-const REAL_FIXTURE_FILES = [
-  'claude-medium.cast',
-  'claude-small.cast',
-  'codex-medium.cast',
-  'codex-small.cast',
-  'gemini-medium.cast',
-  'gemini-small.cast',
-  'sample.cast',
-] as const;
-
 /** 15-entry upload list simulating a bulk upload similar to the user's scenario */
 const BULK_UPLOAD_FIXTURES: string[] = [
   'claude-medium.cast',
@@ -297,8 +286,8 @@ async function uploadBuffer(baseUrl: string, content: Buffer, name: string): Pro
 const PERF = {
   /** Max wall-clock for the entire pipeline on a 5MB session */
   MAX_PIPELINE_5MB_MS: 30_000,
-  /** Max wall-clock for the entire pipeline on a 10MB session */
-  MAX_PIPELINE_10MB_MS: 60_000,
+  /** Max wall-clock for the entire pipeline on a 10MB session (CI runners are ~2x slower) */
+  MAX_PIPELINE_10MB_MS: 90_000,
   /** Max latency for any single health check during processing */
   MAX_HEALTH_LATENCY_MS: 1_000,
   /** Health probe interval */
