@@ -28,15 +28,20 @@ export default defineConfig({
     outDir: 'dist/server',
     emptyOutDir: true,
     rollupOptions: {
-      input: 'src/server/start.ts',
+      input: {
+        start: 'src/server/start.ts',
+        // Pipeline worker must be a separate file — loaded by WorkerPool via new Worker(path)
+        'workers/pipeline_worker': 'src/server/workers/pipeline_worker.ts',
+      },
       output: {
-        entryFileNames: 'start.js',
+        entryFileNames: '[name].js',
         format: 'esm',
       },
       external: [
         /^node:/,
         'pino',
         'pino-pretty',
+        'esbuild',
         // vt-wasm loads .wasm binary via readFileSync relative to import.meta.dirname
         // Must stay external so the path resolves correctly at runtime
         /.*vt-wasm.*/,
