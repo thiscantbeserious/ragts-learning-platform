@@ -199,8 +199,6 @@ export class WorkerPool<TPayload, TResult> {
     return new Promise<void>((resolve, reject) => {
       const worker = new Worker(this.workerPath, {
         workerData: this.workerData,
-        // tsx/vitest registers a loader; propagate it for .ts worker scripts
-        execArgv: ['--import', 'tsx'],
       });
 
       slot.worker = worker;

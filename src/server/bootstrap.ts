@@ -44,7 +44,6 @@ export async function init(): Promise<ServerRuntime> {
   const eventBus = new EmitterEventBusImpl();
   const orchestrator = new PipelineOrchestrator(eventBus, jobQueue, {
     sessionRepository,
-    storageAdapter,
   });
 
   // Subscribe event log to every pipeline event type BEFORE start() so recovered

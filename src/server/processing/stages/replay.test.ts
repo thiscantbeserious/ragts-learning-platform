@@ -307,9 +307,8 @@ describe('replay() — section boundary capture', () => {
 // ---------------------------------------------------------------------------
 
 describe('replay() — error handling', () => {
-  it('rejects when worker sends error response (ok: false)', async () => {
-    // Pass events as null — the worker tries to iterate events.length which throws
-    // on a non-array, causing parentPort.postMessage({ ok: false, error: ... })
+  it('rejects when events is null (TypeError on .length access)', async () => {
+    // Pass events as null — replaySync() calls events.length which throws TypeError
     const badEvents = null as unknown as AsciicastEvent[];
 
     await expect(replay(HEADER, badEvents, [])).rejects.toThrow();
@@ -346,12 +345,16 @@ describe('replay() — error handling', () => {
 // ---------------------------------------------------------------------------
 
 describe('replay() — worker crash paths', () => {
-  it('rejects when worker sends ok:false with a specific error message', async () => {
+  it('resolves when events is a string (characters are skipped as non-events)', async () => {
+    // String has .length but each element is a character — skipped since
+    // eventType is undefined, which is neither 'r' nor 'o'.
     const badEvents = 'not-an-array' as unknown as AsciicastEvent[];
-    await expect(replay(HEADER, badEvents, [])).rejects.toThrow();
+    const result = await replay(HEADER, badEvents, []);
+    expect(result.rawSnapshot).toBeDefined();
+    expect(result.epochBoundaries).toEqual([]);
   });
 
-  it('settled flag prevents double rejection (message followed by exit)', async () => {
+  it('resolves successfully for a normal session', async () => {
     const events: AsciicastEvent[] = [[0.1, 'o', 'test\r\n']];
     const result = await replay(HEADER, events, []);
     expect(result.rawSnapshot).toBeDefined();

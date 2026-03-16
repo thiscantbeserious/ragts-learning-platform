@@ -23,7 +23,6 @@ import { PipelineOrchestrator } from '../../src/server/processing/pipeline_orche
 import { createApp } from '../../src/server/app.js';
 import type { AppDeps } from '../../src/server/app.js';
 import type { DatabaseContext } from '../../src/server/db/database_adapter.js';
-import { initVt } from '#vt-wasm';
 
 const FIXTURES_DIR = join(process.cwd(), 'fixtures');
 const POLL_INTERVAL_MS = 500;
@@ -108,8 +107,6 @@ async function uploadFixture(baseUrl: string, fixture: string, index: number): P
 }
 
 beforeAll(async () => {
-  await initVt();
-
   const testDir = mkdtempSync(join(tmpdir(), 'ragts-stress-test-'));
 
   const impl = new SqliteDatabaseImpl();
@@ -118,7 +115,6 @@ beforeAll(async () => {
   const eventBus = new EmitterEventBusImpl();
   const orchestrator = new PipelineOrchestrator(eventBus, ctx.jobQueue, {
     sessionRepository: ctx.sessionRepository,
-    storageAdapter: ctx.storageAdapter,
   });
   await orchestrator.start();
 
