@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import ShellHeader from './ShellHeader.vue';
+import ToolbarPill from './toolbar/ToolbarPill.vue';
 
 function createTestRouter() {
   return createRouter({
@@ -62,6 +63,13 @@ describe('ShellHeader', () => {
       const wrapper = await mountShellHeader();
       const header = wrapper.find('header');
       expect(header.attributes('aria-label')).toBeTruthy();
+    });
+  });
+
+  describe('toolbar', () => {
+    it('renders the ToolbarPill component inside the right area', async () => {
+      const wrapper = await mountShellHeader();
+      expect(wrapper.findComponent(ToolbarPill).exists()).toBe(true);
     });
   });
 });
