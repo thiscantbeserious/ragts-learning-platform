@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toolbar Draft 2b Iconoir — Glass Pill in Real App Shell | Erika</title>
+  <link rel="stylesheet" href="../../styles/layout.css">
+  <link rel="stylesheet" href="../../styles/shell.css">
+  <link rel="stylesheet" href="../../styles/components.css">
+  <link rel="stylesheet" href="../../styles/icons.css">
+  <style>
+    /* ================================================================
+       Draft 2b: Glass Pill Toolbar placed in the REAL application shell.
+       Faithful reproduction of the running Erika app at localhost:5173.
+       ================================================================ */
+
+    /* Override: allow dropdown to overflow the header grid row */
+    .spatial-shell__header {
+      overflow: visible;
+      z-index: 50;
+    }
+
+    /* --- Brand Mark (matches BrandMark.vue scoped styles exactly) --- */
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);
+      padding-inline: var(--space-4);
+      background: var(--bg-surface);
+      position: relative;
+      box-shadow: inset -1px 0 0 var(--border-default);
+    }
+
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+    }
+
+    .brand-mark__logotype {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-mark__icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+      box-shadow:
+        0 0 8px color-mix(in srgb, var(--accent-primary) 15%, transparent),
+        inset 0 0 6px color-mix(in srgb, var(--accent-primary) 8%, transparent);
+      flex-shrink: 0;
+    }
+
+    .brand-mark__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-primary);
+      line-height: var(--lh-lg);
+      text-shadow: 0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    }
+
+    /* --- Shell Header (matches ShellHeader.vue scoped styles exactly) --- */
+    .shell-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--header-height);
+      padding-inline: var(--space-6);
+      background: var(--bg-surface);
+      position: relative;
+      overflow: visible;
+    }
+
+    .shell-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--accent-primary) 60%, transparent),
+        color-mix(in srgb, var(--accent-secondary) 80%, transparent)
+      );
+    }
+
+    .shell-header__left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      min-width: 0;
+      flex: 1;
+    }
+
+    .shell-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    /* --- Breadcrumb (matches ShellHeader.vue breadcrumb styles) --- */
+    .shell-header__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .shell-header__breadcrumb-home {
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .shell-header__breadcrumb-home:hover {
+      color: var(--text-secondary);
+      text-decoration: underline;
+    }
+
+    .shell-header__breadcrumb-sep {
+      color: var(--text-disabled);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .shell-header__breadcrumb-current {
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    /* --- Sidebar Panel (matches SidebarPanel.vue scoped styles) --- */
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-surface);
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .sidebar__search-wrap {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__search-input {
+      width: 100%;
+      height: var(--input-height-sm);
+      padding: 0 var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      box-sizing: border-box;
+    }
+
+    .sidebar__search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* --- Filter Pills (matches SidebarPanel.vue filter styles) --- */
+    .sidebar__filters {
+      padding: var(--space-1\.5) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--space-1);
+    }
+
+    .sidebar__filters .filter-pill {
+      padding: 2px var(--space-1\.5);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      border-radius: var(--radius-sm);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    /* --- Session List --- */
+    .sidebar__session-list {
+      list-style: none;
+      margin: 0;
+      padding: var(--space-1) 0;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* --- Session Card (matches SessionCard.vue scoped styles) --- */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1\.5) var(--space-3);
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+      transition: background var(--duration-fast) var(--easing-default),
+                  border-color var(--duration-fast) var(--easing-default);
+    }
+
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1\.5);
+      min-width: 0;
+    }
+
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+
+    .session-card__status-dot--processing {
+      background: var(--accent-primary);
+      animation: status-pulse 1.4s ease-in-out infinite;
+    }
+
+    .session-card__status-dot--failed {
+      background: var(--status-error);
+    }
+
+    @keyframes status-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+
+    .session-card__meta {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: var(--space-2);
+      padding-left: calc(6px + var(--space-1\.5));
+      display: flex;
+    }
+
+    .session-card__age {
+      margin-left: auto;
+    }
+
+    .session-card__processing-text {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--accent-primary);
+      padding-left: calc(6px + var(--space-1\.5));
+    }
+
+    .session-card__processing-text::after {
+      content: '';
+      animation: ellipsis 1.8s steps(4, end) infinite;
+    }
+
+    @keyframes ellipsis {
+      0%  { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+    }
+
+    /* Swoosh for processing cards */
+    .session-card--processing {
+      cursor: default;
+    }
+
+    .session-card--processing .session-card__filename {
+      color: var(--text-muted);
+    }
+
+    .session-card--processing::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        105deg,
+        transparent 0%,
+        color-mix(in srgb, var(--accent-primary) 3%, transparent) 30%,
+        color-mix(in srgb, var(--accent-primary) 8%, transparent) 40%,
+        color-mix(in srgb, var(--accent-primary) 15%, transparent) 50%,
+        color-mix(in srgb, var(--accent-primary) 8%, transparent) 60%,
+        color-mix(in srgb, var(--accent-primary) 3%, transparent) 70%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+      animation: swoosh-sweep 3s ease-in-out infinite;
+    }
+
+    @keyframes swoosh-sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    /* --- Sidebar Footer --- */
+    .sidebar__footer {
+      padding: var(--space-3);
+      border-top: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__new-session-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* --- Session Detail View (matches SessionDetailView.vue) --- */
+    .session-detail-view {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+      overflow-y: auto;
+      padding: var(--space-6);
+    }
+
+    /* --- Terminal Chrome (matches SessionContent.vue) --- */
+    .terminal-chrome {
+      font-family: var(--font-mono);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .terminal-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    /* --- Section Header (matches SectionHeader.vue + components.css) --- */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      text-align: left;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      border: none;
+      width: 100%;
+      padding: var(--space-2) var(--space-4);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-default);
+      color: var(--text-primary);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .section-header--detected {
+      border-left: 2px solid var(--accent-primary);
+    }
+
+    .section-header__chevron {
+      flex-shrink: 0;
+      color: var(--text-muted);
+    }
+
+    .section-header__label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+
+    .section-header__range {
+      flex-shrink: 0;
+      min-width: 18ch;
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+    }
+
+    .section-header__badge {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    /* --- Terminal Content Lines --- */
+    .terminal-line {
+      display: flex;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-mono);
+    }
+
+    .terminal-line__number {
+      display: inline-block;
+      min-width: 3ch;
+      padding-right: var(--space-3);
+      padding-left: var(--space-3);
+      text-align: right;
+      color: var(--text-disabled);
+      user-select: none;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-default);
+    }
+
+    .terminal-line__content {
+      padding-left: var(--space-3);
+      white-space: pre;
+      color: var(--terminal-text);
+    }
+
+    /* Background for the terminal body */
+    .terminal-body {
+      background: var(--terminal-bg);
+      padding: var(--space-2) 0;
+    }
+
+    /* ================================================================
+       GLASS PILL TOOLBAR (from Draft 2)
+       ================================================================ */
+
+    .toolbar-pill {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 3px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 212, 255, 0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 212, 255, 0.15);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.06), inset 0 0 8px rgba(0, 212, 255, 0.03);
+    }
+
+    .toolbar-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--duration-normal) var(--easing-default);
+      position: relative;
+      color: var(--text-secondary);
+    }
+
+    .toolbar-btn:hover {
+      background: rgba(0, 212, 255, 0.12);
+      border-color: rgba(0, 212, 255, 0.3);
+      color: var(--accent-primary);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+
+    .toolbar-btn .icon {
+      color: inherit;
+    }
+
+    /* --- Progress Ring Pipeline Status --- */
+    .pipeline-ring-trigger {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: 30px;
+      padding: 0 var(--space-3) 0 var(--space-1);
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      transition: all var(--duration-normal) var(--easing-default);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+    }
+
+    .pipeline-ring-trigger:hover {
+      background: rgba(0, 212, 255, 0.12);
+      border-color: rgba(0, 212, 255, 0.3);
+      color: var(--accent-primary);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+
+    /* SVG Progress Ring */
+    .progress-ring {
+      width: 24px;
+      height: 24px;
+      transform: rotate(-90deg);
+      flex-shrink: 0;
+    }
+
+    .progress-ring__bg {
+      fill: none;
+      stroke: rgba(0, 212, 255, 0.12);
+      stroke-width: 2.5;
+    }
+
+    .progress-ring__fill {
+      fill: none;
+      stroke: var(--accent-primary);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-dasharray: 56.55;
+      stroke-dashoffset: 32.79;
+      transition: stroke-dashoffset 0.5s ease;
+      filter: drop-shadow(0 0 3px rgba(0, 212, 255, 0.5));
+    }
+
+    .ring-count {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: var(--weight-bold);
+      fill: var(--accent-primary);
+      text-anchor: middle;
+      dominant-baseline: central;
+      transform: rotate(90deg);
+      transform-origin: 12px 12px;
+    }
+
+    /* --- Pipeline Dropdown --- */
+    .pipeline-wrap {
+      position: relative;
+    }
+
+    .pipeline-dropdown {
+      position: absolute;
+      top: calc(100% + var(--space-3));
+      right: -4px;
+      width: 340px;
+      background: rgba(28, 28, 50, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 212, 255, 0.08);
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    .pipeline-dropdown__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    }
+
+    .pipeline-dropdown__title {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+    }
+
+    .pipeline-dropdown__summary {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--accent-primary);
+    }
+
+    .pipeline-dropdown__section {
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .pipeline-dropdown__section + .pipeline-dropdown__section {
+      border-top: 1px solid rgba(0, 212, 255, 0.06);
+    }
+
+    .pipeline-dropdown__label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: var(--weight-medium);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      margin-bottom: var(--space-2);
+    }
+
+    .pipeline-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-1\.5) 0;
+    }
+
+    .pipeline-item__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pipeline-item__status {
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .mini-spinner {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid rgba(0, 212, 255, 0.2);
+      border-top-color: var(--accent-primary);
+      border-radius: var(--radius-full);
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .queue-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--status-warning);
+      flex-shrink: 0;
+      opacity: 0.6;
+    }
+
+    /* --- Pill Separator --- */
+    .toolbar-pill__separator {
+      width: 1px;
+      height: 18px;
+      background: rgba(0, 212, 255, 0.15);
+      flex-shrink: 0;
+    }
+
+    /* --- User Avatar --- */
+    .toolbar-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(255, 77, 106, 0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--duration-normal) var(--easing-default);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-bold);
+    }
+
+    .toolbar-avatar:hover {
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="spatial-shell">
+
+    <!-- ============================================================
+         BRAND MARK — exact replica of BrandMark.vue
+         ============================================================ -->
+    <div class="spatial-shell__brand brand-mark">
+      <a href="/" class="brand-mark__logotype">
+        <div class="brand-mark__icon">E</div>
+        <span class="brand-mark__name">Erika</span>
+      </a>
+    </div>
+
+    <!-- ============================================================
+         SHELL HEADER — exact replica of ShellHeader.vue
+         + Draft 2 glass pill toolbar in the __right section
+         ============================================================ -->
+    <header class="spatial-shell__header shell-header" aria-label="Application header">
+      <div class="shell-header__left">
+        <nav class="shell-header__breadcrumb" aria-label="Breadcrumb">
+          <a href="#" class="shell-header__breadcrumb-home">Sessions</a>
+          <span class="shell-header__breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="shell-header__breadcrumb-current">gemini-pattern-analysis.cast</span>
+        </nav>
+      </div>
+      <div class="shell-header__right">
+        <!-- Glass Pill Toolbar -->
+        <div class="toolbar-pill">
+          <!-- Pipeline Ring -->
+          <div class="pipeline-wrap">
+            <button class="pipeline-ring-trigger">
+              <svg class="progress-ring" viewBox="0 0 24 24">
+                <circle class="progress-ring__bg" cx="12" cy="12" r="9" />
+                <circle class="progress-ring__fill" cx="12" cy="12" r="9" />
+                <text class="ring-count" x="12" y="12">3</text>
+              </svg>
+              <span style="color: var(--text-secondary);">Pipeline</span>
+            </button>
+            <!-- Dropdown open -->
+            <div class="pipeline-dropdown">
+              <div class="pipeline-dropdown__header">
+                <span class="pipeline-dropdown__title">Pipeline Status</span>
+                <span class="pipeline-dropdown__summary">1 active / 2 queued</span>
+              </div>
+              <div class="pipeline-dropdown__section">
+                <div class="pipeline-dropdown__label">Processing</div>
+                <div class="pipeline-item">
+                  <div class="mini-spinner"></div>
+                  <span class="pipeline-item__name">aggressive-terminal-noise-red...</span>
+                  <span class="pipeline-item__status">42%</span>
+                </div>
+              </div>
+              <div class="pipeline-dropdown__section">
+                <div class="pipeline-dropdown__label">Queued</div>
+                <div class="pipeline-item">
+                  <div class="queue-dot"></div>
+                  <span class="pipeline-item__name">extraction-pipeline-config-mi...</span>
+                  <span class="pipeline-item__status">#1</span>
+                </div>
+                <div class="pipeline-item">
+                  <div class="queue-dot"></div>
+                  <span class="pipeline-item__name">clipboard-copy-feature-sdlc.cast</span>
+                  <span class="pipeline-item__status">#2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Separator -->
+          <div class="toolbar-pill__separator"></div>
+
+          <!-- Settings -->
+          <button class="toolbar-btn" title="Settings">
+            <span class="toolbar-icon" data-icon="settings" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+          </button>
+
+          <!-- Bell -->
+          <button class="toolbar-btn" title="Notifications">
+            <span class="toolbar-icon" data-icon="bell" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+          </button>
+
+          <!-- Separator -->
+          <div class="toolbar-pill__separator"></div>
+
+          <!-- User Avatar -->
+          <div class="toolbar-avatar">S</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         SIDEBAR — exact replica of SidebarPanel.vue
+         Includes search, filter pills, session list, and footer
+         ============================================================ -->
+    <nav class="spatial-shell__sidebar sidebar-panel" aria-label="Session list">
+      <!-- Search input -->
+      <div class="sidebar__search-wrap">
+        <input
+          type="search"
+          class="sidebar__search-input"
+          placeholder="Filter sessions..."
+          aria-label="Filter sessions by filename"
+        />
+      </div>
+
+      <!-- Filter pills -->
+      <div class="sidebar__filters filter-pills" role="group" aria-label="Filter by status">
+        <button class="filter-pill filter-pill--active" aria-pressed="true" type="button">All</button>
+        <button class="filter-pill" aria-pressed="false" type="button">Processing</button>
+        <button class="filter-pill" aria-pressed="false" type="button">Ready</button>
+        <button class="filter-pill" aria-pressed="false" type="button">Failed</button>
+      </div>
+
+      <!-- Session list -->
+      <ul class="sidebar__session-list">
+        <!-- Selected session -->
+        <li>
+          <div class="session-card session-card--selected">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">gemini-pattern-analysis.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>50 sections</span>
+              <span class="session-card__age">5h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <!-- Processing session (with swoosh) -->
+        <li>
+          <div class="session-card session-card--processing">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--processing"></span>
+              <span class="session-card__filename">aggressive-terminal-noise-red...</span>
+            </div>
+            <div class="session-card__processing-text">Processing</div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">aggressive-terminal-noise-red...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>122 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">gemini-pattern-analysis.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>50 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_260206_213638.ca...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>83 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">terminal-transform-dedup-migr...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>15 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">test.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>4 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">sim-sanl_0ta7a6r.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>1 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_260205_211940.ca...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>0 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_260205_212404.ca...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>0 sections</span>
+              <span class="session-card__age">6h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">agnt-ses-rec_main__0targvg.ca...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>50 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">clipboard-copy-feature-sdlc.c...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>128 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">extraction-pipeline-config-mi...</span>
+            </div>
+            <div class="session-card__meta">
+              <span>203 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">anon-1.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>50 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <!-- Failed sessions -->
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--failed"></span>
+              <span class="session-card__filename">edit-acceptance-workflow-impl.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>0 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--failed"></span>
+              <span class="session-card__filename">agnt-ses-rec_main__0tb1fwp.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>0 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+
+        <li>
+          <div class="session-card">
+            <div class="session-card__row">
+              <span class="session-card__status-dot session-card__status-dot--ready"></span>
+              <span class="session-card__filename">env-ag-fir_0ta77yf.cast</span>
+            </div>
+            <div class="session-card__meta">
+              <span>36 sections</span>
+              <span class="session-card__age">15h ago</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Footer -->
+      <div class="sidebar__footer">
+        <button class="sidebar__new-session-btn btn btn--sm btn--primary" type="button">+ New Session</button>
+      </div>
+    </nav>
+
+    <!-- ============================================================
+         MAIN CONTENT — session detail with terminal sections
+         Matches the real SessionDetailView + SessionContent layout
+         ============================================================ -->
+    <main id="main-content" class="spatial-shell__main" tabindex="-1">
+      <div class="session-detail-view">
+        <div class="terminal-chrome">
+          <div class="terminal-scroll">
+            <!-- Section 1 header -->
+            <button class="section-header section-header--detected">
+              <div class="section-header__chevron">
+                <span class="toolbar-icon" data-icon="chevron-down" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+              </div>
+              <span class="section-header__label">Section 1</span>
+              <span class="section-header__range">L1-L3572 (3572 lines)</span>
+              <span class="badge badge--sm badge--accent section-header__badge">Detected</span>
+            </button>
+
+            <!-- Terminal body with line numbers -->
+            <div class="terminal-body">
+              <!-- Mocked terminal output matching the real session screenshot -->
+              <div class="terminal-line">
+                <span class="terminal-line__number">1</span>
+                <span class="terminal-line__content" style="color: var(--term-color-6);">                                                                  </span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">2</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-14);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span><span style="color: var(--term-color-4);">    </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">3</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-14);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span><span style="color: var(--term-color-4);">    </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">4</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-13);">   </span><span style="color: var(--term-color-5);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span><span style="color: var(--term-color-4);">    </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">5</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-14);">  </span><span style="color: var(--term-color-13);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span><span style="color: var(--term-color-4);">    </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">6</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-14);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span><span style="color: var(--term-color-4);">    </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">7</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">8</span>
+                <span class="terminal-line__content">Tips for getting started:</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">9</span>
+                <span class="terminal-line__content">  1. Ask questions, edit files, or run commands.</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">10</span>
+                <span class="terminal-line__content">  2. Be specific for the best results.</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">11</span>
+                <span class="terminal-line__content">  3. <span style="color: var(--accent-primary);">/help</span> for more information.</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">12</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">13</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-14);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">14</span>
+                <span class="terminal-line__content"><span style="color: var(--term-color-12);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-14);">  </span><span style="color: var(--term-color-4);">   </span><span style="color: var(--term-color-6);">  </span><span style="color: var(--term-color-12);">   </span></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">15</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">16</span>
+                <span class="terminal-line__content" style="border-left: 2px solid var(--text-muted); padding-left: var(--space-2); margin-left: var(--space-2);">Gemini 3 Flash and Pro are now available.</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">17</span>
+                <span class="terminal-line__content" style="border-left: 2px solid var(--text-muted); padding-left: var(--space-2); margin-left: var(--space-2);">Enable "Preview features" in /settings.</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">18</span>
+                <span class="terminal-line__content" style="border-left: 2px solid var(--text-muted); padding-left: var(--space-2); margin-left: var(--space-2);">Learn more at https://goo.gle/enable-preview-features</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">19</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">20</span>
+                <span class="terminal-line__content"><span style="color: var(--accent-primary);">&gt;</span> can you understand the current project? i want to have a detailed session to</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">21</span>
+                <span class="terminal-line__content">    ahve all kind of weird output that you can produce</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">22</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">23</span>
+                <span class="terminal-line__content"><span style="color: var(--status-success);">*</span> Of course. I see that your current working directory,</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">24</span>
+                <span class="terminal-line__content">    <span style="color: var(--accent-primary);">/Users/simon.sanladerer/git/simon/</span>, contains a variety of distinct projects,</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">25</span>
+                <span class="terminal-line__content">    including a Rust project (<span style="color: var(--accent-primary);">agent-session-recorder</span>), a Next.js project</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">26</span>
+                <span class="terminal-line__content">    (<span style="color: var(--accent-primary);">case-conf-workshop</span>), and a Go project (<span style="color: var(--accent-primary);">paperless-gpt</span>), among others.</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">27</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">28</span>
+                <span class="terminal-line__content">    I'm ready to start. To make this session as interesting as possible, could you</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">29</span>
+                <span class="terminal-line__content">    clarify what you mean by "weird output"? For example, are you interested in:</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">30</span>
+                <span class="terminal-line__content"></span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">31</span>
+                <span class="terminal-line__content">      * Generating code in an esoteric programming language?</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">32</span>
+                <span class="terminal-line__content">      * Creating complex data visualizations in the terminal?</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">33</span>
+                <span class="terminal-line__content">      * A "creative" use of my available tools?</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">34</span>
+                <span class="terminal-line__content">      * Something else entirely?</span>
+              </div>
+              <div class="terminal-line">
+                <span class="terminal-line__number">35</span>
+                <span class="terminal-line__content"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Stroke controls panel -->
+    <div id="stroke-controls" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:200;display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-md);font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">
+      <label>Stroke</label>
+      <input type="range" id="sw-slider" min="0.5" max="3" step="0.25" value="1.5" style="width:100px;accent-color:var(--accent-primary);">
+      <span id="sw-value">1.5</span>
+      <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+        <input type="checkbox" id="abs-toggle" style="accent-color:var(--accent-primary);">
+        Abs
+      </label>
+    </div>
+
+    <!-- Toast stack -->
+    <div style="position:fixed;bottom:24px;right:24px;z-index:100;">
+      <div class="toast-stack">
+        <div class="toast toast--success">
+          <div class="toast__icon">
+            <span class="toolbar-icon" data-icon="check-circle" style="width:20px;height:20px;display:inline-flex;color:currentColor;"></span>
+          </div>
+          <div class="toast__content">
+            <div class="toast__title">Session uploaded</div>
+            <div class="toast__message">debug-api-auth-flow.cast has been processed successfully.</div>
+          </div>
+          <button class="toast__close">
+            <span class="toolbar-icon" data-icon="close" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+          </button>
+        </div>
+        <div class="toast toast--warning">
+          <div class="toast__icon">
+            <span class="toolbar-icon" data-icon="warning" style="width:20px;height:20px;display:inline-flex;color:currentColor;"></span>
+          </div>
+          <div class="toast__content">
+            <div class="toast__title">Large file detected</div>
+            <div class="toast__message">Processing may take longer than usual for files over 10MB.</div>
+          </div>
+          <button class="toast__close">
+            <span class="toolbar-icon" data-icon="close" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+          </button>
+        </div>
+        <div class="toast toast--error">
+          <div class="toast__icon">
+            <span class="toolbar-icon" data-icon="error-circle" style="width:20px;height:20px;display:inline-flex;color:currentColor;"></span>
+          </div>
+          <div class="toast__content">
+            <div class="toast__title">Upload failed</div>
+            <div class="toast__message">Invalid file format. Only .cast files are supported.</div>
+          </div>
+          <button class="toast__close">
+            <span class="toolbar-icon" data-icon="close" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+          </button>
+        </div>
+        <div class="toast toast--info">
+          <div class="toast__icon">
+            <span class="toolbar-icon" data-icon="info-circle" style="width:20px;height:20px;display:inline-flex;color:currentColor;"></span>
+          </div>
+          <div class="toast__content">
+            <div class="toast__title">Processing started</div>
+            <div class="toast__message">Section detection is running. This page will update automatically.</div>
+          </div>
+          <button class="toast__close">
+            <span class="toolbar-icon" data-icon="close" style="width:16px;height:16px;display:inline-flex;color:currentColor;"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    (function () {
+      const map = {
+        'settings': 'settings', 'bell': 'bell', 'chevron-down': 'nav-arrow-down',
+        'check-circle': 'check-circle', 'warning': 'warning-triangle',
+        'error-circle': 'xmark-circle', 'info-circle': 'info-circle', 'close': 'xmark'
+      };
+      const svgCache = {};
+      const slider = document.getElementById('sw-slider');
+      const valueEl = document.getElementById('sw-value');
+      const absToggle = document.getElementById('abs-toggle');
+
+      function applyStroke() {
+        const sw = slider.value;
+        valueEl.textContent = sw;
+        document.querySelectorAll('svg').forEach(function (svg) {
+          svg.querySelectorAll('[stroke-width]').forEach(function (el) { el.setAttribute('stroke-width', sw); });
+          if (svg.getAttribute('stroke-width')) svg.setAttribute('stroke-width', sw);
+          svg.querySelectorAll('*').forEach(function (el) {
+            if (absToggle.checked) el.setAttribute('vector-effect', 'non-scaling-stroke');
+            else el.removeAttribute('vector-effect');
+            if (el.style && el.style.strokeWidth) el.style.strokeWidth = sw + 'px';
+          });
+        });
+      }
+
+      slider.addEventListener('input', applyStroke);
+      absToggle.addEventListener('change', applyStroke);
+
+      document.querySelectorAll('[data-icon]').forEach(function (el) {
+        const name = map[el.dataset.icon] || el.dataset.icon;
+        const BASE = 'https://raw.githubusercontent.com/iconoir-icons/iconoir/main/icons/regular/';
+        fetch(BASE + name + '.svg')
+          .then(function (res) { return res.text(); })
+          .then(function (svg) {
+            el.innerHTML = svg;
+            const s = el.querySelector('svg');
+            if (s) { s.style.width = '100%'; s.style.height = '100%'; s.setAttribute('stroke', 'currentColor'); }
+            applyStroke();
+          })
+          .catch(function () {
+            // Fetch failed (e.g. offline) — leave element empty, icon silently absent.
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

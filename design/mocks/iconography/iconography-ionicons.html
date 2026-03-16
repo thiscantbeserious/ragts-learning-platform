@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ionicons Outline Comparison — Erika Design Guide</title>
+  <link rel="stylesheet" href="../../styles/layout.css">
+  <link rel="stylesheet" href="../../styles/page.css">
+  <link rel="stylesheet" href="../../styles/components.css">
+  <link rel="stylesheet" href="../../styles/icons.css">
+  <style>
+    /* ========================
+       Iconography Catalog — Ionicons Sharp
+       Tokens + grid utilities imported from ../styles/layout.css
+       Page scaffold imported from ../styles/page.css
+       Component styles imported from ../styles/components.css
+       Icon utilities imported from ../styles/icons.css
+       This file contains only page-specific showcase styles
+       ======================== */
+
+    .icon-table { width: 100%; border-collapse: collapse; }
+    .icon-table th {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      font-weight: var(--weight-medium); color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: var(--tracking-wider);
+      padding: var(--space-2) var(--space-3); text-align: left;
+      border-bottom: 1px solid var(--border-strong);
+    }
+    .icon-table td {
+      padding: var(--space-3) var(--space-3);
+      border-bottom: 1px solid var(--border-default); vertical-align: middle;
+    }
+    .icon-table tr:last-child td { border-bottom: none; }
+    .icon-table__name { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-primary); }
+    .icon-table__class { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); }
+
+    /* Inline SVG icon rendering */
+    .ion-icon {
+      display: inline-flex; align-items: center;
+      justify-content: center; color: inherit; flex-shrink: 0;
+    }
+    .ion-icon svg { display: block; width: 100%; height: 100%; }
+    .ion-icon--xs { width: 12px; height: 12px; }
+    .ion-icon--sm { width: 16px; height: 16px; }
+    .ion-icon--md { width: 20px; height: 20px; }
+    .ion-icon--lg { width: 24px; height: 24px; }
+    .ion-icon--xl { width: 32px; height: 32px; }
+
+    .color-demo { display: flex; align-items: center; gap: var(--space-6); flex-wrap: wrap; }
+    .color-demo__item { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+    .color-demo__label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); }
+
+    .baseline-row { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); }
+    .baseline-row__label { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); min-width: 60px; flex-shrink: 0; }
+    .baseline-row__text--xs  { font-size: var(--text-xs);   line-height: var(--leading-relaxed); color: var(--text-primary); }
+    .baseline-row__text--sm  { font-size: var(--text-sm);   line-height: var(--leading-relaxed); color: var(--text-primary); }
+    .baseline-row__text--base{ font-size: var(--text-base); line-height: var(--leading-normal);  color: var(--text-primary); }
+    .baseline-row__text--lg  { font-size: var(--text-lg);   line-height: var(--leading-snug);    color: var(--text-primary); }
+    .baseline-row__text--xl  { font-size: var(--text-xl);   line-height: var(--leading-snug);    color: var(--text-primary); }
+    .baseline-row__text--2xl { font-size: var(--text-2xl);  line-height: var(--leading-tight);   color: var(--text-primary); }
+
+    @media (max-width: 767px) {
+      .section:has(.icon-table) { overflow-x: auto; }
+      .icon-table th:first-child, .icon-table td:first-child { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="page">
+      <h1 class="page__title">Ionicons Sharp Comparison</h1>
+      <p class="page__subtitle">Ionicons Sharp variant (512x512, no rounded caps/joins — angular/geometric). Mapped to Erika icon names.</p>
+
+      <section class="section">
+        <h2 class="section__title">Size Classes Reference</h2>
+        <p class="section__description">Icon sizes are mapped to spacing tokens. Each size class applies a fixed width and height. All mask-image SVGs share a 20x20 viewBox for consistent scaling.</p>
+        <table class="icon-table">
+          <thead><tr><th>Class</th><th>Size</th><th>Token</th><th>Usage</th></tr></thead>
+          <tbody>
+            <tr><td><span class="icon-table__name">.icon--xs</span></td><td><span class="icon-table__class">12px</span></td><td><span class="icon-table__class">--space-3</span></td><td><span class="icon-table__class">Inline with small text</span></td></tr>
+            <tr><td><span class="icon-table__name">.icon--sm</span></td><td><span class="icon-table__class">16px</span></td><td><span class="icon-table__class">--space-4</span></td><td><span class="icon-table__class">Badges, small buttons, inline</span></td></tr>
+            <tr><td><span class="icon-table__name">.icon--md</span></td><td><span class="icon-table__class">20px</span></td><td><span class="icon-table__class">--space-5</span></td><td><span class="icon-table__class">Default, most components</span></td></tr>
+            <tr><td><span class="icon-table__name">.icon--lg</span></td><td><span class="icon-table__class">24px</span></td><td><span class="icon-table__class">--space-6</span></td><td><span class="icon-table__class">Upload zone, empty state</span></td></tr>
+            <tr><td><span class="icon-table__name">.icon--xl</span></td><td><span class="icon-table__class">32px</span></td><td><span class="icon-table__class">--space-8</span></td><td><span class="icon-table__class">Hero, feature icons</span></td></tr>
+            <tr><td><span class="icon-table__name">.icon--2xl</span></td><td><span class="icon-table__class">48px</span></td><td><span class="icon-table__class">--space-12</span></td><td><span class="icon-table__class">Splash, loading states</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <hr class="divider">
+
+      <section class="section" v-for="(icons, groupName) in iconGroups" :key="groupName">
+        <h2 class="section__title">{{ groupLabels[groupName] }}</h2>
+        <p class="section__description">{{ groupDescriptions[groupName] }}</p>
+        <table class="icon-table">
+          <thead>
+            <tr>
+              <th style="width: 200px;">Name</th>
+              <th>Ionicons name</th>
+              <th>xs (12)</th><th>sm (16)</th><th>md (20)</th><th>lg (24)</th><th>xl (32)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="icon in icons" :key="icon.name">
+              <td>
+                <span class="icon-table__name">{{ icon.name }}</span><br>
+                <span class="icon-table__class">{{ icon.usage }}</span>
+              </td>
+              <td><span class="icon-table__class">{{ ioniconsMap[icon.name] || '—' }}-sharp</span></td>
+              <td><div class="ion-icon ion-icon--xs" v-html="getSvg(icon.name)"></div></td>
+              <td><div class="ion-icon ion-icon--sm" v-html="getSvg(icon.name)"></div></td>
+              <td><div class="ion-icon ion-icon--md" v-html="getSvg(icon.name)"></div></td>
+              <td><div class="ion-icon ion-icon--lg" v-html="getSvg(icon.name)"></div></td>
+              <td><div class="ion-icon ion-icon--xl" v-html="getSvg(icon.name)"></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <hr class="divider">
+
+      <section class="section">
+        <h2 class="section__title">Color Inheritance</h2>
+        <p class="section__description">Ionicons Outline SVGs use stroke="currentColor". Color propagates through the SVG stroke attribute.</p>
+        <div class="color-demo">
+          <div v-for="c in colorSamples" :key="c.token" class="color-demo__item">
+            <div :style="'color: var(' + c.token + ')'" class="ion-icon ion-icon--lg" v-html="getSvg('check-circle')"></div>
+            <span class="color-demo__label">{{ c.label }}</span>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <section class="section">
+        <h2 class="section__title">Typography Baseline Match</h2>
+        <p class="section__description">Icons sized to sit inline with text at each type scale step. The icon height matches the computed line height of its paired text, keeping vertical rhythm.</p>
+        <div class="state-group">
+          <div class="baseline-row">
+            <span class="baseline-row__label">xs</span>
+            <div style="color: var(--accent-primary);" class="ion-icon ion-icon--xs" v-html="getSvg('check-circle')"></div>
+            <span class="baseline-row__text--xs">12px icon with text-xs (10px) -- inline labels, fine metadata</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">sm</span>
+            <div style="color: var(--accent-primary);" class="ion-icon ion-icon--sm" v-html="getSvg('check-circle')"></div>
+            <span class="baseline-row__text--sm">16px icon with text-sm (12px) -- badges, small buttons, compact rows</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">md</span>
+            <div style="color: var(--accent-primary);" class="ion-icon ion-icon--md" v-html="getSvg('check-circle')"></div>
+            <span class="baseline-row__text--base">20px icon with text-base (14px) -- default body text, form labels</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">lg</span>
+            <div style="color: var(--accent-primary);" class="ion-icon ion-icon--lg" v-html="getSvg('check-circle')"></div>
+            <span class="baseline-row__text--lg">24px icon with text-lg (17px) -- section titles, card headers</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">xl</span>
+            <div style="color: var(--accent-primary);" class="ion-icon ion-icon--xl" v-html="getSvg('check-circle')"></div>
+            <span class="baseline-row__text--xl">32px icon with text-xl (20px) -- page headings, hero elements</span>
+          </div>
+          <div class="baseline-row">
+            <span class="baseline-row__label">xl+</span>
+            <div style="color: var(--accent-primary);" class="ion-icon ion-icon--xl" v-html="getSvg('check-circle')"></div>
+            <span class="baseline-row__text--2xl">32px icon with text-2xl (24px) -- display headings</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, reactive } = Vue;
+
+    // SVG cache: maps erikaName -> sanitized SVG string (null while loading)
+    const svgCache = reactive({});
+    const LOADING_SVG = `<svg viewBox="0 0 512 512" fill="none" stroke="currentColor" style="opacity:0.2"><circle cx="256" cy="256" r="80"/></svg>`;
+
+    function fetchSvg(erikaName, ionName) {
+      if (erikaName in svgCache) return;
+      svgCache[erikaName] = null; // loading sentinel
+      const url = `https://raw.githubusercontent.com/ionic-team/ionicons/main/src/svg/${ionName}-outline.svg`;
+      fetch(url)
+        .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+        .then(raw => {
+          // Strip width/height from root, fix all color references to use currentColor
+          let svg = raw;
+          // Remove root width/height
+          svg = svg.replace(/<svg([^>]*)>/, (match, attrs) => {
+            attrs = attrs.replace(/ width="[^"]*"/g, '').replace(/ height="[^"]*"/g, '');
+            return `<svg${attrs}>`;
+          });
+          // Replace all hardcoded colors with currentColor
+          svg = svg.replace(/stroke:#000/g, 'stroke:currentColor');
+          svg = svg.replace(/stroke:black/g, 'stroke:currentColor');
+          svg = svg.replace(/fill:#000/g, 'fill:currentColor');
+          svg = svg.replace(/stroke="#000"/g, 'stroke="currentColor"');
+          svg = svg.replace(/fill="#000"/g, 'fill="currentColor"');
+          // For mixed icons (some Ionicons "outline" are actually filled paths):
+          // If root svg has no stroke/fill set, and child paths have no style attr, they default to fill:black
+          // Add fill="currentColor" to root svg as fallback
+          if (!svg.includes('stroke:') && !svg.includes('stroke="')) {
+            svg = svg.replace(/<svg/, '<svg fill="currentColor"');
+          }
+          svgCache[erikaName] = svg;
+        })
+        .catch(() => {
+          svgCache[erikaName] = `<svg viewBox="0 0 512 512" fill="none" stroke="currentColor"><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="200" fill="currentColor">—</text></svg>`;
+        });
+    }
+
+    const app = createApp({
+      template: document.getElementById('app').innerHTML,
+      data() {
+        return {
+          ioniconsMap: {
+            'chevron-right':'chevron-forward','chevron-down':'chevron-down','chevron-left':'chevron-back','chevron-up':'chevron-up',
+            'arrow-left':'arrow-back','arrow-right':'arrow-forward','close':'close','home':'home','menu':'menu','external-link':'open',
+            'check-circle':'checkmark-circle','warning':'warning','error-circle':'close-circle','info-circle':'information-circle',
+            'checkmark':'checkmark','x-mark':'close','help-circle':'help-circle',
+            'upload':'cloud-upload','download':'cloud-download','plus':'add','search':'search','edit':'create','trash':'trash',
+            'copy':'copy','share':'share','bookmark':'bookmark','star':'star','refresh':'refresh','link':'link',
+            'terminal':'terminal','code':'code-slash','clock':'time','sections':'reorder-three','file-check':'document-text',
+            'calendar':'calendar','document':'document','folder':'folder','tag':'pricetag','comment':'chatbubble',
+            'play':'play','pause':'pause','stop':'stop','rewind':'play-back','fast-forward':'play-forward',
+            'skip-back':'play-skip-back','skip-forward':'play-skip-forward',
+            'user':'person','settings':'settings','filter':'filter','sort':'swap-vertical','grid-view':'grid','list-view':'list',
+            'eye':'eye','eye-off':'eye-off','expand':'expand','collapse':'contract','bell':'notifications','logout':'log-out',
+          },
+          groupLabels: { navigation:'Navigation', status:'Status', actions:'Actions', content:'Content', playback:'Playback', system:'System' },
+          groupDescriptions: {
+            navigation: 'Directional and navigation controls. Used in menus, breadcrumbs, pagination, and modal close actions.',
+            status: 'Feedback indicators for success, warning, error, and info states. Used in toasts, form validation, and inline status.',
+            actions: 'User-initiated operations. Used in toolbars, context menus, session management, and bulk actions.',
+            content: 'Content type indicators and metadata display. Used in session cards, file listings, and detail views.',
+            playback: 'Terminal session replay controls. Used in the session player timeline and transport bar.',
+            system: 'Application-level controls. Used in settings, preferences, layout toggles, and account actions.',
+          },
+          iconGroups: {
+            navigation: [
+              {name:'chevron-right',usage:'Section expand'},{name:'chevron-down',usage:'Dropdown trigger'},
+              {name:'chevron-left',usage:'Previous nav'},{name:'chevron-up',usage:'Collapse / scroll up'},
+              {name:'arrow-left',usage:'Back navigation'},{name:'arrow-right',usage:'Next navigation'},
+              {name:'close',usage:'Modal close, dismiss'},{name:'home',usage:'Home / landing'},
+              {name:'menu',usage:'Mobile hamburger'},{name:'external-link',usage:'Open in new tab'},
+            ],
+            status: [
+              {name:'check-circle',usage:'Success toast, done'},{name:'warning',usage:'Warning toast'},
+              {name:'error-circle',usage:'Error toast, fail'},{name:'info-circle',usage:'Info toast'},
+              {name:'checkmark',usage:'Inline valid'},{name:'x-mark',usage:'Inline invalid'},{name:'help-circle',usage:'Help / FAQ'},
+            ],
+            actions: [
+              {name:'upload',usage:'Upload zone/button'},{name:'download',usage:'Export session'},
+              {name:'plus',usage:'Add / create'},{name:'search',usage:'Search bar'},
+              {name:'edit',usage:'Edit notes / metadata'},{name:'trash',usage:'Delete session'},
+              {name:'copy',usage:'Copy command / URL'},{name:'share',usage:'Share session'},
+              {name:'bookmark',usage:'Save session'},{name:'star',usage:'Favorite'},
+              {name:'refresh',usage:'Reload / retry'},{name:'link',usage:'Copy link'},
+            ],
+            content: [
+              {name:'terminal',usage:'Session type, core'},{name:'code',usage:'Code snippet'},
+              {name:'clock',usage:'Session duration'},{name:'sections',usage:'Section count'},
+              {name:'file-check',usage:'Session verified'},{name:'calendar',usage:'Date input'},
+              {name:'document',usage:'File / transcript'},{name:'folder',usage:'Collection / group'},
+              {name:'tag',usage:'Label / category'},{name:'comment',usage:'Annotation / note'},
+            ],
+            playback: [
+              {name:'play',usage:'Start replay'},{name:'pause',usage:'Pause replay'},{name:'stop',usage:'Stop replay'},
+              {name:'rewind',usage:'Jump backward'},{name:'fast-forward',usage:'Jump forward'},
+              {name:'skip-back',usage:'Prev section'},{name:'skip-forward',usage:'Next section'},
+            ],
+            system: [
+              {name:'user',usage:'Profile / avatar'},{name:'settings',usage:'Preferences'},
+              {name:'filter',usage:'Filter sessions'},{name:'sort',usage:'Sort order'},
+              {name:'grid-view',usage:'Grid layout'},{name:'list-view',usage:'List layout'},
+              {name:'eye',usage:'Show / visible'},{name:'eye-off',usage:'Hide / hidden'},
+              {name:'expand',usage:'Fullscreen'},{name:'collapse',usage:'Exit fullscreen'},
+              {name:'bell',usage:'Notifications'},{name:'logout',usage:'Sign out'},
+            ],
+          },
+          colorSamples: [
+            {token:'--text-primary',label:'text-primary'},{token:'--accent-primary',label:'accent-primary'},
+            {token:'--accent-secondary',label:'accent-secondary'},{token:'--status-success',label:'status-success'},
+            {token:'--status-error',label:'status-error'},{token:'--status-warning',label:'status-warning'},
+            {token:'--status-info',label:'status-info'},{token:'--text-muted',label:'text-muted'},
+            {token:'--text-disabled',label:'text-disabled'},
+          ],
+        };
+      },
+      methods: {
+        getSvg(erikaName) {
+          const ionName = this.ioniconsMap[erikaName];
+          if (!ionName) return `<svg viewBox="0 0 512 512" fill="currentColor"><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="200">–</text></svg>`;
+          const cached = svgCache[erikaName];
+          if (cached === undefined) { fetchSvg(erikaName, ionName); return LOADING_SVG; }
+          return cached ?? LOADING_SVG;
+        },
+      },
+      mounted() {
+        Object.entries(this.ioniconsMap).forEach(([erikaName, ionName]) => {
+          if (!(erikaName in svgCache)) fetchSvg(erikaName, ionName);
+        });
+      },
+    });
+
+    app.mount('#app');
+  </script>
+<script src="../../guide/_inc/search-index.js"></script>
+<script src="../../guide/_inc/appbar.js"></script>
+</body>
+</html>
