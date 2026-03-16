@@ -348,13 +348,7 @@ describe('replay() — error handling', () => {
 describe('replay() — worker crash paths', () => {
   it('rejects when worker sends ok:false with a specific error message', async () => {
     const badEvents = 'not-an-array' as unknown as AsciicastEvent[];
-    try {
-      await replay(HEADER, badEvents, []);
-      expect.unreachable('Should have thrown');
-    } catch (err) {
-      expect(err).toBeInstanceOf(Error);
-      expect((err as Error).message).toBeTruthy();
-    }
+    await expect(replay(HEADER, badEvents, [])).rejects.toThrow();
   });
 
   it('settled flag prevents double rejection (message followed by exit)', async () => {
