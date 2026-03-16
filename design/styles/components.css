@@ -714,7 +714,7 @@
   align-items: stretch;
   gap: 0;
   padding: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: rgba(10, 10, 25, 0.55);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
