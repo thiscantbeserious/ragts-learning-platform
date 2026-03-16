@@ -119,4 +119,4 @@ The toolbar should be able to collapse/shrink with a smooth animation -- for exa
 - The entire icon migration introduces zero visual regressions in existing components. Icons render at the same sizes, in the same positions, with the same color inheritance behavior as before.
 
 ---
-**Sign-off:** Pending
+**Sign-off:** Approved (2026-03-16)
