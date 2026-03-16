@@ -6,17 +6,11 @@
  *
  * In development (src/): worker threads can't resolve .js → .ts imports
  * (verbatimModuleSyntax + moduleResolution: "bundler" breaks in workers).
- * We use esbuild to bundle the TS entry point to a self-contained JS file
- * at startup (~13ms). The output goes to node_modules/.cache/ so the worker
- * can resolve node_modules from the project root.
+ * A separate dev module (build_worker_dev.ts) uses esbuild to bundle the TS
+ * entry point to a self-contained JS file at startup (~13ms).
  */
 
-import { existsSync, rmSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const THIS_DIR = dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = resolve(THIS_DIR, '../../..');
+import { existsSync } from 'node:fs';
 
 /** Result of resolving a worker script. */
 export interface BuiltWorker {
@@ -37,63 +31,7 @@ export async function resolveWorkerScript(tsEntryPoint: string): Promise<BuiltWo
     return { path: jsPath, cleanup: () => {} };
   }
 
-  // Development: compile with esbuild
-  return buildWorkerScript(tsEntryPoint);
-}
-
-/**
- * Compiles a TypeScript worker entry point to a self-contained JS file via esbuild.
- * Only used in development — production uses the Vite-compiled output.
- */
-async function buildWorkerScript(entryPoint: string): Promise<BuiltWorker> {
-  const esbuild = await import('esbuild');
-  type Plugin = import('esbuild').Plugin;
-
-  const { mkdirSync } = await import('node:fs');
-  const cacheDir = join(PROJECT_ROOT, 'node_modules', '.cache', 'erika-workers');
-  mkdirSync(cacheDir, { recursive: true });
-  const outfile = join(cacheDir, `worker-${Date.now()}.mjs`);
-
-  // Resolve #vt-wasm to an absolute path since the bundled worker
-  // runs from .cache/ where package.json imports aren't available.
-  const vtWasmAbsPath = join(PROJECT_ROOT, 'packages/vt-wasm/index.js');
-
-  const resolveImportsPlugin: Plugin = {
-    name: 'resolve-package-imports',
-    setup(pluginBuild) {
-      pluginBuild.onResolve({ filter: /^#vt-wasm/ }, () => ({
-        path: vtWasmAbsPath,
-        external: true,
-      }));
-    },
-  };
-
-  // Bundle project source code but keep node_modules external
-  // to avoid CJS/ESM interop issues with packages like pino.
-  const externalNodeModulesPlugin: Plugin = {
-    name: 'external-node-modules',
-    setup(pluginBuild) {
-      pluginBuild.onResolve({ filter: /^[^./]/ }, (args) => {
-        if (args.path.startsWith('#')) return undefined;
-        return { path: args.path, external: true };
-      });
-    },
-  };
-
-  await esbuild.build({
-    entryPoints: [entryPoint],
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node22',
-    outfile,
-    plugins: [resolveImportsPlugin, externalNodeModulesPlugin],
-  });
-
-  return {
-    path: outfile,
-    cleanup: () => {
-      try { rmSync(outfile, { force: true }); } catch { /* best-effort */ }
-    },
-  };
+  // Development only: compile with esbuild (dynamic import — not available in production)
+  const { buildWithEsbuild } = await import('./build_worker_dev.js');
+  return buildWithEsbuild(tsEntryPoint);
 }
