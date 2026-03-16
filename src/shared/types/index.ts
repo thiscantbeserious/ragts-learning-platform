@@ -28,3 +28,9 @@ export type { ServiceErrorCode } from './errors.js';
 export type { Section } from './section.js';
 
 export type { SessionDetailResponse, SessionStatusResponse } from './api.js';
+
+export type {
+  PipelineSession,
+  PipelineStatusSnapshot,
+  PipelineStatusEvent,
+} from './pipeline_status.js';

@@ -24,6 +24,7 @@ import {
   RetryService,
   EventLogService,
 } from './services/index.js';
+import { PipelineStatusService } from './services/pipeline_status_service.js';
 import { handleUpload } from './routes/upload.js';
 import {
   handleListSessions,
@@ -32,6 +33,7 @@ import {
   handleRedetect,
 } from './routes/sessions.js';
 import { handleSseEvents } from './routes/sse.js';
+import { handlePipelineStatus } from './routes/pipeline_status.js';
 import { handleGetStatus } from './routes/status.js';
 import { handleRetry } from './routes/retry.js';
 import { handleGetEventLog } from './routes/events.js';
@@ -100,6 +102,12 @@ export function createApp(deps: AppDeps): Hono {
   const retryService = new RetryService({ sessionRepository, jobQueue, eventBus });
   const eventLogService = new EventLogService({ sessionRepository, eventLog });
 
+  const pipelineStatusService = new PipelineStatusService({
+    eventBus,
+    sessionAdapter: sessionRepository,
+  });
+  void pipelineStatusService.init();
+
   app.get('/api/health', async (c) => {
     try {
       await ping();
@@ -120,6 +128,8 @@ export function createApp(deps: AppDeps): Hono {
   app.get('/api/sessions/:id/events', (c) =>
     handleSseEvents(c, sessionRepository, eventBus, eventLog)
   );
+
+  app.get('/api/pipeline/status', (c) => handlePipelineStatus(c, pipelineStatusService));
 
   app.get('/api/sessions/:id/status', (c) => handleGetStatus(c, statusService));
   app.post('/api/sessions/:id/retry', (c) => handleRetry(c, retryService));

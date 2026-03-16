@@ -27,5 +27,8 @@ export type { RetryServiceDeps, RetryServiceResult, RetryResult } from './retry_
 export { EventLogService } from './event_log_service.js';
 export type { EventLogServiceDeps, EventLogResult } from './event_log_service.js';
 
+export { PipelineStatusService } from './pipeline_status_service.js';
+export type { PipelineStatusServiceDeps, PipelineStatusCallback } from './pipeline_status_service.js';
+
 export { ServiceError } from '../../shared/types/errors.js';
 export type { ServiceErrorCode } from '../../shared/types/errors.js';
