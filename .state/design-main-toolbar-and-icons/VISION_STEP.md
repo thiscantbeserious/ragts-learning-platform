@@ -20,17 +20,20 @@ The real goal is not "add three buttons to the header." It is to make Erika feel
 
 ## Design Direction
 
-The approved design (Draft 2b) establishes a **glass pill** paradigm -- a frosted, translucent container that groups functionally related controls into a single cohesive element in the header's right section. This is not a traditional toolbar of discrete buttons. It is a capsule with internal structure:
+The approved design is **Draft 2b** — the glass pill toolbar mockup.
 
-- **Frosted glass material:** `backdrop-filter: blur(12px)` with a subtle cyan-tinted background (`rgba(0, 212, 255, 0.04)`) and a 1px border at 15% cyan opacity. The pill floats on the header surface like a heads-up display element.
+> **THE MOCKUP IS THE SPEC.** The authoritative source of truth for all visual details is:
+> `.state/design-main-toolbar-and-icons/references/draft-2b-lucide.html`
+>
+> This HTML file contains the exact CSS values, spacing, colors, border radii, backdrop blur, shadow, animation timings, and layout. Do NOT interpret the prose descriptions below as the spec — they are summaries for context. When in doubt, open the mockup and read the CSS. The engineer MUST copy the mockup's HTML/CSS first, then componentize.
 
-- **Internal grouping via separators:** Thin 1px vertical lines at 15% cyan separate functional zones: pipeline status | settings + notifications | user avatar. The separators are the pill's internal skeleton -- they create visual hierarchy without breaking the capsule's unity.
+The design establishes a **glass pill** paradigm — a frosted, translucent container that groups functionally related controls into a single cohesive element in the header's right section. Key elements (all values are in the mockup):
 
-- **SVG progress ring:** The pipeline indicator uses a 24px SVG circle with `stroke-dasharray`/`stroke-dashoffset` animation and a centered count digit. This is richer than a static badge -- it conveys both quantity and progress at a glance. The ring's fill stroke carries a `drop-shadow` glow that pulses with the accent color.
-
-- **Dropdown as frosted panel:** The pipeline dropdown extends the glass material to a 340px panel with section grouping (Processing / Queued / Recently completed). Same `backdrop-filter: blur(16px)` treatment at higher opacity (`rgba(28, 28, 50, 0.95)`). Items show mini-spinners for active processing and amber dots for queued position.
-
-- **Emotional tone:** The toolbar should feel like a **cockpit instrument cluster** -- compact, always-visible, information-dense but never noisy. When nothing is processing, the pipeline ring shows "0" in a dormant state. When activity happens, the ring animates to life with the cyan glow. The user should feel oriented and informed without having to look for information.
+- **Frosted glass material** with `backdrop-filter`, cyan-tinted background, subtle border
+- **Internal grouping via separators** — thin vertical lines between functional zones: pipeline status | settings + notifications | user avatar
+- **SVG progress ring** — animated circle with count digit for pipeline status
+- **Dropdown as frosted panel** — extends below the pill with Processing / Queued / Recently completed sections
+- **Emotional tone** — cockpit instrument cluster: compact, always-visible, information-dense but calm
 
 **Icon visual language after migration:** Lucide SVGs use a 24x24 internal coordinate space (viewBox), but the rendered size is unchanged -- all existing CSS size classes (`.icon--xs` 12px through `.icon--2xl` 48px) continue to control the actual pixel size, exactly as today. The viewBox is an internal detail, not a sizing change. Stroke-width 2 (Lucide default), round linecap and linejoin. The rounder stroke terminals give a slightly warmer, more approachable feel compared to the current butt/miter style. The mask-image rendering approach is preserved -- Lucide SVGs are encoded as data URIs in `icons.css`, maintaining the `currentColor` inheritance model and all existing size classes. No icon sizes change. No runtime JavaScript, no font loading, no network requests for icons.
 
