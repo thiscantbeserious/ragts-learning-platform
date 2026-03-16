@@ -19,7 +19,7 @@ import { Worker } from 'node:worker_threads';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { buildWorkerScript, type BuiltWorker } from './build_worker.js';
+import { resolveWorkerScript, type BuiltWorker } from './build_worker.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WORKER_ENTRY = resolve(__dirname, 'pipeline_worker.ts');
@@ -27,7 +27,7 @@ const WORKER_ENTRY = resolve(__dirname, 'pipeline_worker.ts');
 let builtWorker: BuiltWorker;
 
 beforeAll(async () => {
-  builtWorker = await buildWorkerScript(WORKER_ENTRY);
+  builtWorker = await resolveWorkerScript(WORKER_ENTRY);
 }, 30000);
 
 afterAll(() => {

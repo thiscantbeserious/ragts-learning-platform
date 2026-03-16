@@ -19,7 +19,7 @@ import { PipelineStage, type PipelineEvent, type DetectionStatus } from '../../s
 import { store } from './stages/store.js';
 import { logger } from '../logger.js';
 import { WorkerPool } from '../workers/worker_pool.js';
-import { buildWorkerScript, type BuiltWorker } from '../workers/build_worker.js';
+import { resolveWorkerScript, type BuiltWorker } from '../workers/build_worker.js';
 import type { PipelinePayload } from '../workers/pipeline_worker.js';
 import type { ProcessedSession } from './types.js';
 
@@ -78,7 +78,7 @@ export class PipelineOrchestrator {
       dirname(fileURLToPath(import.meta.url)),
       '../workers/pipeline_worker.ts'
     );
-    this.builtWorker = await buildWorkerScript(workerEntry);
+    this.builtWorker = await resolveWorkerScript(workerEntry);
 
     this.pool = new WorkerPool<PipelinePayload, ProcessedSession>({
       workerPath: this.builtWorker.path,
