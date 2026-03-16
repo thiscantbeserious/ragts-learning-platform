@@ -47,12 +47,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, inject } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Session } from '../../shared/types/session.js';
 import { formatRelativeTime } from '../../shared/utils/format_relative_time.js';
 import { useSSE } from '../composables/useSSE.js';
 import { useToast } from '../composables/useToast.js';
+import { sessionListKey } from '../composables/useSessionList.js';
 
 /**
  * SessionCard renders a single session entry in the sidebar list.
@@ -79,6 +80,9 @@ const initialStatus = computed(() => props.session.detection_status);
 const { status: liveStatus } = useSSE(sessionId, initialStatus);
 const { addToast } = useToast();
 
+/** Optional session list injection — used to refresh the sidebar after terminal state. */
+const sessionList = inject(sessionListKey, null);
+
 /** Maps detection_status to one of three display groups. */
 type StatusGroup = 'ready' | 'processing' | 'failed';
 
@@ -99,17 +103,37 @@ const statusGroup = computed<StatusGroup>(() => {
 const justCompleted = ref(false);
 
 /**
+ * Tracks whether a terminal toast has already been shown for this session's
+ * current processing run. Prevents duplicate toasts on SSE reconnect/replay.
+ * Resets to false when the session re-enters a processing state (redetect).
+ */
+const hasNotifiedTerminal = ref(false);
+
+/**
  * Watch for terminal status transitions to trigger glow animation and toast notification.
- * Fires a success toast when processing completes, or an error toast when it fails.
+ * Guards against duplicate toasts on SSE reconnect replay via hasNotifiedTerminal.
+ * On completion, also triggers a session list refresh so the sidebar shows updated data.
  */
 watch(liveStatus, (next, prev) => {
   if (prev === next) return;
-  if (next === 'completed') {
+
+  // Reset guard when session re-enters processing (e.g. redetect)
+  if (next !== undefined && PROCESSING_STATUSES.has(next as Session['detection_status'])) {
+    hasNotifiedTerminal.value = false;
+    return;
+  }
+
+  if (next === 'completed' && !hasNotifiedTerminal.value) {
+    hasNotifiedTerminal.value = true;
     justCompleted.value = true;
     addToast(`${props.session.filename} is ready`, 'success', { title: 'Session ready', icon: 'icon-file-check' });
     setTimeout(() => { justCompleted.value = false; }, 700);
-  } else if (next === 'failed' || next === 'interrupted') {
+    // Refresh sidebar list so section counts and status reflect server state
+    if (sessionList) void sessionList.refreshOnSessionComplete();
+  } else if ((next === 'failed' || next === 'interrupted') && !hasNotifiedTerminal.value) {
+    hasNotifiedTerminal.value = true;
     addToast(`${props.session.filename} processing failed`, 'error', { title: 'Processing failed', icon: 'icon-error-circle' });
+    if (sessionList) void sessionList.refreshOnSessionComplete();
   }
 });
 

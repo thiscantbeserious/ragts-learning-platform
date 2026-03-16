@@ -29,6 +29,7 @@ function mockSessionListState(sessions: Session[] = []): SessionListState {
     filteredSessions: computed(() => sessionsRef.value),
     fetchSessions: async () => {},
     deleteSession: async () => false,
+    refreshOnSessionComplete: async () => {},
   };
 }
 

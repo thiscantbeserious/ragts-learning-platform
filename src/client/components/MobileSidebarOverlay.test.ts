@@ -95,6 +95,7 @@ function makeSessionListState(): SessionListState {
     filteredSessions: computed(() => sessions.value),
     fetchSessions: async () => {},
     deleteSession: async () => false,
+    refreshOnSessionComplete: async () => {},
   };
 }
 

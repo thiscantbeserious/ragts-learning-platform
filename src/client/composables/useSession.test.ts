@@ -7,6 +7,16 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
+
+// Mock useSSE before importing useSession — EventSource is not available in happy-dom.
+// Returns a reactive ref so the watch in useSession does not throw on undefined.
+vi.mock('./useSSE.js', () => ({
+  useSSE: vi.fn().mockReturnValue({
+    status: ref('completed'),
+    isConnected: ref(false),
+  }),
+}));
+
 import { useSession } from './useSession.js';
 import type { SessionDetailResponse } from '../../shared/types/index.js';
 

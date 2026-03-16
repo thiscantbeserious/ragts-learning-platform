@@ -69,6 +69,7 @@ function makeSessionListState(overrides: Partial<SessionListState> = {}): Sessio
     filteredSessions,
     fetchSessions: vi.fn(),
     deleteSession: vi.fn(),
+    refreshOnSessionComplete: vi.fn(),
     ...overrides,
   };
 }

@@ -39,6 +39,7 @@ function makeSessionListState(sessions: Session[] = []): SessionListState {
     filteredSessions: computed(() => sessionsRef.value),
     fetchSessions: async () => {},
     deleteSession: async () => true,
+    refreshOnSessionComplete: async () => {},
   };
 }
 

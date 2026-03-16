@@ -35,6 +35,7 @@ function mockSessionListState(sessions: Session[] = []): SessionListState {
     filteredSessions: computed(() => sessionsRef.value),
     fetchSessions: vi.fn(),
     deleteSession: vi.fn(),
+    refreshOnSessionComplete: vi.fn(),
   };
 }
 

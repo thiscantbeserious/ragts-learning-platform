@@ -15,6 +15,8 @@ export interface SessionListState {
   filteredSessions: ComputedRef<Session[]>;
   fetchSessions: () => Promise<void>;
   deleteSession: (id: string) => Promise<boolean>;
+  /** Re-fetches the session list. Call when a session reaches a terminal state via SSE. */
+  refreshOnSessionComplete: () => Promise<void>;
 }
 
 /**
@@ -106,6 +108,15 @@ export function useSessionList() {
     }
   }
 
+  /**
+   * Re-fetches the full session list from the server.
+   * Call this from SSE-aware consumers (e.g. SessionCard) when a session
+   * reaches a terminal state so the sidebar reflects updated server data.
+   */
+  async function refreshOnSessionComplete(): Promise<void> {
+    await fetchSessions();
+  }
+
   onMounted(fetchSessions);
 
   return {
@@ -117,5 +128,6 @@ export function useSessionList() {
     filteredSessions,
     fetchSessions,
     deleteSession,
+    refreshOnSessionComplete,
   };
 }

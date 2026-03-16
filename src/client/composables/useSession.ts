@@ -1,6 +1,7 @@
 import { ref, computed, watch, toValue, type MaybeRef } from 'vue';
 import type { TerminalSnapshot } from '#vt-wasm/types';
 import type { Section, SessionDetailResponse } from '../../shared/types/index.js';
+import { useSSE } from './useSSE.js';
 
 export type { Section } from '../../shared/types/index.js';
 
@@ -82,9 +83,21 @@ export function useSession(sessionId: MaybeRef<string>) {
     }
   }
 
-  watch(() => toValue(sessionId), (id) => {
+  // Normalise sessionId to a Ref so useSSE can watch it
+  const sessionIdRef = computed(() => toValue(sessionId));
+
+  watch(sessionIdRef, (id) => {
     if (id) fetchSession(id);
   }, { immediate: true });
+
+  // SSE integration — re-fetch when pipeline reaches a terminal state
+  const { status: sseStatus } = useSSE(sessionIdRef, detectionStatus);
+  watch(sseStatus, (next) => {
+    const id = toValue(sessionId);
+    if (id && (next === 'completed' || next === 'failed')) {
+      void fetchSession(id);
+    }
+  });
 
   return {
     session,
