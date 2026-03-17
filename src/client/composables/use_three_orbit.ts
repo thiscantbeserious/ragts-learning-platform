@@ -34,7 +34,7 @@ interface PlanetConfig {
 }
 
 const CYAN = new THREE.Color(0x00d4ff);
-const PINK = new THREE.Color(0xff4d6a);
+const PINK = new THREE.Color(0xff6688);
 
 const PLANETS: PlanetConfig[] = [
   { label: 'RECORD',   texture: '/textures/2k_mars.jpg',          orbitRadius: 1.8, size: 0.12, angle: 0,                  tint: CYAN, haloColor: CYAN },
@@ -108,17 +108,19 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
     disposables.push(baseGeo, baseMat);
     scene.add(new THREE.Mesh(baseGeo, baseMat));
 
-    // Tight white bloom sphere — slightly larger, blurs the sharp edge
-    const bloomGeo = new THREE.SphereGeometry(0.12, 32, 32);
-    const bloomMat = new THREE.MeshBasicMaterial({
-      color: 0xddeeff,
-      transparent: true,
-      opacity: 0.25,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    disposables.push(bloomGeo, bloomMat);
-    scene.add(new THREE.Mesh(bloomGeo, bloomMat));
+    // Bloom layers — multiple overlapping semi-transparent spheres for soft falloff
+    for (const [radius, opacity] of [[0.10, 0.4], [0.14, 0.2], [0.20, 0.1], [0.28, 0.05]] as const) {
+      const bGeo = new THREE.SphereGeometry(radius, 24, 24);
+      const bMat = new THREE.MeshBasicMaterial({
+        color: 0xddeeff,
+        transparent: true,
+        opacity,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      disposables.push(bGeo, bMat);
+      scene.add(new THREE.Mesh(bGeo, bMat));
+    }
 
     disposables.push(coreGeo, coreMat);
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
