@@ -28,17 +28,17 @@ let animFrameId = 0;
 
 interface OrbitalNode {
   label: string;
-  angle: number; // radians offset on the orbit
-  color: [number, number, number]; // RGB
-  glowColor: string; // CSS rgba for glow
+  angle: number;
+  color: [number, number, number];
+  ambient: [number, number, number]; // colored shadow fill (not black)
 }
 
 const NODES: OrbitalNode[] = [
-  { label: 'record',   angle: 0,                  color: [0, 212, 255], glowColor: 'rgba(0, 212, 255, 0.4)' },
-  { label: 'validate', angle: (2 * Math.PI) / 5,  color: [255, 77, 106], glowColor: 'rgba(255, 77, 106, 0.4)' },
-  { label: 'detect',   angle: (4 * Math.PI) / 5,  color: [0, 212, 255], glowColor: 'rgba(0, 212, 255, 0.4)' },
-  { label: 'replay',   angle: (6 * Math.PI) / 5,  color: [0, 212, 255], glowColor: 'rgba(0, 212, 255, 0.4)' },
-  { label: 'curate',   angle: (8 * Math.PI) / 5,  color: [255, 77, 106], glowColor: 'rgba(255, 77, 106, 0.4)' },
+  { label: 'record',   angle: 0,                  color: [0, 212, 255], ambient: [26, 26, 90] },
+  { label: 'validate', angle: (2 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
+  { label: 'detect',   angle: (4 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90] },
+  { label: 'replay',   angle: (6 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90] },
+  { label: 'curate',   angle: (8 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
 ];
 
 const ORBIT_TILT = 25 * (Math.PI / 180); // 25° slight tilt — viewed from front/slightly above
@@ -85,52 +85,48 @@ function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, tim
   for (const { x, y, scale, node } of projected) {
     const r = sphereRadius * scale;
     const [cr, cg, cb] = node.color;
+    const [ar, ag, ab] = node.ambient;
     const depthAlpha = 0.4 + 0.6 * scale;
 
-    // --- Layer 1: Atmosphere glow (drawn outside sphere) ---
+    // --- Layer 1: Atmosphere glow ---
     ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.35;
-    const atmo = ctx.createRadialGradient(x, y, r * 0.85, x, y, r * 2);
-    atmo.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0)`);
-    atmo.addColorStop(0.5, `rgba(${cr}, ${cg}, ${cb}, 0.15)`);
-    atmo.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
+    ctx.globalAlpha = depthAlpha * 0.3;
+    const atmo = ctx.createRadialGradient(x, y, r * 0.8, x, y, r * 2);
+    atmo.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.2)`);
+    atmo.addColorStop(0.5, `rgba(${cr}, ${cg}, ${cb}, 0.06)`);
+    atmo.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = atmo;
     ctx.beginPath();
     ctx.arc(x, y, r * 2, 0, 2 * Math.PI);
     ctx.fill();
     ctx.restore();
 
-    // --- Layer 2: Base diffuse sphere — very soft gradient, subtle lighting ---
+    // --- Layer 2: Core diffuse (white highlight → color → colored ambient shadow) ---
     ctx.save();
     ctx.globalAlpha = depthAlpha;
-    const base = ctx.createRadialGradient(
-      x - r * 0.3, y - r * 0.3, 0,
-      x + r * 0.1, y + r * 0.1, r
+    const core = ctx.createRadialGradient(
+      x - r * 0.35, y - r * 0.35, 0,
+      x, y, r * 1.1
     );
-    const hlR = Math.min(255, cr + 30);
-    const hlG = Math.min(255, cg + 30);
-    const hlB = Math.min(255, cb + 30);
-    base.addColorStop(0, `rgba(${hlR}, ${hlG}, ${hlB}, 1)`);
-    base.addColorStop(0.3, `rgba(${cr}, ${cg}, ${cb}, 0.95)`);
-    base.addColorStop(0.55, `rgba(${Math.floor(cr * 0.75)}, ${Math.floor(cg * 0.75)}, ${Math.floor(cb * 0.75)}, 0.9)`);
-    base.addColorStop(0.8, `rgba(${Math.floor(cr * 0.45)}, ${Math.floor(cg * 0.45)}, ${Math.floor(cb * 0.5)}, 0.85)`);
-    base.addColorStop(1, `rgba(${Math.floor(cr * 0.3)}, ${Math.floor(cg * 0.3)}, ${Math.floor(cb * 0.35)}, 0.8)`);
-    ctx.fillStyle = base;
+    core.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    core.addColorStop(0.2, `rgba(${cr}, ${cg}, ${cb}, 1)`);
+    core.addColorStop(0.6, `rgba(${cr}, ${cg}, ${cb}, 1)`);
+    core.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 1)`);
+    ctx.fillStyle = core;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.fill();
     ctx.restore();
 
-    // --- Layer 3: Soft specular — gentle, not harsh ---
+    // --- Layer 3: Specular highlight (soft, wide — screen blend) ---
     ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.5;
+    ctx.globalAlpha = depthAlpha * 0.6;
     ctx.globalCompositeOperation = 'screen';
-    const hlX = x - r * 0.3;
-    const hlY = y - r * 0.3;
-    const spec = ctx.createRadialGradient(hlX, hlY, 0, hlX, hlY, r * 0.6);
-    spec.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
-    spec.addColorStop(0.3, 'rgba(255, 255, 255, 0.1)');
-    spec.addColorStop(0.7, 'rgba(255, 255, 255, 0.02)');
+    const hlX = x - r * 0.4;
+    const hlY = y - r * 0.4;
+    const spec = ctx.createRadialGradient(hlX, hlY, r * 0.1, hlX, hlY, r * 0.6);
+    spec.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+    spec.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
     spec.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = spec;
     ctx.beginPath();
@@ -139,7 +135,36 @@ function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, tim
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
 
-    // (no rim light / outline — clean edges only)
+    // --- Layer 4: Ambient occlusion (multiply — darkens rim subtly) ---
+    ctx.save();
+    ctx.globalAlpha = depthAlpha * 0.3;
+    ctx.globalCompositeOperation = 'multiply';
+    const ao = ctx.createRadialGradient(x, y, r * 0.7, x, y, r * 1.05);
+    ao.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    ao.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 1)`);
+    ctx.fillStyle = ao;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+
+    // --- Layer 5: Subsurface scattering hint (screen — glow on shadow side) ---
+    ctx.save();
+    ctx.globalAlpha = depthAlpha * 0.15;
+    ctx.globalCompositeOperation = 'screen';
+    const sss = ctx.createRadialGradient(
+      x + r * 0.4, y + r * 0.4, 0,
+      x + r * 0.4, y + r * 0.4, r * 0.8
+    );
+    sss.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.3)`);
+    sss.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = sss;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
 
     // --- Label — always 2D, HUD style ---
     ctx.save();
