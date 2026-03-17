@@ -2,7 +2,8 @@
  * Tests for PipelineDropdown component.
  *
  * Covers: header rendering, section visibility based on session data,
- * session name rendering, spinner/queue-dot indicators, and injection usage.
+ * session name rendering, spinner/queue-dot indicators, injection usage,
+ * ARIA roles, and arrow key navigation.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -312,6 +313,159 @@ describe('PipelineDropdown', () => {
         props: { open: true },
       });
       expect(wrapper.find('.pipeline-dropdown__summary').text()).toBe('0 active');
+    });
+  });
+
+  describe('ARIA roles', () => {
+    it('has role="menu" on the dropdown container', () => {
+      const wrapper = mountDropdown(makePipelineStatus());
+      expect(wrapper.find('.pipeline-dropdown').attributes('role')).toBe('menu');
+    });
+
+    it('assigns role="menuitem" to each pipeline-item in processing section', () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+        makeSession({ id: 's2', name: 'b.cast', status: 'processing' }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => 0);
+      const totalActive = computed(() => processingCount.value);
+      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdown(status);
+
+      const items = wrapper.findAll('.pipeline-item');
+      items.forEach((item) => {
+        expect(item.attributes('role')).toBe('menuitem');
+      });
+    });
+
+    it('assigns tabindex="-1" to each pipeline-item', () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => 0);
+      const totalActive = computed(() => processingCount.value);
+      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdown(status);
+
+      const item = wrapper.find('.pipeline-item');
+      expect(item.attributes('tabindex')).toBe('-1');
+    });
+  });
+
+  describe('arrow key navigation', () => {
+    function mountDropdownAttached(status: PipelineStatusState, open = true) {
+      return mount(PipelineDropdown, {
+        props: { open },
+        global: {
+          provide: {
+            [pipelineStatusKey as symbol]: status,
+          },
+        },
+        attachTo: document.body,
+      });
+    }
+
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('ArrowDown moves focus from first item to second item', async () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+        makeSession({ id: 's2', name: 'b.cast', status: 'processing' }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => 0);
+      const totalActive = computed(() => processingCount.value);
+      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdownAttached(status);
+
+      const items = wrapper.findAll('.pipeline-item');
+      (items[0]!.element as HTMLElement).focus();
+
+      await wrapper.find('.pipeline-dropdown').trigger('keydown', { key: 'ArrowDown' });
+
+      expect(document.activeElement).toBe(items[1]!.element);
+    });
+
+    it('ArrowUp moves focus from second item to first item', async () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+        makeSession({ id: 's2', name: 'b.cast', status: 'processing' }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => 0);
+      const totalActive = computed(() => processingCount.value);
+      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdownAttached(status);
+
+      const items = wrapper.findAll('.pipeline-item');
+      (items[1]!.element as HTMLElement).focus();
+
+      await wrapper.find('.pipeline-dropdown').trigger('keydown', { key: 'ArrowUp' });
+
+      expect(document.activeElement).toBe(items[0]!.element);
+    });
+
+    it('ArrowDown on last item wraps focus to first item', async () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+        makeSession({ id: 's2', name: 'b.cast', status: 'processing' }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => 0);
+      const totalActive = computed(() => processingCount.value);
+      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdownAttached(status);
+
+      const items = wrapper.findAll('.pipeline-item');
+      (items[1]!.element as HTMLElement).focus();
+
+      await wrapper.find('.pipeline-dropdown').trigger('keydown', { key: 'ArrowDown' });
+
+      expect(document.activeElement).toBe(items[0]!.element);
+    });
+
+    it('ArrowUp on first item wraps focus to last item', async () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+        makeSession({ id: 's2', name: 'b.cast', status: 'processing' }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => 0);
+      const totalActive = computed(() => processingCount.value);
+      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdownAttached(status);
+
+      const items = wrapper.findAll('.pipeline-item');
+      (items[0]!.element as HTMLElement).focus();
+
+      await wrapper.find('.pipeline-dropdown').trigger('keydown', { key: 'ArrowUp' });
+
+      expect(document.activeElement).toBe(items[1]!.element);
+    });
+
+    it('ArrowDown navigates across sections (processing to queued)', async () => {
+      const processingSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'a.cast', status: 'processing' }),
+      ]);
+      const queuedSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's2', name: 'b.cast', status: 'queued', queuePosition: 1 }),
+      ]);
+      const processingCount = computed(() => processingSessions.value.length);
+      const queuedCount = computed(() => queuedSessions.value.length);
+      const totalActive = computed(() => processingCount.value + queuedCount.value);
+      const status = makePipelineStatus({ processingSessions, queuedSessions, processingCount, queuedCount, totalActive });
+      const wrapper = mountDropdownAttached(status);
+
+      const items = wrapper.findAll('.pipeline-item');
+      (items[0]!.element as HTMLElement).focus();
+
+      await wrapper.find('.pipeline-dropdown').trigger('keydown', { key: 'ArrowDown' });
+
+      expect(document.activeElement).toBe(items[1]!.element);
     });
   });
 });

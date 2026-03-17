@@ -150,6 +150,11 @@ onUnmounted(() => {
   box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
 }
 
+.pipeline-ring-trigger:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
 /* SVG progress ring */
 .progress-ring {
   width: 24px;

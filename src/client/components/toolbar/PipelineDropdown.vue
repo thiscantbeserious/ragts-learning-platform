@@ -2,6 +2,8 @@
   <div
     v-if="open"
     class="pipeline-dropdown"
+    role="menu"
+    @keydown="handleArrowKey"
   >
     <div class="pipeline-dropdown__header">
       <span class="pipeline-dropdown__title">Pipeline Status</span>
@@ -20,6 +22,8 @@
         v-for="session in processingSessions"
         :key="session.id"
         class="pipeline-item"
+        role="menuitem"
+        tabindex="-1"
       >
         <div
           class="mini-spinner"
@@ -42,6 +46,8 @@
         v-for="session in queuedSessions"
         :key="session.id"
         class="pipeline-item"
+        role="menuitem"
+        tabindex="-1"
       >
         <div
           class="queue-dot"
@@ -64,6 +70,8 @@
         v-for="session in recentlyCompleted"
         :key="session.id"
         class="pipeline-item"
+        role="menuitem"
+        tabindex="-1"
       >
         <span
           class="icon icon-check pipeline-item__check"
@@ -85,6 +93,11 @@ import { formatRelativeTime } from '../../../shared/utils/format_relative_time.j
  * PipelineDropdown — popover panel showing processing, queued, and recently
  * completed pipeline sessions. Positioned absolutely below the pipeline-wrap
  * container (which must have position:relative). CSS copied from Draft 2b mockup.
+ *
+ * Implements role="menu" with role="menuitem" on each pipeline-item. Arrow key
+ * navigation (Up/Down) cycles focus through all items in DOM order. Items are
+ * not in the normal tab order (tabindex="-1"); they are removed from DOM when
+ * the dropdown is closed via v-if.
  */
 
 const props = defineProps<{
@@ -118,6 +131,26 @@ const summaryText = computed(() => {
   if (queued > 0) parts.push(`${queued} queued`);
   return parts.join(' / ');
 });
+
+/**
+ * Handle ArrowUp/ArrowDown keyboard navigation within the dropdown menu.
+ * Collects all .pipeline-item elements in DOM order and cycles focus between
+ * them, wrapping at the boundaries.
+ */
+function handleArrowKey(event: KeyboardEvent): void {
+  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+  event.preventDefault();
+
+  const container = (event.currentTarget as HTMLElement);
+  const items = Array.from(container.querySelectorAll<HTMLElement>('.pipeline-item'));
+  if (items.length === 0) return;
+
+  const currentIndex = items.indexOf(document.activeElement as HTMLElement);
+  const direction = event.key === 'ArrowDown' ? 1 : -1;
+  const nextIndex = (currentIndex + direction + items.length) % items.length;
+  items[nextIndex]?.focus();
+}
+
 </script>
 
 <style scoped>
@@ -183,6 +216,13 @@ const summaryText = computed(() => {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-1\.5) 0;
+  outline: none;
+}
+
+.pipeline-item:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .pipeline-item__name {
