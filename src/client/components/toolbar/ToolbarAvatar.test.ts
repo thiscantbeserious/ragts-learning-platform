@@ -1,11 +1,13 @@
 /**
  * Tests for ToolbarAvatar component.
  *
- * Covers: rendering initial, accessibility, element type, and click event emission.
+ * Covers: rendering initial, accessibility, element type, click event emission,
+ * and collapse toggle integration via toolbarCollapseKey injection.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import ToolbarAvatar from './ToolbarAvatar.vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
 
 function mountAvatar(props: { initial?: string } = {}) {
   return mount(ToolbarAvatar, { props });
@@ -41,6 +43,29 @@ describe('ToolbarAvatar', () => {
       const wrapper = mountAvatar();
       await wrapper.find('button').trigger('click');
       expect(wrapper.emitted('click')).toBeTruthy();
+    });
+  });
+
+  describe('collapse integration', () => {
+    it('calls toggleCollapse when the button is clicked and injection is provided', async () => {
+      const toggleCollapse = vi.fn();
+      const wrapper = mount(ToolbarAvatar, {
+        global: {
+          provide: {
+            [toolbarCollapseKey as symbol]: {
+              isCollapsed: { value: false },
+              toggleCollapse,
+            },
+          },
+        },
+      });
+      await wrapper.find('button').trigger('click');
+      expect(toggleCollapse).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not throw when no toolbarCollapseKey is provided', async () => {
+      const wrapper = mountAvatar();
+      await expect(wrapper.find('button').trigger('click')).resolves.not.toThrow();
     });
   });
 });

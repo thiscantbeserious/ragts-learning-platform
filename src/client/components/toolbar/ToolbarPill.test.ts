@@ -2,11 +2,13 @@
  * Tests for ToolbarPill component.
  *
  * Covers: glass pill container structure, CSS class application, ARIA attributes,
- * and slot projection for toolbar items.
+ * slot projection for toolbar items, and collapse/expand state management.
  */
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { inject, defineComponent } from 'vue';
 import ToolbarPill from './ToolbarPill.vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
 
 describe('ToolbarPill', () => {
   it('renders the toolbar-pill container', () => {
@@ -35,6 +37,76 @@ describe('ToolbarPill', () => {
     it('has aria-label="Main toolbar"', () => {
       const wrapper = mount(ToolbarPill);
       expect(wrapper.attributes('aria-label')).toBe('Main toolbar');
+    });
+  });
+
+  describe('collapse state', () => {
+    it('does not have the collapsed class by default', () => {
+      const wrapper = mount(ToolbarPill);
+      expect(wrapper.classes()).not.toContain('toolbar-pill--collapsed');
+    });
+
+    it('provides toolbarCollapseKey with isCollapsed=false by default', () => {
+      let injected: { isCollapsed: { value: boolean }; toggleCollapse: () => void } | undefined;
+      const Consumer = defineComponent({
+        setup() {
+          injected = inject(toolbarCollapseKey);
+        },
+        template: '<div />',
+      });
+      mount(ToolbarPill, {
+        slots: { default: Consumer },
+      });
+      expect(injected).toBeDefined();
+      expect(injected!.isCollapsed.value).toBe(false);
+    });
+
+    it('toggleCollapse adds toolbar-pill--collapsed class', async () => {
+      let injected: { isCollapsed: { value: boolean }; toggleCollapse: () => void } | undefined;
+      const Consumer = defineComponent({
+        setup() {
+          injected = inject(toolbarCollapseKey);
+        },
+        template: '<div />',
+      });
+      const wrapper = mount(ToolbarPill, {
+        slots: { default: Consumer },
+      });
+      injected!.toggleCollapse();
+      await wrapper.vm.$nextTick();
+      expect(wrapper.classes()).toContain('toolbar-pill--collapsed');
+    });
+
+    it('toggleCollapse toggles isCollapsed from false to true', async () => {
+      let injected: { isCollapsed: { value: boolean }; toggleCollapse: () => void } | undefined;
+      const Consumer = defineComponent({
+        setup() {
+          injected = inject(toolbarCollapseKey);
+        },
+        template: '<div />',
+      });
+      mount(ToolbarPill, {
+        slots: { default: Consumer },
+      });
+      expect(injected!.isCollapsed.value).toBe(false);
+      injected!.toggleCollapse();
+      expect(injected!.isCollapsed.value).toBe(true);
+    });
+
+    it('toggleCollapse toggles isCollapsed back to false on second call', async () => {
+      let injected: { isCollapsed: { value: boolean }; toggleCollapse: () => void } | undefined;
+      const Consumer = defineComponent({
+        setup() {
+          injected = inject(toolbarCollapseKey);
+        },
+        template: '<div />',
+      });
+      mount(ToolbarPill, {
+        slots: { default: Consumer },
+      });
+      injected!.toggleCollapse();
+      injected!.toggleCollapse();
+      expect(injected!.isCollapsed.value).toBe(false);
     });
   });
 });

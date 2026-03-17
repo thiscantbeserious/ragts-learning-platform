@@ -3,6 +3,7 @@
     class="toolbar-avatar"
     title="User menu"
     type="button"
+    @click="handleClick"
   >
     {{ initial }}
   </button>
@@ -13,8 +14,25 @@
  * ToolbarAvatar — 30px gradient initial circle for the user menu trigger.
  * Renders a single-character initial; defaults to "S" as a placeholder.
  * Designed to sit at the trailing end of the glass pill toolbar.
+ *
+ * Injects toolbarCollapseKey from ToolbarPill to toggle the pill's collapsed
+ * state on click. If the key is not provided (e.g. in isolated tests), the
+ * click still emits normally without error.
  */
+import { inject } from 'vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
+
 withDefaults(defineProps<{ initial?: string }>(), { initial: 'S' });
+
+const emit = defineEmits<{ click: [event: MouseEvent] }>();
+
+const collapseContext = inject(toolbarCollapseKey, undefined);
+
+/** Toggles the parent ToolbarPill's collapsed state and emits the native click. */
+function handleClick(event: MouseEvent): void {
+  collapseContext?.toggleCollapse();
+  emit('click', event);
+}
 </script>
 
 <style scoped>

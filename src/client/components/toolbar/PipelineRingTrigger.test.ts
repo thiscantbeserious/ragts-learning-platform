@@ -2,7 +2,8 @@
  * Tests for PipelineRingTrigger component.
  *
  * Covers: SVG ring renders, count binds to totalActive, label text,
- * and correct injection key usage.
+ * correct injection key usage, dropdown open/close toggle, aria-expanded,
+ * keyboard (Escape) close, and outside-click close.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -44,6 +45,7 @@ function mountWithStatus(status: PipelineStatusState) {
         [pipelineStatusKey as symbol]: status,
       },
     },
+    attachTo: document.body,
   });
 }
 
@@ -57,6 +59,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  document.body.innerHTML = '';
 });
 
 // ---------------------------------------------------------------------------
@@ -65,14 +68,14 @@ afterEach(() => {
 
 describe('PipelineRingTrigger', () => {
   describe('structure', () => {
-    it('renders a button element', () => {
+    it('renders a pipeline-wrap container div', () => {
       const wrapper = mountWithStatus(makePipelineStatus());
-      expect(wrapper.element.tagName).toBe('BUTTON');
+      expect(wrapper.find('.pipeline-wrap').exists()).toBe(true);
     });
 
-    it('has class pipeline-ring-trigger on the root button', () => {
+    it('renders a button with class pipeline-ring-trigger inside the wrap', () => {
       const wrapper = mountWithStatus(makePipelineStatus());
-      expect(wrapper.classes()).toContain('pipeline-ring-trigger');
+      expect(wrapper.find('button.pipeline-ring-trigger').exists()).toBe(true);
     });
 
     it('renders an SVG progress ring', () => {
@@ -163,7 +166,7 @@ describe('PipelineRingTrigger', () => {
   describe('aria-label', () => {
     it('has aria-label showing count=0 when idle', () => {
       const wrapper = mountWithStatus(makePipelineStatus());
-      expect(wrapper.attributes('aria-label')).toBe('Pipeline: 0 active');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe('Pipeline: 0 active');
     });
 
     it('updates aria-label when totalActive changes', async () => {
@@ -177,12 +180,12 @@ describe('PipelineRingTrigger', () => {
       const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
       const wrapper = mountWithStatus(status);
 
-      expect(wrapper.attributes('aria-label')).toBe('Pipeline: 1 active');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe('Pipeline: 1 active');
 
       processingSessions.value = [];
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.attributes('aria-label')).toBe('Pipeline: 0 active');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe('Pipeline: 0 active');
     });
   });
 
@@ -212,6 +215,77 @@ describe('PipelineRingTrigger', () => {
       const wrapper = mountWithStatus(makePipelineStatus());
       const fill = wrapper.find('circle.progress-ring__fill');
       expect(fill.attributes('stroke-dasharray')).toBe('56.55');
+    });
+  });
+
+  describe('dropdown toggle', () => {
+    it('dropdown is not rendered by default', () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(false);
+    });
+
+    it('aria-expanded is false by default', () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('false');
+    });
+
+    it('clicking trigger opens the dropdown', async () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(true);
+    });
+
+    it('aria-expanded is true when dropdown is open', async () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('true');
+    });
+
+    it('clicking trigger again closes the dropdown', async () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(true);
+
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(false);
+    });
+
+    it('pressing Escape closes the dropdown', async () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(true);
+
+      await wrapper.trigger('keydown', { key: 'Escape' });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(false);
+    });
+
+    it('clicking outside closes the dropdown', async () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(true);
+
+      // Simulate outside click via document event
+      document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(false);
+    });
+
+    it('pressing Escape returns focus to the trigger button', async () => {
+      const wrapper = mountWithStatus(makePipelineStatus());
+      const triggerButton = wrapper.find('button.pipeline-ring-trigger').element as Element & { blur(): void; focus(): void };
+
+      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(true);
+
+      // Move focus away to simulate real-world dropdown interaction
+      triggerButton.blur();
+
+      await wrapper.trigger('keydown', { key: 'Escape' });
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.pipeline-dropdown').exists()).toBe(false);
+      expect(document.activeElement).toBe(triggerButton);
     });
   });
 });
