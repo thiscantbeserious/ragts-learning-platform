@@ -2,14 +2,17 @@
 /**
  * StartPage — the "home" view rendered in the main grid area when no session is selected.
  *
- * Shows a TRON-aesthetic animated SVG grid background with 5 pipeline nodes and
- * ambient particles over a centered upload-zone card (design system component).
- * Respects prefers-reduced-motion by disabling all CSS animations.
- * Upload flow is wired in Stage 10 — for now, upload-zone opens the file picker only.
+ * Shows a TRON-aesthetic animated SVG grid background with a Three.js planet orbit
+ * scene (5 textured spheres) and ambient particles over a centered upload-zone card.
+ * Respects prefers-reduced-motion by disabling all CSS animations and Three.js rotation.
+ * Upload flow uses optimistic insert with useUpload composable.
+ *
+ * Texture credit: Solar System Scope (CC BY 4.0) — https://www.solarsystemscope.com/textures/
  */
-import { ref, inject, computed, onMounted, onUnmounted } from 'vue';
+import { ref, useTemplateRef, inject, computed, onMounted, onUnmounted } from 'vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import { useUpload } from '../composables/useUpload.js';
+import { useThreeOrbit } from '../composables/use_three_orbit.js';
 import type { Session } from '../../shared/types/session.js';
 
 const sessionList = inject(sessionListKey, null);
@@ -20,207 +23,19 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const { uploadFileWithOptimistic } = useUpload();
 
 // ---------------------------------------------------------------------------
-// 3D orbit canvas — 5 lit spheres orbiting with perspective projection
+// Three.js planet orbit scene
 // ---------------------------------------------------------------------------
 
-const orbitCanvasRef = ref<HTMLCanvasElement | null>(null);
-let animFrameId = 0;
-
-interface OrbitalNode {
-  label: string;
-  angle: number;
-  color: [number, number, number];
-  ambient: [number, number, number];
-}
-
-const NODES: OrbitalNode[] = [
-  { label: 'record',   angle: 0,                  color: [0, 212, 255], ambient: [26, 26, 90] },
-  { label: 'validate', angle: (2 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
-  { label: 'detect',   angle: (4 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90] },
-  { label: 'replay',   angle: (6 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90] },
-  { label: 'curate',   angle: (8 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
-];
-
-const ORBIT_TILT_BASE = 75; // degrees — base tilt (top-down horizontal ring)
-const ORBIT_TILT_RANGE = 40; // degrees — how much mouse can shift the view (±)
-const ORBIT_SPEED = (2 * Math.PI) / 25;
-const PERSPECTIVE = 600;
-const BASE_SPHERE_RADIUS = 14;
-
-/** Current tilt in radians — updated by mousemove, interpolated smoothly. */
-let targetTilt = ORBIT_TILT_BASE * (Math.PI / 180);
-let currentTilt = targetTilt;
-
-function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, time: number): void {
-  const dpr = globalThis.devicePixelRatio || 1;
-  const w = canvas.clientWidth;
-  const h = canvas.clientHeight;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, w, h);
-
-  const cx = w / 2;
-  const cy = h / 2;
-  const orbitRadius = Math.min(w, h) * 0.3;
-  const sphereRadius = Math.max(8, Math.min(w, h) * 0.018);
-  const rotation = time * 0.001 * ORBIT_SPEED;
-
-  // Project each node into 2D with depth
-  const projected: { x: number; y: number; z: number; scale: number; node: OrbitalNode }[] = [];
-
-  for (const node of NODES) {
-    const a = rotation + node.angle;
-    // Smooth interpolation toward target tilt
-    currentTilt += (targetTilt - currentTilt) * 0.05;
-
-    // 3D position on tilted orbit ring
-    const x3 = Math.cos(a) * orbitRadius;
-    const y3 = Math.sin(a) * orbitRadius * Math.cos(currentTilt);
-    // Negate z: back-of-ring goes INTO screen (smaller), front comes toward viewer (larger)
-    const z3 = -Math.sin(a) * orbitRadius * Math.sin(currentTilt);
-
-    // Perspective projection
-    const scale = PERSPECTIVE / (PERSPECTIVE + z3);
-    const sx = cx + x3 * scale;
-    const sy = cy + y3 * scale;
-
-    projected.push({ x: sx, y: sy, z: z3, scale, node });
-  }
-
-  // Sort back-to-front (far first)
-  projected.sort((a, b) => b.z - a.z);
-
-  for (const { x, y, scale, node } of projected) {
-    const r = sphereRadius * scale;
-    const [cr, cg, cb] = node.color;
-    const [ar, ag, ab] = node.ambient;
-    const depthAlpha = 0.4 + 0.6 * scale;
-
-    // --- Layer 1: Atmosphere glow ---
-    ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.3;
-    const atmo = ctx.createRadialGradient(x, y, r * 0.8, x, y, r * 2);
-    atmo.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.2)`);
-    atmo.addColorStop(0.5, `rgba(${cr}, ${cg}, ${cb}, 0.06)`);
-    atmo.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = atmo;
-    ctx.beginPath();
-    ctx.arc(x, y, r * 2, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.restore();
-
-    // --- Layer 2: Core diffuse sphere ---
-    ctx.save();
-    ctx.globalAlpha = depthAlpha;
-    const core = ctx.createRadialGradient(
-      x - r * 0.35, y - r * 0.35, 0,
-      x, y, r * 1.1
-    );
-    core.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    core.addColorStop(0.2, `rgba(${cr}, ${cg}, ${cb}, 1)`);
-    core.addColorStop(0.6, `rgba(${cr}, ${cg}, ${cb}, 1)`);
-    core.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 1)`);
-    ctx.fillStyle = core;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.restore();
-
-    // --- Layer 3: Specular highlight (soft, wide — screen blend) ---
-    ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.6;
-    ctx.globalCompositeOperation = 'screen';
-    const hlX = x - r * 0.4;
-    const hlY = y - r * 0.4;
-    const spec = ctx.createRadialGradient(hlX, hlY, r * 0.1, hlX, hlY, r * 0.6);
-    spec.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-    spec.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
-    spec.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    ctx.fillStyle = spec;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.restore();
-
-    // --- Layer 4: Ambient occlusion (multiply — darkens rim subtly) ---
-    ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.3;
-    ctx.globalCompositeOperation = 'multiply';
-    const ao = ctx.createRadialGradient(x, y, r * 0.7, x, y, r * 1.05);
-    ao.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    ao.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 1)`);
-    ctx.fillStyle = ao;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.restore();
-
-    // --- Layer 5: Subsurface scattering hint (screen — glow on shadow side) ---
-    ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.15;
-    ctx.globalCompositeOperation = 'screen';
-    const sss = ctx.createRadialGradient(
-      x + r * 0.4, y + r * 0.4, 0,
-      x + r * 0.4, y + r * 0.4, r * 0.8
-    );
-    sss.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, 0.3)`);
-    sss.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = sss;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.restore();
-
-    // --- Label — always 2D, HUD style ---
-    ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.7;
-    const fontSize = Math.max(9, 11 * scale);
-    ctx.font = `500 ${fontSize}px "Geist Mono", monospace`;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#aaaab0';
-    ctx.fillText(node.label.toUpperCase(), x, y + r + 14 * scale);
-    ctx.restore();
-  }
-}
-
-function startOrbitAnimation(): void {
-  const canvas = orbitCanvasRef.value;
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  // Check reduced motion preference
-  const prefersReduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  function loop(time: number): void {
-    drawOrbit(canvas!, ctx!, prefersReduced ? 0 : time);
-    animFrameId = requestAnimationFrame(loop);
-  }
-  animFrameId = requestAnimationFrame(loop);
-}
-
-/** Mouse Y maps to orbit tilt:
- *  - Mouse at top: 88° (nearly full top-down — ring is flat)
- *  - Mouse at center: ~55° (angled view)
- *  - Mouse at bottom: 20° (nearly edge-on — ring is a line) */
-function handleMouseMove(e: MouseEvent): void {
-  const normalizedY = e.clientY / globalThis.innerHeight; // 0 (top) to 1 (bottom)
-  const tiltDeg = 88 - normalizedY * 48;
-  targetTilt = tiltDeg * (Math.PI / 180);
-}
+/** Template ref for the Three.js container div — wired to composable via useTemplateRef. */
+const threeContainerRef = useTemplateRef<HTMLDivElement>('threeContainerRef');
+const { labelPositions, mount: mountThree, unmount: unmountThree } = useThreeOrbit(threeContainerRef);
 
 onMounted(() => {
-  startOrbitAnimation();
-  document.addEventListener('mousemove', handleMouseMove);
+  mountThree();
 });
 
 onUnmounted(() => {
-  if (animFrameId) cancelAnimationFrame(animFrameId);
-  document.removeEventListener('mousemove', handleMouseMove);
+  unmountThree();
 });
 
 /** Opens the system file picker. Upload zone, browse link, and keyboard trigger this. */
@@ -337,12 +152,24 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
 
     </svg>
 
-    <!-- 3D orbiting pipeline nodes — Canvas with real projected spheres -->
-    <canvas
-      ref="orbitCanvasRef"
-      class="sp-orbit-canvas"
+    <!-- Three.js planet orbit scene — 5 textured spheres with real-time lighting -->
+    <div
+      ref="threeContainerRef"
+      class="sp-orbit-three"
       aria-hidden="true"
-    />
+    >
+      <!-- HTML label overlays — projected from 3D world positions each frame -->
+      <span
+        v-for="lp in labelPositions"
+        :key="lp.label"
+        class="sp-orbit-label"
+        :style="{
+          left: lp.x + 'px',
+          top: lp.y + 'px',
+          opacity: lp.visible ? 0.65 : 0,
+        }"
+      >{{ lp.label }}</span>
+    </div>
 
     <!-- Ambient particles (8 total — 6 cyan, 2 pink) -->
     <div
@@ -504,16 +331,32 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
 }
 
 /* ============================================================
-   3D ORBIT CANVAS — real projected spheres with shading
+   THREE.JS PLANET ORBIT SCENE — replaces Canvas 2D orbit
    ============================================================ */
 
-.sp-orbit-canvas {
+.sp-orbit-three {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
   z-index: 1;
+}
+
+/* Labels are absolutely positioned spans updated by Three.js projection */
+.sp-orbit-label {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #aaaab0;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+  white-space: nowrap;
+  user-select: none;
 }
 
 /* ============================================================
@@ -757,8 +600,7 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   .sp-particle { display: none !important; }
   .sp-deco-path { opacity: 0.06 !important; visibility: visible !important; }
   .start-page__cursor-blink { animation: none !important; }
-  .sp-orbit__ring { animation-play-state: paused !important; }
-  .sp-orbit__node-inner { animation-play-state: paused !important; }
+  /* Three.js reduced-motion handled in useThreeOrbit composable */
 }
 
 /* ============================================================
