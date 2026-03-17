@@ -39,7 +39,9 @@
         </span>
       </nav>
     </div>
-    <div class="shell-header__right" />
+    <div class="shell-header__right">
+      <ToolbarPill />
+    </div>
   </header>
 </template>
 
@@ -49,6 +51,7 @@ import { useRoute } from 'vue-router';
 import { sessionListKey } from '../composables/useSessionList.js';
 import { layoutKey } from '../composables/useLayout.js';
 import HexGateIcon from './HexGateIcon.vue';
+import ToolbarPill from './toolbar/ToolbarPill.vue';
 
 /**
  * ShellHeader renders the application header bar spanning the two right columns.
@@ -112,9 +115,10 @@ defineExpose({ hamburgerRef });
   background: var(--bg-surface);
   /* Bottom border — continuous gradient line aligned with BrandMark's ::after. */
   position: relative;
-  /* overflow: clip prevents breadcrumb text overflow without creating a scroll context,
-     and does not clip focus outlines of child buttons (unlike overflow: hidden). */
-  overflow: clip;
+  /* overflow: visible allows toolbar dropdowns to overflow the header grid row.
+     The .spatial-shell__header z-index: 50 in shell.css ensures the header
+     stacks above adjacent grid areas so overflowing content is not clipped. */
+  overflow: visible;
 }
 
 .shell-header::after {
@@ -140,7 +144,7 @@ defineExpose({ hamburgerRef });
   flex: 1;
 }
 
-/* Right section — will hold global actions in a future stage. */
+/* Right section — holds the glass pill toolbar for pipeline status and global actions. */
 .shell-header__right {
   display: flex;
   align-items: center;

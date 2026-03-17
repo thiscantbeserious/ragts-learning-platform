@@ -104,9 +104,11 @@
   grid-area: brand;
 }
 
-/** Primary header bar: spans the two right columns. */
+/** Primary header bar: spans the two right columns.
+    z-index: 50 ensures toolbar dropdowns overflow above adjacent grid areas. */
 .spatial-shell__header {
   grid-area: header;
+  z-index: 50;
 }
 
 /** Persistent sidebar panel: spans both content rows on the left. */
