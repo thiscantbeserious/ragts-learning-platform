@@ -1,46 +1,59 @@
 <template>
-  <button
-    class="pipeline-ring-trigger"
-    type="button"
-    :aria-label="`Pipeline: ${totalActive} active`"
+  <div
+    class="pipeline-wrap"
+    @keydown.escape="closeDropdown"
+    @click.stop
   >
-    <svg
-      class="progress-ring"
-      viewBox="0 0 24 24"
-      width="24"
-      height="24"
-      aria-hidden="true"
+    <button
+      ref="triggerButtonRef"
+      class="pipeline-ring-trigger"
+      type="button"
+      :aria-label="`Pipeline: ${totalActive} active`"
+      :aria-expanded="isOpen"
+      @click="toggleDropdown"
     >
-      <circle
-        class="progress-ring__bg"
-        cx="12"
-        cy="12"
-        r="9"
-      />
-      <circle
-        class="progress-ring__fill"
-        cx="12"
-        cy="12"
-        r="9"
-        stroke-dasharray="56.55"
-        :stroke-dashoffset="dashOffset"
-      />
-      <text
-        class="ring-count"
-        x="12"
-        y="12"
-      >{{ totalActive }}</text>
-    </svg>
-    <span class="pipeline-label">Pipeline</span>
-  </button>
+      <svg
+        class="progress-ring"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        aria-hidden="true"
+      >
+        <circle
+          class="progress-ring__bg"
+          cx="12"
+          cy="12"
+          r="9"
+        />
+        <circle
+          class="progress-ring__fill"
+          cx="12"
+          cy="12"
+          r="9"
+          stroke-dasharray="56.55"
+          :stroke-dashoffset="dashOffset"
+        />
+        <text
+          class="ring-count"
+          x="12"
+          y="12"
+        >{{ totalActive }}</text>
+      </svg>
+      <span class="pipeline-label">Pipeline</span>
+    </button>
+
+    <PipelineDropdown :open="isOpen" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import { inject, computed } from 'vue';
+import { inject, computed, ref, onMounted, onUnmounted } from 'vue';
 import { pipelineStatusKey } from '../../composables/usePipelineStatus.js';
+import PipelineDropdown from './PipelineDropdown.vue';
 
 /**
  * PipelineRingTrigger — SVG progress ring showing active pipeline session count.
+ * Manages the open/close state of PipelineDropdown.
  * Injects pipeline status from SpatialShell via pipelineStatusKey.
  * CSS and markup follow the Draft 2b approved mockup exactly.
  */
@@ -54,18 +67,61 @@ const totalActive = computed(() => pipelineStatus?.totalActive.value ?? 0);
 
 /**
  * Stroke-dashoffset for the SVG fill arc.
- * This is a binary active/inactive indicator, not proportional to session count —
- * the ring shows "work in progress" (42% arc) whenever totalActive > 0, and
- * disappears when idle. Proportional fill is deferred pending UX approval.
+ * Binary active/inactive indicator — ring shows "work in progress" (42% arc)
+ * whenever totalActive > 0, disappears when idle.
  */
 const dashOffset = computed(() => {
   if (totalActive.value === 0) return CIRCUMFERENCE;
   // Fixed 42% arc from the Draft 2b approved mockup (offset 32.79 = 58% of 56.55)
   return 32.79;
 });
+
+// ---------------------------------------------------------------------------
+// Dropdown state
+// ---------------------------------------------------------------------------
+
+/** Template ref to the trigger button, used to restore focus on close. */
+const triggerButtonRef = ref<{ focus(): void } | null>(null);
+
+const isOpen = ref(false);
+
+/** Toggle the dropdown open/close. */
+function toggleDropdown(): void {
+  isOpen.value = !isOpen.value;
+}
+
+/** Close the dropdown and return focus to the trigger button. */
+function closeDropdown(): void {
+  isOpen.value = false;
+  triggerButtonRef.value?.focus();
+}
+
+/**
+ * Handle document-level clicks to close on outside click.
+ * The pipeline-wrap uses @click.stop, so any click that reaches the document
+ * originated outside the component — close the dropdown unconditionally.
+ */
+function handleDocumentClick(): void {
+  closeDropdown();
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleDocumentClick);
+});
 </script>
 
 <style scoped>
+/**
+ * pipeline-wrap: relative container so dropdown positions correctly.
+ */
+.pipeline-wrap {
+  position: relative;
+}
+
 /**
  * Pipeline ring trigger button — from Draft 2b (draft-2b-lucide.html).
  * CSS values copied exactly from the approved mockup spec.
