@@ -100,33 +100,39 @@ function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, tim
     ctx.fill();
     ctx.restore();
 
-    // --- Layer 2: Base diffuse sphere (white → color → dark navy) ---
+    // --- Layer 2: Base diffuse sphere — very soft gradient, subtle lighting ---
     ctx.save();
     ctx.globalAlpha = depthAlpha;
-    // Offset inner circle for directional lighting (upper-left light source)
     const base = ctx.createRadialGradient(
-      x - r * 0.4, y - r * 0.4, 0,
-      x, y, r
+      x - r * 0.3, y - r * 0.3, 0,
+      x + r * 0.1, y + r * 0.1, r
     );
-    base.addColorStop(0, `rgba(${Math.min(255, cr + 120)}, ${Math.min(255, cg + 120)}, ${Math.min(255, cb + 120)}, 1)`);
-    base.addColorStop(0.4, `rgba(${cr}, ${cg}, ${cb}, 1)`);
-    base.addColorStop(0.75, `rgba(${Math.floor(cr * 0.3)}, ${Math.floor(cg * 0.3)}, ${Math.floor(cb * 0.35)}, 1)`);
-    base.addColorStop(1, 'rgba(10, 10, 30, 1)');
+    // Gentle highlight — just slightly brighter, not white
+    const hlR = Math.min(255, cr + 40);
+    const hlG = Math.min(255, cg + 40);
+    const hlB = Math.min(255, cb + 40);
+    base.addColorStop(0, `rgba(${hlR}, ${hlG}, ${hlB}, 1)`);
+    base.addColorStop(0.25, `rgba(${cr}, ${cg}, ${cb}, 0.95)`);
+    // Very gradual transition into shadow
+    base.addColorStop(0.5, `rgba(${Math.floor(cr * 0.7)}, ${Math.floor(cg * 0.7)}, ${Math.floor(cb * 0.7)}, 0.9)`);
+    base.addColorStop(0.75, `rgba(${Math.floor(cr * 0.35)}, ${Math.floor(cg * 0.35)}, ${Math.floor(cb * 0.4)}, 0.85)`);
+    base.addColorStop(1, `rgba(${Math.floor(cr * 0.12)}, ${Math.floor(cg * 0.12)}, ${Math.floor(cb * 0.18)}, 0.8)`);
     ctx.fillStyle = base;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI);
     ctx.fill();
     ctx.restore();
 
-    // --- Layer 3: Specular highlight (screen blend for bright gloss) ---
+    // --- Layer 3: Soft specular — gentle, not harsh ---
     ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.9;
+    ctx.globalAlpha = depthAlpha * 0.5;
     ctx.globalCompositeOperation = 'screen';
-    const hlX = x - r * 0.35;
-    const hlY = y - r * 0.35;
-    const spec = ctx.createRadialGradient(hlX, hlY, 0, hlX, hlY, r * 0.45);
-    spec.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
-    spec.addColorStop(0.4, 'rgba(255, 255, 255, 0.2)');
+    const hlX = x - r * 0.3;
+    const hlY = y - r * 0.3;
+    const spec = ctx.createRadialGradient(hlX, hlY, 0, hlX, hlY, r * 0.6);
+    spec.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
+    spec.addColorStop(0.3, 'rgba(255, 255, 255, 0.1)');
+    spec.addColorStop(0.7, 'rgba(255, 255, 255, 0.02)');
     spec.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = spec;
     ctx.beginPath();
@@ -135,21 +141,21 @@ function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, tim
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
 
-    // --- Layer 4: Rim light (backlight on dark edge, lighter blend) ---
+    // --- Layer 4: Subtle rim light — very faint backlight ---
     ctx.save();
-    ctx.globalAlpha = depthAlpha * 0.4;
+    ctx.globalAlpha = depthAlpha * 0.2;
     ctx.globalCompositeOperation = 'lighter';
     const rim = ctx.createRadialGradient(
-      x + r * 0.3, y + r * 0.3, r * 0.6,
-      x, y, r
+      x + r * 0.2, y + r * 0.2, r * 0.7,
+      x, y, r * 1.02
     );
     rim.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    rim.addColorStop(0.7, 'rgba(0, 0, 0, 0)');
-    rim.addColorStop(0.9, `rgba(${cr}, ${cg}, ${cb}, 0.25)`);
-    rim.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0.1)`);
+    rim.addColorStop(0.85, 'rgba(0, 0, 0, 0)');
+    rim.addColorStop(0.95, `rgba(${cr}, ${cg}, ${cb}, 0.15)`);
+    rim.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0.05)`);
     ctx.fillStyle = rim;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.arc(x, y, r * 1.02, 0, 2 * Math.PI);
     ctx.fill();
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
