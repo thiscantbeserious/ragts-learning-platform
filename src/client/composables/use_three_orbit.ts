@@ -267,10 +267,9 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
       glowCanvas.height = 64;
       const gctx = glowCanvas.getContext('2d')!;
       const gg = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-      gg.addColorStop(0, 'rgba(255, 255, 255, 1)');
-      gg.addColorStop(0.2, 'rgba(255, 255, 255, 0.6)');
-      gg.addColorStop(0.45, 'rgba(255, 255, 255, 0.15)');
-      gg.addColorStop(0.7, 'rgba(255, 255, 255, 0.03)');
+      gg.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      gg.addColorStop(0.15, 'rgba(255, 255, 255, 0.3)');
+      gg.addColorStop(0.4, 'rgba(255, 255, 255, 0.08)');
       gg.addColorStop(1, 'rgba(255, 255, 255, 0)');
       gctx.fillStyle = gg;
       gctx.fillRect(0, 0, 64, 64);
@@ -282,11 +281,11 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
         transparent: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
-        opacity: 0.35,
+        opacity: 0.45,
       });
       disposables.push(spriteMat);
       const sprite = new THREE.Sprite(spriteMat);
-      const glowSize = planet.size * 3.5;
+      const glowSize = planet.size * 6;
       sprite.scale.set(glowSize, glowSize, 1);
       mesh.add(sprite);
 
