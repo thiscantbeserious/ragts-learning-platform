@@ -118,8 +118,11 @@ export function usePipelineStatus(): PipelineStatusState {
 
     es.addEventListener('pipeline-status', (e: MessageEvent) => {
       try {
-        // Cast-trusted because the server owns this SSE endpoint exclusively.
-        const snapshot = JSON.parse(e.data as string) as PipelineStatusSnapshot;
+        // The server wraps the snapshot in { type, data }. Extract the inner payload.
+        const parsed = JSON.parse(e.data as string) as { type: string; data: PipelineStatusSnapshot } | PipelineStatusSnapshot;
+        const snapshot = 'data' in parsed && typeof parsed.data === 'object' && parsed.data !== null
+          ? parsed.data
+          : parsed as PipelineStatusSnapshot;
         applySnapshot(snapshot);
       } catch {
         // Malformed snapshot — ignore and wait for next event

@@ -33,8 +33,8 @@ defineProps<{
  */
 .toolbar-btn {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: var(--toolbar-btn-size, 30px);
+  height: var(--toolbar-btn-size, 30px);
   border-radius: var(--radius-full);
   border: 1px solid transparent;
   background: transparent;
@@ -49,10 +49,10 @@ defineProps<{
 }
 
 .toolbar-btn:hover {
-  background: rgba(0, 212, 255, 0.12);
-  border-color: rgba(0, 212, 255, 0.3);
+  background: var(--toolbar-hover-bg);
+  border-color: var(--toolbar-hover-border);
   color: var(--accent-primary);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 10px var(--toolbar-hover-shadow);
 }
 
 .toolbar-btn:focus-visible {

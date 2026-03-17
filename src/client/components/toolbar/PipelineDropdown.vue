@@ -4,6 +4,7 @@
     class="pipeline-dropdown"
     role="menu"
     @keydown="handleArrowKey"
+    @click.stop
   >
     <div class="pipeline-dropdown__header">
       <span class="pipeline-dropdown__title">Pipeline Status</span>
@@ -156,18 +157,24 @@ function handleArrowKey(event: KeyboardEvent): void {
 /**
  * Pipeline dropdown panel — CSS copied directly from Draft 2b (draft-2b-lucide.html).
  */
+/* Dropdown is teleported to <body> so it falls outside the .toolbar-pill
+   cascade. Tokens are repeated here with fallback values. */
 .pipeline-dropdown {
-  position: absolute;
-  top: calc(100% + var(--space-3));
-  right: -4px;
+  --toolbar-dropdown-bg: rgba(28, 28, 50, 0.95);
+  --toolbar-dropdown-border: rgba(0, 212, 255, 0.2);
+  --toolbar-dropdown-glow: rgba(0, 212, 255, 0.08);
+  --toolbar-dropdown-header-border: rgba(0, 212, 255, 0.1);
+  --toolbar-dropdown-section-border: rgba(0, 212, 255, 0.06);
+  --toolbar-spinner-border: rgba(0, 212, 255, 0.2);
+
   width: 340px;
-  background: rgba(28, 28, 50, 0.95);
+  background: var(--toolbar-dropdown-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  border: 1px solid var(--toolbar-dropdown-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 212, 255, 0.08);
-  z-index: 100;
+  box-shadow: var(--shadow-lg), 0 0 30px var(--toolbar-dropdown-glow);
+  z-index: calc(var(--z-overlay-panel, 201) + 1);
   overflow: hidden;
 }
 
@@ -176,7 +183,7 @@ function handleArrowKey(event: KeyboardEvent): void {
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+  border-bottom: 1px solid var(--toolbar-dropdown-header-border);
 }
 
 .pipeline-dropdown__title {
@@ -197,7 +204,7 @@ function handleArrowKey(event: KeyboardEvent): void {
 }
 
 .pipeline-dropdown__section + .pipeline-dropdown__section {
-  border-top: 1px solid rgba(0, 212, 255, 0.06);
+  border-top: 1px solid var(--toolbar-dropdown-section-border);
 }
 
 .pipeline-dropdown__label {
@@ -250,7 +257,7 @@ function handleArrowKey(event: KeyboardEvent): void {
 .mini-spinner {
   width: 12px;
   height: 12px;
-  border: 1.5px solid rgba(0, 212, 255, 0.2);
+  border: 1.5px solid var(--toolbar-spinner-border);
   border-top-color: var(--accent-primary);
   border-radius: var(--radius-full);
   animation: pipeline-spin 0.8s linear infinite;

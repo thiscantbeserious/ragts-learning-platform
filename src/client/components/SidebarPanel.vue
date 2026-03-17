@@ -18,6 +18,7 @@
         @click="closeMobileOverlay"
       />
       <span class="sidebar__mobile-brand">Erika</span>
+      <Toolbar class="sidebar__mobile-toolbar" />
     </div>
 
     <SkeletonSidebar v-if="sessionList.loading.value" />
@@ -172,6 +173,7 @@ import SkeletonSidebar from './SkeletonSidebar.vue';
 import SessionCard from './SessionCard.vue';
 import OverlayScrollbar from './OverlayScrollbar.vue';
 import HexGateIcon from './HexGateIcon.vue';
+import Toolbar from './toolbar/Toolbar.vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import type { SessionListState } from '../composables/useSessionList.js';
 import { useUpload } from '../composables/useUpload.js';
@@ -529,6 +531,11 @@ function clearFilters(): void {
   border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 60%, transparent);
   flex-shrink: 0;
   position: relative;
+}
+
+/* Toolbar in mobile header — pushed to the right via margin-left auto. */
+.sidebar__mobile-toolbar {
+  margin-inline-start: auto;
 }
 
 /* Brand name in mobile header — matches BrandMark typography. */

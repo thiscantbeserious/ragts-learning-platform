@@ -42,7 +42,13 @@
       <span class="pipeline-label">Pipeline</span>
     </button>
 
-    <PipelineDropdown :open="isOpen" />
+    <Teleport to="body">
+      <PipelineDropdown
+        v-if="isOpen"
+        :open="isOpen"
+        :style="dropdownStyle"
+      />
+    </Teleport>
   </div>
 </template>
 
@@ -81,9 +87,20 @@ const dashOffset = computed(() => {
 // ---------------------------------------------------------------------------
 
 /** Template ref to the trigger button, used to restore focus on close. */
-const triggerButtonRef = ref<{ focus(): void } | null>(null);
+const triggerButtonRef = ref<HTMLButtonElement | null>(null);
 
 const isOpen = ref(false);
+
+/** Computed style to position the teleported dropdown below the trigger button. */
+const dropdownStyle = computed(() => {
+  if (!isOpen.value || !triggerButtonRef.value) return {};
+  const rect = triggerButtonRef.value.getBoundingClientRect();
+  return {
+    position: 'fixed',
+    top: `${rect.bottom}px`,
+    right: `${window.innerWidth - rect.right + 4}px`,
+  };
+});
 
 /** Toggle the dropdown open/close. */
 function toggleDropdown(): void {
@@ -99,10 +116,12 @@ function closeDropdown(): void {
 /**
  * Handle document-level clicks to close on outside click.
  * The pipeline-wrap uses @click.stop, so any click that reaches the document
- * originated outside the component — close the dropdown unconditionally.
+ * originated outside the component. Only acts when the dropdown is open,
+ * and does NOT steal focus (the user clicked somewhere intentionally).
  */
 function handleDocumentClick(): void {
-  closeDropdown();
+  if (!isOpen.value) return;
+  isOpen.value = false;
 }
 
 onMounted(() => {
@@ -120,6 +139,7 @@ onUnmounted(() => {
  */
 .pipeline-wrap {
   position: relative;
+  margin-inline-start: 1px;
 }
 
 /**
@@ -130,7 +150,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  height: 30px;
+  height: var(--toolbar-btn-size, 30px);
   padding: 0 var(--space-3) 0 var(--space-1);
   border-radius: var(--radius-full);
   border: 1px solid transparent;
@@ -144,10 +164,10 @@ onUnmounted(() => {
 }
 
 .pipeline-ring-trigger:hover {
-  background: rgba(0, 212, 255, 0.12);
-  border-color: rgba(0, 212, 255, 0.3);
+  background: var(--toolbar-hover-bg);
+  border-color: var(--toolbar-hover-border);
   color: var(--accent-primary);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 10px var(--toolbar-hover-shadow);
 }
 
 .pipeline-ring-trigger:focus-visible {
@@ -165,7 +185,7 @@ onUnmounted(() => {
 
 .progress-ring__bg {
   fill: none;
-  stroke: rgba(0, 212, 255, 0.12);
+  stroke: var(--toolbar-ring-bg-stroke);
   stroke-width: 2.5;
 }
 
@@ -175,7 +195,7 @@ onUnmounted(() => {
   stroke-width: 2.5;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.5s ease;
-  filter: drop-shadow(0 0 3px rgba(0, 212, 255, 0.5));
+  filter: drop-shadow(0 0 3px var(--toolbar-ring-glow));
 }
 
 .ring-count {

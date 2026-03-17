@@ -1,6 +1,7 @@
 <template>
   <button
     class="toolbar-avatar"
+    aria-label="User menu"
     title="User menu"
     type="button"
     @click="handleClick"
@@ -41,11 +42,11 @@ function handleClick(event: MouseEvent): void {
  * CSS values copied exactly from the approved mockup spec.
  */
 .toolbar-avatar {
-  width: 30px;
-  height: 30px;
+  width: var(--toolbar-btn-size, 30px);
+  height: var(--toolbar-btn-size, 30px);
   border-radius: var(--radius-full);
   border: 1px solid transparent;
-  background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(255, 77, 106, 0.1));
+  background: linear-gradient(135deg, var(--toolbar-avatar-gradient-start), var(--toolbar-avatar-gradient-end));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,8 +61,8 @@ function handleClick(event: MouseEvent): void {
 }
 
 .toolbar-avatar:hover {
-  border-color: rgba(0, 212, 255, 0.3);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  border-color: var(--toolbar-hover-border);
+  box-shadow: 0 0 10px var(--toolbar-hover-shadow);
 }
 
 .toolbar-avatar:focus-visible {
