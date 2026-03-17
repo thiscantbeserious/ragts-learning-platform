@@ -41,7 +41,7 @@ const PLANETS: PlanetConfig[] = [
   { label: 'VALIDATE', texture: '/textures/2k_moon.jpg',          orbitRadius: 2.6, size: 0.10, angle: (2 * Math.PI) / 5,  tint: PINK, haloColor: PINK },
   { label: 'DETECT',   texture: '/textures/2k_jupiter.jpg',       orbitRadius: 3.4, size: 0.15, angle: (4 * Math.PI) / 5,  tint: CYAN, haloColor: CYAN },
   { label: 'REPLAY',   texture: '/textures/2k_venus_surface.jpg', orbitRadius: 4.2, size: 0.11, angle: (6 * Math.PI) / 5,  tint: CYAN, haloColor: CYAN },
-  { label: 'CURATE',   texture: '/textures/2k_mars.jpg',          orbitRadius: 5.0, size: 0.13, angle: (8 * Math.PI) / 5,  tint: PINK, haloColor: PINK },
+  { label: 'CURATE',   texture: '/textures/2k_mars.jpg',          orbitRadius: 4.4, size: 0.13, angle: (8 * Math.PI) / 5,  tint: PINK, haloColor: PINK },
 ];
 
 // ---------------------------------------------------------------------------
@@ -247,7 +247,7 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
       mesh.userData['baseAngle'] = planet.angle;
 
       // Atmosphere — slightly larger sphere with Fresnel rim glow shader
-      const atmoGeo = new THREE.SphereGeometry(planet.size * 1.15, 32, 32);
+      const atmoGeo = new THREE.SphereGeometry(planet.size * 1.35, 32, 32);
       disposables.push(atmoGeo);
 
       const r = planet.haloColor.r;
@@ -279,7 +279,7 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
             vec3 viewDir = normalize(-vPositionW);
             float rim = 1.0 - max(dot(viewDir, vNormal), 0.0);
             rim = pow(rim, 2.5);
-            gl_FragColor = vec4(glowColor, rim * 0.45);
+            gl_FragColor = vec4(glowColor, rim * 0.7);
           }
         `,
       });
@@ -402,13 +402,13 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
     resizeObserver = new ResizeObserver(() => handleResize(container));
     resizeObserver.observe(container);
     document.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('wheel', handleWheel, { passive: false });
+    document.addEventListener('wheel', handleWheel, { passive: false });
   }
 
   function unmount(): void {
     cancelAnimationFrame(animFrameId);
     document.removeEventListener('mousemove', handleMouseMove);
-    containerRef.value?.removeEventListener('wheel', handleWheel);
+    document.removeEventListener('wheel', handleWheel);
     resizeObserver?.disconnect();
     for (const d of disposables) d.dispose();
     renderer?.dispose();
