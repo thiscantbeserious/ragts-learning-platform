@@ -261,7 +261,40 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
       mesh.userData['orbitRadius'] = planet.orbitRadius;
       mesh.userData['baseAngle'] = planet.angle;
 
-      // Atmospheric glow — sprite only (BackSide Fresnel is invisible at this scale)
+      // Atmosphere — BackSide Fresnel sphere slightly larger than planet
+      const atmoGeo = new THREE.SphereGeometry(planet.size * 1.2, 32, 32);
+      disposables.push(atmoGeo);
+      const atmoMat = new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+          glowColor: { value: new THREE.Vector3(planet.haloColor.r, planet.haloColor.g, planet.haloColor.b) },
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPositionW;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPositionW = (modelViewMatrix * vec4(position, 1.0)).xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 glowColor;
+          varying vec3 vNormal;
+          varying vec3 vPositionW;
+          void main() {
+            vec3 viewDir = normalize(-vPositionW);
+            float rim = 1.0 - max(dot(viewDir, vNormal), 0.0);
+            float intensity = pow(rim, 2.0) * 0.8;
+            gl_FragColor = vec4(glowColor, intensity);
+          }
+        `,
+      });
+      disposables.push(atmoMat);
+      mesh.add(new THREE.Mesh(atmoGeo, atmoMat));
       const glowCanvas = document.createElement('canvas');
       glowCanvas.width = 64;
       glowCanvas.height = 64;
