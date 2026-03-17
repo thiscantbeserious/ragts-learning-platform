@@ -283,4 +283,35 @@ describe('PipelineDropdown', () => {
       expect(summaryText).toContain('2 queued');
     });
   });
+
+  describe('edge cases', () => {
+    it('renders empty status when queued session has no queuePosition', () => {
+      const queuedSessions = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'nopos.cast', status: 'queued' }),
+      ]);
+      const status = makePipelineStatus({ queuedSessions });
+      const wrapper = mountDropdown(status);
+
+      const statusEl = wrapper.find('.pipeline-dropdown__section--queued .pipeline-item__status');
+      expect(statusEl.text()).toBe('');
+    });
+
+    it('renders empty status when completed session has no completedAt', () => {
+      const recentlyCompleted = ref<PipelineSession[]>([
+        makeSession({ id: 's1', name: 'done.cast', status: 'completed' }),
+      ]);
+      const status = makePipelineStatus({ recentlyCompleted });
+      const wrapper = mountDropdown(status);
+
+      const statusEl = wrapper.find('.pipeline-dropdown__section--completed .pipeline-item__status');
+      expect(statusEl.text()).toBe('');
+    });
+
+    it('renders with no injection (falls back to empty arrays)', () => {
+      const wrapper = mount(PipelineDropdown, {
+        props: { open: true },
+      });
+      expect(wrapper.find('.pipeline-dropdown__summary').text()).toBe('0 active');
+    });
+  });
 });
