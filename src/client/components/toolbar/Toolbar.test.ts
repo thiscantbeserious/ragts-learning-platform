@@ -48,7 +48,8 @@ describe('Toolbar', () => {
     const settings = buttons.find((b) => b.attributes('title') === 'Settings');
     expect(settings).toBeTruthy();
     await settings!.trigger('click');
-    await router.isReady();
+    await wrapper.vm.$nextTick();
+    await wrapper.vm.$nextTick();
     expect(router.currentRoute.value.path).toBe('/settings');
   });
 });
