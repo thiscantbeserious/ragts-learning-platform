@@ -99,7 +99,7 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
     const coreMat = new THREE.MeshBasicMaterial({
       map: sunTex,
       color: 0xffffff,
-      opacity: 0.3,
+      opacity: 0.12,
       transparent: true,
     });
     // White base sphere underneath so the texture fades into white
@@ -108,18 +108,34 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
     disposables.push(baseGeo, baseMat);
     scene.add(new THREE.Mesh(baseGeo, baseMat));
 
-    // Bloom layers — multiple overlapping semi-transparent spheres for soft falloff
-    for (const [radius, opacity] of [[0.10, 0.4], [0.14, 0.2], [0.20, 0.1], [0.28, 0.05]] as const) {
-      const bGeo = new THREE.SphereGeometry(radius, 24, 24);
-      const bMat = new THREE.MeshBasicMaterial({
-        color: 0xddeeff,
+
+    // Bloom — soft glow sprites at increasing sizes (no hard edges like spheres)
+    const bloomCanvas = document.createElement('canvas');
+    bloomCanvas.width = 64;
+    bloomCanvas.height = 64;
+    const bctx2 = bloomCanvas.getContext('2d')!;
+    const bloomGrad = bctx2.createRadialGradient(32, 32, 0, 32, 32, 32);
+    bloomGrad.addColorStop(0, 'rgb(220, 230, 255)');
+    bloomGrad.addColorStop(0.2, 'rgb(200, 220, 255)');
+    bloomGrad.addColorStop(0.5, 'rgba(180, 210, 255, 0.3)');
+    bloomGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    bctx2.fillStyle = bloomGrad;
+    bctx2.fillRect(0, 0, 64, 64);
+    const bloomTex = new THREE.CanvasTexture(bloomCanvas);
+    disposables.push(bloomTex);
+
+    for (const [size, op] of [[0.5, 0.6], [0.9, 0.3], [1.4, 0.12]] as const) {
+      const bMat = new THREE.SpriteMaterial({
+        map: bloomTex,
         transparent: true,
-        opacity,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
+        opacity: op,
       });
-      disposables.push(bGeo, bMat);
-      scene.add(new THREE.Mesh(bGeo, bMat));
+      disposables.push(bMat);
+      const bSprite = new THREE.Sprite(bMat);
+      bSprite.scale.set(size, size, 1);
+      scene.add(bSprite);
     }
 
     disposables.push(coreGeo, coreMat);
@@ -262,7 +278,7 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
       mesh.userData['baseAngle'] = planet.angle;
 
       // Atmosphere — BackSide Fresnel sphere slightly larger than planet
-      const atmoGeo = new THREE.SphereGeometry(planet.size * 1.4, 32, 32);
+      const atmoGeo = new THREE.SphereGeometry(planet.size * 1.2, 32, 32);
       disposables.push(atmoGeo);
       const atmoMat = new THREE.ShaderMaterial({
         transparent: true,
@@ -288,13 +304,43 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
           void main() {
             vec3 viewDir = normalize(-vPositionW);
             float rim = 1.0 - max(dot(viewDir, vNormal), 0.0);
-            float intensity = pow(rim, 3.0) * 0.3;
+            float intensity = pow(rim, 3.0) * 0.15;
             gl_FragColor = vec4(glowColor, intensity);
           }
         `,
       });
       disposables.push(atmoMat);
       mesh.add(new THREE.Mesh(atmoGeo, atmoMat));
+
+      // Outer soft blur glow — sprite with radial gradient for feathered edge
+      const blurCanvas = document.createElement('canvas');
+      blurCanvas.width = 64;
+      blurCanvas.height = 64;
+      const bctx = blurCanvas.getContext('2d')!;
+      const bg = bctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      const cr = Math.floor(planet.haloColor.r * 255);
+      const cg = Math.floor(planet.haloColor.g * 255);
+      const cb = Math.floor(planet.haloColor.b * 255);
+      bg.addColorStop(0, `rgb(${cr}, ${cg}, ${cb})`);
+      bg.addColorStop(0.2, `rgb(${cr}, ${cg}, ${cb})`);
+      bg.addColorStop(0.5, `rgba(${cr}, ${cg}, ${cb}, 0.4)`);
+      bg.addColorStop(0.75, `rgba(${cr}, ${cg}, ${cb}, 0.1)`);
+      bg.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      bctx.fillStyle = bg;
+      bctx.fillRect(0, 0, 64, 64);
+      const blurTex = new THREE.CanvasTexture(blurCanvas);
+      disposables.push(blurTex);
+      const blurMat = new THREE.SpriteMaterial({
+        map: blurTex,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        opacity: 1.0,
+      });
+      disposables.push(blurMat);
+      const blurSprite = new THREE.Sprite(blurMat);
+      blurSprite.scale.set(planet.size * 4, planet.size * 4, 1);
+      mesh.add(blurSprite);
       const glowCanvas = document.createElement('canvas');
       glowCanvas.width = 64;
       glowCanvas.height = 64;
