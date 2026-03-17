@@ -20,7 +20,7 @@
  * click still emits normally without error.
  */
 import { inject } from 'vue';
-import { toolbarCollapseKey } from './ToolbarPill.vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
 
 withDefaults(defineProps<{ initial?: string }>(), { initial: 'S' });
 

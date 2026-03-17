@@ -9,25 +9,6 @@
   </div>
 </template>
 
-<script lang="ts">
-/**
- * ToolbarCollapseContext — shape of the collapse context provided to descendants.
- * Exported as a module-level constant so ToolbarAvatar and tests can import it
- * without triggering the `<script setup>` ES-export restriction.
- */
-import type { InjectionKey, Ref } from 'vue';
-
-export interface ToolbarCollapseContext {
-  /** Whether the toolbar pill is currently collapsed. */
-  isCollapsed: Readonly<Ref<boolean>>;
-  /** Toggles the collapsed state. */
-  toggleCollapse: () => void;
-}
-
-/** Injection key for the toolbar collapse context. */
-export const toolbarCollapseKey: InjectionKey<ToolbarCollapseContext> = Symbol('toolbarCollapse');
-</script>
-
 <script setup lang="ts">
 /**
  * ToolbarPill — glass pill container for the main application toolbar.
@@ -38,6 +19,7 @@ export const toolbarCollapseKey: InjectionKey<ToolbarCollapseContext> = Symbol('
  * toggle the collapsed state without prop-drilling through ShellHeader.
  */
 import { ref, readonly, provide } from 'vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
 
 const isCollapsed = ref(false);
 

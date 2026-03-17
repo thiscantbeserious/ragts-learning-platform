@@ -7,7 +7,8 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { inject, defineComponent } from 'vue';
-import ToolbarPill, { toolbarCollapseKey } from './ToolbarPill.vue';
+import ToolbarPill from './ToolbarPill.vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
 
 describe('ToolbarPill', () => {
   it('renders the toolbar-pill container', () => {

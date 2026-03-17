@@ -7,7 +7,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import ToolbarAvatar from './ToolbarAvatar.vue';
-import { toolbarCollapseKey } from './ToolbarPill.vue';
+import { toolbarCollapseKey } from './toolbar_collapse.js';
 
 function mountAvatar(props: { initial?: string } = {}) {
   return mount(ToolbarAvatar, { props });

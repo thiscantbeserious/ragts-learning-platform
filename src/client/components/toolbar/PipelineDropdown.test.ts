@@ -220,7 +220,7 @@ describe('PipelineDropdown', () => {
 
     it('shows recently completed section when non-empty', () => {
       const recentlyCompleted = ref<PipelineSession[]>([
-        makeSession({ id: 's1', name: 'done.cast', status: 'ready', completedAt: new Date().toISOString() }),
+        makeSession({ id: 's1', name: 'done.cast', status: 'completed', completedAt: new Date().toISOString() }),
       ]);
       const status = makePipelineStatus({ recentlyCompleted });
       const wrapper = mountDropdown(status);
@@ -230,7 +230,7 @@ describe('PipelineDropdown', () => {
 
     it('renders session names in recently completed section', () => {
       const recentlyCompleted = ref<PipelineSession[]>([
-        makeSession({ id: 's1', name: 'finished.cast', status: 'ready', completedAt: new Date().toISOString() }),
+        makeSession({ id: 's1', name: 'finished.cast', status: 'completed', completedAt: new Date().toISOString() }),
       ]);
       const status = makePipelineStatus({ recentlyCompleted });
       const wrapper = mountDropdown(status);
@@ -241,7 +241,7 @@ describe('PipelineDropdown', () => {
     it('renders a relative time string for completed sessions', () => {
       const completedAt = new Date(Date.now() - 2 * 60 * 1000).toISOString(); // 2 min ago
       const recentlyCompleted = ref<PipelineSession[]>([
-        makeSession({ id: 's1', name: 'finished.cast', status: 'ready', completedAt }),
+        makeSession({ id: 's1', name: 'finished.cast', status: 'completed', completedAt }),
       ]);
       const status = makePipelineStatus({ recentlyCompleted });
       const wrapper = mountDropdown(status);
