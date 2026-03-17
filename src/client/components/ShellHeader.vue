@@ -40,7 +40,9 @@
       </nav>
     </div>
     <div class="shell-header__right">
-      <ToolbarPill />
+      <ToolbarPill>
+        <PipelineRingTrigger />
+      </ToolbarPill>
     </div>
   </header>
 </template>
@@ -52,6 +54,7 @@ import { sessionListKey } from '../composables/useSessionList.js';
 import { layoutKey } from '../composables/useLayout.js';
 import HexGateIcon from './HexGateIcon.vue';
 import ToolbarPill from './toolbar/ToolbarPill.vue';
+import PipelineRingTrigger from './toolbar/PipelineRingTrigger.vue';
 
 /**
  * ShellHeader renders the application header bar spanning the two right columns.

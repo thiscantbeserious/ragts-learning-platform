@@ -4,11 +4,27 @@
  * Covers: container structure, left/right slot areas, and accessibility
  * (landmark role for the header element).
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import ShellHeader from './ShellHeader.vue';
 import ToolbarPill from './toolbar/ToolbarPill.vue';
+import PipelineRingTrigger from './toolbar/PipelineRingTrigger.vue';
+
+// ShellHeader mounts PipelineRingTrigger which uses usePipelineStatus (EventSource).
+// Must be a regular function (not arrow) to work as a constructor with `new`.
+function MockEventSource() {
+  return { onopen: null, onerror: null, addEventListener: vi.fn(), close: vi.fn() };
+}
+MockEventSource.prototype = {};
+
+beforeEach(() => {
+  vi.stubGlobal('EventSource', MockEventSource);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 function createTestRouter() {
   return createRouter({
@@ -70,6 +86,11 @@ describe('ShellHeader', () => {
     it('renders the ToolbarPill component inside the right area', async () => {
       const wrapper = await mountShellHeader();
       expect(wrapper.findComponent(ToolbarPill).exists()).toBe(true);
+    });
+
+    it('renders PipelineRingTrigger as slot content inside ToolbarPill', async () => {
+      const wrapper = await mountShellHeader();
+      expect(wrapper.findComponent(PipelineRingTrigger).exists()).toBe(true);
     });
   });
 });

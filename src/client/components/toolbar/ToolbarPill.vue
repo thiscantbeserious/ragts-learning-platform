@@ -11,7 +11,7 @@
 <script setup lang="ts">
 /**
  * ToolbarPill — glass pill container for the main application toolbar.
- * Renders as an empty flex container; toolbar items are placed via the default slot.
+ * Toolbar items are composed via the default slot by the parent (ShellHeader).
  * Visual design follows the Draft 2b mockup: cyan-tinted glass with backdrop blur.
  */
 </script>

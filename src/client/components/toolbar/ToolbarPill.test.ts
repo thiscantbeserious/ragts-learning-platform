@@ -1,7 +1,8 @@
 /**
  * Tests for ToolbarPill component.
  *
- * Covers: glass pill container structure, CSS class application, and ARIA attributes.
+ * Covers: glass pill container structure, CSS class application, ARIA attributes,
+ * and slot projection for toolbar items.
  */
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';

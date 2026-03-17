@@ -18,7 +18,7 @@ test('error: 404 — invalid session ID', async ({ page }) => {
 
 test('error: nonexistent route', async ({ page }) => {
   await page.goto('/nonexistent-route');
-  await page.waitForLoadState('networkidle');
+  await page.waitForLoadState('load');
 
   await expect(page).toHaveScreenshot('error-nonexistent-route.png', {
     mask: [page.locator('.shell-header')],

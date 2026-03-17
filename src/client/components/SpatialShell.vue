@@ -30,6 +30,7 @@ import MobileSidebarOverlay from './MobileSidebarOverlay.vue';
 import ToastContainer from './ToastContainer.vue';
 import { useLayout, layoutKey } from '../composables/useLayout.js';
 import { useSessionList, sessionListKey } from '../composables/useSessionList.js';
+import { usePipelineStatus, pipelineStatusKey } from '../composables/usePipelineStatus.js';
 import { useToast } from '../composables/useToast.js';
 
 /**
@@ -48,6 +49,10 @@ const { isMobile } = layout;
 /** Session list is provided at shell level so sidebar and header can share it. */
 const sessionList = useSessionList();
 provide(sessionListKey, sessionList);
+
+/** Pipeline status is provided at shell level so toolbar components can inject it. */
+const pipelineStatus = usePipelineStatus();
+provide(pipelineStatusKey, pipelineStatus);
 
 /** Toast state — shared singleton, consumed by ToastContainer rendered here. */
 const { toasts, removeToast } = useToast();

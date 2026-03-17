@@ -6,12 +6,33 @@
  * Also verifies that the data-hydrating attribute is removed after mount.
  * Drag handling has been moved to SidebarPanel (Variant E).
  */
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { defineComponent, inject } from 'vue';
 import SpatialShell from './SpatialShell.vue';
 import { layoutKey } from '../composables/useLayout.js';
+
+// SpatialShell now calls usePipelineStatus() which opens an EventSource.
+// Stub it globally so tests don't fail in the happy-dom environment.
+// Must be a regular function (not arrow) to be used as a constructor with `new`.
+function MockEventSource() {
+  return {
+    onopen: null,
+    onerror: null,
+    addEventListener: vi.fn(),
+    close: vi.fn(),
+  };
+}
+MockEventSource.prototype = {};
+
+beforeEach(() => {
+  vi.stubGlobal('EventSource', MockEventSource);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 function createTestRouter() {
   return createRouter({
