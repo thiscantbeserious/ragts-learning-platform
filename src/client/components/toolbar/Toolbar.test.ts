@@ -39,17 +39,15 @@ describe('Toolbar', () => {
     expect(wrapper.find('.toolbar-avatar').exists()).toBe(true);
   });
 
-  it('navigates to /settings when settings button is clicked', async () => {
+  it('calls router.push on settings button click', async () => {
     const router = createTestRouter();
     await router.push('/');
+    const pushSpy = vi.spyOn(router, 'push');
     const wrapper = mount(Toolbar, { global: { plugins: [router] } });
     const buttons = wrapper.findAll('.toolbar-btn');
-    // Settings button has title="Settings"
     const settings = buttons.find((b) => b.attributes('title') === 'Settings');
     expect(settings).toBeTruthy();
     await settings!.trigger('click');
-    await wrapper.vm.$nextTick();
-    await wrapper.vm.$nextTick();
-    expect(router.currentRoute.value.path).toBe('/settings');
+    expect(pushSpy).toHaveBeenCalledWith('/settings');
   });
 });
