@@ -263,12 +263,12 @@ describe('PipelineRingTrigger', () => {
     it('clicking outside closes the dropdown', async () => {
       const wrapper = mountWithStatus(makePipelineStatus());
       await wrapper.find('button.pipeline-ring-trigger').trigger('click');
-      expect(!!document.querySelector('.pipeline-dropdown')).toBe(true);
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('true');
 
       // Simulate outside click via document event
       document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await wrapper.vm.$nextTick();
-      expect(!!document.querySelector('.pipeline-dropdown')).toBe(false);
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('false');
     });
 
     it('pressing Escape returns focus to the trigger button', async () => {
