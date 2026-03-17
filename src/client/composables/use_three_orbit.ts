@@ -37,11 +37,11 @@ const CYAN = new THREE.Color(0x00d4ff);
 const PINK = new THREE.Color(0xff6688);
 
 const PLANETS: PlanetConfig[] = [
-  { label: 'RECORD',   texture: '/textures/2k_mars.jpg',          orbitRadius: 1.8, size: 0.12, angle: 0,                  tint: CYAN, haloColor: CYAN },
+  { label: 'RECORD',   texture: '/textures/2k_mars.jpg',          orbitRadius: 1.8, size: 0.07, angle: 0,                  tint: CYAN, haloColor: CYAN },
   { label: 'VALIDATE', texture: '/textures/2k_moon.jpg',          orbitRadius: 2.6, size: 0.10, angle: (2 * Math.PI) / 5,  tint: PINK, haloColor: PINK },
-  { label: 'DETECT',   texture: '/textures/2k_jupiter.jpg',       orbitRadius: 3.4, size: 0.15, angle: (4 * Math.PI) / 5,  tint: CYAN, haloColor: CYAN },
-  { label: 'REPLAY',   texture: '/textures/2k_venus_surface.jpg', orbitRadius: 4.2, size: 0.11, angle: (6 * Math.PI) / 5,  tint: CYAN, haloColor: CYAN },
-  { label: 'CURATE',   texture: '/textures/2k_mars.jpg',          orbitRadius: 4.4, size: 0.13, angle: (8 * Math.PI) / 5,  tint: PINK, haloColor: PINK },
+  { label: 'DETECT',   texture: '/textures/2k_jupiter.jpg',       orbitRadius: 3.4, size: 0.14, angle: (4 * Math.PI) / 5,  tint: CYAN, haloColor: CYAN },
+  { label: 'REPLAY',   texture: '/textures/2k_venus_surface.jpg', orbitRadius: 4.0, size: 0.10, angle: (6 * Math.PI) / 5,  tint: CYAN, haloColor: CYAN },
+  { label: 'CURATE',   texture: '/textures/2k_mars.jpg',          orbitRadius: 4.6, size: 0.16, angle: (8 * Math.PI) / 5,  tint: PINK, haloColor: PINK },
 ];
 
 // ---------------------------------------------------------------------------
