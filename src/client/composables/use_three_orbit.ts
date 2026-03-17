@@ -92,13 +92,11 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
 
     // Textured star core — moon texture with bright emissive for a 3D sun shape
     const loader = new THREE.TextureLoader();
-    const sunTex = loader.load('/textures/2k_sun.jpg');
+    const sunTex = loader.load('/textures/2k_moon.jpg');
     disposables.push(sunTex);
     const coreGeo = new THREE.SphereGeometry(0.08, 32, 32);
     const coreMat = new THREE.MeshBasicMaterial({
-      color: 0xddeeff,
-      emissive: new THREE.Color(0xddeeff),
-      emissiveIntensity: 1.0,
+      map: sunTex,
     });
     disposables.push(coreGeo, coreMat);
     const coreMesh = new THREE.Mesh(coreGeo, coreMat);
