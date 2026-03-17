@@ -81,27 +81,7 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
       ? globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false;
 
-  // ---------------------------------------------------------------------------
-  // Halo sprite texture (generated procedurally)
-  // ---------------------------------------------------------------------------
-
-  function createHaloTexture(color: THREE.Color): THREE.Texture {
-    const size = 128;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d')!;
-    const cx = size / 2;
-    const grad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
-    grad.addColorStop(0, `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0.6)`);
-    grad.addColorStop(0.3, `rgba(${Math.floor(color.r * 255)}, ${Math.floor(color.g * 255)}, ${Math.floor(color.b * 255)}, 0.15)`);
-    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-    const tex = new THREE.CanvasTexture(canvas);
-    disposables.push(tex);
-    return tex;
-  }
+  // (atmosphere glow uses Fresnel shader on a second sphere — no sprite textures needed)
 
   // ---------------------------------------------------------------------------
   // Central star/nebula
@@ -208,18 +188,47 @@ export function useThreeOrbit(externalContainerRef?: Ref<HTMLElement | null>) {
       mesh.userData['orbitRadius'] = planet.orbitRadius;
       mesh.userData['baseAngle'] = planet.angle;
 
-      // Atmospheric glow halo
-      const haloTex = createHaloTexture(planet.haloColor);
-      const haloMat = new THREE.SpriteMaterial({
-        map: haloTex,
+      // Atmosphere — slightly larger sphere with Fresnel rim glow shader
+      const atmoGeo = new THREE.SphereGeometry(planet.size * 1.15, 32, 32);
+      disposables.push(atmoGeo);
+
+      const r = planet.haloColor.r;
+      const g = planet.haloColor.g;
+      const b = planet.haloColor.b;
+
+      const atmoMat = new THREE.ShaderMaterial({
         transparent: true,
-        blending: THREE.AdditiveBlending,
         depthWrite: false,
+        side: THREE.FrontSide,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+          glowColor: { value: new THREE.Vector3(r, g, b) },
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPositionW;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPositionW = (modelViewMatrix * vec4(position, 1.0)).xyz;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 glowColor;
+          varying vec3 vNormal;
+          varying vec3 vPositionW;
+          void main() {
+            vec3 viewDir = normalize(-vPositionW);
+            float rim = 1.0 - max(dot(viewDir, vNormal), 0.0);
+            rim = pow(rim, 2.5);
+            gl_FragColor = vec4(glowColor, rim * 0.6);
+          }
+        `,
       });
-      disposables.push(haloMat);
-      const halo = new THREE.Sprite(haloMat);
-      halo.scale.set(planet.size * 5, planet.size * 5, 1);
-      mesh.add(halo);
+      disposables.push(atmoMat);
+
+      const atmoMesh = new THREE.Mesh(atmoGeo, atmoMat);
+      mesh.add(atmoMesh);
 
       meshes.push(mesh);
       orbitGroup.add(mesh);
