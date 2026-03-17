@@ -77,7 +77,8 @@ function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, tim
     // 3D position on tilted orbit ring
     const x3 = Math.cos(a) * orbitRadius;
     const y3 = Math.sin(a) * orbitRadius * Math.cos(currentTilt);
-    const z3 = Math.sin(a) * orbitRadius * Math.sin(currentTilt);
+    // Negate z: back-of-ring goes INTO screen (smaller), front comes toward viewer (larger)
+    const z3 = -Math.sin(a) * orbitRadius * Math.sin(currentTilt);
 
     // Perspective projection
     const scale = PERSPECTIVE / (PERSPECTIVE + z3);
@@ -208,7 +209,7 @@ function startOrbitAnimation(): void {
  *  - Mouse at bottom: 20° (nearly edge-on — ring is a line) */
 function handleMouseMove(e: MouseEvent): void {
   const normalizedY = e.clientY / globalThis.innerHeight; // 0 (top) to 1 (bottom)
-  const tiltDeg = 88 - normalizedY * 40;
+  const tiltDeg = 88 - normalizedY * 48;
   targetTilt = tiltDeg * (Math.PI / 180);
 }
 
