@@ -203,12 +203,12 @@ function startOrbitAnimation(): void {
 }
 
 /** Mouse Y maps to orbit tilt:
- *  - Mouse at top: 88° (nearly full top-down)
- *  - Mouse at center: 75° (base)
- *  - Mouse at bottom: 60° (more edge-on, see the ring shape) */
+ *  - Mouse at top: 88° (nearly full top-down — ring is flat)
+ *  - Mouse at center: ~55° (angled view)
+ *  - Mouse at bottom: 20° (nearly edge-on — ring is a line) */
 function handleMouseMove(e: MouseEvent): void {
   const normalizedY = e.clientY / globalThis.innerHeight; // 0 (top) to 1 (bottom)
-  const tiltDeg = 88 - normalizedY * 28;
+  const tiltDeg = 88 - normalizedY * 68;
   targetTilt = tiltDeg * (Math.PI / 180);
 }
 
