@@ -104,17 +104,17 @@ describe('ShellHeader', () => {
     it('renders the settings ToolbarButton with correct icon and label', async () => {
       const wrapper = await mountShellHeader();
       const buttons = wrapper.findAllComponents(ToolbarButton);
-      const settings = buttons.find((b) => b.props('icon') === 'icon-settings');
+      const settings = buttons.find((b) => (b.props() as Record<string, unknown>).icon === 'icon-settings');
       expect(settings).toBeTruthy();
-      expect(settings?.props('label')).toBe('Settings');
+      expect((settings?.props() as Record<string, unknown>)?.label).toBe('Settings');
     });
 
     it('renders the bell ToolbarButton with correct icon and label', async () => {
       const wrapper = await mountShellHeader();
       const buttons = wrapper.findAllComponents(ToolbarButton);
-      const bell = buttons.find((b) => b.props('icon') === 'icon-bell');
+      const bell = buttons.find((b) => (b.props() as Record<string, unknown>).icon === 'icon-bell');
       expect(bell).toBeTruthy();
-      expect(bell?.props('label')).toBe('Notifications');
+      expect((bell?.props() as Record<string, unknown>)?.label).toBe('Notifications');
     });
 
     it('renders the ToolbarAvatar component', async () => {
