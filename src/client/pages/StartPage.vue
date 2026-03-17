@@ -41,7 +41,7 @@ const NODES: OrbitalNode[] = [
   { label: 'curate',   angle: (8 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
 ];
 
-const ORBIT_TILT = 25 * (Math.PI / 180); // 25° slight tilt — viewed from front/slightly above
+const ORBIT_TILT = 75 * (Math.PI / 180); // 75° — nearly top-down, horizontal ring like viewing Earth's equator from above
 const ORBIT_SPEED = (2 * Math.PI) / 25;  // full rotation in 25s
 const PERSPECTIVE = 600;
 const BASE_SPHERE_RADIUS = 14; // base radius in px at z=0
