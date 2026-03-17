@@ -94,8 +94,8 @@ describe('StartPage', () => {
 
     it('renders 5 pipeline nodes', () => {
       const wrapper = mount(StartPage);
-      const nodeRings = wrapper.findAll('.sp-node-ring');
-      expect(nodeRings.length).toBe(5);
+      const orbitNodes = wrapper.findAll('.sp-orbit__node');
+      expect(orbitNodes.length).toBe(5);
     });
 
     it('renders 8 ambient particles', () => {

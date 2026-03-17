@@ -2,21 +2,41 @@
 /**
  * StartPage — the "home" view rendered in the main grid area when no session is selected.
  *
- * Shows a TRON-aesthetic animated SVG grid background with 5 pipeline nodes and
- * ambient particles over a centered upload-zone card (design system component).
- * Respects prefers-reduced-motion by disabling all CSS animations.
- * Upload flow is wired in Stage 10 — for now, upload-zone opens the file picker only.
+ * Shows a TRON-aesthetic animated SVG grid background with a Three.js planet orbit
+ * scene (5 textured spheres) and ambient particles over a centered upload-zone card.
+ * Respects prefers-reduced-motion by disabling all CSS animations and Three.js rotation.
+ * Upload flow uses optimistic insert with useUpload composable.
+ *
+ * Texture credit: Solar System Scope (CC BY 4.0) — https://www.solarsystemscope.com/textures/
  */
-import { ref, inject, computed } from 'vue';
+import { ref, useTemplateRef, inject, computed, onMounted, onUnmounted } from 'vue';
 import { sessionListKey } from '../composables/useSessionList.js';
 import { useUpload } from '../composables/useUpload.js';
+import { useThreeOrbit } from '../composables/use_three_orbit.js';
 import type { Session } from '../../shared/types/session.js';
 
 const sessionList = inject(sessionListKey, null);
+const isLoading = computed(() => sessionList?.loading.value ?? true);
 const hasSessions = computed(() => (sessionList?.sessions.value.length ?? 0) > 0);
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const { uploadFileWithOptimistic } = useUpload();
+
+// ---------------------------------------------------------------------------
+// Three.js planet orbit scene
+// ---------------------------------------------------------------------------
+
+/** Template ref for the Three.js container div — wired to composable via useTemplateRef. */
+const threeContainerRef = useTemplateRef<HTMLDivElement>('threeContainerRef');
+const { labelPositions, mount: mountThree, unmount: unmountThree } = useThreeOrbit(threeContainerRef);
+
+onMounted(() => {
+  mountThree();
+});
+
+onUnmounted(() => {
+  unmountThree();
+});
 
 /** Opens the system file picker. Upload zone, browse link, and keyboard trigger this. */
 function openFilePicker(): void {
@@ -130,151 +150,26 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
         stroke="#ff4d6a"
       />
 
-      <!-- Node 1: record (cyan) at grid intersection 280,120 -->
-      <g>
-        <circle
-          class="sp-node-fill sp-node-fill--cyan sp-node-fill--n1"
-          cx="280"
-          cy="120"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--cyan sp-node-ring--n1"
-          cx="280"
-          cy="120"
-          r="10"
-        />
-        <circle
-          class="sp-node-outer sp-node-outer--n1"
-          cx="280"
-          cy="120"
-          r="16"
-          stroke="#00d4ff"
-          stroke-dasharray="4 4"
-        />
-        <text
-          class="sp-node-label sp-node-label--n1"
-          x="280"
-          y="160"
-        >record</text>
-      </g>
-
-      <!-- Node 2: validate (pink) at grid intersection 400,480 -->
-      <g>
-        <circle
-          class="sp-node-fill sp-node-fill--pink sp-node-fill--n2"
-          cx="400"
-          cy="480"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--pink sp-node-ring--n2"
-          cx="400"
-          cy="480"
-          r="10"
-        />
-        <circle
-          class="sp-node-outer sp-node-outer--n2"
-          cx="400"
-          cy="480"
-          r="16"
-          stroke="#ff4d6a"
-          stroke-dasharray="4 4"
-        />
-        <text
-          class="sp-node-label sp-node-label--n2"
-          x="400"
-          y="520"
-        >validate</text>
-      </g>
-
-      <!-- Node 3: detect (cyan) at grid intersection 640,80 -->
-      <g>
-        <circle
-          class="sp-node-fill sp-node-fill--cyan sp-node-fill--n3"
-          cx="640"
-          cy="80"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--cyan sp-node-ring--n3"
-          cx="640"
-          cy="80"
-          r="10"
-        />
-        <circle
-          class="sp-node-outer sp-node-outer--n3"
-          cx="640"
-          cy="80"
-          r="16"
-          stroke="#00d4ff"
-          stroke-dasharray="4 4"
-        />
-        <text
-          class="sp-node-label sp-node-label--n3"
-          x="640"
-          y="120"
-        >detect</text>
-      </g>
-
-      <!-- Node 4: replay (pink) at grid intersection 920,480 -->
-      <g>
-        <circle
-          class="sp-node-fill sp-node-fill--pink sp-node-fill--n4"
-          cx="920"
-          cy="480"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--pink sp-node-ring--n4"
-          cx="920"
-          cy="480"
-          r="10"
-        />
-        <circle
-          class="sp-node-outer sp-node-outer--n4"
-          cx="920"
-          cy="480"
-          r="16"
-          stroke="#ff4d6a"
-          stroke-dasharray="4 4"
-        />
-        <text
-          class="sp-node-label sp-node-label--n4"
-          x="920"
-          y="520"
-        >replay</text>
-      </g>
-
-      <!-- Node 5: curate (cyan, final — stronger glow) at grid intersection 960,120 -->
-      <g>
-        <circle
-          class="sp-node-fill sp-node-fill--final sp-node-fill--n5"
-          cx="960"
-          cy="120"
-          r="8"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--final sp-node-ring--n5"
-          cx="960"
-          cy="120"
-          r="13"
-        />
-        <circle
-          class="sp-node-outer sp-node-outer--n5"
-          cx="960"
-          cy="120"
-          r="20"
-          stroke="#00d4ff"
-          stroke-dasharray="5 5"
-        />
-        <text
-          class="sp-node-label sp-node-label--n5"
-          x="960"
-          y="160"
-        >curate</text>
-      </g>
     </svg>
+
+    <!-- Three.js planet orbit scene — 5 textured spheres with real-time lighting -->
+    <div
+      ref="threeContainerRef"
+      class="sp-orbit-three"
+      aria-hidden="true"
+    >
+      <!-- HTML label overlays — projected from 3D world positions each frame -->
+      <span
+        v-for="lp in labelPositions"
+        :key="lp.label"
+        class="sp-orbit-label"
+        :style="{
+          left: lp.x + 'px',
+          top: lp.y + 'px',
+          opacity: lp.visible ? 0.65 : 0,
+        }"
+      >{{ lp.label }}</span>
+    </div>
 
     <!-- Ambient particles (8 total — 6 cyan, 2 pink) -->
     <div
@@ -310,16 +205,20 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
       aria-hidden="true"
     />
 
-    <!-- Blinking cursor watermark -->
+    <!-- Blinking cursor watermark — hidden when sessions already exist -->
     <div
+      v-if="!isLoading && !hasSessions"
       class="start-page__cursor-prompt"
       aria-hidden="true"
     >
       <span class="start-page__cursor-chevron">&gt;</span><span class="start-page__cursor-blink">_</span>
     </div>
 
-    <!-- Content overlay (centered over SVG) -->
-    <div class="start-page__content">
+    <!-- Content overlay (centered over SVG) — hidden when sessions exist -->
+    <div
+      v-if="!isLoading && !hasSessions"
+      class="start-page__content"
+    >
       <!-- Upload zone — design system component -->
       <div
         class="upload-zone"
@@ -349,7 +248,7 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           </svg>
         </div>
         <div class="upload-zone__title">
-          {{ hasSessions ? 'Add another session.' : 'No sessions yet. Fix that.' }}
+          No sessions yet. Fix that.
         </div>
         <div class="upload-zone__subtitle">
           Drop a <code>.cast</code> file here or click to browse
@@ -432,64 +331,32 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
 }
 
 /* ============================================================
-   PIPELINE NODES — TRON identity disc style
+   THREE.JS PLANET ORBIT SCENE — replaces Canvas 2D orbit
    ============================================================ */
 
-.sp-node-ring {
-  fill: none;
-  stroke-width: 1;
-  opacity: 0;
+.sp-orbit-three {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.sp-node-ring--cyan {
-  stroke: var(--accent-primary);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent))
-          drop-shadow(0 0 16px color-mix(in srgb, var(--accent-primary) 20%, transparent));
-}
-
-.sp-node-ring--pink {
-  stroke: var(--accent-secondary);
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-secondary) 35%, transparent))
-          drop-shadow(0 0 16px color-mix(in srgb, var(--accent-secondary) 20%, transparent));
-}
-
-.sp-node-ring--final {
-  stroke: var(--accent-primary);
-  stroke-width: 1.5;
-  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 40%, transparent))
-          drop-shadow(0 0 30px color-mix(in srgb, var(--accent-primary) 25%, transparent));
-}
-
-.sp-node-outer {
-  fill: none;
-  stroke-width: 0.5;
-  opacity: 0;
-}
-
-.sp-node-fill {
-  opacity: 0;
-}
-
-.sp-node-fill--cyan {
-  fill: color-mix(in srgb, var(--accent-primary) 15%, transparent);
-}
-
-.sp-node-fill--pink {
-  fill: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
-}
-
-.sp-node-fill--final {
-  fill: color-mix(in srgb, var(--accent-primary) 25%, transparent);
-}
-
-.sp-node-label {
+/* Labels are absolutely positioned spans updated by Three.js projection */
+.sp-orbit-label {
+  position: absolute;
+  transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: 14px;
-  letter-spacing: 0.2em;
-  fill: var(--text-muted);
-  text-anchor: middle;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #aaaab0;
   text-transform: uppercase;
-  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+  white-space: nowrap;
+  user-select: none;
 }
 
 /* ============================================================
@@ -643,6 +510,8 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
    KEYFRAMES
    ============================================================ */
 
+
+
 @keyframes spGridFadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -656,58 +525,6 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
 @keyframes spDecoFadeIn {
   from { visibility: visible; opacity: 0; }
   to   { visibility: visible; }
-}
-
-@keyframes spNodeAppear {
-  0%   { opacity: 0; transform: scale(0.4); }
-  60%  { opacity: 1; transform: scale(1.1); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes spOuterRingAppear {
-  0%   { opacity: 0; transform: scale(0.6); }
-  100% { opacity: 0.3; transform: scale(1); }
-}
-
-@keyframes spFillAppear {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes spLabelReveal {
-  from { opacity: 0; }
-  to   { opacity: 0.3; }
-}
-
-@keyframes spNodePulseCyan {
-  0%, 100% { transform: scale(1);
-             filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-primary) 35%, transparent))
-                     drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 15%, transparent)); }
-  50%      { transform: scale(1.3);
-             filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 65%, transparent))
-                     drop-shadow(0 0 28px color-mix(in srgb, var(--accent-primary) 25%, transparent)); }
-}
-
-@keyframes spNodePulsePink {
-  0%, 100% { transform: scale(1);
-             filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-secondary) 35%, transparent))
-                     drop-shadow(0 0 14px color-mix(in srgb, var(--accent-secondary) 15%, transparent)); }
-  50%      { transform: scale(1.3);
-             filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-secondary) 65%, transparent))
-                     drop-shadow(0 0 28px color-mix(in srgb, var(--accent-secondary) 25%, transparent)); }
-}
-
-@keyframes spNodePulseFinal {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent-primary) 40%, transparent))
-            drop-shadow(0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent));
-  }
-  50% {
-    transform: scale(1.4);
-    filter: drop-shadow(0 0 20px color-mix(in srgb, var(--accent-primary) 70%, transparent))
-            drop-shadow(0 0 40px color-mix(in srgb, var(--accent-primary) 30%, transparent));
-  }
 }
 
 @keyframes spParticleDrift1 {
@@ -782,11 +599,8 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   .sp-grid-dots { opacity: 1 !important; }
   .sp-particle { display: none !important; }
   .sp-deco-path { opacity: 0.06 !important; visibility: visible !important; }
-  .sp-node-ring { opacity: 1 !important; }
-  .sp-node-outer { opacity: 0.3 !important; }
-  .sp-node-fill { opacity: 1 !important; }
-  .sp-node-label { opacity: 0.3 !important; }
   .start-page__cursor-blink { animation: none !important; }
+  /* Three.js reduced-motion handled in useThreeOrbit composable */
 }
 
 /* ============================================================
@@ -803,56 +617,6 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   .sp-deco-path {
     animation: spDecoFadeIn 1s ease-out 0.5s forwards;
   }
-
-  /* Node 1: record (cyan) — grid intersection 280, 120 */
-  .sp-node-ring--n1 {
-    transform-origin: 280px 120px;
-    animation: spNodeAppear 0.5s ease-out 0.8s forwards,
-               spNodePulseCyan 4s ease-in-out 5.0s infinite;
-  }
-  .sp-node-outer--n1 { animation: spOuterRingAppear 0.6s ease-out 1.0s forwards; }
-  .sp-node-fill--n1  { animation: spFillAppear 0.3s ease-out 0.9s forwards; }
-  .sp-node-label--n1 { animation: spLabelReveal 0.4s ease-out 1.0s forwards; }
-
-  /* Node 2: validate (pink) — grid intersection 400, 480 */
-  .sp-node-ring--n2 {
-    transform-origin: 400px 480px;
-    animation: spNodeAppear 0.5s ease-out 1.7s forwards,
-               spNodePulsePink 4.5s ease-in-out 5.6s infinite;
-  }
-  .sp-node-outer--n2 { animation: spOuterRingAppear 0.6s ease-out 1.9s forwards; }
-  .sp-node-fill--n2  { animation: spFillAppear 0.3s ease-out 1.8s forwards; }
-  .sp-node-label--n2 { animation: spLabelReveal 0.4s ease-out 2.0s forwards; }
-
-  /* Node 3: detect (cyan) — grid intersection 640, 80 */
-  .sp-node-ring--n3 {
-    transform-origin: 640px 80px;
-    animation: spNodeAppear 0.5s ease-out 2.3s forwards,
-               spNodePulseCyan 4.2s ease-in-out 6.0s infinite;
-  }
-  .sp-node-outer--n3 { animation: spOuterRingAppear 0.6s ease-out 2.5s forwards; }
-  .sp-node-fill--n3  { animation: spFillAppear 0.3s ease-out 2.4s forwards; }
-  .sp-node-label--n3 { animation: spLabelReveal 0.4s ease-out 2.7s forwards; }
-
-  /* Node 4: replay (pink) — grid intersection 920, 480 */
-  .sp-node-ring--n4 {
-    transform-origin: 920px 480px;
-    animation: spNodeAppear 0.5s ease-out 3.0s forwards,
-               spNodePulsePink 4.8s ease-in-out 5.1s infinite;
-  }
-  .sp-node-outer--n4 { animation: spOuterRingAppear 0.6s ease-out 3.2s forwards; }
-  .sp-node-fill--n4  { animation: spFillAppear 0.3s ease-out 3.1s forwards; }
-  .sp-node-label--n4 { animation: spLabelReveal 0.4s ease-out 3.4s forwards; }
-
-  /* Node 5: curate (cyan, final) — grid intersection 960, 120 */
-  .sp-node-ring--n5 {
-    transform-origin: 960px 120px;
-    animation: spNodeAppear 0.7s ease-out 3.4s forwards,
-               spNodePulseFinal 3.5s ease-in-out 5.4s infinite;
-  }
-  .sp-node-outer--n5 { animation: spOuterRingAppear 0.8s ease-out 3.6s forwards; }
-  .sp-node-fill--n5  { animation: spFillAppear 0.4s ease-out 3.5s forwards; }
-  .sp-node-label--n5 { animation: spLabelReveal 0.5s ease-out 4.2s forwards; }
 
   /* Ambient particles */
   .sp-particle--1 { animation: spParticleDrift1 12s ease-in-out -3s infinite; }
