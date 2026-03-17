@@ -30,16 +30,38 @@ interface OrbitalNode {
   label: string;
   angle: number;
   color: [number, number, number];
-  ambient: [number, number, number]; // colored shadow fill (not black)
+  ambient: [number, number, number];
+  texture?: HTMLImageElement;
+  textureOffset: number; // rotates texture UV over time
 }
 
+// Small public domain planet textures (Solar System Scope — CC BY 4.0)
+const TEXTURE_URLS: Record<string, string> = {
+  record:   'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/OSIRIS_Mars_true_color.jpg/240px-OSIRIS_Mars_true_color.jpg',
+  validate: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/240px-FullMoon2010.jpg',
+  detect:   'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Africa_and_Europe_from_a_Million_Miles_Away.png/240px-Africa_and_Europe_from_a_Million_Miles_Away.png',
+  replay:   'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg/240px-Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+  curate:   'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Venus_from_Mariner_10.jpg/240px-Venus_from_Mariner_10.jpg',
+};
+
 const NODES: OrbitalNode[] = [
-  { label: 'record',   angle: 0,                  color: [0, 212, 255], ambient: [26, 26, 90] },
-  { label: 'validate', angle: (2 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
-  { label: 'detect',   angle: (4 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90] },
-  { label: 'replay',   angle: (6 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90] },
-  { label: 'curate',   angle: (8 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58] },
+  { label: 'record',   angle: 0,                  color: [0, 212, 255], ambient: [26, 26, 90], textureOffset: 0 },
+  { label: 'validate', angle: (2 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58], textureOffset: 0 },
+  { label: 'detect',   angle: (4 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90], textureOffset: 0 },
+  { label: 'replay',   angle: (6 * Math.PI) / 5,  color: [0, 212, 255], ambient: [26, 26, 90], textureOffset: 0 },
+  { label: 'curate',   angle: (8 * Math.PI) / 5,  color: [255, 77, 106], ambient: [90, 26, 58], textureOffset: 0 },
 ];
+
+// Preload textures
+for (const node of NODES) {
+  const url = TEXTURE_URLS[node.label];
+  if (url) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = url;
+    img.onload = () => { node.texture = img; };
+  }
+}
 
 const ORBIT_TILT_BASE = 75; // degrees — base tilt (top-down horizontal ring)
 const ORBIT_TILT_RANGE = 40; // degrees — how much mouse can shift the view (±)
@@ -110,21 +132,53 @@ function drawOrbit(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, tim
     ctx.fill();
     ctx.restore();
 
-    // --- Layer 2: Core diffuse (white highlight → color → colored ambient shadow) ---
+    // --- Layer 2: Planet body (texture if loaded, otherwise color gradient) ---
     ctx.save();
     ctx.globalAlpha = depthAlpha;
-    const core = ctx.createRadialGradient(
-      x - r * 0.35, y - r * 0.35, 0,
-      x, y, r * 1.1
-    );
-    core.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    core.addColorStop(0.2, `rgba(${cr}, ${cg}, ${cb}, 1)`);
-    core.addColorStop(0.6, `rgba(${cr}, ${cg}, ${cb}, 1)`);
-    core.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 1)`);
-    ctx.fillStyle = core;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.fill();
+    ctx.clip();
+
+    if (node.texture) {
+      // Draw texture mapped into the circle with slow rotation
+      const texShift = (time * 0.00003) % 1; // slow texture scroll
+      const tw = node.texture.width;
+      const th = node.texture.height;
+      // Draw texture twice side-by-side for seamless scroll
+      const offsetX = texShift * r * 2;
+      ctx.drawImage(node.texture, x - r - offsetX, y - r, r * 2, r * 2);
+      ctx.drawImage(node.texture, x - r - offsetX + r * 2, y - r, r * 2, r * 2);
+
+      // Color tint overlay to match the node's theme color
+      ctx.globalCompositeOperation = 'color';
+      ctx.fillStyle = `rgba(${cr}, ${cg}, ${cb}, 0.3)`;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      ctx.globalCompositeOperation = 'source-over';
+
+      // Lighting overlay — same gradient as the fallback but semi-transparent
+      const lighting = ctx.createRadialGradient(
+        x - r * 0.35, y - r * 0.35, 0,
+        x, y, r * 1.1
+      );
+      lighting.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
+      lighting.addColorStop(0.3, 'rgba(255, 255, 255, 0.05)');
+      lighting.addColorStop(0.6, 'rgba(0, 0, 0, 0)');
+      lighting.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 0.5)`);
+      ctx.fillStyle = lighting;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    } else {
+      // Fallback: color gradient sphere
+      const core = ctx.createRadialGradient(
+        x - r * 0.35, y - r * 0.35, 0,
+        x, y, r * 1.1
+      );
+      core.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      core.addColorStop(0.2, `rgba(${cr}, ${cg}, ${cb}, 1)`);
+      core.addColorStop(0.6, `rgba(${cr}, ${cg}, ${cb}, 1)`);
+      core.addColorStop(1, `rgba(${ar}, ${ag}, ${ab}, 1)`);
+      ctx.fillStyle = core;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
     ctx.restore();
 
     // --- Layer 3: Specular highlight (soft, wide — screen blend) ---
