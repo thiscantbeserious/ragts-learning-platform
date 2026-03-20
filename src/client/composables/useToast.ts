@@ -90,11 +90,14 @@ const activeKeys = new Map<string, AggregationState>();
 /** Lazily created effectScope that hosts the toasts watcher for activeKeys cleanup. */
 let watchScope: EffectScope | null = null;
 
-/** Removes a toast by id and cancels its auto-dismiss timer if one is pending. */
+/** Removes a toast by id, cancels its auto-dismiss timer, and clears its aggregation bucket. */
 function removeToast(id: number): void {
   dismissHandles.get(id)?.cancel();
   dismissHandles.delete(id);
   durations.delete(id);
+  for (const [key, state] of activeKeys) {
+    if (state.toastId === id) { activeKeys.delete(key); break; }
+  }
   toasts.value = toasts.value.filter((t) => t.id !== id);
 }
 
