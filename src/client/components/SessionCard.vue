@@ -52,7 +52,8 @@ import { useRouter } from 'vue-router';
 import type { Session } from '../../shared/types/session.js';
 import { formatRelativeTime } from '../../shared/utils/format_relative_time.js';
 import { useSSE } from '../composables/useSSE.js';
-import { useToast } from '../composables/useToast.js';
+import { useToast, ToastCategory } from '../composables/useToast.js';
+import { useScheduler } from '../composables/useScheduler.js';
 import { sessionListKey } from '../composables/useSessionList.js';
 
 /**
@@ -78,7 +79,8 @@ const router = useRouter();
 const sessionId = computed(() => props.session.id);
 const initialStatus = computed(() => props.session.detection_status);
 const { status: liveStatus } = useSSE(sessionId, initialStatus);
-const { addToast } = useToast();
+const { fireToast } = useToast();
+const scheduler = useScheduler();
 
 /** Optional session list injection — used to refresh the sidebar after terminal state. */
 const sessionList = inject(sessionListKey, null);
@@ -126,20 +128,22 @@ watch(liveStatus, (next, prev) => {
   if (next === 'completed' && !hasNotifiedTerminal.value) {
     hasNotifiedTerminal.value = true;
     justCompleted.value = true;
-    addToast(`${props.session.filename} is ready`, 'success', {
+    fireToast(`${props.session.filename} is ready`, 'success', {
       title: 'Session ready',
       icon: 'icon-file-check',
+      category: ToastCategory.SESSION_READY,
       itemLabel: props.session.filename,
       summaryNoun: 'sessions ready',
     });
-    setTimeout(() => { justCompleted.value = false; }, 700);
+    scheduler.after(700, () => { justCompleted.value = false; });
     // Refresh sidebar list so section counts and status reflect server state
     sessionList?.refreshOnSessionComplete();
   } else if ((next === 'failed' || next === 'interrupted') && !hasNotifiedTerminal.value) {
     hasNotifiedTerminal.value = true;
-    addToast(`${props.session.filename} processing failed`, 'error', {
+    fireToast(`${props.session.filename} processing failed`, 'error', {
       title: 'Processing failed',
       icon: 'icon-error-circle',
+      category: ToastCategory.PROCESSING_FAILED,
       itemLabel: props.session.filename,
       summaryNoun: 'sessions failed',
       showItemLabels: true,

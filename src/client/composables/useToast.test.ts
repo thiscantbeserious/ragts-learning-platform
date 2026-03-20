@@ -1,14 +1,14 @@
 /**
  * Tests for useToast composable — core toast lifecycle.
  *
- * Covers: addToast (creates toast with correct fields, auto-dismiss, legacy numeric arg),
+ * Covers: fireToast (creates toast with correct fields, auto-dismiss, legacy numeric arg),
  * removeToast (removes toast, cancels timer), resetToastState (clears all state),
  * updateToast (in-place mutation, timer reset).
  *
  * Aggregation tests live in useToast.aggregation.test.ts.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { useToast, resetToastState } from './useToast.js';
+import { useToast, resetToastState, ToastCategory } from './useToast.js';
 
 describe('useToast', () => {
   beforeEach(() => {
@@ -21,47 +21,47 @@ describe('useToast', () => {
     resetToastState();
   });
 
-  describe('addToast', () => {
+  describe('fireToast', () => {
     it('adds a toast to the list with the correct message', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Upload complete', 'success');
+      const { toasts, fireToast } = useToast();
+      fireToast('Upload complete', 'success');
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('Upload complete');
     });
 
     it('assigns the correct type to the toast', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Watch out', 'warning');
+      const { toasts, fireToast } = useToast();
+      fireToast('Watch out', 'warning');
       expect(toasts.value[0]?.type).toBe('warning');
     });
 
     it('sets role to "alert" for error toasts', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Something failed', 'error');
+      const { toasts, fireToast } = useToast();
+      fireToast('Something failed', 'error');
       expect(toasts.value[0]?.role).toBe('alert');
     });
 
     it('sets role to "status" for non-error toasts', () => {
-      const { toasts, addToast } = useToast();
-      addToast('All good', 'success');
+      const { toasts, fireToast } = useToast();
+      fireToast('All good', 'success');
       expect(toasts.value[0]?.role).toBe('status');
     });
 
     it('sets the title when provided in options', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Details here', 'info', { title: 'My Title' });
+      const { toasts, fireToast } = useToast();
+      fireToast('Details here', 'info', { title: 'My Title' });
       expect(toasts.value[0]?.title).toBe('My Title');
     });
 
     it('sets the icon when provided in options', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Uploaded', 'success', { icon: 'icon-upload' });
+      const { toasts, fireToast } = useToast();
+      fireToast('Uploaded', 'success', { icon: 'icon-upload' });
       expect(toasts.value[0]?.icon).toBe('icon-upload');
     });
 
     it('auto-dismisses the toast after the default duration for success', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Done', 'success');
+      const { toasts, fireToast } = useToast();
+      fireToast('Done', 'success');
       expect(toasts.value).toHaveLength(1);
 
       vi.advanceTimersByTime(5001);
@@ -69,8 +69,8 @@ describe('useToast', () => {
     });
 
     it('auto-dismisses error toasts after 8 seconds', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Error', 'error');
+      const { toasts, fireToast } = useToast();
+      fireToast('Error', 'error');
 
       vi.advanceTimersByTime(7999);
       expect(toasts.value).toHaveLength(1);
@@ -80,8 +80,8 @@ describe('useToast', () => {
     });
 
     it('supports legacy numeric third argument as durationMs', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Custom duration', 'info', 1000);
+      const { toasts, fireToast } = useToast();
+      fireToast('Custom duration', 'info', 1000);
 
       vi.advanceTimersByTime(999);
       expect(toasts.value).toHaveLength(1);
@@ -91,39 +91,39 @@ describe('useToast', () => {
     });
 
     it('assigns unique ids to multiple toasts', () => {
-      const { toasts, addToast } = useToast();
-      addToast('First', 'info');
-      addToast('Second', 'info');
+      const { toasts, fireToast } = useToast();
+      fireToast('First', 'info');
+      fireToast('Second', 'info');
       const ids = toasts.value.map((t) => t.id);
       expect(new Set(ids).size).toBe(2);
     });
 
     it('does not auto-dismiss when durationMs is 0', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Sticky', 'info', { durationMs: 0 });
+      const { toasts, fireToast } = useToast();
+      fireToast('Sticky', 'info', { durationMs: 0 });
 
       vi.advanceTimersByTime(60_000);
       expect(toasts.value).toHaveLength(1);
     });
 
     it('returns the toast id', () => {
-      const { addToast } = useToast();
-      const id = addToast('Hello', 'info');
+      const { fireToast } = useToast();
+      const id = fireToast('Hello', 'info');
       expect(typeof id).toBe('number');
     });
 
     it('returns incrementing ids for multiple toasts', () => {
-      const { addToast } = useToast();
-      const id1 = addToast('First', 'info');
-      const id2 = addToast('Second', 'info');
+      const { fireToast } = useToast();
+      const id1 = fireToast('First', 'info');
+      const id2 = fireToast('Second', 'info');
       expect(id2).toBeGreaterThan(id1);
     });
   });
 
   describe('removeToast', () => {
     it('removes the toast with the given id', () => {
-      const { toasts, addToast, removeToast } = useToast();
-      addToast('To remove', 'info');
+      const { toasts, fireToast, removeToast } = useToast();
+      fireToast('To remove', 'info');
       const id = toasts.value[0]!.id;
 
       removeToast(id);
@@ -131,8 +131,8 @@ describe('useToast', () => {
     });
 
     it('cancels the auto-dismiss timer when toast is manually removed', () => {
-      const { toasts, addToast, removeToast } = useToast();
-      addToast('Manual dismiss', 'success');
+      const { toasts, fireToast, removeToast } = useToast();
+      fireToast('Manual dismiss', 'success');
       const id = toasts.value[0]!.id;
 
       removeToast(id);
@@ -148,9 +148,9 @@ describe('useToast', () => {
     });
 
     it('only removes the targeted toast, leaving others intact', () => {
-      const { toasts, addToast, removeToast } = useToast();
-      addToast('Keep me', 'info');
-      addToast('Remove me', 'info');
+      const { toasts, fireToast, removeToast } = useToast();
+      fireToast('Keep me', 'info');
+      fireToast('Remove me', 'info');
 
       const removeId = toasts.value[1]!.id;
       removeToast(removeId);
@@ -162,17 +162,17 @@ describe('useToast', () => {
 
   describe('resetToastState', () => {
     it('clears all toasts', () => {
-      const { toasts, addToast } = useToast();
-      addToast('One', 'info');
-      addToast('Two', 'info');
+      const { toasts, fireToast } = useToast();
+      fireToast('One', 'info');
+      fireToast('Two', 'info');
 
       resetToastState();
       expect(toasts.value).toHaveLength(0);
     });
 
     it('cancels all pending auto-dismiss timers', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Will be cleared', 'success');
+      const { toasts, fireToast } = useToast();
+      fireToast('Will be cleared', 'success');
 
       resetToastState();
 
@@ -182,15 +182,21 @@ describe('useToast', () => {
     });
 
     it('clears the activeKeys aggregation map', async () => {
-      const { addToast, removeToast, toasts } = useToast();
-      // Add a titled toast to populate activeKeys
-      const id = addToast('Item uploaded', 'success', { title: 'Session uploaded' });
+      const { fireToast, removeToast, toasts } = useToast();
+      // Add a categorized toast to populate activeKeys
+      const id = fireToast('Item uploaded', 'success', {
+        title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
       expect(toasts.value).toHaveLength(1);
 
       resetToastState();
 
-      // After reset, a new titled toast should be a fresh entry (count=1, not aggregated)
-      addToast('Item uploaded', 'success', { title: 'Session uploaded' });
+      // After reset, a new categorized toast should be a fresh entry (count=1, not aggregated)
+      fireToast('Item uploaded', 'success', {
+        title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('Item uploaded');
 
@@ -202,29 +208,22 @@ describe('useToast', () => {
 
   describe('updateToast', () => {
     it('changes the message of an existing toast', () => {
-      const { toasts, addToast, updateToast } = useToast();
-      const id = addToast('Original', 'info');
+      const { toasts, fireToast, updateToast } = useToast();
+      const id = fireToast('Original', 'info');
       updateToast(id, { message: 'Updated' });
       expect(toasts.value[0]?.message).toBe('Updated');
     });
 
-    it('changes the title of an existing toast', () => {
-      const { toasts, addToast, updateToast } = useToast();
-      const id = addToast('Msg', 'info', { title: 'Old Title' });
-      updateToast(id, { title: 'New Title' });
-      expect(toasts.value[0]?.title).toBe('New Title');
-    });
-
     it('changes the icon of an existing toast', () => {
-      const { toasts, addToast, updateToast } = useToast();
-      const id = addToast('Msg', 'info', { icon: 'icon-old' });
+      const { toasts, fireToast, updateToast } = useToast();
+      const id = fireToast('Msg', 'info', { icon: 'icon-old' });
       updateToast(id, { icon: 'icon-new' });
       expect(toasts.value[0]?.icon).toBe('icon-new');
     });
 
     it('returns true for an existing toast', () => {
-      const { addToast, updateToast } = useToast();
-      const id = addToast('Msg', 'info');
+      const { fireToast, updateToast } = useToast();
+      const id = fireToast('Msg', 'info');
       expect(updateToast(id, { message: 'Updated' })).toBe(true);
     });
 
@@ -233,9 +232,16 @@ describe('useToast', () => {
       expect(updateToast(999, { message: 'Does not exist' })).toBe(false);
     });
 
+    it('changes the title of an existing toast', () => {
+      const { toasts, fireToast, updateToast } = useToast();
+      const id = fireToast('Msg', 'info', { title: 'Original title' });
+      updateToast(id, { title: 'New Title' });
+      expect(toasts.value[0]?.title).toBe('New Title');
+    });
+
     it('resets the auto-dismiss timer on update', () => {
-      const { toasts, addToast, updateToast } = useToast();
-      const id = addToast('Msg', 'success'); // 5000ms default
+      const { toasts, fireToast, updateToast } = useToast();
+      const id = fireToast('Msg', 'success'); // 5000ms default
 
       // Advance most of the original window
       vi.advanceTimersByTime(4000);

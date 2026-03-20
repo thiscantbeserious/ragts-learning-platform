@@ -1,13 +1,13 @@
 /**
  * Aggregation tests for useToast composable.
  *
- * Covers: titled toasts merge into a single updating toast,
- * titleless toasts bypass aggregation, cleanup after dismiss,
+ * Covers: category-based aggregation, titled toasts as display-only,
+ * titleless/uncategorized toasts bypass aggregation, cleanup after dismiss,
  * updateToast fallback when toast disappears mid-burst.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { nextTick } from 'vue';
-import { useToast, resetToastState } from './useToast.js';
+import { useToast, resetToastState, ToastCategory } from './useToast.js';
 
 describe('useToast aggregation', () => {
   beforeEach(() => {
@@ -20,108 +20,270 @@ describe('useToast aggregation', () => {
     resetToastState();
   });
 
-  describe('titled toasts', () => {
-    it('first titled toast is created normally and returns an ID', () => {
-      const { toasts, addToast } = useToast();
-      const id = addToast('File uploaded', 'success', { title: 'Session uploaded' });
+  describe('category-based aggregation', () => {
+    it('first toast with a category is created normally and returns an ID', () => {
+      const { toasts, fireToast } = useToast();
+      const id = fireToast('File uploaded', 'success', {
+        title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
       expect(toasts.value).toHaveLength(1);
       expect(typeof id).toBe('number');
     });
 
-    it('second toast with same title+type updates existing toast in place (count=2)', () => {
-      const { toasts, addToast } = useToast();
-      addToast('file1.cast uploaded', 'success', {
+    it('second toast with same category updates existing toast in place (count=2)', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('file1.cast uploaded', 'success', {
         title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
         itemLabel: 'file1.cast',
         summaryTemplate: (count) => `${count} sessions uploaded`,
       });
-      addToast('file2.cast uploaded', 'success', {
+      fireToast('file2.cast uploaded', 'success', {
         title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
         itemLabel: 'file2.cast',
         summaryTemplate: (count) => `${count} sessions uploaded`,
       });
-      // Only one toast in the list
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('2 sessions uploaded');
     });
 
-    it('returns the same ID for subsequent toasts of same title+type', () => {
-      const { addToast } = useToast();
-      const id1 = addToast('file1.cast', 'success', { title: 'Session uploaded' });
-      const id2 = addToast('file2.cast', 'success', { title: 'Session uploaded' });
+    it('returns the same ID for subsequent toasts of same category', () => {
+      const { fireToast } = useToast();
+      const id1 = fireToast('file1.cast', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
+      const id2 = fireToast('file2.cast', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
       expect(id1).toBe(id2);
     });
 
-    it('third toast with same key updates to count=3', () => {
-      const { toasts, addToast } = useToast();
+    it('third toast with same category updates to count=3', () => {
+      const { toasts, fireToast } = useToast();
       const template = (count: number) => `${count} sessions uploaded`;
-      addToast('f1', 'success', { title: 'Session uploaded', summaryTemplate: template });
-      addToast('f2', 'success', { title: 'Session uploaded', summaryTemplate: template });
-      addToast('f3', 'success', { title: 'Session uploaded', summaryTemplate: template });
+      fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS, summaryTemplate: template });
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS, summaryTemplate: template });
+      fireToast('f3', 'success', { category: ToastCategory.UPLOAD_SUCCESS, summaryTemplate: template });
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('3 sessions uploaded');
     });
 
+    it('two toasts with different categories are NOT merged', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('upload ok', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      fireToast('session ready', 'success', { category: ToastCategory.SESSION_READY });
+      expect(toasts.value).toHaveLength(2);
+    });
+
+    it('toast with category but no title still participates in aggregation', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      expect(toasts.value).toHaveLength(1);
+    });
+
+    it('toast without category bypasses aggregation (backward compat)', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('First', 'success', { title: 'Same title' });
+      fireToast('Second', 'success', { title: 'Same title' });
+      expect(toasts.value).toHaveLength(2);
+    });
+  });
+
+  describe('title is purely display', () => {
+    it('two toasts with same category but different titles are MERGED', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', {
+        title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
+      fireToast('f2', 'success', {
+        title: 'Sessions uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
+      expect(toasts.value).toHaveLength(1);
+    });
+
+    it('original toast title is preserved on aggregation update', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', {
+        title: 'Session uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
+      fireToast('f2', 'success', {
+        title: 'Sessions uploaded',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
+      expect(toasts.value[0]?.title).toBe('Session uploaded');
+    });
+  });
+
+  describe('updateToast can change title', () => {
+    it('updateToast with title field changes the title', () => {
+      const { toasts, fireToast, updateToast } = useToast();
+      const id = fireToast('msg', 'success', {
+        title: 'Original title',
+        category: ToastCategory.UPLOAD_SUCCESS,
+      });
+      updateToast(id, { title: 'New Title' });
+      expect(toasts.value[0]?.title).toBe('New Title');
+    });
+
+    it('title change via updateToast does not break aggregation', () => {
+      const { toasts, fireToast, updateToast } = useToast();
+      const id = fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      updateToast(id, { title: 'New Title' });
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      expect(toasts.value).toHaveLength(1);
+    });
+  });
+
+  describe('summaryTemplate and built-in formatting', () => {
     it('summaryTemplate receives (count, itemLabels, messages)', () => {
-      const { addToast } = useToast();
+      const { fireToast } = useToast();
       const captured: { count: number; labels: string[]; messages: string[] }[] = [];
       const template = (count: number, labels: string[], messages: string[]) => {
         captured.push({ count, labels, messages });
         return `${count} items`;
       };
-      addToast('msg1', 'success', { title: 'Upload', itemLabel: 'a.cast', summaryTemplate: template });
-      addToast('msg2', 'success', { title: 'Upload', itemLabel: 'b.cast', summaryTemplate: template });
+      fireToast('msg1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        itemLabel: 'a.cast',
+        summaryTemplate: template,
+      });
+      fireToast('msg2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        itemLabel: 'b.cast',
+        summaryTemplate: template,
+      });
 
-      expect(captured).toHaveLength(1); // Only called on second+ toasts
+      expect(captured).toHaveLength(1);
       expect(captured[0]?.count).toBe(2);
       expect(captured[0]?.labels).toEqual(['a.cast', 'b.cast']);
       expect(captured[0]?.messages).toEqual(['msg1', 'msg2']);
     });
 
     it('uses default "{N} notifications" summary when no summaryTemplate provided', () => {
-      const { toasts, addToast } = useToast();
-      addToast('First', 'success', { title: 'Upload' });
-      addToast('Second', 'success', { title: 'Upload' });
+      const { toasts, fireToast } = useToast();
+      fireToast('First', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      fireToast('Second', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
       expect(toasts.value[0]?.message).toBe('2 notifications');
     });
 
-    it('same title but different type creates separate toasts (not merged)', () => {
-      const { toasts, addToast } = useToast();
-      addToast('msg1', 'success', { title: 'Upload' });
-      addToast('msg2', 'error', { title: 'Upload' });
-      expect(toasts.value).toHaveLength(2);
+    it('summaryNoun produces "{N} {noun}" on aggregation', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryNoun: 'sessions uploaded',
+      });
+      fireToast('f2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryNoun: 'sessions uploaded',
+      });
+      expect(toasts.value[0]?.message).toBe('2 sessions uploaded');
     });
 
-    it('same type but different titles creates separate toasts (not merged)', () => {
-      const { toasts, addToast } = useToast();
-      addToast('msg1', 'success', { title: 'Session uploaded' });
-      addToast('msg2', 'success', { title: 'Session ready' });
-      expect(toasts.value).toHaveLength(2);
+    it('showItemLabels appends truncated label list', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'error', {
+        category: ToastCategory.UPLOAD_FAILED,
+        summaryNoun: 'failed',
+        showItemLabels: true,
+        itemLabel: 'a.cast',
+      });
+      fireToast('f2', 'error', {
+        category: ToastCategory.UPLOAD_FAILED,
+        summaryNoun: 'failed',
+        showItemLabels: true,
+        itemLabel: 'b.cast',
+      });
+      expect(toasts.value[0]?.message).toBe('2 failed: a.cast, b.cast');
     });
 
-    it('preserves the original toast icon on aggregation update', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'success', { title: 'Upload', icon: 'icon-file' });
-      addToast('f2', 'success', { title: 'Upload' });
-      expect(toasts.value[0]?.icon).toBe('icon-file');
+    it('showItemLabels truncates at 3 labels with "and N more"', () => {
+      const { toasts, fireToast } = useToast();
+      const opts = {
+        category: ToastCategory.UPLOAD_FAILED,
+        summaryNoun: 'failed',
+        showItemLabels: true,
+      };
+      fireToast('f1', 'error', { ...opts, itemLabel: 'a.cast' });
+      fireToast('f2', 'error', { ...opts, itemLabel: 'b.cast' });
+      fireToast('f3', 'error', { ...opts, itemLabel: 'c.cast' });
+      fireToast('f4', 'error', { ...opts, itemLabel: 'd.cast' });
+      fireToast('f5', 'error', { ...opts, itemLabel: 'e.cast' });
+      expect(toasts.value[0]?.message).toBe('5 failed: a.cast, b.cast, c.cast and 2 more');
     });
 
-    it('preserves the original toast title on aggregation update', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'success', { title: 'Session uploaded' });
-      addToast('f2', 'success', { title: 'Session uploaded' });
-      expect(toasts.value[0]?.title).toBe('Session uploaded');
+    it('showItemLabels with exactly 3 labels shows all without "and N more"', () => {
+      const { toasts, fireToast } = useToast();
+      const opts = {
+        category: ToastCategory.UPLOAD_FAILED,
+        summaryNoun: 'failed',
+        showItemLabels: true,
+      };
+      fireToast('f1', 'error', { ...opts, itemLabel: 'a.cast' });
+      fireToast('f2', 'error', { ...opts, itemLabel: 'b.cast' });
+      fireToast('f3', 'error', { ...opts, itemLabel: 'c.cast' });
+      expect(toasts.value[0]?.message).toBe('3 failed: a.cast, b.cast, c.cast');
+    });
+
+    it('showItemLabels with no itemLabel values omits the label suffix', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'error', {
+        category: ToastCategory.UPLOAD_FAILED,
+        summaryNoun: 'failed',
+        showItemLabels: true,
+      });
+      fireToast('f2', 'error', {
+        category: ToastCategory.UPLOAD_FAILED,
+        summaryNoun: 'failed',
+        showItemLabels: true,
+      });
+      expect(toasts.value[0]?.message).toBe('2 failed');
+    });
+
+    it('summaryNoun without showItemLabels does not append labels', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryNoun: 'uploaded',
+        itemLabel: 'a.cast',
+      });
+      fireToast('f2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryNoun: 'uploaded',
+        itemLabel: 'b.cast',
+      });
+      expect(toasts.value[0]?.message).toBe('2 uploaded');
+    });
+
+    it('summaryTemplate overrides summaryNoun when both provided', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryNoun: 'uploaded',
+        summaryTemplate: (n) => `custom: ${n}`,
+      });
+      fireToast('f2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryNoun: 'uploaded',
+        summaryTemplate: (n) => `custom: ${n}`,
+      });
+      expect(toasts.value[0]?.message).toBe('custom: 2');
     });
 
     it('collects itemLabel values and passes them to summaryTemplate', () => {
-      const { toasts, addToast } = useToast();
-      addToast('msg1', 'success', {
-        title: 'Upload',
+      const { toasts, fireToast } = useToast();
+      fireToast('msg1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
         itemLabel: 'a.cast',
         summaryTemplate: (_, labels) => labels.join(', '),
       });
-      addToast('msg2', 'success', {
-        title: 'Upload',
+      fireToast('msg2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
         itemLabel: 'b.cast',
         summaryTemplate: (_, labels) => labels.join(', '),
       });
@@ -129,172 +291,118 @@ describe('useToast aggregation', () => {
     });
 
     it('collects original messages and passes them to summaryTemplate', () => {
-      const { toasts, addToast } = useToast();
-      addToast('msg1', 'success', {
-        title: 'Upload',
+      const { toasts, fireToast } = useToast();
+      fireToast('msg1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
         summaryTemplate: (_, _labels, messages) => messages.join(' | '),
       });
-      addToast('msg2', 'success', {
-        title: 'Upload',
+      fireToast('msg2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
         summaryTemplate: (_, _labels, messages) => messages.join(' | '),
       });
       expect(toasts.value[0]?.message).toBe('msg1 | msg2');
     });
-  });
 
-  describe('built-in formatting (summaryNoun + showItemLabels)', () => {
-    it('summaryNoun produces "{N} {noun}" on aggregation', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'success', { title: 'Upload', summaryNoun: 'sessions uploaded' });
-      addToast('f2', 'success', { title: 'Upload', summaryNoun: 'sessions uploaded' });
-      expect(toasts.value[0]?.message).toBe('2 sessions uploaded');
-    });
-
-    it('showItemLabels appends truncated label list', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'error', { title: 'Fail', summaryNoun: 'failed', showItemLabels: true, itemLabel: 'a.cast' });
-      addToast('f2', 'error', { title: 'Fail', summaryNoun: 'failed', showItemLabels: true, itemLabel: 'b.cast' });
-      expect(toasts.value[0]?.message).toBe('2 failed: a.cast, b.cast');
-    });
-
-    it('showItemLabels truncates at 3 labels with "and N more"', () => {
-      const { toasts, addToast } = useToast();
-      const opts = { title: 'Fail', summaryNoun: 'failed', showItemLabels: true };
-      addToast('f1', 'error', { ...opts, itemLabel: 'a.cast' });
-      addToast('f2', 'error', { ...opts, itemLabel: 'b.cast' });
-      addToast('f3', 'error', { ...opts, itemLabel: 'c.cast' });
-      addToast('f4', 'error', { ...opts, itemLabel: 'd.cast' });
-      addToast('f5', 'error', { ...opts, itemLabel: 'e.cast' });
-      expect(toasts.value[0]?.message).toBe('5 failed: a.cast, b.cast, c.cast and 2 more');
-    });
-
-    it('showItemLabels with exactly 3 labels shows all without "and N more"', () => {
-      const { toasts, addToast } = useToast();
-      const opts = { title: 'Fail', summaryNoun: 'failed', showItemLabels: true };
-      addToast('f1', 'error', { ...opts, itemLabel: 'a.cast' });
-      addToast('f2', 'error', { ...opts, itemLabel: 'b.cast' });
-      addToast('f3', 'error', { ...opts, itemLabel: 'c.cast' });
-      expect(toasts.value[0]?.message).toBe('3 failed: a.cast, b.cast, c.cast');
-    });
-
-    it('showItemLabels with no itemLabel values omits the label suffix', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'error', { title: 'Fail', summaryNoun: 'failed', showItemLabels: true });
-      addToast('f2', 'error', { title: 'Fail', summaryNoun: 'failed', showItemLabels: true });
-      expect(toasts.value[0]?.message).toBe('2 failed');
-    });
-
-    it('summaryNoun without showItemLabels does not append labels', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'success', { title: 'Up', summaryNoun: 'uploaded', itemLabel: 'a.cast' });
-      addToast('f2', 'success', { title: 'Up', summaryNoun: 'uploaded', itemLabel: 'b.cast' });
-      expect(toasts.value[0]?.message).toBe('2 uploaded');
-    });
-
-    it('summaryTemplate overrides summaryNoun when both provided', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'success', {
-        title: 'Up',
-        summaryNoun: 'uploaded',
-        summaryTemplate: (n) => `custom: ${n}`,
+    it('preserves the original toast icon on aggregation update', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        icon: 'icon-file',
       });
-      addToast('f2', 'success', {
-        title: 'Up',
-        summaryNoun: 'uploaded',
-        summaryTemplate: (n) => `custom: ${n}`,
-      });
-      expect(toasts.value[0]?.message).toBe('custom: 2');
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      expect(toasts.value[0]?.icon).toBe('icon-file');
     });
   });
 
   describe('cleanup', () => {
     it('dismissed toast clears activeKeys; next toast of same kind starts fresh', async () => {
-      const { toasts, addToast, removeToast } = useToast();
+      const { toasts, fireToast, removeToast } = useToast();
 
-      // First burst: add, aggregate, then dismiss
-      const id = addToast('f1', 'success', { title: 'Session uploaded' });
-      addToast('f2', 'success', { title: 'Session uploaded' });
+      const id = fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
       expect(toasts.value).toHaveLength(1);
 
-      // Dismiss the aggregated toast
       removeToast(id);
       expect(toasts.value).toHaveLength(0);
 
-      // Flush post-DOM watcher so activeKeys gets cleaned up
       await nextTick();
 
-      // New toast of same kind should be a fresh single (not count=3)
-      addToast('f3', 'success', { title: 'Session uploaded' });
+      fireToast('f3', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('f3');
     });
 
     it('auto-dismissed toast clears activeKeys; next toast starts fresh', async () => {
-      const { toasts, addToast } = useToast();
+      const { toasts, fireToast } = useToast();
 
-      addToast('f1', 'success', { title: 'Session uploaded' }); // 5000ms default
-      vi.advanceTimersByTime(5001); // trigger auto-dismiss
+      fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS }); // 5000ms default
+      vi.advanceTimersByTime(5001);
       expect(toasts.value).toHaveLength(0);
 
       await nextTick();
 
-      addToast('f2', 'success', { title: 'Session uploaded' });
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('f2');
     });
 
     it('gracefully handles updateToast returning false mid-burst by creating a fresh toast', async () => {
-      const { toasts, addToast, removeToast } = useToast();
+      const { toasts, fireToast, removeToast } = useToast();
 
-      // Add first toast
-      const id = addToast('f1', 'success', { title: 'Session uploaded' });
+      const id = fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
 
       // Forcibly remove the toast WITHOUT going through aggregation cleanup
       removeToast(id);
 
-      // nextTick NOT called yet — activeKeys still has stale entry for the key.
-      addToast('f2', 'success', { title: 'Session uploaded' });
+      // nextTick NOT called yet — activeKeys still has stale entry
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
 
-      // Should have exactly one fresh toast
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('f2');
     });
 
-    it('resetToastState clears activeKeys; next titled toast starts fresh', () => {
-      const { toasts, addToast } = useToast();
-      addToast('f1', 'success', { title: 'Session uploaded' });
-      addToast('f2', 'success', { title: 'Session uploaded' });
+    it('resetToastState clears activeKeys; next categorized toast starts fresh', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
       expect(toasts.value[0]?.message).toBe('2 notifications');
 
       resetToastState();
 
-      addToast('f3', 'success', { title: 'Session uploaded' });
+      fireToast('f3', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('f3');
     });
   });
 
-  describe('titleless toasts bypass aggregation', () => {
-    it('toast without title is created normally with no aggregation', () => {
-      const { toasts, addToast } = useToast();
-      addToast('No title here', 'success');
+  describe('toasts without category bypass aggregation', () => {
+    it('toast without category is created normally with no aggregation', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('No category here', 'success');
       expect(toasts.value).toHaveLength(1);
-      expect(toasts.value[0]?.message).toBe('No title here');
+      expect(toasts.value[0]?.message).toBe('No category here');
     });
 
-    it('multiple titleless toasts each create separate toasts', () => {
-      const { toasts, addToast } = useToast();
-      addToast('First titleless', 'success');
-      addToast('Second titleless', 'success');
+    it('multiple toasts without category each create separate toasts', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('First', 'success');
+      fireToast('Second', 'success');
       expect(toasts.value).toHaveLength(2);
     });
 
-    it('titleless toasts do not interfere with titled toasts of same type', () => {
-      const { toasts, addToast } = useToast();
-      addToast('Titleless', 'success');
-      addToast('Titled 1', 'success', { title: 'Upload' });
-      addToast('Titled 2', 'success', { title: 'Upload' });
-      // Titleless = 1 toast, titled = 1 aggregated toast
+    it('toasts with title but no category bypass aggregation', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('First', 'success', { title: 'Same title' });
+      fireToast('Second', 'success', { title: 'Same title' });
+      expect(toasts.value).toHaveLength(2);
+    });
+
+    it('uncategorized toasts do not interfere with categorized toasts of same type', () => {
+      const { toasts, fireToast } = useToast();
+      fireToast('Uncategorized', 'success');
+      fireToast('Cat 1', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      fireToast('Cat 2', 'success', { category: ToastCategory.UPLOAD_SUCCESS });
+      // Uncategorized = 1 toast, categorized = 1 aggregated toast
       expect(toasts.value).toHaveLength(2);
     });
   });

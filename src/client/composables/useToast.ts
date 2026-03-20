@@ -1,7 +1,19 @@
 import { ref, watch, effectScope } from 'vue';
 import type { EffectScope } from 'vue';
+import { createScheduler } from './useScheduler.js';
+import type { SchedulerHandle } from './useScheduler.js';
 
 export type ToastRole = 'status' | 'alert';
+
+/** Predefined toast categories for aggregation. Category is the sole aggregation key. */
+export const ToastCategory = {
+  UPLOAD_SUCCESS: 'upload-success',
+  UPLOAD_FAILED: 'upload-failed',
+  SESSION_READY: 'session-ready',
+  PROCESSING_FAILED: 'processing-failed',
+} as const;
+
+export type ToastCategory = typeof ToastCategory[keyof typeof ToastCategory];
 
 export interface Toast {
   id: number;
@@ -15,11 +27,13 @@ export interface Toast {
   icon?: string;
 }
 
-/** Options accepted by addToast. The legacy numeric form is also supported for backward compat. */
+/** Options accepted by fireToast. The legacy numeric form is also supported for backward compat. */
 export interface AddToastOptions {
   title?: string;
   durationMs?: number;
   icon?: string;
+  /** Predefined category for aggregation. When set, this toast participates in aggregation. */
+  category?: ToastCategory;
   /** Domain-neutral label for this item (e.g., filename). Collected into itemLabels array. */
   itemLabel?: string;
   /** Plural noun for built-in summary, e.g. "sessions uploaded" → "5 sessions uploaded". */
@@ -58,12 +72,18 @@ let nextId = 0;
 /** Shared reactive toast list — module-level singleton so any composable can add toasts. */
 const toasts = ref<Toast[]>([]);
 
-/** Tracks active auto-dismiss timers by toast id so they can be cancelled on manual dismiss. */
-const timers = new Map<number, ReturnType<typeof setTimeout>>();
+/** Scheduler instance for all toast auto-dismiss timers. */
+const scheduler = createScheduler();
+
+/** Maps toast id to its pending auto-dismiss handle for cancel-on-dismiss. */
+const dismissHandles = new Map<number, SchedulerHandle>();
+
+/** Persists the resolved dismiss duration per toast so updateToast can reset to original value. */
+const durations = new Map<number, number>();
 
 /**
  * Module-level map of active aggregation keys to their state.
- * Key format: `${title}\0${type}` — null byte prevents collisions with type-in-title.
+ * Key is the ToastCategory string — category is the sole aggregation key.
  */
 const activeKeys = new Map<string, AggregationState>();
 
@@ -72,23 +92,24 @@ let watchScope: EffectScope | null = null;
 
 /** Removes a toast by id and cancels its auto-dismiss timer if one is pending. */
 function removeToast(id: number): void {
-  const timer = timers.get(id);
-  if (timer !== undefined) {
-    clearTimeout(timer);
-    timers.delete(id);
-  }
+  dismissHandles.get(id)?.cancel();
+  dismissHandles.delete(id);
+  durations.delete(id);
   toasts.value = toasts.value.filter((t) => t.id !== id);
 }
 
 /** Schedules auto-dismiss for a toast. Cancels any existing timer for the same id first. */
-function scheduleAutoDismiss(id: number, type: Toast['type'], durationMs?: number): void {
-  const existing = timers.get(id);
-  if (existing !== undefined) clearTimeout(existing);
+function scheduleAutoDismiss(id: number, durationMs: number): void {
+  dismissHandles.get(id)?.cancel();
+  dismissHandles.delete(id);
 
-  const duration = durationMs ?? DISMISS_DURATION[type];
-  if (duration > 0) {
-    timers.set(id, setTimeout(() => { removeToast(id); }, duration));
-  }
+  if (durationMs <= 0) return;
+
+  const handle = scheduler.after(durationMs, () => {
+    dismissHandles.delete(id);
+    removeToast(id);
+  });
+  dismissHandles.set(id, handle);
 }
 
 /**
@@ -119,8 +140,9 @@ function ensureWatchScope(): void {
 export function resetToastState(): void {
   nextId = 0;
   toasts.value = [];
-  timers.forEach(clearTimeout);
-  timers.clear();
+  scheduler.cancelAll();
+  dismissHandles.clear();
+  durations.clear();
   activeKeys.clear();
   watchScope?.stop();
   watchScope = null;
@@ -163,14 +185,15 @@ function trackNewAggregation(
  * All callers share the same reactive state, so toasts added from upload or SSE
  * are displayed by the single ToastContainer rendered in SpatialShell.
  *
- * Titled toasts participate in automatic aggregation: multiple toasts sharing the
- * same title+type merge into a single updating toast instead of stacking.
+ * Categorized toasts (with `category` option) participate in automatic aggregation:
+ * multiple toasts sharing the same category merge into a single updating toast.
  */
 export function useToast() {
   ensureWatchScope();
 
   /**
    * Updates fields of an existing toast in place and resets its auto-dismiss timer.
+   * Title is safe to mutate — category (not title) is the aggregation key.
    * Returns true if the toast was found and updated, false if the id no longer exists.
    */
   function updateToast(
@@ -184,31 +207,31 @@ export function useToast() {
     if (fields.title !== undefined) toast.title = fields.title;
     if (fields.icon !== undefined) toast.icon = fields.icon;
 
-    scheduleAutoDismiss(id, toast.type);
+    scheduleAutoDismiss(id, durations.get(id) ?? DISMISS_DURATION[toast.type]);
     return true;
   }
 
   /**
    * Adds a toast notification. Auto-dismisses after durationMs (defaults by type).
-   * Titled toasts participate in aggregation: same title+type merges into existing toast.
+   * Categorized toasts (with `category` option) participate in aggregation: same category
+   * merges into the existing toast instead of stacking.
    * @param message - Toast body text.
    * @param type - Visual variant: 'success' | 'info' | 'warning' | 'error'.
-   * @param options - Optional title, durationMs, icon, summaryTemplate, itemLabel.
+   * @param options - Optional title, durationMs, icon, category, summaryTemplate, itemLabel.
    * @returns The toast id (number).
    */
-  function addToast(
+  function fireToast(
     message: string,
     type: Toast['type'] = 'info',
     options?: AddToastOptions | number,
   ): number {
     const opts = typeof options === 'number' ? { durationMs: options } : (options ?? {});
-    const { title, icon } = opts;
 
-    if (!title) {
+    if (!opts.category) {
       return createFreshToast(message, type, opts);
     }
 
-    return addTitledToast(message, type, title, icon, opts);
+    return addCategorizedToast(message, type, opts);
   }
 
   /** Creates a brand-new toast entry with no aggregation tracking. */
@@ -218,31 +241,31 @@ export function useToast() {
     opts: AddToastOptions,
   ): number {
     const id = nextId++;
+    const duration = opts.durationMs ?? DISMISS_DURATION[type];
+    durations.set(id, duration);
     const role: ToastRole = type === 'error' ? 'alert' : 'status';
     toasts.value.push({ id, title: opts.title, message, type, role, icon: opts.icon });
-    scheduleAutoDismiss(id, type, opts.durationMs);
+    scheduleAutoDismiss(id, duration);
     return id;
   }
 
   /**
-   * Handles addToast for titled toasts — checks activeKeys and either aggregates
+   * Handles fireToast for categorized toasts — checks activeKeys and either aggregates
    * into the existing toast or creates a fresh one.
    */
-  function addTitledToast(
+  function addCategorizedToast(
     message: string,
     type: Toast['type'],
-    title: string,
-    icon: string | undefined,
     opts: AddToastOptions,
   ): number {
-    const key = `${title}\0${type}`;
+    const key = opts.category as string;
     const existing = activeKeys.get(key);
 
     if (existing) {
       return mergeIntoExisting(existing, key, message, type, opts);
     }
 
-    const id = createFreshToast(message, type, { ...opts, title, icon });
+    const id = createFreshToast(message, type, opts);
     trackNewAggregation(key, id, message, opts);
     return id;
   }
@@ -281,7 +304,7 @@ export function useToast() {
 
   return {
     toasts,
-    addToast,
+    fireToast,
     updateToast,
     removeToast,
   };
