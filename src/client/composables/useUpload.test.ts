@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { nextTick } from 'vue';
 import { useUpload } from './useUpload';
+import { useToast, resetToastState } from './useToast';
 
 function makeOkResponse(body: object): Response {
   return {
@@ -20,10 +22,12 @@ function makeErrorResponse(status: number, body: object): Response {
 describe('useUpload', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
+    resetToastState();
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    resetToastState();
   });
 
   describe('uploadFile', () => {
@@ -296,6 +300,54 @@ describe('useUpload', () => {
       });
 
       expect(uploading.value).toBe(false);
+    });
+
+    it('aggregates rapid-fire successes into a single toast with count summary', async () => {
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse({ id: 'server-1' }));
+      const onOptimisticInsert = vi.fn();
+      const onUploadComplete = vi.fn().mockResolvedValue(undefined);
+      const { uploadFileWithOptimistic } = useUpload();
+      const { toasts } = useToast();
+
+      await uploadFileWithOptimistic(new File(['data'], 'alpha.cast'), {
+        onOptimisticInsert,
+        onUploadComplete,
+      });
+      await uploadFileWithOptimistic(new File(['data'], 'beta.cast'), {
+        onOptimisticInsert,
+        onUploadComplete,
+      });
+      await uploadFileWithOptimistic(new File(['data'], 'gamma.cast'), {
+        onOptimisticInsert,
+        onUploadComplete,
+      });
+
+      await nextTick();
+
+      expect(toasts.value).toHaveLength(1);
+      expect(toasts.value[0]?.message).toBe('3 sessions uploaded');
+    });
+
+    it('aggregates rapid-fire errors into a single toast listing filenames', async () => {
+      vi.mocked(fetch).mockResolvedValue(makeErrorResponse(500, { error: 'Server error' }));
+      const onOptimisticInsert = vi.fn();
+      const onUploadComplete = vi.fn().mockResolvedValue(undefined);
+      const { uploadFileWithOptimistic } = useUpload();
+      const { toasts } = useToast();
+
+      await uploadFileWithOptimistic(new File(['data'], 'alpha.cast'), {
+        onOptimisticInsert,
+        onUploadComplete,
+      });
+      await uploadFileWithOptimistic(new File(['data'], 'beta.cast'), {
+        onOptimisticInsert,
+        onUploadComplete,
+      });
+
+      await nextTick();
+
+      expect(toasts.value).toHaveLength(1);
+      expect(toasts.value[0]?.message).toBe('2 uploads failed: alpha.cast, beta.cast');
     });
   });
 });

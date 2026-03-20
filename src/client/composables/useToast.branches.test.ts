@@ -25,32 +25,32 @@ describe('useToast — icon extraction from options (line 67)', () => {
   });
 
   it('sets icon to undefined when options object has no icon property', () => {
-    const { toasts, addToast } = useToast();
+    const { toasts, fireToast } = useToast();
     // opts is an object with durationMs but no icon
-    addToast('Test message', 'info', { durationMs: 5000 });
+    fireToast('Test message', 'info', { durationMs: 5000 });
     expect(toasts.value[0]?.icon).toBeUndefined();
   });
 
   it('sets icon from options object when icon property is present', () => {
-    const { toasts, addToast } = useToast();
-    addToast('Test message', 'success', { icon: 'icon-check', durationMs: 5000 });
+    const { toasts, fireToast } = useToast();
+    fireToast('Test message', 'success', { icon: 'icon-check', durationMs: 5000 });
     expect(toasts.value[0]?.icon).toBe('icon-check');
   });
 
   it('auto-dismiss timer fires and removes toast after duration', () => {
-    const { toasts, addToast } = useToast();
-    addToast('Timed toast', 'info', { durationMs: 3000 });
+    const { toasts, fireToast } = useToast();
+    fireToast('Timed toast', 'info', { durationMs: 3000 });
     expect(toasts.value).toHaveLength(1);
 
     vi.advanceTimersByTime(3001);
     expect(toasts.value).toHaveLength(0);
   });
 
-  it('addToast with numeric legacy arg still produces object opts and sets icon to undefined', () => {
-    const { toasts, addToast } = useToast();
+  it('fireToast with numeric legacy arg still produces object opts and sets icon to undefined', () => {
+    const { toasts, fireToast } = useToast();
     // Legacy numeric third argument: opts becomes { durationMs: 2000 }
     // typeof opts === 'object' → true, opts.icon → undefined
-    addToast('Legacy call', 'warning', 2000);
+    fireToast('Legacy call', 'warning', 2000);
     expect(toasts.value[0]?.icon).toBeUndefined();
 
     vi.advanceTimersByTime(2001);

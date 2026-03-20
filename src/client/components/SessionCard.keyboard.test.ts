@@ -23,7 +23,13 @@ const controlledStatus = ref<string>('processing');
 const mockAddToast = vi.fn();
 
 vi.mock('../composables/useToast.js', () => ({
-  useToast: () => ({ addToast: mockAddToast }),
+  useToast: () => ({ fireToast: mockAddToast }),
+  ToastCategory: {
+    UPLOAD_SUCCESS: 'upload-success',
+    UPLOAD_FAILED: 'upload-failed',
+    SESSION_READY: 'session-ready',
+    PROCESSING_FAILED: 'processing-failed',
+  },
 }));
 
 vi.mock('../composables/useSSE.js', () => ({

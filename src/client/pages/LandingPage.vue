@@ -7,7 +7,7 @@ import { useSessionList } from '../composables/useSessionList';
 import { useToast } from '../composables/useToast';
 
 const { sessions, loading, error: listError, fetchSessions, deleteSession } = useSessionList();
-const { toasts, addToast, removeToast } = useToast();
+const { toasts, fireToast, removeToast } = useToast();
 
 const {
   uploading,
@@ -20,15 +20,15 @@ const {
   clearError,
 } = useUpload(() => {
   fetchSessions();
-  addToast('Session uploaded successfully', 'success');
+  fireToast('Session uploaded successfully', 'success');
 });
 
 async function onDelete(id: string): Promise<void> {
   const success = await deleteSession(id);
   if (success) {
-    addToast('Session deleted', 'info');
+    fireToast('Session deleted', 'info');
   } else {
-    addToast('Failed to delete session', 'error');
+    fireToast('Failed to delete session', 'error');
   }
 }
 </script>

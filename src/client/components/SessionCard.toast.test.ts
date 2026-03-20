@@ -171,6 +171,63 @@ describe('SessionCard — toast dedup (hasNotifiedTerminal guard)', () => {
     expect(toasts.value[0]?.type).toBe('error');
   });
 
+  it('aggregates rapid session-ready completions into a single toast with summary', async () => {
+    const session1 = makeSession({ id: 'sess-1', filename: 'alpha.cast', detection_status: 'processing' });
+    const session2 = makeSession({ id: 'sess-2', filename: 'beta.cast', detection_status: 'processing' });
+
+    // Mount two cards sharing the same toast state
+    mountCard(session1);
+    await nextTick();
+    // Second mount creates a new mockSseStatus; capture it separately
+    const firstSseStatus = mockSseStatus;
+    mountCard(session2);
+    await nextTick();
+    const secondSseStatus = mockSseStatus;
+
+    const { toasts } = useToast();
+    expect(toasts.value).toHaveLength(0);
+
+    // First card completes
+    firstSseStatus.value = 'completed';
+    await nextTick();
+    expect(toasts.value).toHaveLength(1);
+    expect(toasts.value[0]?.type).toBe('success');
+    const firstMessage = toasts.value[0]?.message;
+    expect(firstMessage).toBe('alpha.cast is ready');
+
+    // Second card completes — should aggregate into same toast
+    secondSseStatus.value = 'completed';
+    await nextTick();
+    expect(toasts.value).toHaveLength(1);
+    expect(toasts.value[0]?.message).toBe('2 sessions ready');
+  });
+
+  it('aggregates rapid processing-failed events into a single toast with filename summary', async () => {
+    const session1 = makeSession({ id: 'sess-1', filename: 'alpha.cast', detection_status: 'processing' });
+    const session2 = makeSession({ id: 'sess-2', filename: 'beta.cast', detection_status: 'processing' });
+
+    mountCard(session1);
+    await nextTick();
+    const firstSseStatus = mockSseStatus;
+    mountCard(session2);
+    await nextTick();
+    const secondSseStatus = mockSseStatus;
+
+    const { toasts } = useToast();
+
+    // First card fails
+    firstSseStatus.value = 'failed';
+    await nextTick();
+    expect(toasts.value).toHaveLength(1);
+    expect(toasts.value[0]?.type).toBe('error');
+
+    // Second card fails — should aggregate into same toast
+    secondSseStatus.value = 'failed';
+    await nextTick();
+    expect(toasts.value).toHaveLength(1);
+    expect(toasts.value[0]?.message).toMatch(/2 sessions failed: alpha\.cast, beta\.cast/);
+  });
+
   it('resets hasNotified when status re-enters a processing state (redetect scenario)', async () => {
     const session = makeSession({ detection_status: 'processing' });
     mountCard(session);
@@ -187,10 +244,14 @@ describe('SessionCard — toast dedup (hasNotifiedTerminal guard)', () => {
     mockSseStatus.value = 'processing';
     await nextTick();
 
-    // Second completion after redetect — should fire a new toast
+    // Second completion after redetect — should notify again.
+    // With aggregation active, both "Session ready" success toasts share the same
+    // category key and merge into one updated toast rather than stacking.
+    // The user is still notified (toast is visible and updated), just deduplicated.
     mockSseStatus.value = 'completed';
     await nextTick();
 
-    expect(toasts.value.length).toBeGreaterThanOrEqual(2);
+    // At least one success toast must be visible
+    expect(toasts.value.some((t) => t.type === 'success')).toBe(true);
   });
 });

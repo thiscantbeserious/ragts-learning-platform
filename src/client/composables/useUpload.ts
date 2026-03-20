@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import type { Session } from '../../shared/types/session.js';
-import { useToast } from './useToast.js';
+import { useToast, ToastCategory } from './useToast.js';
 
 /** Shape of the upload response from POST /api/upload. */
 export interface UploadResponse {
@@ -24,7 +24,7 @@ export function useUpload(onSuccess?: () => void) {
   const uploading = ref(false);
   const error = ref<string | null>(null);
   const isDragging = ref(false);
-  const { addToast } = useToast();
+  const { fireToast } = useToast();
 
   async function uploadFile(file: File): Promise<void> {
     error.value = null;
@@ -107,17 +107,37 @@ export function useUpload(onSuccess?: () => void) {
         const msg = data.error || `Upload failed (${res.status})`;
         error.value = data.details ? `${msg}: ${data.details}` : msg;
         await callbacks.onUploadComplete(tempId);
-        addToast(error.value ?? 'Upload failed', 'error', { title: 'Upload failed', icon: 'icon-error-circle' });
+        fireToast(error.value ?? 'Upload failed', 'error', {
+          title: 'Upload failed',
+          icon: 'icon-error-circle',
+          category: ToastCategory.UPLOAD_FAILED,
+          itemLabel: file.name,
+          summaryNoun: 'uploads failed',
+          showItemLabels: true,
+        });
         return;
       }
 
       await callbacks.onUploadComplete(tempId);
-      addToast(`${file.name} has been uploaded`, 'success', { title: 'Session uploaded', icon: 'icon-upload' });
+      fireToast(`${file.name} has been uploaded`, 'success', {
+        title: 'Session uploaded',
+        icon: 'icon-upload',
+        category: ToastCategory.UPLOAD_SUCCESS,
+        itemLabel: file.name,
+        summaryNoun: 'sessions uploaded',
+      });
       onSuccess?.();
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Upload failed';
       await callbacks.onUploadComplete(tempId);
-      addToast(error.value ?? 'Upload failed', 'error', { title: 'Upload failed', icon: 'icon-error-circle' });
+      fireToast(error.value ?? 'Upload failed', 'error', {
+        title: 'Upload failed',
+        icon: 'icon-error-circle',
+        category: ToastCategory.UPLOAD_FAILED,
+        itemLabel: file.name,
+        summaryNoun: 'uploads failed',
+        showItemLabels: true,
+      });
     } finally {
       uploading.value = false;
     }
