@@ -41,7 +41,7 @@
     "pino": "^10.3.1",
     "typia": "^12.0.1",
     "vue": "^3.5.28",
-    "vue-router": "^4.5.0"
+    "vue-router": "^5.0.4"
   },
   "devDependencies": {
     "@bgotink/playwright-coverage": "^0.3.2",
