@@ -9,6 +9,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
+import { collectV8Coverage } from '@bgotink/playwright-coverage';
 
 export default defineConfig({
   testDir: '.',
@@ -17,7 +18,16 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: 1,
-  reporter: 'list',
+  reporter: [
+    ['list'],
+    // Output V8 coverage as lcov for merging with vitest coverage
+    ...(process.env.PLAYWRIGHT_COVERAGE
+      ? [collectV8Coverage({
+          outputDir: '../../coverage/playwright',
+          reporter: ['lcov'],
+        }) as any]
+      : []),
+  ],
   timeout: 30000,
   use: {
     baseURL: 'http://localhost:5173',

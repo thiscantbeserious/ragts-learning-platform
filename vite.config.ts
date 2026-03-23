@@ -92,7 +92,7 @@ export default defineConfig({
     ],
     coverage: {
       reporter: ['text', 'lcov'],
-      reportsDirectory: 'coverage',
+      reportsDirectory: 'coverage/vitest',
       exclude: [
         '**/scripts/**',
         '**/migrations/**',
