@@ -257,7 +257,9 @@ describe('API Routes', () => {
       expect(data.content).not.toHaveProperty('events');
       expect(data.content).toHaveProperty('markers');
       expect(data.content.markers).toHaveLength(3);
-      expect(data).toHaveProperty('snapshot');
+      expect(data).toHaveProperty('totalLines');
+      expect(data).toHaveProperty('sectionCount');
+      expect(data).not.toHaveProperty('snapshot');
     });
 
     it('should return 404 for non-existent session', async () => {
@@ -537,7 +539,8 @@ describe('API Routes', () => {
       );
       expect(getRes.status).toBe(200);
       const body = await getRes.json();
-      expect(body.snapshot).toBeNull();
+      // The metadata endpoint no longer returns snapshot content — corrupt snapshot is ignored
+      expect(body).not.toHaveProperty('snapshot');
     });
 
     it('should handle session with corrupt section snapshot', async () => {
@@ -566,7 +569,9 @@ describe('API Routes', () => {
       expect(getRes.status).toBe(200);
       const body = await getRes.json();
       const corruptSection = body.sections.find((s: { label: string }) => s.label === 'corrupt');
-      expect(corruptSection.snapshot).toBeNull();
+      // SectionMetadata no longer includes snapshot content — sections carry only lineCount/preview
+      expect(corruptSection).toBeDefined();
+      expect(corruptSection).not.toHaveProperty('snapshot');
     });
 
     it('should return 500 when list sessions fails', async () => {

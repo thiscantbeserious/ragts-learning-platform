@@ -16,6 +16,7 @@ import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { EventBusAdapter } from '../events/event_bus_adapter.js';
 import { PipelineStage } from '../../shared/types/pipeline.js';
 import type { Section } from '../../shared/types/section.js';
+import type { SectionMetadata, SessionMetadataResponse } from '../../shared/types/api.js';
 import { logger } from '../logger.js';
 import { RateLimiter } from '../utils/rate_limiter.js';
 
@@ -92,6 +93,45 @@ export class SessionService {
         content: { header: parsed.header, markers: parsed.markers },
         sections: transformedSections,
       } as Record<string, unknown>,
+    };
+  }
+
+  /**
+   * Retrieve session metadata without snapshot content.
+   * Returns SectionMetadata[] with lineCount/preview from DB columns — no snapshot blobs.
+   * Reads the .cast file for header+markers only; sections are loaded from DB.
+   */
+  async getSessionMetadata(id: string): Promise<SessionServiceResult<SessionMetadataResponse>> {
+    const session = await this.sessionRepository.findById(id);
+    if (!session) {
+      return { ok: false, status: 404, error: 'Session not found' };
+    }
+
+    let content: string;
+    try {
+      content = await this.storageAdapter.read(id);
+    } catch (err) {
+      if (err instanceof Error && err.message.includes('not found')) {
+        return { ok: false, status: 404, error: 'Session file not found on filesystem' };
+      }
+      throw err;
+    }
+
+    const parsed = parseAsciicast(content);
+    const sectionRows = await this.sectionRepository.findBySessionId(id);
+    const sections = sectionRows.map(toSectionMetadata);
+    const totalLines = sections.reduce((sum, s) => sum + s.lineCount, 0);
+
+    const { filepath: _fp, snapshot: _snap, ...sessionData } = session;
+    return {
+      ok: true,
+      data: {
+        ...sessionData,
+        content: { header: parsed.header, markers: parsed.markers },
+        sections,
+        totalLines,
+        sectionCount: sections.length,
+      } as unknown as SessionMetadataResponse,
     };
   }
 
@@ -183,6 +223,21 @@ function parseSnapshotJson(value: string | null | undefined, context: string, id
     log.warn({ err, [`${context}Id`]: id }, `Failed to parse ${context} snapshot JSON`);
     return null;
   }
+}
+
+/** Transform a DB section row into SectionMetadata (no snapshot content). */
+function toSectionMetadata(section: SectionRow): SectionMetadata {
+  return {
+    id: section.id,
+    type: section.type,
+    label: section.label ?? '',
+    startEvent: section.start_event,
+    endEvent: section.end_event ?? 0,
+    startLine: section.start_line,
+    endLine: section.end_line,
+    lineCount: section.line_count ?? 0,
+    preview: section.preview,
+  };
 }
 
 /** Transform a DB section row into the shared API response shape. */
