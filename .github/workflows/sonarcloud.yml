@@ -47,6 +47,28 @@ jobs:
             echo "Using vitest-only coverage"
           fi
 
+      - name: Enforce coverage thresholds (matches vite.config.ts)
+        run: |
+          THRESHOLD=90
+          if [ ! -f coverage/lcov.info ]; then
+            echo "::error::No coverage report found"
+            exit 1
+          fi
+          # Parse lcov for branch coverage (BRDA/BRF/BRH)
+          BRF=$(grep -c '^BRDA:' coverage/lcov.info || echo 0)
+          BRH=$(grep '^BRDA:' coverage/lcov.info | grep -cv ',-$' || echo 0)
+          if [ "$BRF" -gt 0 ]; then
+            BRANCH_PCT=$(( BRH * 100 / BRF ))
+          else
+            BRANCH_PCT=100
+          fi
+          echo "Merged branch coverage: ${BRANCH_PCT}% (threshold: ${THRESHOLD}%)"
+          if [ "$BRANCH_PCT" -lt "$THRESHOLD" ]; then
+            echo "::error::Merged branch coverage (${BRANCH_PCT}%) does not meet threshold (${THRESHOLD}%)"
+            exit 1
+          fi
+          echo "Coverage threshold met."
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v7
         env:
