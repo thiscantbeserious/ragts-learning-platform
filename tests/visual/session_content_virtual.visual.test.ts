@@ -79,10 +79,10 @@ test.describe('Small session (no navigator)', () => {
   test('scroll works for small session', async ({ page }) => {
     await gotoSession(page, smallSessionId, '.terminal-line');
 
-    const scrollable = page.locator('.session-detail-view');
+    // Small sessions scroll inside the OverlayScrollbar viewport, not the view itself
+    const scrollable = page.locator('.terminal-scroll .overlay-scrollbar__viewport');
     const initialScrollY = await scrollable.evaluate((el) => el.scrollTop);
 
-    // Scroll down
     await scrollable.evaluate((el) => el.scrollTo({ top: 100 }));
     await page.waitForTimeout(100);
 
