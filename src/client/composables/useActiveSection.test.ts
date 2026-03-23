@@ -1,15 +1,18 @@
 /**
  * Tests for useActiveSection composable.
  *
- * Covers: initial state (null), section becoming active when element enters viewport,
- * switching active section when a new element enters, cleanup on unmount,
- * re-observing when elements list changes.
+ * Covers:
+ * - IntersectionObserver mode (small/flat sessions): initial state, entering/leaving
+ *   viewport, multiple sections, element list reactivity, cleanup.
+ * - Scroll-position mode (large/virtual sessions): derives active section from
+ *   scroll position + item offsets, updates on scroll, cleans up scroll listener.
  *
  * IntersectionObserver is not available in happy-dom so we stub it globally.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
 import { useActiveSection } from './useActiveSection.js';
+import type { SectionOffset } from './useActiveSection.js';
 
 // ---------------------------------------------------------------------------
 // IntersectionObserver mock
@@ -264,5 +267,166 @@ describe('useActiveSection', () => {
       cleanup();
       expect(activeId.value).toBeNull();
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Scroll-position mode tests
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates a minimal HTMLElement mock that supports scroll events and scrollTop.
+ * Used to simulate scroll container behaviour without a real DOM.
+ */
+function makeScrollContainer(initialScrollTop = 0): HTMLElement {
+  const el = document.createElement('div');
+  Object.defineProperty(el, 'scrollTop', {
+    writable: true,
+    value: initialScrollTop,
+  });
+  return el;
+}
+
+/** Build a simple ordered list of section offsets (non-overlapping). */
+function makeOffsets(ids: string[], sectionHeight = 500): SectionOffset[] {
+  return ids.map((id, i) => ({
+    id,
+    start: i * sectionHeight,
+    end: (i + 1) * sectionHeight,
+  }));
+}
+
+describe('useActiveSection — scroll-position mode', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('sets activeId to the first section when scrollTop is 0', async () => {
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    expect(activeId.value).toBe('a');
+  });
+
+  it('sets activeId to the section whose start is <= scrollTop', async () => {
+    const scrollEl = makeScrollContainer(600);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    // Section b starts at 500, c starts at 1000 — scrollTop 600 is in b
+    expect(activeId.value).toBe('b');
+  });
+
+  it('updates activeId when scroll event fires', async () => {
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    expect(activeId.value).toBe('a');
+
+    // Simulate scrolling to section c (start = 1000)
+    (scrollEl as unknown as Record<string, number>)['scrollTop'] = 1050;
+    scrollEl.dispatchEvent(new Event('scroll'));
+
+    expect(activeId.value).toBe('c');
+  });
+
+  it('returns first section id when scrollTop is above all section starts', async () => {
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets: SectionOffset[] = [
+      { id: 'x', start: 100, end: 600 },
+      { id: 'y', start: 600, end: 1200 },
+    ];
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    // scrollTop 0 is above section x start (100) — falls back to first
+    expect(activeId.value).toBe('x');
+  });
+
+  it('returns null when offsets list is empty', async () => {
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => [],
+    });
+
+    await nextTick();
+    expect(activeId.value).toBeNull();
+  });
+
+  it('attaches scroll listener when scrollElement becomes non-null', async () => {
+    const scrollElement = ref<HTMLElement | null>(null);
+    const offsets = makeOffsets(['a', 'b']);
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    // No element yet — activeId not yet set
+    expect(activeId.value).toBeNull();
+
+    const scrollEl = makeScrollContainer(500);
+    scrollElement.value = scrollEl;
+    await nextTick();
+
+    // After element assigned, initial computation runs
+    expect(activeId.value).toBe('b');
+  });
+
+  it('cleanup removes scroll listener and resets activeId', async () => {
+    const scrollEl = makeScrollContainer(500);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId, cleanup } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    expect(activeId.value).toBe('b');
+
+    cleanup();
+    expect(activeId.value).toBeNull();
+
+    // Scroll event after cleanup should not update activeId
+    (scrollEl as unknown as Record<string, number>)['scrollTop'] = 1050;
+    scrollEl.dispatchEvent(new Event('scroll'));
+    expect(activeId.value).toBeNull();
+  });
+
+  it('uses last section when scrollTop exceeds all section starts', async () => {
+    const scrollEl = makeScrollContainer(9999);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    expect(activeId.value).toBe('c');
   });
 });

@@ -8,6 +8,7 @@ import { useSessionV2 } from '../composables/use_session.js';
 import { useActiveSection, type SectionEntry } from '../composables/useActiveSection.js';
 import { useSectionVirtualizer } from '../composables/use_section_virtualizer.js';
 import { SMALL_SESSION_THRESHOLD } from '../../shared/constants.js';
+import type { SectionOffset } from '../composables/useActiveSection.js';
 
 /**
  * SessionDetailView renders a session's content in the spatial shell main area.
@@ -76,13 +77,40 @@ const measureElement = computed(() =>
 
 const sectionEntries = ref<SectionEntry[]>([]);
 
-const { activeId } = useActiveSection(sectionEntries);
+/**
+ * Returns ordered section offsets from the virtualizer measurement cache.
+ * Used by useActiveSection in scroll-position mode to derive the active section.
+ */
+function getItemOffsets(): SectionOffset[] {
+  const measurements = virtualizer.value.measurementsCache;
+  return sections.value.map((section, index) => {
+    const m = measurements[index];
+    return {
+      id: section.id,
+      start: m?.start ?? 0,
+      end: m?.end ?? 0,
+    };
+  });
+}
 
-/** Called by SectionItem on mount to register each section element for scrollspy. */
+const { activeId } = useActiveSection(sectionEntries, {
+  scrollElement: scrollViewport as Ref<HTMLElement | null>,
+  getItemOffsets,
+});
+
+/**
+ * Called by SectionItem on mount (or re-mount after virtual scroll) to register
+ * the section element. Always updates the entry to avoid stale element refs
+ * caused by TanStack Virtual unmounting and remounting DOM nodes.
+ */
 function onRegisterSection(id: string, el: Element): void {
   if (!isLargeSession.value) return;
-  const existing = sectionEntries.value.find((e) => e.id === id);
-  if (!existing) {
+  const existingIndex = sectionEntries.value.findIndex((e) => e.id === id);
+  if (existingIndex >= 0) {
+    const updated = [...sectionEntries.value];
+    updated[existingIndex] = { id, el };
+    sectionEntries.value = updated;
+  } else {
     sectionEntries.value = [...sectionEntries.value, { id, el }];
   }
 }
@@ -157,8 +185,12 @@ function onHoverSection(id: string): void {
 /* Large session: side-by-side content + navigator */
 .session-detail-view--with-nav {
   flex-direction: row;
-  /* Keep padding on parent; remove right padding so navigator sits flush */
-  padding: var(--space-6);
+  /* Zero out vertical padding so navigator fills full height flush to edges.
+     Left padding is preserved to keep the content area inset from the shell edge.
+     Right padding is zero — navigator sits flush on the right. */
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--space-6);
   padding-right: 0;
   gap: 0;
   overflow: hidden;
@@ -168,6 +200,13 @@ function onHoverSection(id: string): void {
   flex: 1;
   min-width: 0;
   min-height: 0;
+}
+
+/* In the with-nav layout the container has no vertical padding,
+   so we add it back to the content area only — the navigator fills flush. */
+.session-detail-view--with-nav .session-detail-view__content {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
 }
 
 .session-detail-view__nav {
