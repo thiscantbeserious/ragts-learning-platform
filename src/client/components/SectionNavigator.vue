@@ -86,6 +86,7 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-env browser */
 import { ref, computed, watch } from 'vue';
 import OverlayScrollbar from './OverlayScrollbar.vue';
 import { useScheduler } from '../composables/useScheduler.js';
