@@ -127,7 +127,7 @@ describe('SessionContent component snapshots', () => {
         detectionStatus: 'failed',
       },
     });
-    expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
+    expect(wrapper.find('.fallback-banner--error').exists()).toBe(true);
     expect(wrapper.html()).toMatchSnapshot();
   });
 });

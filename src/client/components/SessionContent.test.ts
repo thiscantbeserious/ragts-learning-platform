@@ -102,15 +102,15 @@ describe('SessionContent (Stage 11)', () => {
           snapshot,
         },
       });
-      expect(wrapper.find('.session-content-banner--info').exists()).toBe(true);
-      expect(wrapper.find('.session-content-banner--info').text()).toContain(
-        'Section boundaries were not detected'
+      expect(wrapper.find('.fallback-banner--info').exists()).toBe(true);
+      expect(wrapper.find('.fallback-banner--info').text()).toContain(
+        'No sections detected'
       );
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
       expect(wrapper.find('.terminal-snapshot-stub').attributes('data-line-count')).toBe('5');
     });
 
-    it('state 2: completed + no snapshot → "No content available"', () => {
+    it('state 2: completed + no snapshot → info banner + empty terminal state', () => {
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
@@ -118,8 +118,8 @@ describe('SessionContent (Stage 11)', () => {
           detectionStatus: 'completed',
         },
       });
-      expect(wrapper.find('.terminal-empty').text()).toContain('No content available');
-      expect(wrapper.find('.session-content-banner--info').exists()).toBe(false);
+      expect(wrapper.find('.fallback-banner--info').exists()).toBe(true);
+      expect(wrapper.find('.terminal-empty-state').exists()).toBe(true);
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(false);
     });
 
@@ -133,12 +133,12 @@ describe('SessionContent (Stage 11)', () => {
           snapshot,
         },
       });
-      expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
-      expect(wrapper.find('.session-content-banner--error').text()).toContain('error');
+      expect(wrapper.find('.fallback-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.fallback-banner--error').text()).toContain('processing failed');
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
     });
 
-    it('state 4: failed + no snapshot → "Session processing failed"', () => {
+    it('state 4: failed + no snapshot → error banner + empty terminal state', () => {
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
@@ -146,12 +146,12 @@ describe('SessionContent (Stage 11)', () => {
           detectionStatus: 'failed',
         },
       });
-      expect(wrapper.find('.terminal-empty--error').exists()).toBe(true);
-      expect(wrapper.find('.terminal-empty--error').text()).toContain('processing failed');
+      expect(wrapper.find('.fallback-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.terminal-empty-state--error').exists()).toBe(true);
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(false);
     });
 
-    it('state 4b: interrupted + no snapshot → error state', () => {
+    it('state 4b: interrupted + no snapshot → error banner + empty terminal state', () => {
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
@@ -159,7 +159,8 @@ describe('SessionContent (Stage 11)', () => {
           detectionStatus: 'interrupted',
         },
       });
-      expect(wrapper.find('.terminal-empty--error').exists()).toBe(true);
+      expect(wrapper.find('.fallback-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.terminal-empty-state--error').exists()).toBe(true);
     });
 
     it('state 5: processing (non-terminal) → "Session is being processed"', () => {
@@ -194,7 +195,7 @@ describe('SessionContent (Stage 11)', () => {
           snapshot,
         },
       });
-      expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.fallback-banner--error').exists()).toBe(true);
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
     });
   });
@@ -239,7 +240,7 @@ describe('SessionContent (Stage 11)', () => {
           detectionStatus: 'failed',
         },
       });
-      expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.fallback-banner--error').exists()).toBe(true);
     });
 
     it('does NOT show info banner when sections exist', () => {
@@ -250,7 +251,7 @@ describe('SessionContent (Stage 11)', () => {
           detectionStatus: 'completed',
         },
       });
-      expect(wrapper.find('.session-content-banner--info').exists()).toBe(false);
+      expect(wrapper.find('.fallback-banner--info').exists()).toBe(false);
     });
   });
 

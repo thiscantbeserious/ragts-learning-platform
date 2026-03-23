@@ -33,6 +33,11 @@ const props = withDefaults(defineProps<{
    */
   snapshot?: TerminalSnapshot | null;
   /**
+   * Optional error detail string — shown in the error banner detail block
+   * when the pipeline failed (e.g. last error message from the status endpoint).
+   */
+  errorDetail?: string | null;
+  /**
    * Virtual items from useSectionVirtualizer — when provided, enables virtual
    * rendering. Only these items are rendered (large session path).
    */
@@ -51,6 +56,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   detectionStatus: 'completed',
   snapshot: null,
+  errorDetail: null,
   virtualItems: undefined,
   totalHeight: undefined,
   measureElement: null,
@@ -107,9 +113,19 @@ defineExpose({
       <!-- Error banner for failed sessions that have partial sections -->
       <div
         v-if="isTerminalError"
-        class="session-content-banner session-content-banner--error"
+        class="fallback-banner fallback-banner--error"
       >
-        Session processing encountered an error. Showing available content.
+        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div class="fallback-banner__body">
+          <div class="fallback-banner__title">Session processing failed</div>
+          <div class="fallback-banner__text">
+            The pipeline encountered an error. Showing recovered terminal content below.
+          </div>
+        </div>
       </div>
 
       <!-- Virtual mode: absolutely positioned items within a sized container -->
@@ -148,31 +164,46 @@ defineExpose({
       </template>
     </OverlayScrollbar>
 
-    <!-- State A: completed + 0 sections + snapshot exists → full snapshot with info banner -->
-    <template v-else-if="detectionStatus === 'completed' && snapshot">
-      <div class="session-content-banner session-content-banner--info">
-        Section boundaries were not detected for this session.
+    <!-- State 1: Processing failed + no content -->
+    <template v-else-if="isTerminalError && !snapshot">
+      <div class="fallback-banner fallback-banner--error">
+        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div class="fallback-banner__body">
+          <div class="fallback-banner__title">Session processing failed</div>
+          <div class="fallback-banner__text">
+            The pipeline encountered an error while analyzing this recording.
+            No terminal content could be recovered.
+          </div>
+          <div v-if="errorDetail" class="fallback-banner__detail">{{ errorDetail }}</div>
+        </div>
       </div>
-      <OverlayScrollbar class="terminal-scroll">
-        <TerminalSnapshotComponent
-          :lines="snapshot.lines"
-          :start-line-number="1"
-        />
-      </OverlayScrollbar>
+      <div class="terminal-empty-state terminal-empty-state--error">
+        <svg class="terminal-empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 17 10 11 4 5"/>
+          <line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+        <div class="terminal-empty-state__label">No terminal output available</div>
+      </div>
     </template>
 
-    <!-- State A (no snapshot): completed + 0 sections + no snapshot -->
-    <div
-      v-else-if="detectionStatus === 'completed'"
-      class="terminal-empty"
-    >
-      No content available for this session.
-    </div>
-
-    <!-- State B (failed/interrupted + snapshot): error banner + full snapshot -->
+    <!-- State 2: Processing failed + partial content (snapshot) -->
     <template v-else-if="isTerminalError && snapshot">
-      <div class="session-content-banner session-content-banner--error">
-        Session processing encountered an error. Showing available content.
+      <div class="fallback-banner fallback-banner--error">
+        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <div class="fallback-banner__body">
+          <div class="fallback-banner__title">Session processing failed</div>
+          <div class="fallback-banner__text">
+            The pipeline encountered an error. Showing recovered terminal content below.
+          </div>
+        </div>
       </div>
       <OverlayScrollbar class="terminal-scroll">
         <TerminalSnapshotComponent
@@ -182,13 +213,53 @@ defineExpose({
       </OverlayScrollbar>
     </template>
 
-    <!-- State B (failed/interrupted + no snapshot): error-only state -->
-    <div
-      v-else-if="isTerminalError"
-      class="terminal-empty terminal-empty--error"
-    >
-      Session processing failed and no content is available.
-    </div>
+    <!-- State 3: No sections detected + content exists -->
+    <template v-else-if="detectionStatus === 'completed' && snapshot">
+      <div class="fallback-banner fallback-banner--info">
+        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div class="fallback-banner__body">
+          <div class="fallback-banner__title">No sections detected</div>
+          <div class="fallback-banner__text">
+            Session completed successfully, but no section boundaries were found.
+            Showing raw terminal output as a single block.
+          </div>
+        </div>
+      </div>
+      <OverlayScrollbar class="terminal-scroll">
+        <TerminalSnapshotComponent
+          :lines="snapshot.lines"
+          :start-line-number="1"
+        />
+      </OverlayScrollbar>
+    </template>
+
+    <!-- State 4: Completed + no content -->
+    <template v-else-if="detectionStatus === 'completed'">
+      <div class="fallback-banner fallback-banner--info">
+        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div class="fallback-banner__body">
+          <div class="fallback-banner__title">No sections detected</div>
+          <div class="fallback-banner__text">
+            Session completed successfully, but no section boundaries or terminal content were found.
+          </div>
+        </div>
+      </div>
+      <div class="terminal-empty-state">
+        <svg class="terminal-empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="4 17 10 11 4 5"/>
+          <line x1="12" y1="19" x2="20" y2="19"/>
+        </svg>
+        <div class="terminal-empty-state__label">No terminal output available</div>
+      </div>
+    </template>
 
     <!-- Non-terminal status: session is still being processed -->
     <div
@@ -221,10 +292,6 @@ defineExpose({
   position: relative;
 }
 
-.section-virtual-item {
-  /* Each virtual item is absolutely placed by the virtualizer */
-}
-
 .terminal-empty {
   padding: var(--space-8);
   text-align: center;
@@ -232,25 +299,181 @@ defineExpose({
   font-style: italic;
 }
 
-.session-content-banner {
-  padding: var(--space-3) var(--space-4);
+/* ================================================================
+   FALLBACK BANNER — shared base (extracted from design/mockups/session-fallbacks/fallback-states.html)
+   ================================================================ */
+.fallback-banner {
+  position: relative;
+  padding: var(--rhythm-1) var(--space-4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: var(--lh-sm);
+  overflow: hidden;
+}
+
+/* Scanline texture overlay */
+.fallback-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fallback-banner__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: -1px;
+  position: relative;
+  z-index: 2;
+}
+
+.fallback-banner__body {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.fallback-banner__title {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-base);
+  line-height: var(--lh-base);
+  margin-bottom: var(--space-1);
+}
+
+.fallback-banner__text {
+  color: var(--text-secondary);
+  font-family: var(--font-body);
   font-size: var(--text-sm);
   line-height: var(--lh-sm);
 }
 
-.session-content-banner--info {
-  background: var(--status-info-subtle, rgba(0, 150, 255, 0.08));
-  color: var(--status-info, #4da6ff);
-  border-bottom: 1px solid var(--status-info-subtle, rgba(0, 150, 255, 0.12));
+.fallback-banner__detail {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: var(--lh-xs);
+  color: var(--text-muted);
+  word-break: break-all;
 }
 
-.session-content-banner--error {
-  background: var(--status-error-subtle, rgba(255, 77, 106, 0.08));
-  color: var(--status-error, #ff4d6a);
-  border-bottom: 1px solid var(--status-error-subtle, rgba(255, 77, 106, 0.12));
+/* ================================================================
+   ERROR VARIANT
+   ================================================================ */
+.fallback-banner--error {
+  background:
+    linear-gradient(135deg, rgba(215, 69, 123, 0.12) 0%, rgba(215, 69, 123, 0.04) 100%);
+  border-bottom: 1px solid rgba(215, 69, 123, 0.25);
 }
 
-.terminal-empty--error {
-  color: var(--status-error, #ff4d6a);
+.fallback-banner--error .fallback-banner__title {
+  color: var(--status-error);
+}
+
+.fallback-banner--error .fallback-banner__icon {
+  color: var(--status-error);
+  filter: drop-shadow(0 0 6px rgba(215, 69, 123, 0.5));
+}
+
+.fallback-banner--error .fallback-banner__detail {
+  background: rgba(215, 69, 123, 0.06);
+  border: 1px solid rgba(215, 69, 123, 0.15);
+}
+
+/* Left edge glow */
+.fallback-banner--error::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--status-error);
+  box-shadow: 0 0 12px rgba(215, 69, 123, 0.6),
+              0 0 4px rgba(215, 69, 123, 0.4);
+  z-index: 2;
+}
+
+/* ================================================================
+   INFO VARIANT
+   ================================================================ */
+.fallback-banner--info {
+  background:
+    linear-gradient(135deg, rgba(143, 218, 252, 0.1) 0%, rgba(143, 218, 252, 0.03) 100%);
+  border-bottom: 1px solid rgba(143, 218, 252, 0.2);
+}
+
+.fallback-banner--info .fallback-banner__title {
+  color: var(--status-info);
+}
+
+.fallback-banner--info .fallback-banner__icon {
+  color: var(--status-info);
+  filter: drop-shadow(0 0 6px rgba(143, 218, 252, 0.4));
+}
+
+/* Left edge glow */
+.fallback-banner--info::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--status-info);
+  box-shadow: 0 0 12px rgba(143, 218, 252, 0.5),
+              0 0 4px rgba(143, 218, 252, 0.3);
+  z-index: 2;
+}
+
+/* ================================================================
+   EMPTY TERMINAL AREA — for no-content states
+   ================================================================ */
+.terminal-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rhythm-1);
+  padding: var(--rhythm-4) var(--space-6);
+  text-align: center;
+}
+
+.terminal-empty-state__icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.3;
+  color: var(--text-disabled);
+}
+
+.terminal-empty-state--error .terminal-empty-state__icon {
+  color: var(--status-error);
+  opacity: 0.25;
+  filter: drop-shadow(0 0 20px rgba(215, 69, 123, 0.3));
+}
+
+.terminal-empty-state__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-disabled);
+  letter-spacing: var(--tracking-wide);
+}
+
+.terminal-empty-state--error .terminal-empty-state__label {
+  color: color-mix(in srgb, var(--status-error) 50%, var(--text-disabled));
 }
 </style>
