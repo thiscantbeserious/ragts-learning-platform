@@ -244,6 +244,22 @@ onBeforeUnmount(() => {
   document.removeEventListener('mousemove', onDragMove);
   document.removeEventListener('mouseup', onDragEnd);
 });
+
+/**
+ * Expose the viewport element ref so parent components (e.g. a virtualizer)
+ * can use it as the TanStack Virtual scroll element.
+ * Also exposes MutationObserver control so callers can pause DOM mutation
+ * tracking while a virtualizer manages section DOM nodes, then resume it.
+ */
+defineExpose({
+  viewport: viewportRef,
+  pauseMutationObserver: () => mutationObserver?.disconnect(),
+  resumeMutationObserver: () => {
+    const vp = viewportRef.value;
+    if (!vp || !mutationObserver) return;
+    mutationObserver.observe(vp, { childList: true, subtree: true });
+  },
+});
 </script>
 
 <style scoped>
