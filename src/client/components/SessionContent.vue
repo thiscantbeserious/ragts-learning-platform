@@ -166,6 +166,17 @@ onUnmounted(() => {
 
 <template>
   <div class="terminal-chrome">
+    <!-- Sticky overlay header: OUTSIDE the scroll container to avoid affecting scrollHeight -->
+    <SectionHeader
+      v-if="showStickyHeader && stickySection"
+      ref="stickyHeaderRef"
+      class="section-sticky-overlay"
+      :section="stickySection"
+      :collapsed="false"
+      :line-count="stickySection.lineCount"
+      @toggle="() => {}"
+    />
+
     <OverlayScrollbar
       v-if="sections.length > 0"
       ref="overlayScrollbarRef"
@@ -188,17 +199,6 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-
-      <!-- Sticky overlay header: shows when the current section's real header has scrolled above -->
-      <SectionHeader
-        v-if="showStickyHeader && stickySection"
-        ref="stickyHeaderRef"
-        class="section-sticky-overlay"
-        :section="stickySection"
-        :collapsed="false"
-        :line-count="stickySection.lineCount"
-        @toggle="() => {}"
-      />
 
       <!-- Virtual mode: absolutely positioned items within a sized container -->
       <div
@@ -366,13 +366,15 @@ onUnmounted(() => {
 }
 
 /**
- * Sticky overlay header sits at the top of the scroll viewport in virtual mode.
- * Rendered directly inside the OverlayScrollbar viewport (not inside the absolute
- * virtual container) so position: sticky works against the scroll container.
+ * Sticky overlay header sits at the top of the terminal-chrome container,
+ * OUTSIDE the scroll viewport so it doesn't affect scrollHeight.
+ * Uses position: absolute to overlay the scroll content.
  */
 .section-sticky-overlay {
-  position: sticky;
+  position: absolute;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
 }
 

@@ -82,16 +82,35 @@ export function useSectionVirtualizer(
     () => virtualizer.value.getVirtualItems() as VirtualItem[]
   );
 
+  /**
+   * Track whether a programmatic scroll is in progress to suppress
+   * the virtualizer's scroll correction loop for bottom items.
+   */
+  let scrollLockTimer: ReturnType<typeof setTimeout> | null = null;
+  let scrollLocked = false;
+
   function scrollToSection(sectionId: string): void {
     const index = sections.value.findIndex((s) => s.id === sectionId);
     if (index < 0) return;
 
-    // For sections near the end that can't scroll to 'start' (would exceed
-    // max scroll), use 'auto' which picks the minimal scroll to make the
-    // item visible. This prevents oscillation from repeated scroll corrections.
+    const el = scrollElement.value;
+
+    // For items in the last ~10, use manual scrollTop to avoid oscillation.
+    // scrollToIndex causes measure → height change → scroll correction loops
+    // for items near the end that can't be scrolled to 'start' position.
     const totalItems = sections.value.length;
-    const nearEnd = index > totalItems - 5;
-    virtualizer.value.scrollToIndex(index, { align: nearEnd ? 'auto' : 'start' });
+    if (el && index > totalItems - 10) {
+      const offset = virtualizer.value.getOffsetForIndex(index, 'start')?.[0] ?? 0;
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      scrollLocked = true;
+      el.scrollTop = Math.min(offset, maxScroll);
+      // Unlock after the virtualizer settles
+      if (scrollLockTimer) clearTimeout(scrollLockTimer);
+      scrollLockTimer = setTimeout(() => { scrollLocked = false; }, 500);
+      return;
+    }
+
+    virtualizer.value.scrollToIndex(index, { align: 'start' });
   }
 
   return { virtualizer, virtualItems, scrollToSection };
@@ -102,13 +121,21 @@ export function useSectionVirtualizer(
 // ---------------------------------------------------------------------------
 
 /**
+ * Minimum height for sections with lineCount=0 or unknown.
+ * Measured from real DOM: collapsed section with loaded empty content renders ~149px.
+ * Using the actual measured value prevents scrollHeight oscillation when these
+ * sections enter/leave the virtualizer's overscan window.
+ */
+const MIN_SECTION_HEIGHT = 149;
+
+/**
  * Estimates the pixel height of a section by its line count.
  * Accounts for header, terminal-snapshot container padding, and per-line height.
- * Returns just the header height for empty or unknown sections.
+ * Uses a measured minimum for sections with unknown/zero line count.
  */
 function estimateSectionHeight(sections: SectionMetadata[], index: number): number {
   const section = sections[index];
-  if (!section) return SECTION_HEADER_HEIGHT;
-  if (section.lineCount <= 0) return SECTION_HEADER_HEIGHT;
+  if (!section) return MIN_SECTION_HEIGHT;
+  if (section.lineCount <= 0) return MIN_SECTION_HEIGHT;
   return SECTION_HEADER_HEIGHT + SNAPSHOT_PADDING + section.lineCount * LINE_HEIGHT;
 }
