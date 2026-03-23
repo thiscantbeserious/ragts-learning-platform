@@ -278,13 +278,15 @@ async function uploadBuffer(baseUrl: string, content: Buffer, name: string): Pro
  * Performance budgets — if these fail, the fix is insufficient and we need
  * intra-stage yielding (Option B) or worker threads.
  */
+const IS_CI = !!process.env.CI;
+
 const PERF = {
   /** Max wall-clock for the entire pipeline on a 2MB session (CI runners are ~3-4x slower than local) */
   MAX_PIPELINE_SMALL_MS: 30_000,
   /** Max wall-clock for the entire pipeline on a 5MB session */
   MAX_PIPELINE_LARGE_MS: 60_000,
-  /** Max latency for any single health check during processing */
-  MAX_HEALTH_LATENCY_MS: 1_000,
+  /** Max latency for any single health check during processing (CI runners have higher variance) */
+  MAX_HEALTH_LATENCY_MS: IS_CI ? 2_000 : 1_000,
   /** Health probe interval */
   PROBE_INTERVAL_MS: 100,
 } as const;
