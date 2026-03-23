@@ -26,9 +26,11 @@ import type { DatabaseContext } from '../../src/server/db/database_adapter.js';
 
 const IS_CI = !!process.env.CI;
 const FIXTURES_DIR = join(process.cwd(), 'fixtures');
+/** CI runners are ~3-4x slower — multiply all timing thresholds */
+const CI_MULTIPLIER = IS_CI ? 3 : 1;
 const POLL_INTERVAL_MS = 500;
-const PIPELINE_TIMEOUT_MS = 120_000;
-const HEALTH_RESPONSE_THRESHOLD_MS = IS_CI ? 3_000 : 1_000;
+const PIPELINE_TIMEOUT_MS = 120_000 * CI_MULTIPLIER;
+const HEALTH_RESPONSE_THRESHOLD_MS = 1_000 * CI_MULTIPLIER;
 
 /** 15-entry upload list simulating a bulk upload similar to the user's scenario */
 const BULK_UPLOAD_FIXTURES: string[] = [
@@ -280,12 +282,12 @@ async function uploadBuffer(baseUrl: string, content: Buffer, name: string): Pro
  * intra-stage yielding (Option B) or worker threads.
  */
 const PERF = {
-  /** Max wall-clock for the entire pipeline on a 2MB session (CI runners are ~3-4x slower than local) */
-  MAX_PIPELINE_SMALL_MS: 30_000,
+  /** Max wall-clock for the entire pipeline on a 2MB session */
+  MAX_PIPELINE_SMALL_MS: 10_000 * CI_MULTIPLIER,
   /** Max wall-clock for the entire pipeline on a 5MB session */
-  MAX_PIPELINE_LARGE_MS: 60_000,
-  /** Max latency for any single health check during processing (CI runners have higher variance) */
-  MAX_HEALTH_LATENCY_MS: IS_CI ? 3_000 : 1_000,
+  MAX_PIPELINE_LARGE_MS: 20_000 * CI_MULTIPLIER,
+  /** Max latency for any single health check during processing */
+  MAX_HEALTH_LATENCY_MS: 1_000 * CI_MULTIPLIER,
   /** Health probe interval */
   PROBE_INTERVAL_MS: 100,
 } as const;
