@@ -127,10 +127,12 @@ function onContentScroll(): void {
   // (not just barely at the top — check that scrollTop is past the section start)
   if (found && scrollTop > 0) {
     // Check: is the found section's real header still visible?
-    // It's visible if its virtual item start is within [scrollTop, scrollTop + viewportHeight]
+    // The header is at item.start and is ~48px tall. It's fully hidden only when
+    // its bottom edge (start + headerHeight) has scrolled above the viewport.
     const foundItem = props.virtualItems.find((_item, i) => props.sections[i]?.id === found!.id);
-    if (foundItem && foundItem.start >= scrollTop) {
-      // Real header is still on screen — don't show sticky for this section
+    const headerHeight = stickyHeaderRef.value?.$el?.offsetHeight ?? 48;
+    if (foundItem && foundItem.start + headerHeight >= scrollTop) {
+      // Real header still partially visible — don't show sticky
       showStickyHeader.value = false;
       stickySection.value = null;
     } else {
