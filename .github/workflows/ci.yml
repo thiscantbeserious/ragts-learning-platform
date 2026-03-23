@@ -125,7 +125,7 @@ jobs:
       - run: npm run test:integration
 
   test-snapshot:
-    name: Snapshot Tests
+    name: Structural Snapshot Tests
     needs: install
     runs-on: ubuntu-latest
     steps:
