@@ -50,7 +50,7 @@ async function loadContent(): Promise<void> {
   try {
     const page = await props.fetchContent(props.section.id);
     lines.value = page.lines;
-    startLineNumber.value = (page.offset ?? 0) + 1;
+    startLineNumber.value = (props.section.startLine ?? 0) + (page.offset ?? 0) + 1;
   } catch (err) {
     loadError.value = err instanceof Error ? err.message : 'Failed to load section';
   }
