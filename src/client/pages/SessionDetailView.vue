@@ -5,10 +5,9 @@ import SessionContent from '../components/SessionContent.vue';
 import SectionNavigator from '../components/SectionNavigator.vue';
 import SkeletonMain from '../components/SkeletonMain.vue';
 import { useSessionV2 } from '../composables/use_session.js';
-import { useActiveSection, type SectionEntry } from '../composables/useActiveSection.js';
+import { useActiveSection, type SectionEntry, type SectionOffset } from '../composables/useActiveSection.js';
 import { useSectionVirtualizer } from '../composables/use_section_virtualizer.js';
 import { SMALL_SESSION_THRESHOLD } from '../../shared/constants.js';
-import type { SectionOffset } from '../composables/useActiveSection.js';
 
 /**
  * SessionDetailView renders a session's content in the spatial shell main area.

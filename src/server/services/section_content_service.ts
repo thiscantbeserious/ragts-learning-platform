@@ -59,7 +59,7 @@ export class SectionContentService {
     }
 
     const section = await this.sectionRepository.findById(sectionId);
-    if (!section || section.session_id !== sessionId) {
+    if (section?.session_id !== sessionId) {
       return { ok: false, status: 404, error: 'Section not found' };
     }
 

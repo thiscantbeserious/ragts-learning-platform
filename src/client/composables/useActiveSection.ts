@@ -83,10 +83,8 @@ export function useActiveSection(
 
   const { scrollElement, getItemOffsets, stickyHeaderRef } = options;
 
-  const useScrollPositionMode = !!(scrollElement && getItemOffsets);
-
-  if (useScrollPositionMode) {
-    return setupScrollPositionMode(elements, activeId, scrollElement!, getItemOffsets!, stickyHeaderRef);
+  if (scrollElement && getItemOffsets) {
+    return setupScrollPositionMode(elements, activeId, scrollElement, getItemOffsets, stickyHeaderRef);
   }
 
   return setupIntersectionMode(elements, activeId);

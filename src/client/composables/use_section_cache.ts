@@ -155,9 +155,7 @@ let _singleton: InMemoryLruCache | null = null;
  */
 export function useSectionCache(cache?: SectionCache): SectionCache {
   if (cache !== undefined) return cache;
-  if (_singleton === null) {
-    _singleton = new InMemoryLruCache();
-  }
+  _singleton ??= new InMemoryLruCache();
   return _singleton;
 }
 

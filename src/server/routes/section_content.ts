@@ -59,7 +59,7 @@ function parseQueryParams(c: Context): { offset?: number; limit?: number | 'all'
   const offsetStr = c.req.query('offset');
   const limitStr = c.req.query('limit');
 
-  const offset = offsetStr !== undefined ? parseInt(offsetStr, 10) : undefined;
+  const offset = offsetStr === undefined ? undefined : Number.parseInt(offsetStr, 10);
   const limit = parseLimitParam(limitStr);
 
   return {
@@ -72,6 +72,6 @@ function parseQueryParams(c: Context): { offset?: number; limit?: number | 'all'
 function parseLimitParam(value: string | undefined): number | 'all' | undefined {
   if (value === undefined) return undefined;
   if (value === 'all') return 'all';
-  const n = parseInt(value, 10);
+  const n = Number.parseInt(value, 10);
   return Number.isFinite(n) && n > 0 ? n : undefined;
 }

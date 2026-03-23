@@ -79,7 +79,7 @@ export function useSectionVirtualizer(
   );
 
   const virtualItems: ComputedRef<VirtualItem[]> = computed(
-    () => virtualizer.value.getVirtualItems() as VirtualItem[]
+    () => virtualizer.value.getVirtualItems()
   );
 
   /**
