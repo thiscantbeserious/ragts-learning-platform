@@ -185,12 +185,7 @@ function onHoverSection(id: string): void {
 /* Large session: side-by-side content + navigator */
 .session-detail-view--with-nav {
   flex-direction: row;
-  /* Zero out vertical padding so navigator fills full height flush to edges.
-     Left padding is preserved to keep the content area inset from the shell edge.
-     Right padding is zero — navigator sits flush on the right. */
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: var(--space-6);
+  padding: var(--space-6);
   padding-right: 0;
   gap: 0;
   overflow: hidden;
@@ -200,13 +195,6 @@ function onHoverSection(id: string): void {
   flex: 1;
   min-width: 0;
   min-height: 0;
-}
-
-/* In the with-nav layout the container has no vertical padding,
-   so we add it back to the content area only — the navigator fills flush. */
-.session-detail-view--with-nav .session-detail-view__content {
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-6);
 }
 
 .session-detail-view__nav {
