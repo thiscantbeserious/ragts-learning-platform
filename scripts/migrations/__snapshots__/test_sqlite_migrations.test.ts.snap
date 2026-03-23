@@ -265,3 +265,120 @@ exports[`SQLite schema migrations > step 3: 004_pipeline_jobs_events.ts 1`] = `
   ],
 }
 `;
+
+exports[`SQLite schema migrations > step 4: 005_section_metadata.ts 1`] = `
+{
+  "entries": [
+    {
+      "name": "idx_events_session_id",
+      "sql": "CREATE INDEX idx_events_session_id ON events(session_id)",
+      "table_name": "events",
+      "type": "index",
+    },
+    {
+      "name": "idx_jobs_status",
+      "sql": "CREATE INDEX idx_jobs_status ON jobs(status)",
+      "table_name": "jobs",
+      "type": "index",
+    },
+    {
+      "name": "idx_sections_session_id",
+      "sql": "CREATE INDEX idx_sections_session_id ON sections(session_id)",
+      "table_name": "sections",
+      "type": "index",
+    },
+    {
+      "name": "idx_sections_start_event",
+      "sql": "CREATE INDEX idx_sections_start_event ON sections(session_id, start_event)",
+      "table_name": "sections",
+      "type": "index",
+    },
+    {
+      "name": "idx_sessions_agent_type",
+      "sql": "CREATE INDEX idx_sessions_agent_type ON sessions(agent_type)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "idx_sessions_uploaded_at",
+      "sql": "CREATE INDEX idx_sessions_uploaded_at ON sessions(uploaded_at DESC)",
+      "table_name": "sessions",
+      "type": "index",
+    },
+    {
+      "name": "events",
+      "sql": "CREATE TABLE events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_id TEXT NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+      event_type TEXT NOT NULL,
+      stage TEXT,
+      payload TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )",
+      "table_name": "events",
+      "type": "table",
+    },
+    {
+      "name": "jobs",
+      "sql": "CREATE TABLE jobs (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL UNIQUE REFERENCES sessions(id) ON DELETE CASCADE,
+      current_stage TEXT NOT NULL DEFAULT 'validate'
+        CHECK (current_stage IN ('validate', 'detect', 'replay', 'dedup', 'store')),
+      status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'running', 'completed', 'failed')),
+      attempts INTEGER NOT NULL DEFAULT 0,
+      max_attempts INTEGER NOT NULL DEFAULT 3,
+      last_error TEXT,
+      started_at TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )",
+      "table_name": "jobs",
+      "type": "table",
+    },
+    {
+      "name": "sections",
+      "sql": "CREATE TABLE sections (
+      id TEXT PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      start_event INTEGER NOT NULL,
+      end_event INTEGER,
+      label TEXT,
+      snapshot TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP, start_line INTEGER, end_line INTEGER, line_count INTEGER, content_hash TEXT, preview TEXT,
+      FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+    )",
+      "table_name": "sections",
+      "type": "table",
+    },
+    {
+      "name": "sessions",
+      "sql": "CREATE TABLE sessions (
+  id TEXT PRIMARY KEY,
+  filename TEXT NOT NULL,
+  filepath TEXT NOT NULL UNIQUE,
+  size_bytes INTEGER NOT NULL,
+  marker_count INTEGER DEFAULT 0,
+  uploaded_at TEXT NOT NULL,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+, agent_type TEXT, event_count INTEGER, detected_sections_count INTEGER DEFAULT 0, detection_status TEXT DEFAULT 'pending', snapshot TEXT)",
+      "table_name": "sessions",
+      "type": "table",
+    },
+    {
+      "name": "trg_jobs_updated_at",
+      "sql": "CREATE TRIGGER trg_jobs_updated_at
+      AFTER UPDATE ON jobs
+      FOR EACH ROW
+      BEGIN
+        UPDATE jobs SET updated_at = datetime('now') WHERE id = OLD.id;
+      END",
+      "table_name": "jobs",
+      "type": "trigger",
+    },
+  ],
+}
+`;

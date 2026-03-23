@@ -18,7 +18,9 @@ RESOLVED=$(_resolve "$FILE_PATH")
 
 # Must be inside the repo and under an allowed directory
 if [[ "$RESOLVED" == "$REPO_ROOT/design/"* ]] ||
-   [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
+   [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]] ||
+   [[ "$RESOLVED" == "/tmp/"* ]] ||
+   [[ "$RESOLVED" == "/private/tmp/"* ]]; then
   exit 0
 fi
 

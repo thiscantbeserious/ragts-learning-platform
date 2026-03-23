@@ -25,8 +25,8 @@ export class SqliteSectionImpl implements SectionAdapter {
   constructor(db: Database.Database) {
     // Prepare statements once at construction
     this.insertStmt = db.prepare(`
-      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line, line_count, content_hash, preview)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     this.findBySessionIdStmt = db.prepare(`
@@ -72,7 +72,10 @@ export class SqliteSectionImpl implements SectionAdapter {
       input.label,
       input.snapshot,
       input.startLine,
-      input.endLine
+      input.endLine,
+      input.lineCount ?? null,
+      input.contentHash ?? null,
+      input.preview ?? null
     );
 
     // Retrieve the created section to get generated created_at
@@ -102,6 +105,15 @@ export class SqliteSectionImpl implements SectionAdapter {
       const result = this.deleteBySessionIdStmt.run(sessionId);
       return result.changes;
     }
+  }
+
+  /**
+   * Find a single section by its unique ID.
+   * Returns null if no matching section exists.
+   */
+  async findById(id: string): Promise<SectionRow | null> {
+    const row = this.findByIdStmt.get(id) as SectionRow | undefined;
+    return row ?? null;
   }
 
   /**

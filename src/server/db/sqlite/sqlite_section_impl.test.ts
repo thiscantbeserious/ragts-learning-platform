@@ -217,6 +217,38 @@ describe('SqliteSectionImpl', () => {
     });
   });
 
+  describe('findById', () => {
+    it('should return null when section does not exist', async () => {
+      const result = await sectionRepo.findById('nonexistent');
+      expect(result).toBeNull();
+    });
+
+    it('should return the section when it exists', async () => {
+      const input: CreateSectionInput = createTestSection(testSessionId, { label: 'Find me' });
+      const created = await sectionRepo.create(input);
+
+      const found = await sectionRepo.findById(created.id);
+
+      expect(found).not.toBeNull();
+      expect(found!.id).toBe(created.id);
+      expect(found!.label).toBe('Find me');
+    });
+
+    it('should not return section from another session', async () => {
+      const other = await sessionRepo.create(
+        createTestSession({ filename: 'other.cast', filepath: 'sessions/other.cast', size_bytes: 512, uploaded_at: '2026-02-17T12:00:00Z' })
+      );
+      const input: CreateSectionInput = createTestSection(other.id, { label: 'Other session section' });
+      const created = await sectionRepo.create(input);
+
+      const found = await sectionRepo.findById(created.id);
+
+      // findById returns the row regardless of session — session ownership checked at service layer
+      expect(found).not.toBeNull();
+      expect(found!.session_id).toBe(other.id);
+    });
+  });
+
   describe('deleteById', () => {
     it('should return false when section does not exist', async () => {
       const deleted = await sectionRepo.deleteById('nonexistent');

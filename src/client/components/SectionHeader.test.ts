@@ -7,10 +7,10 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import SectionHeader from './SectionHeader.vue';
-import type { Section } from '../composables/useSession.js';
+import type { SectionMetadata } from '../../shared/types/api.js';
 
 /** Minimal valid marker section. */
-function makeMarkerSection(overrides: Partial<Section> = {}): Section {
+function makeMarkerSection(overrides: Partial<SectionMetadata> = {}): SectionMetadata {
   return {
     id: 'sec-1',
     type: 'marker',
@@ -19,7 +19,8 @@ function makeMarkerSection(overrides: Partial<Section> = {}): Section {
     endEvent: 10,
     startLine: null,
     endLine: null,
-    snapshot: null,
+    lineCount: 0,
+    preview: null,
     ...overrides,
   };
 }

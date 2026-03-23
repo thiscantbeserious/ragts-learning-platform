@@ -5,7 +5,7 @@
 
 /**
  * Section row from database.
- * Matches the sections table schema.
+ * Matches the sections table schema (including columns added by migration 005).
  */
 export interface SectionRow {
   id: string;
@@ -18,6 +18,12 @@ export interface SectionRow {
   start_line: number | null;
   end_line: number | null;
   created_at: string;
+  /** Precomputed line count. Null on legacy rows before migration 005 backfill. */
+  line_count: number | null;
+  /** Truncated SHA-256 of snapshot content (16 hex chars). Null on legacy rows. */
+  content_hash: string | null;
+  /** First non-empty line or summary text for navigator display (VISIONBOOK item 5). */
+  preview: string | null;
 }
 
 /**
@@ -33,6 +39,18 @@ export interface CreateSectionInput {
   snapshot: string | null;
   startLine: number | null;
   endLine: number | null;
+  /**
+   * Precomputed line count stored alongside the section.
+   * Optional — completeProcessing computes this from the snapshot when null.
+   */
+  lineCount?: number | null;
+  /**
+   * Truncated SHA-256 of snapshot content (16 hex chars).
+   * Optional — completeProcessing computes this from the snapshot when null.
+   */
+  contentHash?: string | null;
+  /** Preview text for navigator display (VISIONBOOK item 5). Nullable. */
+  preview?: string | null;
 }
 
 /**
@@ -50,6 +68,12 @@ export interface SectionAdapter {
    * Find all sections for a session, ordered by start_event ASC.
    */
   findBySessionId(sessionId: string): Promise<SectionRow[]>;
+
+  /**
+   * Find a single section by its unique ID.
+   * Returns null if no matching section exists.
+   */
+  findById(id: string): Promise<SectionRow | null>;
 
   /**
    * Delete sections by session ID.

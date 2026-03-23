@@ -1,9 +1,13 @@
 /**
- * Tests for SessionDetailView component — Stage 9.
+ * Tests for SessionDetailView component — Stage 11 integration.
  *
- * Covers: loading state uses SkeletonMain, error state, empty content state,
- * session content rendering, no breadcrumb in this component (moved to ShellHeader),
- * no container wrapper div with margins.
+ * Covers:
+ *  - loading state delegates to SkeletonMain
+ *  - error state renders inline
+ *  - data wired from useSessionV2 to SessionContent
+ *  - large sessions (sectionCount > SMALL_SESSION_THRESHOLD) show SectionNavigator
+ *  - small sessions (sectionCount <= SMALL_SESSION_THRESHOLD) do NOT show SectionNavigator
+ *  - fetchSectionContent forwarded as onHoverSection on the navigator
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -15,8 +19,8 @@ import SessionDetailView from './SessionDetailView.vue';
 // Mocks
 // ---------------------------------------------------------------------------
 
-vi.mock('../composables/useSession.js', () => ({
-  useSession: vi.fn(),
+vi.mock('../composables/use_session.js', () => ({
+  useSessionV2: vi.fn(),
 }));
 
 vi.mock('../components/SkeletonMain.vue', () => ({
@@ -24,29 +28,56 @@ vi.mock('../components/SkeletonMain.vue', () => ({
 }));
 
 vi.mock('../components/SessionContent.vue', () => ({
-  default: { template: '<div class="session-content-stub" />' },
+  default: {
+    props: ['sections', 'fetchSectionContent', 'virtualItems', 'totalHeight', 'detectionStatus', 'sectionEntries'],
+    template: '<div class="session-content-stub" :data-section-count="sections.length" />',
+    emits: ['register-section'],
+  },
 }));
 
-import { useSession } from '../composables/useSession.js';
+vi.mock('../components/SectionNavigator.vue', () => ({
+  default: {
+    props: ['sections', 'activeId', 'scrollToSection', 'onHoverSection'],
+    template: '<div class="section-navigator-stub" :data-section-count="sections.length" />',
+  },
+}));
+
+import { useSessionV2 } from '../composables/use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-type UseSessionReturn = ReturnType<typeof import('../composables/useSession.js').useSession>;
+type UseSessionV2Return = ReturnType<typeof import('../composables/use_session.js').useSessionV2>;
 
-function mountView(useSessionReturnValue: Partial<UseSessionReturn>) {
-  const mockedUseSession = vi.mocked(useSession);
-  mockedUseSession.mockReturnValue({
+function makeSections(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: `sec-${i}`,
+    type: 'detected' as const,
+    label: `Section ${i}`,
+    startEvent: 0,
+    endEvent: 10,
+    startLine: i * 10,
+    endLine: (i + 1) * 10,
+    lineCount: 10,
+    preview: null,
+  }));
+}
+
+function mountView(overrides: Partial<UseSessionV2Return> = {}) {
+  const mockedUseSessionV2 = vi.mocked(useSessionV2);
+  const fetchSectionContent = vi.fn().mockResolvedValue({ sectionId: 'sec-0', lines: [], totalLines: 0, offset: 0, limit: 500, hasMore: false, contentHash: 'abc' });
+
+  mockedUseSessionV2.mockReturnValue({
     session: ref(null),
     sections: ref([]),
-    snapshot: ref(null),
     loading: ref(false),
     error: ref(null),
     filename: computed(() => ''),
     detectionStatus: ref('completed'),
-    ...useSessionReturnValue,
-  } as UseSessionReturn);
+    fetchSectionContent,
+    ...overrides,
+  } as UseSessionV2Return);
 
   const router = createRouter({
     history: createMemoryHistory(),
@@ -55,14 +86,14 @@ function mountView(useSessionReturnValue: Partial<UseSessionReturn>) {
     ],
   });
 
-  return { router, mockedUseSession };
+  return { router, fetchSectionContent, mockedUseSessionV2 };
 }
 
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('SessionDetailView', () => {
+describe('SessionDetailView (Stage 11)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -114,40 +145,107 @@ describe('SessionDetailView', () => {
     });
   });
 
-  describe('empty content state', () => {
-    it('renders SessionContent when sections are empty and no snapshot (SessionContent owns empty state)', async () => {
+  describe('content state', () => {
+    it('renders SessionContent when sections are present', async () => {
       const { router } = mountView({
         loading: ref(false),
         error: ref(null),
-        sections: ref([]),
-        snapshot: ref(null),
+        sections: ref(makeSections(2)),
       });
       await router.push('/session/sess-1');
       const wrapper = mount(SessionDetailView, {
         global: { plugins: [router] },
       });
       expect(wrapper.find('.session-content-stub').exists()).toBe(true);
-      expect(wrapper.find('.session-detail-view__state').exists()).toBe(false);
     });
-  });
 
-  describe('detectionStatus prop wiring', () => {
-    it('passes detectionStatus from useSession to SessionContent', async () => {
+    it('renders SessionContent when sections are empty (delegates empty state)', async () => {
       const { router } = mountView({
         loading: ref(false),
         error: ref(null),
         sections: ref([]),
-        snapshot: ref(null),
+      });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      expect(wrapper.find('.session-content-stub').exists()).toBe(true);
+    });
+  });
+
+  describe('navigator: small sessions', () => {
+    it('does NOT render SectionNavigator when sectionCount <= SMALL_SESSION_THRESHOLD (5)', async () => {
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref(makeSections(3)),
+      });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      expect(wrapper.find('.section-navigator-stub').exists()).toBe(false);
+    });
+
+    it('does NOT render SectionNavigator for exactly 5 sections (at threshold)', async () => {
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref(makeSections(5)),
+      });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      expect(wrapper.find('.section-navigator-stub').exists()).toBe(false);
+    });
+  });
+
+  describe('navigator: large sessions', () => {
+    it('renders SectionNavigator when sectionCount > SMALL_SESSION_THRESHOLD (6)', async () => {
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref(makeSections(6)),
+      });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      expect(wrapper.find('.section-navigator-stub').exists()).toBe(true);
+    });
+
+    it('passes sections to SectionNavigator', async () => {
+      const sections = makeSections(6);
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref(sections),
+      });
+      await router.push('/session/sess-1');
+      const wrapper = mount(SessionDetailView, {
+        global: { plugins: [router] },
+      });
+      const nav = wrapper.find('.section-navigator-stub');
+      expect(nav.attributes('data-section-count')).toBe('6');
+    });
+  });
+
+  describe('detectionStatus prop wiring', () => {
+    it('passes detectionStatus from useSessionV2 to SessionContent', async () => {
+      const SessionContentStub = {
+        name: 'SessionContentPropsCapture',
+        props: ['sections', 'fetchSectionContent', 'virtualItems', 'totalHeight', 'detectionStatus', 'sectionEntries'],
+        template: '<div class="session-content-props-stub" :data-detection-status="detectionStatus" />',
+      };
+
+      const { router } = mountView({
+        loading: ref(false),
+        error: ref(null),
+        sections: ref([]),
         detectionStatus: ref('pending'),
       });
       await router.push('/session/sess-1');
-
-      // Stub SessionContent to expose the detectionStatus prop it receives
-      const SessionContentStub = {
-        name: 'SessionContentPropsCapture',
-        props: ['snapshot', 'sections', 'defaultCollapsed', 'detectionStatus'],
-        template: '<div class="session-content-props-stub" :data-detection-status="detectionStatus" />',
-      };
 
       const wrapper = mount(SessionDetailView, {
         global: {
@@ -159,37 +257,6 @@ describe('SessionDetailView', () => {
       const stub = wrapper.find('.session-content-props-stub');
       expect(stub.exists()).toBe(true);
       expect(stub.attributes('data-detection-status')).toBe('pending');
-    });
-  });
-
-  describe('content state', () => {
-    it('renders SessionContent when sections are present', async () => {
-      const { router } = mountView({
-        loading: ref(false),
-        error: ref(null),
-        sections: ref([{ id: 'sec-1', title: 'Section 1' }] as never),
-        snapshot: ref(null),
-      });
-      await router.push('/session/sess-1');
-      const wrapper = mount(SessionDetailView, {
-        global: { plugins: [router] },
-      });
-      expect(wrapper.find('.session-content-stub').exists()).toBe(true);
-    });
-
-    it('renders SessionContent when snapshot is set but sections are empty', async () => {
-      const { router } = mountView({
-        loading: ref(false),
-        error: ref(null),
-        sections: ref([]),
-        snapshot: ref({ screen: [], cursor: { x: 0, y: 0, visible: true } } as never),
-      });
-      await router.push('/session/sess-1');
-      const wrapper = mount(SessionDetailView, {
-        global: { plugins: [router] },
-      });
-      // hasContent is true when snapshot is non-null, even with no sections
-      expect(wrapper.find('.session-content-stub').exists()).toBe(true);
     });
   });
 
@@ -218,7 +285,6 @@ describe('SessionDetailView', () => {
       const wrapper = mount(SessionDetailView, {
         global: { plugins: [router] },
       });
-      // Must have the BEM block class, not the old container class
       expect(wrapper.find('.session-detail-page').exists()).toBe(false);
     });
   });

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section Navigator — Draft C: Hybrid Dots-to-Labels</title>
+<link rel="stylesheet" href="../../styles/layout.css">
+<style>
+  /* ============================================================
+     DRAFT C — Hybrid: Compact Dots that Expand to Labels
+     ============================================================
+     The aside shows a vertical strip of compact, uniform-size
+     nodes (circuit-board dots). Hovering the aside widens it to
+     reveal truncated labels. Clicking any node opens the full
+     expand panel leftward with labels + line counts.
+
+     Section types are visually distinguished:
+       - Marker:   neon pink (--accent-secondary) dot + tinted bg
+       - Detected: muted gray dot, neutral bg
+     This matches the existing SectionHeader component styling.
+
+     All dots are uniform 8px. No size variation.
+
+     The circuit trace line spans the full height of the list.
+     ============================================================ */
+
+  body {
+    padding: var(--rhythm-2);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--rhythm-half);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--rhythm-2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .variant-label {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--rhythm-half);
+    margin-top: var(--rhythm-2);
+  }
+
+  .variant-label:first-of-type { margin-top: 0; }
+
+  .variant-desc {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--rhythm-1);
+  }
+
+  /* --- Demo layout --- */
+  .demo-layout {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--rhythm-1);
+    margin-bottom: var(--rhythm-3);
+  }
+
+  .demo-content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--rhythm-1) var(--space-inline);
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .demo-content__label {
+    font-size: var(--text-sm);
+    color: var(--text-disabled);
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* ============================================================
+     HYBRID NAVIGATOR
+     ============================================================ */
+  .nav-hybrid {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    position: relative;
+    width: 36px;
+    transition: width 0.2s var(--easing-default);
+  }
+
+  .nav-hybrid--expanded,
+  .nav-hybrid:hover:not(.nav-hybrid--static) {
+    width: 190px;
+  }
+
+  /* Static demos: locked at 36px, no hover expansion or label reveal */
+  .nav-hybrid--static { width: 36px; }
+  .nav-hybrid--static:hover .node__label,
+  .nav-hybrid--static:hover .node__num,
+  .nav-hybrid--static:hover .nav-hybrid__header-text,
+  .nav-hybrid--static:hover .nav-hybrid__count { opacity: 0; max-width: 0; min-width: 0; }
+
+  /* --- Header --- */
+  .nav-hybrid__header {
+    padding: var(--space-2);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .nav-hybrid__header-icon {
+    width: 14px;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .nav-hybrid__header-icon svg {
+    width: 12px;
+    height: 12px;
+    color: var(--text-muted);
+  }
+
+  .nav-hybrid__header-text {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+    overflow: hidden;
+    opacity: 0;
+    margin-left: 0;
+    transition: opacity 0.15s var(--easing-default), margin-left 0.2s var(--easing-default);
+  }
+
+  .nav-hybrid--expanded .nav-hybrid__header-text,
+  .nav-hybrid:hover .nav-hybrid__header-text {
+    opacity: 1;
+    margin-left: var(--space-2);
+  }
+
+  .nav-hybrid__count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent-primary);
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.15s var(--easing-default);
+  }
+
+  .nav-hybrid--expanded .nav-hybrid__count,
+  .nav-hybrid:hover .nav-hybrid__count {
+    opacity: 1;
+  }
+
+  /* --- Node list (scrollable body) --- */
+  .nav-hybrid__list {
+    overflow-y: auto;
+    padding: var(--space-1) 0;
+    flex: 1;
+    position: relative;
+  }
+
+  .nav-hybrid__list::-webkit-scrollbar { width: 2px; }
+  .nav-hybrid__list::-webkit-scrollbar-track { background: transparent; }
+  .nav-hybrid__list::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+  }
+
+  /* ============================================================
+     CIRCUIT TRACE LINE
+     ============================================================
+     The trace is a ::before on .nav-hybrid__list-inner (the
+     wrapper INSIDE the scroll container). This inner wrapper
+     grows with its children, so the trace spans the full node
+     list height — even when that overflows the scroll container.
+
+     In collapsed state: centered in the aside width.
+     In expanded state: aligned to the dot column center.
+     Both states use transition for smooth position change.
+     ============================================================ */
+  .nav-hybrid__list-inner {
+    position: relative;
+  }
+
+  .nav-hybrid__list-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border-default);
+    pointer-events: none;
+    z-index: 0;
+    /* Fixed at 18px from left — matches dot center (14px padding + 4px half-dot).
+       Never moves on hover/expand. */
+    left: 16.5px;
+  }
+
+  /* ============================================================
+     NODE — Each section entry
+     ============================================================
+     Uniform 8px dot for all nodes, regardless of section type
+     or size. Section type is encoded through COLOR, not size.
+     ============================================================ */
+  .node {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    /* Dot is always at 18px from left edge (center of 36px collapsed width).
+       14px padding + 4px (half of 8px dot) = 18px center. */
+    padding: 3px 0 3px 13px;
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--easing-default);
+    position: relative;
+    min-height: 22px;
+    z-index: 1;
+  }
+
+
+  .node:hover {
+    background: color-mix(in srgb, var(--accent-primary) 6%, var(--bg-surface));
+  }
+
+  /* --- The dot (uniform 8px for all types) --- */
+  .node__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition:
+      background var(--duration-fast) var(--easing-default),
+      box-shadow var(--duration-fast) var(--easing-default);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* --- Section Type: Detected (default/secondary) --- */
+  .node--detected .node__dot {
+    background: var(--border-strong);
+  }
+
+  .node--detected:hover .node__dot {
+    background: color-mix(in srgb, var(--accent-primary) 50%, var(--border-strong));
+  }
+
+  /* --- Section Type: Marker (structural/primary) --- */
+  .node--marker .node__dot {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 4px rgba(255, 77, 106, 0.3);
+  }
+
+  .node--marker:hover .node__dot {
+    box-shadow: 0 0 8px rgba(255, 77, 106, 0.45);
+  }
+
+  /* --- Active state (scrollspy current section) --- */
+  .node--active {
+    background: color-mix(in srgb, var(--accent-primary) 10%, var(--bg-surface));
+  }
+
+  .node--active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 2px;
+    bottom: 2px;
+    width: 2px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  /* Active detected: cyan glow */
+  .node--active.node--detected::before {
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+  }
+
+  .node--active.node--detected .node__dot {
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+  }
+
+  /* Active marker: pink glow (keeps marker identity) */
+  .node--active.node--marker::before {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 6px rgba(255, 77, 106, 0.4);
+  }
+
+  .node--active.node--marker .node__dot {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 8px rgba(255, 77, 106, 0.6);
+  }
+
+  /* --- The label (hidden collapsed, visible expanded) --- */
+  .node__label {
+    font-size: var(--text-xs);
+    line-height: var(--lh-xs);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+    opacity: 0;
+    max-width: 0;
+    transition:
+      opacity 0.15s var(--easing-default),
+      max-width 0.2s var(--easing-default);
+  }
+
+  /* Detected labels: muted */
+  .node--detected .node__label {
+    color: var(--text-muted);
+  }
+
+  /* Marker labels: slightly brighter */
+  .node--marker .node__label {
+    color: var(--text-secondary);
+  }
+
+  .nav-hybrid--expanded .node__label,
+  .nav-hybrid:hover .node__label {
+    opacity: 1;
+    max-width: 150px;
+  }
+
+  .node:hover .node__label {
+    color: var(--text-secondary);
+  }
+
+  .node--active .node__label {
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  /* --- Section number (visible only in expanded state) --- */
+  .node__num {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    min-width: 0;
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    text-align: right;
+    flex-shrink: 0;
+    transition:
+      opacity 0.15s var(--easing-default),
+      min-width 0.2s var(--easing-default),
+      max-width 0.2s var(--easing-default);
+  }
+
+  .node--detected .node__num { color: var(--text-disabled); }
+  .node--marker .node__num { color: color-mix(in srgb, var(--accent-secondary) 60%, var(--text-disabled)); }
+  .node--active .node__num { color: var(--text-muted); }
+
+  .nav-hybrid--expanded .node__num,
+  .nav-hybrid:hover .node__num {
+    opacity: 1;
+    min-width: 16px;
+    max-width: 16px;
+  }
+
+  /* ============================================================
+     EXPAND PANEL — Full Detail View (click to open leftward)
+     ============================================================ */
+  .expand-panel {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    margin-right: var(--space-2);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    min-width: 280px;
+    max-height: 100%;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: panel-unfold 0.25s var(--easing-default);
+    transform-origin: right center;
+  }
+
+  @keyframes panel-unfold {
+    from { opacity: 0; transform: scaleX(0.85) translateX(8px); }
+    to { opacity: 1; transform: scaleX(1) translateX(0); }
+  }
+
+  .expand-panel__title {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    font-weight: var(--weight-medium);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-default);
+    margin-bottom: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .expand-panel__title-count {
+    font-family: var(--font-mono);
+    color: var(--accent-primary);
+  }
+
+  .expand-panel__list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .expand-panel__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--rhythm-quarter) var(--space-2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--easing-default);
+  }
+
+  .expand-panel__item:hover {
+    background: color-mix(in srgb, var(--accent-primary) 8%, var(--bg-elevated));
+  }
+
+  /* Active item in expand panel */
+  .expand-panel__item--active {
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-elevated));
+    border-left: 2px solid var(--accent-primary);
+    padding-left: calc(var(--space-2) - 2px);
+  }
+
+  .expand-panel__item--active.expand-panel__item--marker {
+    border-left-color: var(--accent-secondary);
+  }
+
+  /* Dot in expand panel */
+  .expand-panel__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .expand-panel__item--detected .expand-panel__dot { background: var(--border-strong); }
+  .expand-panel__item--marker .expand-panel__dot {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 4px rgba(255, 77, 106, 0.25);
+  }
+
+  .expand-panel__item--active.expand-panel__item--detected .expand-panel__dot {
+    background: var(--accent-primary);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.5);
+  }
+
+  .expand-panel__item--active.expand-panel__item--marker .expand-panel__dot {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 6px rgba(255, 77, 106, 0.5);
+  }
+
+  .expand-panel__num {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-disabled);
+    min-width: 22px;
+    text-align: right;
+  }
+
+  .expand-panel__item--active .expand-panel__num { color: var(--accent-primary); }
+  .expand-panel__item--active.expand-panel__item--marker .expand-panel__num { color: var(--accent-secondary); }
+
+  .expand-panel__label {
+    font-size: var(--text-sm);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .expand-panel__item--detected .expand-panel__label { color: var(--text-secondary); }
+  .expand-panel__item--marker .expand-panel__label { color: var(--text-primary); }
+  .expand-panel__item--active .expand-panel__label { font-weight: var(--weight-medium); }
+
+  .expand-panel__lines {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+    white-space: nowrap;
+  }
+
+  .expand-panel::-webkit-scrollbar { width: 4px; }
+  .expand-panel::-webkit-scrollbar-track { background: transparent; }
+  .expand-panel::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-full); }
+
+  /* ============================================================
+     SIDE-BY-SIDE COMPARISON
+     ============================================================ */
+  .comparison {
+    display: flex;
+    gap: var(--rhythm-2);
+    align-items: flex-start;
+    margin-bottom: var(--rhythm-2);
+  }
+
+  .comparison__col { flex: 0 0 auto; }
+
+  .comparison__label {
+    font-size: var(--text-xs);
+    color: var(--text-disabled);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    margin-bottom: var(--space-2);
+    text-align: center;
+  }
+
+  /* ============================================================
+     LEGEND
+     ============================================================ */
+  .legend {
+    display: flex;
+    gap: var(--rhythm-1);
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--rhythm-2);
+    flex-wrap: wrap;
+  }
+
+  .legend__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1\.5);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .legend__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend__sep {
+    width: 1px;
+    height: 12px;
+    background: var(--border-default);
+  }
+</style>
+</head>
+<body>
+
+<h1>Draft C: Hybrid Dots-to-Labels</h1>
+<p class="subtitle">Collapsed dot strip widens to show labels on hover -- circuit board feel</p>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend__item">
+    <span class="legend__dot" style="background: var(--accent-secondary); box-shadow: 0 0 4px rgba(255, 77, 106, 0.3);"></span>
+    Marker (structural)
+  </div>
+  <div class="legend__item">
+    <span class="legend__dot" style="background: var(--border-strong);"></span>
+    Detected (auto)
+  </div>
+  <span class="legend__sep"></span>
+  <div class="legend__item">
+    <span class="legend__dot" style="background: var(--accent-secondary); box-shadow: 0 0 8px rgba(255, 77, 106, 0.6);"></span>
+    Active marker
+  </div>
+  <div class="legend__item">
+    <span class="legend__dot" style="background: var(--accent-primary); box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);"></span>
+    Active detected
+  </div>
+</div>
+
+<!-- ============================================================
+     5 SECTIONS — Collapsed vs Expanded
+     ============================================================ -->
+<p class="variant-label">5 Sections -- Collapsed vs Expanded</p>
+<p class="variant-desc">36px collapsed dot strip. On hover, expands to 190px with labels. 2 markers + 3 detected. Section 2 (detected) is active.</p>
+
+<div class="comparison">
+  <!-- Collapsed -->
+  <div class="comparison__col">
+    <div class="comparison__label">Collapsed (36px)</div>
+    <div class="nav-hybrid nav-hybrid--static">
+      <div class="nav-hybrid__header">
+        <span class="nav-hybrid__header-icon">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+            <circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/>
+          </svg>
+        </span>
+      </div>
+      <div class="nav-hybrid__list">
+        <div class="nav-hybrid__list-inner">
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected node--active"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded -->
+  <div class="comparison__col">
+    <div class="comparison__label">Expanded (190px, on hover)</div>
+    <div class="nav-hybrid nav-hybrid--expanded">
+      <div class="nav-hybrid__header">
+        <span class="nav-hybrid__header-icon">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+            <circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/>
+          </svg>
+        </span>
+        <span class="nav-hybrid__header-text">Sections</span>
+        <span class="nav-hybrid__count">5</span>
+      </div>
+      <div class="nav-hybrid__list">
+        <div class="nav-hybrid__list-inner">
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">1</span><span class="node__label">Initialize project</span></div>
+        <div class="node node--detected node--active"><span class="node__dot"></span><span class="node__num">2</span><span class="node__label">Install dependencies</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">3</span><span class="node__label">Configure build system</span></div>
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">4</span><span class="node__label">Run tests</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">5</span><span class="node__label">Deploy</span></div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     20 SECTIONS — Collapsed vs Expanded
+     ============================================================ -->
+<p class="variant-label">20 Sections -- Collapsed vs Expanded</p>
+<p class="variant-desc">6 markers + 14 detected. Section 8 (marker) is active.</p>
+
+<div class="comparison">
+  <!-- Collapsed -->
+  <div class="comparison__col">
+    <div class="comparison__label">Collapsed</div>
+    <div class="nav-hybrid nav-hybrid--static" style="max-height: 400px;">
+      <div class="nav-hybrid__header">
+        <span class="nav-hybrid__header-icon">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+            <circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/>
+          </svg>
+        </span>
+      </div>
+      <div class="nav-hybrid__list">
+        <div class="nav-hybrid__list-inner">
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--marker node--active"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+        <div class="node node--marker"><span class="node__dot"></span></div>
+        <div class="node node--detected"><span class="node__dot"></span></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded -->
+  <div class="comparison__col">
+    <div class="comparison__label">Expanded (hover)</div>
+    <div class="nav-hybrid nav-hybrid--expanded" style="max-height: 400px;">
+      <div class="nav-hybrid__header">
+        <span class="nav-hybrid__header-icon">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+            <circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/>
+          </svg>
+        </span>
+        <span class="nav-hybrid__header-text">Sections</span>
+        <span class="nav-hybrid__count">20</span>
+      </div>
+      <div class="nav-hybrid__list">
+        <div class="nav-hybrid__list-inner">
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">1</span><span class="node__label">Clone repository</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">2</span><span class="node__label">Check environment</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">3</span><span class="node__label">Install dependencies</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">4</span><span class="node__label">Database migration</span></div>
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">5</span><span class="node__label">Configure build</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">6</span><span class="node__label">Seed test data</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">7</span><span class="node__label">Lint source files</span></div>
+        <div class="node node--marker node--active"><span class="node__dot"></span><span class="node__num">8</span><span class="node__label">Run unit tests</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">9</span><span class="node__label">Run integration tests</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">10</span><span class="node__label">Build production</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">11</span><span class="node__label">Optimize assets</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">12</span><span class="node__label">Generate source maps</span></div>
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">13</span><span class="node__label">Docker build</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">14</span><span class="node__label">Push to registry</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">15</span><span class="node__label">Deploy staging</span></div>
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">16</span><span class="node__label">Run smoke tests</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">17</span><span class="node__label">Verify health checks</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">18</span><span class="node__label">Promote to prod</span></div>
+        <div class="node node--marker"><span class="node__dot"></span><span class="node__num">19</span><span class="node__label">Post-deploy verify</span></div>
+        <div class="node node--detected"><span class="node__dot"></span><span class="node__num">20</span><span class="node__label">Cleanup temp files</span></div>
+      </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     50 SECTIONS — Collapsed (with scrolling)
+     ============================================================ -->
+<p class="variant-label">50 Sections -- Collapsed + Expand Panel</p>
+<p class="variant-desc">Collapsed dot strip scrolls within the aside at 50 sections. Section 23 (marker) is active. Expand panel shown.</p>
+
+<div class="demo-layout">
+  <div class="demo-content" style="min-height: 560px;">
+    <span class="demo-content__label">Session content area</span>
+  </div>
+  <div class="nav-hybrid nav-hybrid--static" style="max-height: 560px; position: relative;">
+    <div class="nav-hybrid__header">
+      <span class="nav-hybrid__header-icon">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+          <circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/>
+        </svg>
+      </span>
+    </div>
+    <div class="nav-hybrid__list">
+        <div class="nav-hybrid__list-inner">
+      <!-- 50 nodes: ~12 markers, ~38 detected -->
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker node--active"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--detected"><span class="node__dot"></span></div>
+      <div class="node node--marker"><span class="node__dot"></span></div>
+    </div>
+      </div>
+
+    <!-- Expand Panel -->
+    <div class="expand-panel">
+      <div class="expand-panel__title">
+        <span>All Sections</span>
+        <span class="expand-panel__title-count">50</span>
+      </div>
+      <ul class="expand-panel__list">
+        <li class="expand-panel__item expand-panel__item--marker">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">21</span>
+          <span class="expand-panel__label">Refactor auth middleware</span>
+          <span class="expand-panel__lines">142 ln</span>
+        </li>
+        <li class="expand-panel__item expand-panel__item--detected">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">22</span>
+          <span class="expand-panel__label">Update JWT config</span>
+          <span class="expand-panel__lines">28 ln</span>
+        </li>
+        <li class="expand-panel__item expand-panel__item--marker expand-panel__item--active">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">23</span>
+          <span class="expand-panel__label">Run full test suite</span>
+          <span class="expand-panel__lines">2,341 ln</span>
+        </li>
+        <li class="expand-panel__item expand-panel__item--detected">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">24</span>
+          <span class="expand-panel__label">Build production bundle</span>
+          <span class="expand-panel__lines">87 ln</span>
+        </li>
+        <li class="expand-panel__item expand-panel__item--detected">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">25</span>
+          <span class="expand-panel__label">Docker compose up staging</span>
+          <span class="expand-panel__lines">456 ln</span>
+        </li>
+        <li class="expand-panel__item expand-panel__item--detected">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">26</span>
+          <span class="expand-panel__label">Verify health checks</span>
+          <span class="expand-panel__lines">15 ln</span>
+        </li>
+        <li class="expand-panel__item expand-panel__item--marker">
+          <span class="expand-panel__dot"></span>
+          <span class="expand-panel__num">27</span>
+          <span class="expand-panel__label">Database backup</span>
+          <span class="expand-panel__lines">63 ln</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     50 SECTIONS — Expanded State
+     ============================================================ -->
+<p class="variant-label">50 Sections -- Expanded State (hover)</p>
+<p class="variant-desc">When hovering the aside, it widens to show section numbers and labels. The list scrolls within the aside.</p>
+
+<div class="demo-layout">
+  <div class="demo-content" style="min-height: 560px;">
+    <span class="demo-content__label">Session content area</span>
+  </div>
+  <div class="nav-hybrid nav-hybrid--expanded" style="max-height: 560px;">
+    <div class="nav-hybrid__header">
+      <span class="nav-hybrid__header-icon">
+        <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/>
+          <circle cx="3" cy="9" r="1.5"/><circle cx="9" cy="9" r="1.5"/>
+        </svg>
+      </span>
+      <span class="nav-hybrid__header-text">Sections</span>
+      <span class="nav-hybrid__count">50</span>
+    </div>
+    <div class="nav-hybrid__list">
+        <div class="nav-hybrid__list-inner">
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">1</span><span class="node__label">Initialize project</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">2</span><span class="node__label">Check node version</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">3</span><span class="node__label">Install dependencies</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">4</span><span class="node__label">Setup git hooks</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">5</span><span class="node__label">Configure database</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">6</span><span class="node__label">Run migration 001</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">7</span><span class="node__label">Run migration 002</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">8</span><span class="node__label">Setup auth module</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">9</span><span class="node__label">Generate JWT keys</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">10</span><span class="node__label">Configure CORS</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">11</span><span class="node__label">Setup rate limiting</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">12</span><span class="node__label">Build API routes</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">13</span><span class="node__label">Configure webpack</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">14</span><span class="node__label">Setup TypeScript</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">15</span><span class="node__label">Configure ESLint</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">16</span><span class="node__label">Build frontend</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">17</span><span class="node__label">Write unit tests</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">18</span><span class="node__label">Test auth flow</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">19</span><span class="node__label">Test API routes</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">20</span><span class="node__label">Test edge cases</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">21</span><span class="node__label">Refactor auth</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">22</span><span class="node__label">Update JWT config</span></div>
+      <div class="node node--marker node--active"><span class="node__dot"></span><span class="node__num">23</span><span class="node__label">Run full test suite</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">24</span><span class="node__label">Build production</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">25</span><span class="node__label">Docker compose up</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">26</span><span class="node__label">Health checks</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">27</span><span class="node__label">Database backup</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">28</span><span class="node__label">Seed prod data</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">29</span><span class="node__label">Configure CDN</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">30</span><span class="node__label">Setup monitoring</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">31</span><span class="node__label">Configure alerts</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">32</span><span class="node__label">Deploy to staging</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">33</span><span class="node__label">Smoke tests</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">34</span><span class="node__label">Load test</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">35</span><span class="node__label">Security scan</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">36</span><span class="node__label">Promote to prod</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">37</span><span class="node__label">DNS cutover</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">38</span><span class="node__label">Verify redirects</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">39</span><span class="node__label">Check analytics</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">40</span><span class="node__label">Update docs</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">41</span><span class="node__label">Notify team</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">42</span><span class="node__label">Archive artifacts</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">43</span><span class="node__label">Clean temp dirs</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">44</span><span class="node__label">Post-deploy checks</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">45</span><span class="node__label">Verify endpoints</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">46</span><span class="node__label">Test webhooks</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">47</span><span class="node__label">Check error rates</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">48</span><span class="node__label">Review logs</span></div>
+      <div class="node node--detected"><span class="node__dot"></span><span class="node__num">49</span><span class="node__label">Update status page</span></div>
+      <div class="node node--marker"><span class="node__dot"></span><span class="node__num">50</span><span class="node__label">Final cleanup</span></div>
+    </div>
+      </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     NODE STATES REFERENCE
+     ============================================================ -->
+<p class="variant-label">Node States</p>
+<p class="variant-desc">All combinations of type (marker/detected) and state (default/hover/active). All dots are uniform 8px.</p>
+
+<div style="display: flex; gap: var(--rhythm-2); align-items: flex-start; flex-wrap: wrap; padding: var(--rhythm-1);">
+  <!-- Detected states -->
+  <div style="background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-3); width: 210px;">
+    <div style="font-size: var(--text-xs); color: var(--text-disabled); letter-spacing: var(--tracking-wide); text-transform: uppercase; margin-bottom: var(--space-2);">Detected Section</div>
+    <div class="node node--detected"><span class="node__dot"></span><span class="node__label" style="opacity:1; margin-left: var(--space-2); max-width: 150px;">Default</span></div>
+    <div class="node node--detected" style="background: color-mix(in srgb, var(--accent-primary) 6%, var(--bg-surface));">
+      <span class="node__dot" style="background: color-mix(in srgb, var(--accent-primary) 50%, var(--border-strong));"></span>
+      <span class="node__label" style="opacity:1; margin-left: var(--space-2); max-width: 150px; color: var(--text-secondary);">Hover</span>
+    </div>
+    <div class="node node--detected node--active"><span class="node__dot"></span><span class="node__label" style="opacity:1; margin-left: var(--space-2); max-width: 150px;">Active (cyan glow)</span></div>
+  </div>
+
+  <!-- Marker states -->
+  <div style="background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--radius-lg); padding: var(--space-3); width: 210px;">
+    <div style="font-size: var(--text-xs); color: var(--text-disabled); letter-spacing: var(--tracking-wide); text-transform: uppercase; margin-bottom: var(--space-2);">Marker Section</div>
+    <div class="node node--marker"><span class="node__dot"></span><span class="node__label" style="opacity:1; margin-left: var(--space-2); max-width: 150px;">Default (pink dot)</span></div>
+    <div class="node node--marker" style="background: color-mix(in srgb, var(--accent-primary) 6%, var(--bg-surface));">
+      <span class="node__dot" style="box-shadow: 0 0 8px rgba(255, 77, 106, 0.45);"></span>
+      <span class="node__label" style="opacity:1; margin-left: var(--space-2); max-width: 150px; color: var(--text-secondary);">Hover</span>
+    </div>
+    <div class="node node--marker node--active"><span class="node__dot"></span><span class="node__label" style="opacity:1; margin-left: var(--space-2); max-width: 150px;">Active (pink glow)</span></div>
+  </div>
+</div>
+
+</body>
+</html>

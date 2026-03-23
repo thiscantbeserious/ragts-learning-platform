@@ -40,6 +40,9 @@ export function createTestSection(
     snapshot: null,
     startLine: null,
     endLine: null,
+    lineCount: null,
+    contentHash: null,
+    preview: null,
     ...overrides,
   };
 }

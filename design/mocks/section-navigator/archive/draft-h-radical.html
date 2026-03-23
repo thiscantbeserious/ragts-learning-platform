@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section Navigator — Draft H: Three Radical Designs</title>
+  <link rel="stylesheet" href="../../styles/layout.css">
+  <style>
+    /* ================================================================
+       DRAFT H — Three Radical Designs
+       ================================================================
+       H1: Scrollbar-Integrated Track
+           The navigator IS the scrollbar. A custom vertical track
+           where section boundaries are etched as notches/gaps. The
+           active section lights up as a segment. Hover shows a
+           floating label. No separate aside — the scrollbar itself
+           is the map.
+
+       H2: Radial Dial / Compass
+           A small floating circular dial. Sections are distributed
+           around the ring perimeter. A lit arc shows which section
+           is active. The center shows current section number + label.
+           Feels like a HUD targeting reticle.
+
+       H3: Typographic Waterfall
+           Pure text. Section names stacked vertically in a narrow
+           column, truncated to ~8 chars. Active section is full
+           brightness + accent border. Others fade to near-invisible.
+           No shapes, no icons, no dots — just words as the map.
+       ================================================================ */
+
+    body {
+      padding: var(--rhythm-2);
+    }
+
+    h1 {
+      font-size: var(--text-3xl);
+      line-height: var(--lh-3xl);
+      font-weight: var(--weight-bold);
+      color: var(--text-primary);
+      margin-bottom: var(--rhythm-half);
+      letter-spacing: var(--tracking-tight);
+    }
+
+    .page-subtitle {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      margin-bottom: var(--rhythm-3);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    /* --- Design section headings --- */
+    .design-block {
+      margin-bottom: var(--rhythm-4);
+    }
+
+    .design-block h2 {
+      font-size: var(--text-2xl);
+      line-height: var(--lh-2xl);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-tight);
+      color: var(--accent-primary);
+      margin-bottom: var(--rhythm-half);
+      padding-bottom: var(--rhythm-half);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .design-block h3 {
+      font-size: var(--text-lg);
+      line-height: var(--lh-lg);
+      font-weight: var(--weight-medium);
+      color: var(--text-secondary);
+      margin-bottom: var(--rhythm-half);
+    }
+
+    .design-description {
+      font-size: var(--text-base);
+      line-height: var(--lh-base);
+      color: var(--text-muted);
+      margin-bottom: var(--rhythm-2);
+      max-width: 720px;
+    }
+
+    .scale-row {
+      display: flex;
+      gap: var(--rhythm-2);
+      flex-wrap: wrap;
+      margin-bottom: var(--rhythm-2);
+      align-items: flex-start;
+    }
+
+    .scale-label {
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      margin-bottom: var(--rhythm-half);
+    }
+
+    .scale-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- Shared demo layout --- */
+    .demo-layout {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: var(--rhythm-1);
+    }
+
+    .demo-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: var(--rhythm-1) var(--space-4);
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-content span {
+      font-size: var(--text-sm);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    /* ================================================================
+       H1: SCROLLBAR-INTEGRATED TRACK
+       ================================================================
+       The navigator replaces the traditional scrollbar with a
+       segmented track. Each section is a proportionally-sized
+       segment. The active segment glows. Gaps between segments
+       are section boundaries. Hover on a segment shows a floating
+       label to the left.
+
+       Fixed width: 14px track + 120px hover label zone = 134px max,
+       but the track itself is only 14px wide. The label appears on
+       hover as an overlay, not causing reflow.
+       ================================================================ */
+
+    .h1-track-aside {
+      position: relative;
+      width: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 2px 0;
+    }
+
+    .h1-segment {
+      position: relative;
+      width: 14px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background var(--duration-fast) var(--easing-default),
+                  box-shadow var(--duration-fast) var(--easing-default);
+      /* min-height ensures clickability even for tiny sections */
+      min-height: 4px;
+    }
+
+    /* Detected sections: muted */
+    .h1-segment--detected {
+      background: var(--border-strong);
+    }
+    .h1-segment--detected:hover {
+      background: var(--text-muted);
+    }
+
+    /* Marker sections: accent-tinted */
+    .h1-segment--marker {
+      background: color-mix(in srgb, var(--accent-secondary) 30%, var(--border-strong));
+    }
+    .h1-segment--marker:hover {
+      background: color-mix(in srgb, var(--accent-secondary) 60%, var(--border-strong));
+    }
+
+    /* Active segment */
+    .h1-segment--active.h1-segment--detected {
+      background: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-primary-glow),
+                  inset 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+    .h1-segment--active.h1-segment--marker {
+      background: var(--accent-secondary);
+      box-shadow: 0 0 8px var(--accent-secondary-glow),
+                  inset 0 0 2px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Floating label on hover */
+    .h1-segment .h1-label {
+      display: none;
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      padding: 2px 8px;
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-secondary);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .h1-segment .h1-label .h1-label-num {
+      color: var(--accent-primary);
+      font-weight: var(--weight-semibold);
+      margin-right: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .h1-segment--marker .h1-label .h1-label-num {
+      color: var(--accent-secondary);
+    }
+
+    .h1-segment:hover .h1-label {
+      display: block;
+    }
+
+    /* The overall track has a thin border to look like a scrollbar groove */
+    .h1-track-wrapper {
+      background: var(--bg-page);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      padding: 3px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Proportional height mapping:
+       5 sections:  each ~60-100px
+       20 sections: each ~15-25px
+       50 sections: each ~5-10px
+       Height is driven by flex-grow proportional to line count */
+
+    .h1-track-aside--short { height: 360px; }
+    .h1-track-aside--medium { height: 400px; }
+    .h1-track-aside--tall { height: 450px; }
+
+    /* Top/bottom scroll arrows */
+    .h1-track-cap {
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-disabled);
+      font-size: 8px;
+      flex-shrink: 0;
+    }
+
+
+    /* ================================================================
+       H2: RADIAL DIAL / COMPASS
+       ================================================================
+       A floating circular dial. Sections are dots distributed
+       around the ring perimeter. An arc segment lights up for the
+       active section. The center shows the section number.
+
+       This uses SVG for the ring + arcs, with HTML overlay for
+       the center label and hover tooltips.
+
+       Fixed footprint: 120x120px for 5 sections, same for all.
+       The dial does NOT grow — it becomes denser.
+       ================================================================ */
+
+    .h2-dial-container {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      flex-shrink: 0;
+    }
+
+    .h2-dial-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Ring background */
+    .h2-ring-bg {
+      fill: none;
+      stroke: var(--border-default);
+      stroke-width: 3;
+    }
+
+    /* Section arc segments */
+    .h2-arc {
+      fill: none;
+      stroke-width: 3;
+      cursor: pointer;
+      transition: stroke var(--duration-fast) var(--easing-default),
+                  stroke-width var(--duration-fast) var(--easing-default),
+                  filter var(--duration-fast) var(--easing-default);
+    }
+
+    .h2-arc--detected {
+      stroke: var(--border-strong);
+    }
+    .h2-arc--detected:hover {
+      stroke: var(--text-muted);
+      stroke-width: 5;
+    }
+
+    .h2-arc--marker {
+      stroke: color-mix(in srgb, var(--accent-secondary) 35%, var(--border-strong));
+    }
+    .h2-arc--marker:hover {
+      stroke: var(--accent-secondary);
+      stroke-width: 5;
+    }
+
+    .h2-arc--active.h2-arc--detected {
+      stroke: var(--accent-primary);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 4px var(--accent-primary-glow));
+    }
+    .h2-arc--active.h2-arc--marker {
+      stroke: var(--accent-secondary);
+      stroke-width: 5;
+      filter: drop-shadow(0 0 4px var(--accent-secondary-glow));
+    }
+
+    /* Section dots on the ring */
+    .h2-dot {
+      fill: var(--bg-elevated);
+      stroke: var(--border-strong);
+      stroke-width: 1;
+      cursor: pointer;
+      transition: fill var(--duration-fast) var(--easing-default),
+                  r var(--duration-fast) var(--easing-default);
+    }
+
+    .h2-dot:hover {
+      fill: var(--text-muted);
+    }
+
+    .h2-dot--active {
+      fill: var(--accent-primary);
+      stroke: var(--accent-primary);
+    }
+
+    .h2-dot--marker {
+      stroke: var(--accent-secondary-dim);
+    }
+    .h2-dot--marker.h2-dot--active {
+      fill: var(--accent-secondary);
+      stroke: var(--accent-secondary);
+    }
+
+    /* Center label */
+    .h2-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .h2-center-num {
+      font-family: var(--font-mono);
+      font-size: var(--text-xl);
+      line-height: var(--lh-xl);
+      font-weight: var(--weight-bold);
+      color: var(--accent-primary);
+    }
+
+    .h2-center-label {
+      font-size: 8px;
+      line-height: 10px;
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      max-width: 60px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .h2-center-total {
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-disabled);
+      font-family: var(--font-mono);
+    }
+
+    /* Hover tooltip for dial */
+    .h2-tooltip {
+      display: none;
+      position: absolute;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: var(--shadow-sm);
+      left: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .h2-dial-container:hover .h2-tooltip--visible {
+      display: block;
+    }
+
+
+    /* ================================================================
+       H3: TYPOGRAPHIC WATERFALL
+       ================================================================
+       Pure text navigation. Section names (truncated) stacked
+       vertically. No shapes, no dots, no icons. The active section
+       name is bright + has a left accent border. Other sections
+       fade based on distance from active. Marker sections use the
+       secondary color.
+
+       Fixed width: 72px. Names are truncated with ellipsis.
+       At 50 sections, font shrinks to fit.
+       ================================================================ */
+
+    .h3-waterfall {
+      display: flex;
+      flex-direction: column;
+      width: 72px;
+      gap: 0;
+      border-left: 1px solid var(--border-default);
+      position: relative;
+    }
+
+    .h3-item {
+      position: relative;
+      padding: 1px 0 1px 8px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: color var(--duration-fast) var(--easing-default),
+                  opacity var(--duration-fast) var(--easing-default);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-left: 2px solid transparent;
+      margin-left: -1px;
+    }
+
+    /* Default: near-invisible */
+    .h3-item--detected {
+      color: var(--text-disabled);
+      font-size: var(--text-xs);
+      line-height: 14px;
+    }
+
+    .h3-item--marker {
+      color: color-mix(in srgb, var(--accent-secondary) 40%, var(--text-disabled));
+      font-size: var(--text-xs);
+      line-height: 14px;
+    }
+
+    /* Hover: brighten */
+    .h3-item:hover {
+      color: var(--text-secondary);
+    }
+
+    .h3-item--marker:hover {
+      color: var(--accent-secondary-hover);
+    }
+
+    /* Active: full brightness + accent border */
+    .h3-item--active.h3-item--detected {
+      color: var(--accent-primary);
+      border-left-color: var(--accent-primary);
+      font-weight: var(--weight-medium);
+      text-shadow: 0 0 8px var(--accent-primary-glow);
+    }
+
+    .h3-item--active.h3-item--marker {
+      color: var(--accent-secondary);
+      border-left-color: var(--accent-secondary);
+      font-weight: var(--weight-medium);
+      text-shadow: 0 0 8px var(--accent-secondary-glow);
+    }
+
+    /* Proximity fading: items near the active one are brighter */
+    .h3-item--near {
+      color: var(--text-muted);
+    }
+    .h3-item--near.h3-item--marker {
+      color: color-mix(in srgb, var(--accent-secondary) 60%, var(--text-muted));
+    }
+
+    /* Hover tooltip for waterfall */
+    .h3-item .h3-tooltip {
+      display: none;
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: var(--shadow-sm);
+      font-weight: var(--weight-normal);
+      text-shadow: none;
+    }
+
+    .h3-item:hover .h3-tooltip {
+      display: block;
+    }
+
+    /* Scale adaptations */
+    .h3-waterfall--compact .h3-item {
+      font-size: 9px;
+      line-height: 11px;
+      padding: 0 0 0 6px;
+    }
+
+    .h3-waterfall--ultra .h3-item {
+      font-size: 7px;
+      line-height: 9px;
+      padding: 0 0 0 5px;
+    }
+
+    /* Scanline decorations on the waterfall border */
+    .h3-waterfall::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--accent-primary-subtle) 0px,
+        var(--accent-primary-subtle) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Draft H: Three Radical Designs</h1>
+<p class="page-subtitle">Scrollbar Track / Radial Dial / Typographic Waterfall</p>
+
+<!-- ================================================================
+     H1: SCROLLBAR-INTEGRATED TRACK
+     ================================================================ -->
+<div class="design-block">
+  <h2>H1: Scrollbar-Integrated Track</h2>
+  <p class="design-description">
+    The navigator IS the scrollbar. A narrow segmented track where each section
+    occupies vertical space proportional to its line count. The active segment
+    glows. Gaps between segments are section boundaries. Hover floats a label
+    to the left. No separate aside needed -- the scrollbar is the map.
+    Width: 20px (track + chrome). Proportional segments give an instant
+    sense of where the "heavy" sections live.
+  </p>
+
+  <div class="scale-row">
+    <!-- 5 sections -->
+    <div class="scale-item">
+      <div class="scale-label">5 Sections</div>
+      <div class="demo-layout">
+        <div class="demo-content"><span>Session content</span></div>
+        <div class="h1-track-wrapper">
+          <div class="h1-track-cap">&#9650;</div>
+          <div class="h1-track-aside h1-track-aside--short" id="h1-5">
+            <!-- JS-generated -->
+          </div>
+          <div class="h1-track-cap">&#9660;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 20 sections -->
+    <div class="scale-item">
+      <div class="scale-label">20 Sections</div>
+      <div class="demo-layout">
+        <div class="demo-content"><span>Session content</span></div>
+        <div class="h1-track-wrapper">
+          <div class="h1-track-cap">&#9650;</div>
+          <div class="h1-track-aside h1-track-aside--medium" id="h1-20">
+            <!-- JS-generated -->
+          </div>
+          <div class="h1-track-cap">&#9660;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 50 sections -->
+    <div class="scale-item">
+      <div class="scale-label">50 Sections</div>
+      <div class="demo-layout">
+        <div class="demo-content"><span>Session content</span></div>
+        <div class="h1-track-wrapper">
+          <div class="h1-track-cap">&#9650;</div>
+          <div class="h1-track-aside h1-track-aside--tall" id="h1-50">
+            <!-- JS-generated -->
+          </div>
+          <div class="h1-track-cap">&#9660;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     H2: RADIAL DIAL / COMPASS
+     ================================================================ -->
+<div class="design-block">
+  <h2>H2: Radial Dial</h2>
+  <p class="design-description">
+    A compact circular dial where sections are distributed as arc segments
+    around the ring perimeter. The active section's arc glows. The center
+    displays the current section number and a truncated label. Marker
+    sections use the secondary accent. Feels like a HUD targeting reticle.
+    Fixed size: 120x120px regardless of section count -- density increases
+    as sections increase.
+  </p>
+
+  <div class="scale-row">
+    <!-- 5 sections -->
+    <div class="scale-item">
+      <div class="scale-label">5 Sections</div>
+      <div class="demo-layout" style="align-items: center;">
+        <div class="demo-content" style="min-height: 200px;"><span>Session content</span></div>
+        <div class="h2-dial-container" id="h2-5"></div>
+      </div>
+    </div>
+
+    <!-- 20 sections -->
+    <div class="scale-item">
+      <div class="scale-label">20 Sections</div>
+      <div class="demo-layout" style="align-items: center;">
+        <div class="demo-content" style="min-height: 200px;"><span>Session content</span></div>
+        <div class="h2-dial-container" id="h2-20"></div>
+      </div>
+    </div>
+
+    <!-- 50 sections -->
+    <div class="scale-item">
+      <div class="scale-label">50 Sections</div>
+      <div class="demo-layout" style="align-items: center;">
+        <div class="demo-content" style="min-height: 200px;"><span>Session content</span></div>
+        <div class="h2-dial-container" id="h2-50"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     H3: TYPOGRAPHIC WATERFALL
+     ================================================================ -->
+<div class="design-block">
+  <h2>H3: Typographic Waterfall</h2>
+  <p class="design-description">
+    No shapes, no dots, no icons. Just section names stacked vertically in a
+    narrow column. The active section name glows at full brightness with an
+    accent left border. Nearby sections are slightly visible. Distant sections
+    fade to near-invisible -- a ghostly waterfall of text that reveals the
+    session shape through typography alone. Hover shows the full label.
+    Fixed width: 72px.
+  </p>
+
+  <div class="scale-row">
+    <!-- 5 sections -->
+    <div class="scale-item">
+      <div class="scale-label">5 Sections</div>
+      <div class="demo-layout">
+        <div class="demo-content"><span>Session content</span></div>
+        <div class="h3-waterfall" id="h3-5">
+          <!-- JS-generated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 20 sections -->
+    <div class="scale-item">
+      <div class="scale-label">20 Sections</div>
+      <div class="demo-layout">
+        <div class="demo-content"><span>Session content</span></div>
+        <div class="h3-waterfall h3-waterfall--compact" id="h3-20">
+          <!-- JS-generated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 50 sections -->
+    <div class="scale-item">
+      <div class="scale-label">50 Sections</div>
+      <div class="demo-layout">
+        <div class="demo-content"><span>Session content</span></div>
+        <div class="h3-waterfall h3-waterfall--ultra" id="h3-50">
+          <!-- JS-generated -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // ================================================================
+  // DATA GENERATION
+  // ================================================================
+
+  const sectionLabels = [
+    'git clone', 'npm install', 'build step', 'lint check',
+    'test suite', 'deploy prep', 'env setup', 'db migrate',
+    'seed data', 'api health', 'auth flow', 'cache warm',
+    'log rotate', 'ssl cert', 'dns check', 'load test',
+    'mem profile', 'cpu bench', 'disk audit', 'net scan',
+    'pkg update', 'conf merge', 'key rotate', 'snap backup',
+    'cron setup', 'queue drain', 'idx rebuild', 'schema diff',
+    'perf trace', 'gc tuning', 'heap dump', 'thr analyze',
+    'io profile', 'lat check', 'err report', 'met export',
+    'alert conf', 'dash build', 'doc gen', 'rel notes',
+    'tag create', 'push main', 'cd trigger', 'stg deploy',
+    'smoke test', 'prd deploy', 'rollback', 'verify',
+    'cleanup', 'summary'
+  ];
+
+  function makeSections(count, activeIdx) {
+    const sections = [];
+    for (let i = 0; i < count; i++) {
+      const isMarker = Math.random() < 0.25;
+      // Line counts vary: some sections are huge, most are small
+      const lineCount = i % 7 === 0
+        ? Math.floor(Math.random() * 3000) + 1000
+        : Math.floor(Math.random() * 200) + 20;
+      sections.push({
+        index: i,
+        label: sectionLabels[i % sectionLabels.length],
+        type: isMarker ? 'marker' : 'detected',
+        lineCount,
+        active: i === activeIdx,
+      });
+    }
+    return sections;
+  }
+
+
+  // ================================================================
+  // H1: SCROLLBAR-INTEGRATED TRACK
+  // ================================================================
+
+  function renderH1(containerId, count, activeIdx) {
+    const container = document.getElementById(containerId);
+    const sections = makeSections(count, activeIdx);
+    const totalLines = sections.reduce((s, sec) => s + sec.lineCount, 0);
+
+    sections.forEach(sec => {
+      const el = document.createElement('div');
+      el.className = `h1-segment h1-segment--${sec.type}`;
+      if (sec.active) el.classList.add('h1-segment--active');
+
+      // Proportional height via flex-grow
+      el.style.flexGrow = sec.lineCount / totalLines * 100;
+
+      // Hover label
+      const label = document.createElement('div');
+      label.className = 'h1-label';
+      label.innerHTML = `<span class="h1-label-num">${sec.index + 1}</span>${sec.label}`;
+      el.appendChild(label);
+
+      container.appendChild(el);
+    });
+  }
+
+  renderH1('h1-5', 5, 1);
+  renderH1('h1-20', 20, 7);
+  renderH1('h1-50', 50, 23);
+
+
+  // ================================================================
+  // H2: RADIAL DIAL
+  // ================================================================
+
+  function renderH2(containerId, count, activeIdx) {
+    const container = document.getElementById(containerId);
+    const sections = makeSections(count, activeIdx);
+
+    const cx = 60, cy = 60, r = 48;
+    const strokeWidth = count <= 5 ? 6 : count <= 20 ? 4 : 3;
+    const gapAngle = count <= 5 ? 4 : count <= 20 ? 2 : 1; // degrees gap between arcs
+    const totalGap = gapAngle * count;
+    const usableAngle = 360 - totalGap;
+    const totalLines = sections.reduce((s, sec) => s + sec.lineCount, 0);
+
+    let svg = `<svg class="h2-dial-svg" viewBox="0 0 120 120">`;
+
+    // Background ring
+    svg += `<circle class="h2-ring-bg" cx="${cx}" cy="${cy}" r="${r}" />`;
+
+    // Arc segments
+    const circumference = 2 * Math.PI * r;
+    let currentAngle = -90; // start at top
+
+    sections.forEach((sec, i) => {
+      const proportion = sec.lineCount / totalLines;
+      const arcAngle = proportion * usableAngle;
+      const startAngle = currentAngle;
+      const endAngle = currentAngle + arcAngle;
+
+      // Convert to SVG arc
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+      const x1 = cx + r * Math.cos(startRad);
+      const y1 = cy + r * Math.sin(startRad);
+      const x2 = cx + r * Math.cos(endRad);
+      const y2 = cy + r * Math.sin(endRad);
+      const largeArc = arcAngle > 180 ? 1 : 0;
+
+      const activeClass = sec.active ? ' h2-arc--active' : '';
+      const typeClass = `h2-arc--${sec.type}`;
+
+      // Only draw arc if it has meaningful size
+      if (arcAngle > 0.5) {
+        svg += `<path class="h2-arc ${typeClass}${activeClass}"
+          d="M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}"
+          stroke-width="${strokeWidth}"
+          data-idx="${i}"
+          data-label="${sec.label}"
+        />`;
+      }
+
+      // Dot at section start (only if enough room)
+      if (count <= 20 || i % Math.ceil(count / 20) === 0) {
+        const dotR = count <= 5 ? 3 : count <= 20 ? 2 : 1.5;
+        const dotClass = sec.active ? ' h2-dot--active' : '';
+        const markerClass = sec.type === 'marker' ? ' h2-dot--marker' : '';
+        svg += `<circle class="h2-dot${dotClass}${markerClass}"
+          cx="${x1}" cy="${y1}" r="${dotR}" />`;
+      }
+
+      currentAngle = endAngle + gapAngle;
+    });
+
+    svg += `</svg>`;
+
+    // Center label
+    const activeSec = sections[activeIdx];
+    const centerHtml = `
+      <div class="h2-center">
+        <div class="h2-center-num">${activeIdx + 1}</div>
+        <div class="h2-center-label">${activeSec.label}</div>
+        <div class="h2-center-total">/ ${count}</div>
+      </div>
+    `;
+
+    container.innerHTML = svg + centerHtml;
+  }
+
+  renderH2('h2-5', 5, 1);
+  renderH2('h2-20', 20, 7);
+  renderH2('h2-50', 50, 23);
+
+
+  // ================================================================
+  // H3: TYPOGRAPHIC WATERFALL
+  // ================================================================
+
+  function renderH3(containerId, count, activeIdx) {
+    const container = document.getElementById(containerId);
+    const sections = makeSections(count, activeIdx);
+
+    sections.forEach((sec, i) => {
+      const el = document.createElement('div');
+      const typeClass = `h3-item--${sec.type}`;
+      const activeClass = sec.active ? ' h3-item--active' : '';
+
+      // Proximity fading: items within 2 positions of active are brighter
+      const distance = Math.abs(i - activeIdx);
+      const nearClass = !sec.active && distance <= 2 ? ' h3-item--near' : '';
+
+      el.className = `h3-item ${typeClass}${activeClass}${nearClass}`;
+
+      // Truncated label
+      const displayLabel = sec.label.length > 10
+        ? sec.label.substring(0, 9) + '\u2026'
+        : sec.label;
+      el.textContent = displayLabel;
+
+      // Tooltip with full info
+      const tooltip = document.createElement('div');
+      tooltip.className = 'h3-tooltip';
+      tooltip.innerHTML = `<strong style="color:var(--accent-primary)">${sec.index + 1}.</strong> ${sec.label} <span style="color:var(--text-disabled)">(${sec.lineCount} lines)</span>`;
+      if (sec.type === 'marker') {
+        tooltip.querySelector('strong').style.color = 'var(--accent-secondary)';
+      }
+      el.appendChild(tooltip);
+
+      container.appendChild(el);
+    });
+  }
+
+  renderH3('h3-5', 5, 1);
+  renderH3('h3-20', 20, 7);
+  renderH3('h3-50', 50, 23);
+</script>
+
+</body>
+</html>

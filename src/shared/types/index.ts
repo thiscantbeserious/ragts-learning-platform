@@ -27,7 +27,14 @@ export type { ServiceErrorCode } from './errors.js';
 
 export type { Section } from './section.js';
 
-export type { SessionDetailResponse, SessionStatusResponse } from './api.js';
+export type {
+  SessionDetailResponse,
+  SessionStatusResponse,
+  SectionMetadata,
+  SectionContentPage,
+  BulkSectionContentResponse,
+  SessionMetadataResponse,
+} from './api.js';
 
 export type {
   PipelineSession,

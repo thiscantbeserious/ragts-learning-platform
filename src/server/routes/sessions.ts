@@ -6,7 +6,7 @@
 import typia from 'typia';
 import type { Context } from 'hono';
 import type { SessionService } from '../services/index.js';
-import type { SessionDetailResponse } from '../../shared/types/api.js';
+import type { SessionMetadataResponse } from '../../shared/types/api.js';
 import { validatePathId } from './route_validation.js';
 import { logger } from '../logger.js';
 
@@ -31,7 +31,8 @@ export async function handleListSessions(
 
 /**
  * Handle GET /api/sessions/:id
- * Retrieve session metadata, full parsed content, and sections.
+ * Retrieve session metadata and section metadata (no snapshot content).
+ * Terminal line data is fetched separately via per-section or bulk content endpoints.
  */
 export async function handleGetSession(
   c: Context,
@@ -41,13 +42,13 @@ export async function handleGetSession(
     const id = c.req.param('id');
     const invalid = validatePathId(c, id);
     if (invalid) return invalid;
-    const result = await service.getSession(id);
+    const result = await service.getSessionMetadata(id);
     if (!result.ok) {
       return c.json({ error: result.error }, result.status);
     }
-    const validation = typia.validate<SessionDetailResponse>(result.data);
+    const validation = typia.validate<SessionMetadataResponse>(result.data);
     if (!validation.success) {
-      log.warn({ errors: validation.errors }, 'Response validation warning: session detail shape mismatch');
+      log.warn({ errors: validation.errors }, 'Response validation warning: session metadata shape mismatch');
     }
     return c.json(result.data);
   } catch (err) {

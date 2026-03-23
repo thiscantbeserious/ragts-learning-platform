@@ -5,11 +5,88 @@
 
 import Database from './node_sqlite_compat.js';
 import { nanoid } from 'nanoid';
+import { createHash } from 'node:crypto';
 import typia from 'typia';
 import type { Session, SessionCreate } from '../../../shared/types/session.js';
 import type { SessionAdapter } from '../session_adapter.js';
 import type { DetectionStatus } from '../../../shared/types/pipeline.js';
 import type { ProcessedSession } from '../../processing/types.js';
+import type { CreateSectionInput } from '../section_adapter.js';
+
+/** Sentinel hash for sections with no content (empty lines array). */
+const EMPTY_CONTENT_HASH = computeContentHash('[]');
+
+/** Computes a truncated SHA-256 hash (16 hex chars) for the given content string. */
+function computeContentHash(content: string): string {
+  return createHash('sha256').update(content).digest('hex').slice(0, 16);
+}
+
+/**
+ * Denormalizes a CLI section's snapshot by slicing the session-level snapshot.
+ * Returns the JSON string to store in sections.snapshot.
+ * If no session snapshot is available, returns an empty lines array.
+ */
+function buildDenormalizedSnapshot(
+  sessionSnapshotJson: string,
+  startLine: number,
+  endLine: number
+): string {
+  let sessionLines: unknown[] = [];
+  try {
+    const parsed = JSON.parse(sessionSnapshotJson) as { lines?: unknown[] };
+    if (Array.isArray(parsed.lines)) {
+      sessionLines = parsed.lines;
+    }
+  } catch {
+    // malformed session snapshot — return empty
+  }
+  const safeEnd = Math.min(endLine, sessionLines.length);
+  const safeStart = Math.min(startLine, safeEnd);
+  return JSON.stringify({ lines: sessionLines.slice(safeStart, safeEnd) });
+}
+
+/**
+ * Computes the denormalized section fields (snapshot, lineCount, contentHash)
+ * for a single section input during completeProcessing.
+ * CLI sections get their snapshot populated from the session snapshot.
+ * TUI sections retain their existing snapshot.
+ */
+function computeSectionFields(
+  section: CreateSectionInput,
+  sessionSnapshotJson: string
+): { snapshot: string | null; lineCount: number; contentHash: string } {
+  if (section.snapshot !== null) {
+    // TUI section: snapshot already populated; compute hash and count.
+    const lineCount = section.lineCount ?? countSnapshotLines(section.snapshot);
+    const contentHash = computeContentHash(section.snapshot);
+    return { snapshot: section.snapshot, lineCount, contentHash };
+  }
+
+  if (section.startLine !== null && section.endLine !== null) {
+    // CLI section: denormalize from session snapshot.
+    const snapshot = buildDenormalizedSnapshot(
+      sessionSnapshotJson,
+      section.startLine,
+      section.endLine
+    );
+    const lineCount = Math.max(0, section.endLine - section.startLine);
+    const contentHash = computeContentHash(snapshot);
+    return { snapshot, lineCount, contentHash };
+  }
+
+  // Empty section (no snapshot, no line range).
+  return { snapshot: null, lineCount: 0, contentHash: EMPTY_CONTENT_HASH };
+}
+
+/** Counts lines in a JSON snapshot string. Returns 0 on parse failure. */
+function countSnapshotLines(snapshotJson: string): number {
+  try {
+    const parsed = JSON.parse(snapshotJson) as { lines?: unknown[] };
+    return Array.isArray(parsed.lines) ? parsed.lines.length : 0;
+  } catch {
+    return 0;
+  }
+}
 
 /**
  * SQLite-backed session implementation.
@@ -76,8 +153,8 @@ export class SqliteSessionImpl implements SessionAdapter {
     `);
 
     this.insertSectionStmt = db.prepare(`
-      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line, line_count, content_hash, preview)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
 
     // Pre-prepare statements for status filtering. Closure captures db without
@@ -108,6 +185,12 @@ export class SqliteSessionImpl implements SessionAdapter {
     this.completeProcessingTxn = db.transaction((session: ProcessedSession) => {
       this.deleteSectionsStmt.run(session.sessionId);
       for (const section of session.sections) {
+        // Denormalize CLI sections and compute metadata for all sections.
+        // session.snapshot is already available in this transaction.
+        const { snapshot, lineCount, contentHash } = computeSectionFields(
+          section,
+          session.snapshot
+        );
         this.insertSectionStmt.run(
           nanoid(),
           section.sessionId,
@@ -115,9 +198,12 @@ export class SqliteSessionImpl implements SessionAdapter {
           section.startEvent,
           section.endEvent,
           section.label,
-          section.snapshot,
+          snapshot,
           section.startLine,
-          section.endLine
+          section.endLine,
+          lineCount,
+          contentHash,
+          section.preview ?? null
         );
       }
       this.updateSnapshotStmt.run(session.snapshot, session.sessionId);

@@ -8,17 +8,21 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from './sqlite_database_impl.js';
 import type { SessionAdapter } from '../session_adapter.js';
+import type { SectionAdapter } from '../section_adapter.js';
 import type { DatabaseContext } from '../database_adapter.js';
 import { createTestSession } from './test_fixtures.js';
+import type { ProcessedSession } from '../../processing/types.js';
 
 describe('SqliteSessionImpl', () => {
   let ctx: DatabaseContext;
   let repository: SessionAdapter;
+  let sectionRepository: SectionAdapter;
 
   beforeEach(async () => {
     const impl = new SqliteDatabaseImpl();
     ctx = await impl.initialize({ dataDir: tmpdir(), dbPath: ':memory:' });
     repository = ctx.sessionRepository;
+    sectionRepository = ctx.sectionRepository;
   });
 
   afterEach(async () => {
@@ -159,6 +163,202 @@ describe('SqliteSessionImpl', () => {
 
       // Attempt to create with same filepath should throw
       await expect(repository.create(data)).rejects.toThrow();
+    });
+  });
+
+  describe('completeProcessing — CLI section denormalization', () => {
+    /** Builds a minimal ProcessedSession for testing. */
+    function buildProcessedSession(
+      sessionId: string,
+      sessionSnapshot: object,
+      sections: ProcessedSession['sections']
+    ): ProcessedSession {
+      return {
+        sessionId,
+        snapshot: JSON.stringify(sessionSnapshot),
+        sections,
+        eventCount: 10,
+        detectedSectionsCount: sections.length,
+      };
+    }
+
+    it('populates snapshot for CLI sections from session snapshot', async () => {
+      const session = await repository.create(createTestSession());
+      const sessionLines = Array.from({ length: 20 }, (_, i) => ({ text: `line ${i}` }));
+
+      await repository.completeProcessing(
+        buildProcessedSession(session.id, { lines: sessionLines }, [
+          {
+            sessionId: session.id,
+            type: 'detected',
+            startEvent: 0,
+            endEvent: 5,
+            label: null,
+            snapshot: null,
+            startLine: 0,
+            endLine: 10,
+          },
+        ])
+      );
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      expect(sections).toHaveLength(1);
+      const section = sections[0]!;
+      expect(section.snapshot).not.toBeNull();
+      const parsed = JSON.parse(section.snapshot!) as { lines: unknown[] };
+      expect(parsed.lines).toHaveLength(10);
+    });
+
+    it('CLI section snapshot contains the correct sliced lines', async () => {
+      const session = await repository.create(createTestSession());
+      const sessionLines = Array.from({ length: 30 }, (_, i) => ({ text: `line ${i}` }));
+
+      await repository.completeProcessing(
+        buildProcessedSession(session.id, { lines: sessionLines }, [
+          {
+            sessionId: session.id,
+            type: 'detected',
+            startEvent: 0,
+            endEvent: 5,
+            label: null,
+            snapshot: null,
+            startLine: 5,
+            endLine: 15,
+          },
+        ])
+      );
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      const parsed = JSON.parse(sections[0]!.snapshot!) as { lines: Array<{ text: string }> };
+      expect(parsed.lines[0]!.text).toBe('line 5');
+      expect(parsed.lines[9]!.text).toBe('line 14');
+    });
+
+    it('TUI sections retain their existing snapshot unchanged', async () => {
+      const session = await repository.create(createTestSession());
+      const tuiSnapshot = JSON.stringify({ lines: [{ text: 'tui-output' }] });
+
+      await repository.completeProcessing(
+        buildProcessedSession(session.id, { lines: [] }, [
+          {
+            sessionId: session.id,
+            type: 'detected',
+            startEvent: 0,
+            endEvent: 5,
+            label: null,
+            snapshot: tuiSnapshot,
+            startLine: null,
+            endLine: null,
+          },
+        ])
+      );
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      const parsed = JSON.parse(sections[0]!.snapshot!) as { lines: Array<{ text: string }> };
+      expect(parsed.lines[0]!.text).toBe('tui-output');
+    });
+
+    it('stores line_count for CLI sections', async () => {
+      const session = await repository.create(createTestSession());
+      const sessionLines = Array.from({ length: 50 }, (_, i) => ({ text: `line ${i}` }));
+
+      await repository.completeProcessing(
+        buildProcessedSession(session.id, { lines: sessionLines }, [
+          {
+            sessionId: session.id,
+            type: 'detected',
+            startEvent: 0,
+            endEvent: 5,
+            label: null,
+            snapshot: null,
+            startLine: 0,
+            endLine: 25,
+          },
+        ])
+      );
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      expect(sections[0]!.line_count).toBe(25);
+    });
+
+    it('stores line_count for TUI sections from snapshot line count', async () => {
+      const session = await repository.create(createTestSession());
+      const tuiSnapshot = JSON.stringify({
+        lines: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
+      });
+
+      await repository.completeProcessing(
+        buildProcessedSession(session.id, { lines: [] }, [
+          {
+            sessionId: session.id,
+            type: 'detected',
+            startEvent: 0,
+            endEvent: 5,
+            label: null,
+            snapshot: tuiSnapshot,
+            startLine: null,
+            endLine: null,
+          },
+        ])
+      );
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      expect(sections[0]!.line_count).toBe(3);
+    });
+
+    it('stores non-null content_hash for all sections', async () => {
+      const session = await repository.create(createTestSession());
+      const sessionLines = Array.from({ length: 10 }, (_, i) => ({ text: `line ${i}` }));
+
+      await repository.completeProcessing(
+        buildProcessedSession(session.id, { lines: sessionLines }, [
+          {
+            sessionId: session.id,
+            type: 'detected',
+            startEvent: 0,
+            endEvent: 5,
+            label: null,
+            snapshot: null,
+            startLine: 0,
+            endLine: 5,
+          },
+        ])
+      );
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      expect(sections[0]!.content_hash).not.toBeNull();
+      expect(typeof sections[0]!.content_hash).toBe('string');
+      expect(sections[0]!.content_hash!.length).toBe(16);
+    });
+
+    it('replaces existing sections atomically on second call', async () => {
+      const session = await repository.create(createTestSession());
+      const sessionLines = Array.from({ length: 10 }, (_, i) => ({ text: `line ${i}` }));
+
+      const processed = buildProcessedSession(session.id, { lines: sessionLines }, [
+        {
+          sessionId: session.id,
+          type: 'detected',
+          startEvent: 0,
+          endEvent: 5,
+          label: 'First',
+          snapshot: null,
+          startLine: 0,
+          endLine: 5,
+        },
+      ]);
+
+      await repository.completeProcessing(processed);
+      await repository.completeProcessing({
+        ...processed,
+        sections: [
+          { ...processed.sections[0]!, label: 'Second', startLine: 5, endLine: 10 },
+        ],
+      });
+
+      const sections = await sectionRepository.findBySessionId(session.id);
+      expect(sections).toHaveLength(1);
+      expect(sections[0]!.label).toBe('Second');
     });
   });
 });

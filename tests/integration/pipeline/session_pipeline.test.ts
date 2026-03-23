@@ -101,17 +101,17 @@ describe('processSessionPipeline', () => {
     // Should have 2 marker sections
     expect(markerSections.length).toBe(2);
 
-    // First marker section - CLI section should have line ranges, not snapshot
+    // First marker section - CLI section has denormalized snapshot + line ranges (ADR Decision 8)
     expect(markerSections[0]!.label).toBe('Start');
     expect(markerSections[0]!.start_event).toBe(50);
-    expect(markerSections[0]!.snapshot).toBe(null);
+    expect(markerSections[0]!.snapshot).not.toBeNull();
     expect(markerSections[0]!.start_line).toBeTypeOf('number');
     expect(markerSections[0]!.end_line).toBeTypeOf('number');
 
     // Second marker section
     expect(markerSections[1]!.label).toBe('Middle');
     expect(markerSections[1]!.start_event).toBe(100);
-    expect(markerSections[1]!.snapshot).toBe(null);
+    expect(markerSections[1]!.snapshot).not.toBeNull();
     expect(markerSections[1]!.start_line).toBeTypeOf('number');
     expect(markerSections[1]!.end_line).toBeTypeOf('number');
 
@@ -149,9 +149,9 @@ describe('processSessionPipeline', () => {
     // Should have at least 1 detected section from screen clear
     expect(detectedSections.length).toBeGreaterThan(0);
 
-    // Verify line ranges exist (CLI section), not snapshot
+    // Verify line ranges exist and snapshot is denormalized (CLI section, ADR Decision 8)
     const firstDetected = detectedSections[0]!;
-    expect(firstDetected.snapshot).toBe(null);
+    expect(firstDetected.snapshot).not.toBeNull();
     expect(firstDetected.start_line).toBeTypeOf('number');
     expect(firstDetected.end_line).toBeTypeOf('number');
 
@@ -423,9 +423,10 @@ describe('processSessionPipeline', () => {
     // Should have sections (preamble + 3 markers)
     expect(sortedSections.length).toBeGreaterThan(0);
 
-    // Find the TUI section (should have a snapshot and null line ranges)
-    // The TUI section will be the one captured during alt-screen mode
-    const tuiSections = sortedSections.filter(s => s.snapshot !== null);
+    // After ADR Decision 8 (CLI section denormalization), all sections have a snapshot.
+    // TUI sections are identified by null start_line/end_line.
+    // CLI sections are identified by having numeric start_line/end_line.
+    const tuiSections = sortedSections.filter(s => s.start_line === null && s.end_line === null);
     expect(tuiSections.length).toBeGreaterThan(0);
 
     // Verify TUI section has snapshot and no line ranges
@@ -439,12 +440,12 @@ describe('processSessionPipeline', () => {
     expect(tuiSnapshot.lines).toBeDefined();
     expect(Array.isArray(tuiSnapshot.lines)).toBe(true);
 
-    // Verify CLI sections have line ranges and no snapshots
-    const cliSections = sortedSections.filter(s => s.snapshot === null);
+    // CLI sections have line ranges AND a denormalized snapshot (ADR Decision 8)
+    const cliSections = sortedSections.filter(s => s.start_line !== null);
     expect(cliSections.length).toBeGreaterThan(0);
 
     for (const cliSection of cliSections) {
-      expect(cliSection.snapshot).toBe(null);
+      expect(cliSection.snapshot).not.toBeNull();
       expect(cliSection.start_line).toBeTypeOf('number');
       expect(cliSection.end_line).toBeTypeOf('number');
     }

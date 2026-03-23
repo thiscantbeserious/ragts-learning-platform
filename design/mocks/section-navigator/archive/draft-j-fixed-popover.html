@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section Navigator — Draft J: Fixed Popover (Real App Layout)</title>
+<link rel="stylesheet" href="../../styles/layout.css">
+<style>
+  /* ============================================================
+     DRAFT J — Fixed Popover Card in Real App Layout
+     ============================================================
+     Single focused demo: 50 sections in a realistic app shell.
+     - Fixed aside on right edge, full viewport height
+     - Pill list scrolls within the aside
+     - Popovers rendered outside scroll container (position: fixed)
+       to prevent clipping — mirrors Vue <Teleport to="body">
+     - Content area scrolls normally on the left
+     ============================================================ */
+
+  /* Kill default body padding from layout.css usage in other mockups */
+  body {
+    padding: 0;
+    overflow: hidden; /* page itself doesn't scroll — content area does */
+    height: 100dvh;
+  }
+
+  /* ============================================================
+     APP SHELL
+     ============================================================ */
+  .app-shell {
+    display: grid;
+    grid-template-columns: 1fr 48px;
+    grid-template-rows: auto 1fr;
+    height: 100dvh;
+    width: 100%;
+  }
+
+  /* --- Top bar --- */
+  .app-topbar {
+    grid-column: 1 / -1;
+    height: var(--rhythm-3); /* 54px */
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-inline);
+    gap: var(--space-3);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+
+  .app-topbar__logo {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .app-topbar__logo span {
+    color: var(--accent-primary);
+  }
+
+  .app-topbar__breadcrumb {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1\.5);
+  }
+
+  .app-topbar__breadcrumb-sep {
+    color: var(--text-disabled);
+  }
+
+  .app-topbar__spacer { flex: 1; }
+
+  .app-topbar__meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-disabled);
+  }
+
+  /* --- Content area (scrollable) --- */
+  .content-area {
+    grid-column: 1;
+    grid-row: 2;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--space-inline);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .content-area::-webkit-scrollbar { width: 6px; }
+  .content-area::-webkit-scrollbar-track { background: transparent; }
+  .content-area::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 3px;
+  }
+
+  /* --- Terminal-like content --- */
+  .terminal-block {
+    background: var(--terminal-bg);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: var(--lh-mono);
+    color: var(--terminal-text);
+    padding: var(--space-3);
+    margin-bottom: var(--rhythm-1);
+  }
+
+  .terminal-block__prompt {
+    color: var(--status-success);
+  }
+
+  .terminal-block__cmd {
+    color: var(--text-primary);
+  }
+
+  .terminal-block__output {
+    color: var(--text-muted);
+  }
+
+  .terminal-block__error {
+    color: var(--status-error);
+  }
+
+  .terminal-block__info {
+    color: var(--accent-primary);
+  }
+
+  .terminal-block__warn {
+    color: var(--status-warning);
+  }
+
+  .terminal-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .section-marker {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1\.5);
+    font-size: var(--text-xs);
+    color: var(--accent-secondary);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    margin: var(--rhythm-1) 0 var(--space-2) 0;
+  }
+
+  .section-marker::before {
+    content: '';
+    width: 8px;
+    height: 2px;
+    background: var(--accent-secondary);
+    border-radius: 1px;
+  }
+
+  /* ============================================================
+     NAVIGATOR ASIDE — FIXED, FULL HEIGHT
+     ============================================================ */
+  .nav-aside {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-default);
+    width: 48px;
+    position: relative;
+    /* The aside itself is placed by grid — not position:fixed —
+       but it stays in view because the grid row is 100% of the
+       remaining viewport height and doesn't scroll. */
+  }
+
+  .nav-aside__header {
+    padding: var(--space-1\.5);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    flex-shrink: 0;
+  }
+
+  .nav-aside__header-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    color: var(--accent-primary);
+    letter-spacing: -0.02em;
+  }
+
+  /* --- Pill list: scrolls within aside --- */
+  .nav-aside__list {
+    flex: 1;
+    padding: var(--space-1\.5) 0;
+    overflow-y: auto;
+    overflow-x: hidden; /* overflow-x: visible not possible with overflow-y: auto */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .nav-aside__list::-webkit-scrollbar { width: 0; }
+
+  /* Fade hints at top/bottom when scrollable */
+  .nav-aside__list-wrapper {
+    flex: 1;
+    position: relative;
+    min-height: 0; /* allow flex child to shrink */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .nav-aside__list-wrapper::before,
+  .nav-aside__list-wrapper::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 20px;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .nav-aside__list-wrapper::before {
+    top: 0;
+    background: linear-gradient(to bottom, var(--bg-surface), transparent);
+  }
+
+  .nav-aside__list-wrapper::after {
+    bottom: 0;
+    background: linear-gradient(to top, var(--bg-surface), transparent);
+  }
+
+  /* Inner wrapper for trace line */
+  .nav-aside__list-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: var(--space-1) 0;
+  }
+
+  /* ============================================================
+     TRACE LINE
+     ============================================================ */
+  .nav-aside__list-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-0.5px);
+    width: 1px;
+    background: var(--border-default);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============================================================
+     PILL — Numbered square (26px)
+     ============================================================ */
+  .pill {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: var(--weight-medium);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    transition:
+      background var(--duration-fast) var(--easing-default),
+      border-color var(--duration-fast) var(--easing-default),
+      box-shadow var(--duration-fast) var(--easing-default),
+      color var(--duration-fast) var(--easing-default);
+    border: 1px solid var(--border-default);
+    flex-shrink: 0;
+  }
+
+  /* Detected (default) */
+  .pill--detected {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+  }
+
+  .pill:hover {
+    z-index: 10;
+  }
+
+  .pill--detected:hover {
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, var(--border-default));
+    color: var(--accent-primary);
+  }
+
+  /* Marker (structural) */
+  .pill--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 8%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 25%, var(--border-default));
+    color: var(--accent-secondary);
+  }
+
+  .pill--marker:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 16%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 45%, var(--border-default));
+    box-shadow: 0 0 6px rgba(255, 77, 106, 0.2);
+  }
+
+  /* Active: detected = cyan glow */
+  .pill--active.pill--detected {
+    background: color-mix(in srgb, var(--accent-primary) 15%, var(--bg-elevated));
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.3), 0 0 2px rgba(0, 212, 255, 0.5);
+  }
+
+  /* Active: marker = pink glow */
+  .pill--active.pill--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 20%, var(--bg-elevated));
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    box-shadow: 0 0 8px rgba(255, 77, 106, 0.35), 0 0 2px rgba(255, 77, 106, 0.5);
+  }
+
+  /* ============================================================
+     POPOVER CARD — position: fixed (escapes scroll container)
+     ============================================================
+     In the real Vue app, this uses <Teleport to="body">.
+     Here we use JS to calculate pill viewport position and
+     render the popover with position:fixed so it is never
+     clipped by the scrolling pill list.
+     ============================================================ */
+  .popover-portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  .popover-card {
+    position: fixed;
+    pointer-events: none;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2) var(--space-3);
+    min-width: 220px;
+    max-width: 280px;
+    opacity: 0;
+    transform: scale(0.95);
+    transform-origin: right center;
+    transition:
+      opacity var(--duration-fast) var(--easing-default),
+      transform var(--duration-fast) var(--easing-default);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1\.5);
+  }
+
+  .popover-card--visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+
+  /* Triangle pointer (right side, pointing at pill) */
+  .popover-card::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 6px solid var(--border-strong);
+  }
+
+  .popover-card::before {
+    content: '';
+    position: absolute;
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid var(--bg-elevated);
+    z-index: 1;
+  }
+
+  .popover-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1\.5);
+  }
+
+  .popover-card__type {
+    font-size: 9px;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    padding: 1px var(--space-1);
+    border-radius: 2px;
+  }
+
+  .popover-card__type--marker {
+    color: var(--accent-secondary);
+    background: rgba(255, 77, 106, 0.1);
+  }
+
+  .popover-card__type--detected {
+    color: var(--text-disabled);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .popover-card__lines {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+    margin-left: auto;
+  }
+
+  .popover-card__title {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .popover-card__preview {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    background: var(--terminal-bg);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-1\.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .popover-card__future {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--border-default);
+  }
+
+  .popover-card__future-slot {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .popover-card__future-slot::before {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--border-strong);
+  }
+
+  /* ============================================================
+     SCROLL POSITION INDICATOR
+     ============================================================
+     Subtle bar at the bottom of the aside showing scroll progress
+     ============================================================ */
+  .nav-aside__scroll-indicator {
+    height: 2px;
+    background: var(--border-default);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nav-aside__scroll-indicator-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: var(--accent-primary);
+    opacity: 0.5;
+    transition: width 100ms ease-out;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- Top bar -->
+  <div class="app-topbar">
+    <span class="app-topbar__logo"><span>E</span>rika</span>
+    <div class="app-topbar__breadcrumb">
+      <span>sessions</span>
+      <span class="app-topbar__breadcrumb-sep">/</span>
+      <span style="color: var(--text-secondary);">agent-deploy-pipeline</span>
+    </div>
+    <span class="app-topbar__spacer"></span>
+    <span class="app-topbar__meta">50 sections &middot; 12,847 lines &middot; 4m 23s</span>
+  </div>
+
+  <!-- Content area (scrollable) -->
+  <div class="content-area" id="contentArea">
+
+    <div class="section-marker">Section 1 &mdash; Initialize project</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">git clone git@github.com:team/deploy-pipeline.git</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Cloning into 'deploy-pipeline'...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">remote: Enumerating objects: 1,247, done.</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">remote: Counting objects: 100% (1247/1247), done.</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">remote: Compressing objects: 100% (891/891), done.</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Receiving objects: 100% (1247/1247), 2.31 MiB | 12.4 MiB/s, done.</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Resolving deltas: 100% (673/673), done.</span></div>
+    </div>
+
+    <div class="section-marker">Section 2 &mdash; Check environment</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">node --version</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">v24.0.0</span></div>
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm --version</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">11.0.0</span></div>
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">docker --version</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Docker version 27.3.1, build ce12230</span></div>
+    </div>
+
+    <div class="section-marker">Section 3 &mdash; Install dependencies</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm ci</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">npm warn deprecated inflight@1.0.6: This module is not supported</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">added 1,342 packages in 18s</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">247 packages are looking for funding</span></div>
+    </div>
+
+    <div class="section-marker">Section 4 &mdash; Database migration</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx drizzle-kit push</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Reading schema files...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  [+] Creating table 'sessions'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  [+] Creating table 'sections'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  [+] Creating table 'markers'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  [+] Creating index 'idx_sessions_created'</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Migration complete. 3 tables created, 1 index added.</span></div>
+    </div>
+
+    <div class="section-marker">Section 5 &mdash; Configure build</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">cat vite.config.ts</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">import { defineConfig } from 'vite'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">import vue from '@vitejs/plugin-vue'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">export default defineConfig({</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  plugins: [vue()],</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  server: { proxy: { '/api': 'http://localhost:3000' } }</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">})</span></div>
+    </div>
+
+    <div class="section-marker">Section 6 &mdash; Seed test data</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">node scripts/seed.mjs</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Seeding 50 sessions...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  session-001: 12 sections, 2,341 lines</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  session-002: 8 sections, 891 lines</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  ...</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Done. 50 sessions seeded in 1.2s</span></div>
+    </div>
+
+    <div class="section-marker">Section 7 &mdash; Lint source files</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm run lint</span></div>
+      <div class="terminal-line"><span class="terminal-block__warn">  /src/client/views/SessionView.vue</span></div>
+      <div class="terminal-line"><span class="terminal-block__warn">    42:5  warning  Unexpected console.log  no-console</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  156 files checked. 1 warning, 0 errors.</span></div>
+    </div>
+
+    <div class="section-marker">Section 8 &mdash; Run unit tests</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx vitest run</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> RUN  v3.1.0 /home/runner/deploy-pipeline</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"></span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> Test Files  34 passed (34)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">      Tests  187 passed (187)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">   Start at  14:23:01</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">   Duration  4.21s (transform 1.12s, setup 0.34s, collect 2.89s, tests 3.91s)</span></div>
+    </div>
+
+    <div class="section-marker">Section 9 &mdash; Run integration tests</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx playwright test</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Running 42 tests using 4 workers</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  42 passed (28.3s)</span></div>
+    </div>
+
+    <div class="section-marker">Section 10 &mdash; Build production</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm run build</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">vite v6.2.0 building for production...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">transforming (312)...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">rendering chunks (8)...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">dist/assets/index-Bk3d4f2a.js    245.12 kB | gzip: 78.23 kB</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">dist/assets/index-Ca8f12b3.css    18.45 kB  | gzip: 4.12 kB</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">built in 3.21s</span></div>
+    </div>
+
+    <div class="section-marker">Section 11 &mdash; Optimize assets</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">node scripts/optimize.mjs</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Compressing images... 12 files, saved 340KB</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Inlining critical CSS... done</span></div>
+    </div>
+
+    <div class="section-marker">Section 12 &mdash; Generate source maps</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx sentry-cli sourcemaps upload ./dist</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Uploading 4 source maps...</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Source maps uploaded successfully.</span></div>
+    </div>
+
+    <div class="section-marker">Section 13 &mdash; Docker build</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">docker build -t deploy-pipeline:v1.4.2 .</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">[+] Building 42.3s (14/14) FINISHED</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => [internal] load build definition from Dockerfile</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => [1/10] FROM node:24-alpine@sha256:abc123</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => [2/10] WORKDIR /app</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => [3/10] COPY package*.json ./</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => [4/10] RUN npm ci --production</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => [5/10] COPY dist/ ./dist/</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> => exporting to image</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Image built: deploy-pipeline:v1.4.2 (178MB)</span></div>
+    </div>
+
+    <div class="section-marker">Section 14 &mdash; Push to registry</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">docker push registry.internal/deploy-pipeline:v1.4.2</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">The push refers to repository [registry.internal/deploy-pipeline]</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">v1.4.2: digest: sha256:def456... size: 2841</span></div>
+    </div>
+
+    <div class="section-marker">Section 15 &mdash; Deploy staging</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl apply -f k8s/staging/</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment.apps/deploy-pipeline configured</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">service/deploy-pipeline unchanged</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">ingress.networking.k8s.io/deploy-pipeline configured</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Waiting for rollout...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment "deploy-pipeline" successfully rolled out</span></div>
+    </div>
+
+    <div class="section-marker">Section 16 &mdash; Run smoke tests</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -s https://staging.internal/healthz | jq .</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">{</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  "status": "ok",</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  "version": "1.4.2",</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  "uptime": "12s"</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">}</span></div>
+    </div>
+
+    <div class="section-marker">Section 17 &mdash; Verify health checks</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl get pods -l app=deploy-pipeline</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">NAME                               READY   STATUS    RESTARTS   AGE</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deploy-pipeline-7f8b9d4c5-x2k4l   1/1     Running   0          45s</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deploy-pipeline-7f8b9d4c5-m9n3p   1/1     Running   0          45s</span></div>
+    </div>
+
+    <div class="section-marker">Section 18 &mdash; Promote to prod</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl apply -f k8s/production/</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment.apps/deploy-pipeline configured</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">horizontalpodautoscaler.autoscaling/deploy-pipeline configured</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Rolling update in progress...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment "deploy-pipeline" successfully rolled out</span></div>
+    </div>
+
+    <div class="section-marker">Section 19 &mdash; Post-deploy verify</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -s https://app.internal/healthz</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">{"status":"ok","version":"1.4.2","uptime":"8s"}</span></div>
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm run e2e:prod</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  12 passed (8.1s)</span></div>
+    </div>
+
+    <div class="section-marker">Section 20 &mdash; Cleanup temp files</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">rm -rf /tmp/deploy-*</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Cleaned 3 temp directories</span></div>
+    </div>
+
+    <div class="section-marker">Section 21 &mdash; Monitor rollout</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl rollout status deployment/deploy-pipeline -w</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Waiting for deployment "deploy-pipeline" rollout to finish: 1 of 3 updated replicas are available...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Waiting for deployment "deploy-pipeline" rollout to finish: 2 of 3 updated replicas are available...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment "deploy-pipeline" successfully rolled out</span></div>
+    </div>
+
+    <div class="section-marker">Section 22 &mdash; Check error rates</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -s 'https://prometheus.internal/api/v1/query?query=rate(http_errors_total[5m])'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">{"status":"success","data":{"result":[{"value":[1711234567,"0.001"]}]}}</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Error rate: 0.1% (within threshold)</span></div>
+    </div>
+
+    <div class="section-marker">Section 23 &mdash; Run full test suite</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm run test:all</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Running unit tests...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  Test Files  34 passed (34)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  Tests       187 passed (187)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Running integration tests...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  42 passed (28.3s)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Running e2e tests...</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  12 passed (8.1s)</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">All 241 tests passed.</span></div>
+    </div>
+
+    <div class="section-marker">Section 24 &mdash; Update changelog</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx conventional-changelog -p angular -i CHANGELOG.md -s</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Added 7 entries to CHANGELOG.md</span></div>
+    </div>
+
+    <div class="section-marker">Section 25 &mdash; Tag release</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">git tag -a v1.4.2 -m "Release v1.4.2"</span></div>
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">git push origin v1.4.2</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">To github.com:team/deploy-pipeline.git</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> * [new tag]         v1.4.2 -> v1.4.2</span></div>
+    </div>
+
+    <div class="section-marker">Section 26 &mdash; Notify Slack</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -X POST "$SLACK_WEBHOOK" -d '{"text":"v1.4.2 deployed to production"}'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">ok</span></div>
+    </div>
+
+    <div class="section-marker">Section 27 &mdash; Archive artifacts</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">aws s3 cp dist/ s3://artifacts/v1.4.2/ --recursive</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">upload: dist/index.html to s3://artifacts/v1.4.2/index.html</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">upload: dist/assets/index-Bk3d4f2a.js to s3://artifacts/v1.4.2/assets/index-Bk3d4f2a.js</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">4 files uploaded.</span></div>
+    </div>
+
+    <div class="section-marker">Section 28 &mdash; Verify CDN</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -sI https://cdn.internal/v1.4.2/index.html | head -3</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">HTTP/2 200</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">cache-control: public, max-age=31536000</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">content-type: text/html; charset=utf-8</span></div>
+    </div>
+
+    <div class="section-marker">Section 29 &mdash; Database backup</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">pg_dump -Fc production_db > backup-$(date +%Y%m%d).dump</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Dumping 47 tables...</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Backup complete: 234MB</span></div>
+    </div>
+
+    <div class="section-marker">Section 30 &mdash; Scale replicas</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl scale deployment/deploy-pipeline --replicas=5</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment.apps/deploy-pipeline scaled</span></div>
+    </div>
+
+    <div class="section-marker">Section 31 &mdash; Load test warmup</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">k6 run --vus 10 --duration 30s scripts/load-test.js</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">     http_reqs..................: 4521    150.7/s</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">     http_req_duration..........: avg=42ms  p(95)=89ms</span></div>
+    </div>
+
+    <div class="section-marker">Section 32 &mdash; Full load test</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">k6 run --vus 100 --duration 120s scripts/load-test.js</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">     http_reqs..................: 28934   241.1/s</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">     http_req_duration..........: avg=67ms  p(95)=134ms  p(99)=201ms</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">     http_req_failed............: 0.02%</span></div>
+    </div>
+
+    <div class="section-marker">Section 33 &mdash; Analyze metrics</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -s 'https://grafana.internal/api/dashboards/uid/api-latency' | jq '.dashboard.title'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">"API Latency - Production"</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">p99 latency stable at 201ms (target: &lt;300ms)</span></div>
+    </div>
+
+    <div class="section-marker">Section 34 &mdash; Check memory usage</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl top pods -l app=deploy-pipeline</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">NAME                               CPU(cores)   MEMORY(bytes)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deploy-pipeline-7f8b9d4c5-x2k4l   45m          128Mi</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deploy-pipeline-7f8b9d4c5-m9n3p   38m          121Mi</span></div>
+    </div>
+
+    <div class="section-marker">Section 35 &mdash; Update DNS records</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">aws route53 change-resource-record-sets --hosted-zone-id Z123 --change-batch file://dns.json</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">ChangeInfo: { "Id": "/change/C1234", "Status": "PENDING" }</span></div>
+    </div>
+
+    <div class="section-marker">Section 36 &mdash; SSL cert renewal</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">certbot renew --dry-run</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Cert not due for renewal, no action taken.</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Expiry: 2026-06-15 (86 days remaining)</span></div>
+    </div>
+
+    <div class="section-marker">Section 37 &mdash; Verify redirects</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -sLo /dev/null -w "%{http_code}" https://old.internal/api</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">301</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Redirect working correctly.</span></div>
+    </div>
+
+    <div class="section-marker">Section 38 &mdash; Rotate secrets</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">vault kv put secret/deploy-pipeline api_key=$(openssl rand -hex 32)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Key                Value</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">---                -----</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">created_time       2026-03-21T14:45:00Z</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">version            3</span></div>
+    </div>
+
+    <div class="section-marker">Section 39 &mdash; Restart workers</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">kubectl rollout restart deployment/worker-pool</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">deployment.apps/worker-pool restarted</span></div>
+    </div>
+
+    <div class="section-marker">Section 40 &mdash; Verify queue depth</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">redis-cli llen job_queue</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">(integer) 0</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Queue drained successfully.</span></div>
+    </div>
+
+    <div class="section-marker">Section 41 &mdash; Run accessibility audit</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx pa11y https://app.internal</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Results for https://app.internal:</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  0 errors, 2 warnings, 4 notices</span></div>
+    </div>
+
+    <div class="section-marker">Section 42 &mdash; Lighthouse report</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx lighthouse https://app.internal --output=json --quiet</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Performance: 94  Accessibility: 98  Best Practices: 100  SEO: 92</span></div>
+    </div>
+
+    <div class="section-marker">Section 43 &mdash; Bundle analysis</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx vite-bundle-visualizer</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Total: 245.12 KB (gzip: 78.23 KB)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  vue: 42.1 KB (17%)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  xterm: 89.3 KB (36%)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">  app: 113.7 KB (47%)</span></div>
+    </div>
+
+    <div class="section-marker">Section 44 &mdash; Create GitHub release</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">gh release create v1.4.2 --generate-notes</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">https://github.com/team/deploy-pipeline/releases/tag/v1.4.2</span></div>
+    </div>
+
+    <div class="section-marker">Section 45 &mdash; Update status page</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">curl -X POST https://status.internal/api/incidents/resolve -d '{"id":"inc-2024"}'</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">{"status":"resolved","resolved_at":"2026-03-21T14:48:00Z"}</span></div>
+    </div>
+
+    <div class="section-marker">Section 46 &mdash; Sync staging DB</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">pg_restore -d staging_db backup-20260321.dump</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Restoring 47 tables...</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Restore complete.</span></div>
+    </div>
+
+    <div class="section-marker">Section 47 &mdash; Clean Docker images</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">docker image prune -a --filter "until=168h" -f</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Deleted Images: 23</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Total reclaimed space: 4.2GB</span></div>
+    </div>
+
+    <div class="section-marker">Section 48 &mdash; Update dependencies</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npx npm-check-updates -u</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> vue           ^3.5.12  ->  ^3.5.13</span></div>
+      <div class="terminal-line"><span class="terminal-block__output"> typescript    ^5.7.2   ->  ^5.8.0</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">3 packages updated.</span></div>
+    </div>
+
+    <div class="section-marker">Section 49 &mdash; Final verification</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">npm run verify:all</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Lint.............. PASS</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Types............. PASS</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Unit tests........ PASS (187/187)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Integration....... PASS (42/42)</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">E2E............... PASS (12/12)</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">All checks passed.</span></div>
+    </div>
+
+    <div class="section-marker">Section 50 &mdash; Pipeline complete</div>
+    <div class="terminal-block">
+      <div class="terminal-line"><span class="terminal-block__prompt">$ </span><span class="terminal-block__cmd">echo "Deploy pipeline completed successfully"</span></div>
+      <div class="terminal-line"><span class="terminal-block__info">Deploy pipeline completed successfully</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Total duration: 4m 23s</span></div>
+      <div class="terminal-line"><span class="terminal-block__output">Exit code: 0</span></div>
+    </div>
+
+    <!-- Extra bottom padding so last section is scrollable into view -->
+    <div style="height: var(--rhythm-4);"></div>
+  </div>
+
+  <!-- Navigator aside (fixed right edge, full height) -->
+  <div class="nav-aside" id="navAside">
+    <div class="nav-aside__header">
+      <span class="nav-aside__header-count">50</span>
+    </div>
+    <div class="nav-aside__list-wrapper">
+      <div class="nav-aside__list" id="pillList">
+        <div class="nav-aside__list-inner" id="pillListInner">
+          <!-- Pills generated by JS below -->
+        </div>
+      </div>
+    </div>
+    <div class="nav-aside__scroll-indicator">
+      <div class="nav-aside__scroll-indicator-bar" id="scrollBar"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Popover portal: outside all scroll containers, position:fixed -->
+<div class="popover-portal" id="popoverPortal">
+  <div class="popover-card" id="popoverCard">
+    <div class="popover-card__header">
+      <span class="popover-card__type" id="popoverType"></span>
+      <span class="popover-card__lines" id="popoverLines"></span>
+    </div>
+    <div class="popover-card__title" id="popoverTitle"></div>
+    <div class="popover-card__preview" id="popoverPreview"></div>
+    <div class="popover-card__future">
+      <span class="popover-card__future-slot">0 comments</span>
+      <span class="popover-card__future-slot">AI summary</span>
+      <span class="popover-card__future-slot">No errors</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // Section data for 50 pills
+  // ============================================================
+  const sections = [
+    { title: 'Initialize project', type: 'marker', lines: 42, preview: '$ git clone git@github.com:team/deploy-pipeline.git' },
+    { title: 'Check environment', type: 'detected', lines: 8, preview: '$ node --version' },
+    { title: 'Install dependencies', type: 'detected', lines: 342, preview: '$ npm ci' },
+    { title: 'Database migration', type: 'detected', lines: 67, preview: '$ npx drizzle-kit push' },
+    { title: 'Configure build', type: 'marker', lines: 91, preview: '$ cat vite.config.ts' },
+    { title: 'Seed test data', type: 'detected', lines: 23, preview: '$ node scripts/seed.mjs' },
+    { title: 'Lint source files', type: 'detected', lines: 156, preview: '$ npm run lint' },
+    { title: 'Run unit tests', type: 'marker', lines: 2341, preview: '$ npx vitest run' },
+    { title: 'Run integration tests', type: 'detected', lines: 1892, preview: '$ npx playwright test' },
+    { title: 'Build production', type: 'detected', lines: 45, preview: '$ npm run build' },
+    { title: 'Optimize assets', type: 'detected', lines: 32, preview: '$ node scripts/optimize.mjs' },
+    { title: 'Generate source maps', type: 'detected', lines: 12, preview: '$ npx sentry-cli sourcemaps upload ./dist' },
+    { title: 'Docker build', type: 'marker', lines: 178, preview: '$ docker build -t deploy-pipeline:v1.4.2 .' },
+    { title: 'Push to registry', type: 'detected', lines: 22, preview: '$ docker push registry.internal/deploy-pipeline:v1.4.2' },
+    { title: 'Deploy staging', type: 'detected', lines: 89, preview: '$ kubectl apply -f k8s/staging/' },
+    { title: 'Run smoke tests', type: 'marker', lines: 445, preview: '$ curl -s https://staging.internal/healthz' },
+    { title: 'Verify health checks', type: 'detected', lines: 11, preview: '$ kubectl get pods -l app=deploy-pipeline' },
+    { title: 'Promote to prod', type: 'detected', lines: 34, preview: '$ kubectl apply -f k8s/production/' },
+    { title: 'Post-deploy verify', type: 'marker', lines: 67, preview: '$ curl -s https://app.internal/healthz' },
+    { title: 'Cleanup temp files', type: 'detected', lines: 5, preview: '$ rm -rf /tmp/deploy-*' },
+    { title: 'Monitor rollout', type: 'marker', lines: 38, preview: '$ kubectl rollout status deployment/deploy-pipeline -w' },
+    { title: 'Check error rates', type: 'detected', lines: 14, preview: '$ curl -s prometheus.internal/api/v1/query' },
+    { title: 'Run full test suite', type: 'marker', lines: 2341, preview: '$ npm run test:all' },
+    { title: 'Update changelog', type: 'detected', lines: 8, preview: '$ npx conventional-changelog -p angular' },
+    { title: 'Tag release', type: 'detected', lines: 12, preview: '$ git tag -a v1.4.2' },
+    { title: 'Notify Slack', type: 'detected', lines: 3, preview: '$ curl -X POST "$SLACK_WEBHOOK"' },
+    { title: 'Archive artifacts', type: 'marker', lines: 19, preview: '$ aws s3 cp dist/ s3://artifacts/v1.4.2/' },
+    { title: 'Verify CDN', type: 'detected', lines: 7, preview: '$ curl -sI https://cdn.internal/v1.4.2/' },
+    { title: 'Database backup', type: 'detected', lines: 22, preview: '$ pg_dump -Fc production_db' },
+    { title: 'Scale replicas', type: 'detected', lines: 4, preview: '$ kubectl scale deployment/deploy-pipeline --replicas=5' },
+    { title: 'Load test warmup', type: 'detected', lines: 31, preview: '$ k6 run --vus 10 --duration 30s' },
+    { title: 'Full load test', type: 'detected', lines: 89, preview: '$ k6 run --vus 100 --duration 120s' },
+    { title: 'Analyze metrics', type: 'marker', lines: 15, preview: '$ curl -s grafana.internal/api/dashboards/' },
+    { title: 'Check memory usage', type: 'detected', lines: 9, preview: '$ kubectl top pods -l app=deploy-pipeline' },
+    { title: 'Update DNS records', type: 'detected', lines: 6, preview: '$ aws route53 change-resource-record-sets' },
+    { title: 'SSL cert renewal', type: 'marker', lines: 11, preview: '$ certbot renew --dry-run' },
+    { title: 'Verify redirects', type: 'detected', lines: 5, preview: '$ curl -sLo /dev/null -w "%{http_code}"' },
+    { title: 'Rotate secrets', type: 'detected', lines: 14, preview: '$ vault kv put secret/deploy-pipeline' },
+    { title: 'Restart workers', type: 'detected', lines: 4, preview: '$ kubectl rollout restart deployment/worker-pool' },
+    { title: 'Verify queue depth', type: 'detected', lines: 6, preview: '$ redis-cli llen job_queue' },
+    { title: 'Run accessibility audit', type: 'detected', lines: 18, preview: '$ npx pa11y https://app.internal' },
+    { title: 'Lighthouse report', type: 'detected', lines: 12, preview: '$ npx lighthouse https://app.internal' },
+    { title: 'Bundle analysis', type: 'detected', lines: 15, preview: '$ npx vite-bundle-visualizer' },
+    { title: 'Create GitHub release', type: 'marker', lines: 8, preview: '$ gh release create v1.4.2' },
+    { title: 'Update status page', type: 'detected', lines: 5, preview: '$ curl -X POST https://status.internal/api/' },
+    { title: 'Sync staging DB', type: 'detected', lines: 19, preview: '$ pg_restore -d staging_db' },
+    { title: 'Clean Docker images', type: 'detected', lines: 7, preview: '$ docker image prune -a' },
+    { title: 'Update dependencies', type: 'detected', lines: 11, preview: '$ npx npm-check-updates -u' },
+    { title: 'Final verification', type: 'detected', lines: 28, preview: '$ npm run verify:all' },
+    { title: 'Pipeline complete', type: 'marker', lines: 8, preview: '$ echo "Deploy pipeline completed successfully"' },
+  ];
+
+  const ACTIVE_INDEX = 22; // Section 23 (0-based)
+
+  // ============================================================
+  // Generate pills
+  // ============================================================
+  const listInner = document.getElementById('pillListInner');
+
+  sections.forEach((section, i) => {
+    const pill = document.createElement('div');
+    const num = i + 1;
+    const isActive = i === ACTIVE_INDEX;
+    pill.className = `pill pill--${section.type}${isActive ? ' pill--active' : ''}`;
+    pill.innerHTML = `<span>${num}</span>`;
+    pill.dataset.index = i;
+    listInner.appendChild(pill);
+  });
+
+  // ============================================================
+  // Popover positioning (position: fixed, outside scroll container)
+  // ============================================================
+  const popoverCard = document.getElementById('popoverCard');
+  const popoverType = document.getElementById('popoverType');
+  const popoverLines = document.getElementById('popoverLines');
+  const popoverTitle = document.getElementById('popoverTitle');
+  const popoverPreview = document.getElementById('popoverPreview');
+  let activeHoverPill = null;
+
+  function formatLines(n) {
+    return n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : n.toString();
+  }
+
+  function showPopover(pillEl, section) {
+    activeHoverPill = pillEl;
+
+    // Set content
+    popoverType.textContent = section.type;
+    popoverType.className = `popover-card__type popover-card__type--${section.type}`;
+    popoverLines.textContent = `${formatLines(section.lines)} ln`;
+    popoverTitle.textContent = section.title;
+    popoverPreview.textContent = section.preview;
+
+    // Position: fixed relative to viewport
+    const rect = pillEl.getBoundingClientRect();
+    const pillCenterY = rect.top + rect.height / 2;
+    const popoverGap = 10; // gap between pill and popover
+
+    // Show temporarily to measure
+    popoverCard.style.visibility = 'hidden';
+    popoverCard.classList.add('popover-card--visible');
+    const popoverRect = popoverCard.getBoundingClientRect();
+
+    // Position to the LEFT of the pill
+    let top = pillCenterY - popoverRect.height / 2;
+    let left = rect.left - popoverGap - popoverRect.width;
+
+    // Clamp top within viewport
+    const margin = 8;
+    if (top < margin) top = margin;
+    if (top + popoverRect.height > window.innerHeight - margin) {
+      top = window.innerHeight - margin - popoverRect.height;
+    }
+
+    popoverCard.style.top = `${top}px`;
+    popoverCard.style.left = `${left}px`;
+    popoverCard.style.visibility = '';
+  }
+
+  function hidePopover() {
+    activeHoverPill = null;
+    popoverCard.classList.remove('popover-card--visible');
+  }
+
+  // Event delegation on pill list
+  listInner.addEventListener('mouseenter', (e) => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    const idx = parseInt(pill.dataset.index, 10);
+    if (isNaN(idx)) return;
+    showPopover(pill, sections[idx]);
+  }, true);
+
+  listInner.addEventListener('mouseleave', (e) => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    if (pill === activeHoverPill) hidePopover();
+  }, true);
+
+  // ============================================================
+  // Scroll indicator
+  // ============================================================
+  const pillList = document.getElementById('pillList');
+  const scrollBar = document.getElementById('scrollBar');
+
+  function updateScrollIndicator() {
+    const { scrollTop, scrollHeight, clientHeight } = pillList;
+    const maxScroll = scrollHeight - clientHeight;
+    if (maxScroll <= 0) {
+      scrollBar.style.width = '100%';
+      return;
+    }
+    const pct = (scrollTop / maxScroll) * 100;
+    scrollBar.style.width = `${pct}%`;
+  }
+
+  pillList.addEventListener('scroll', updateScrollIndicator);
+  updateScrollIndicator();
+
+  // Scroll active pill into view on load
+  requestAnimationFrame(() => {
+    const activePill = listInner.querySelector('.pill--active');
+    if (activePill) {
+      activePill.scrollIntoView({ block: 'center', behavior: 'instant' });
+      updateScrollIndicator();
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -61,20 +61,20 @@ describe('migrateV2', () => {
     expect(updatedSession?.detection_status).toBe('completed');
     expect(updatedSession?.event_count).toBe(150);
 
-    // Verify marker sections were created with line ranges (CLI session)
+    // Verify marker sections were created with line ranges and denormalized snapshots (ADR Decision 8)
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const markerSections = sections.filter((s) => s.type === 'marker');
 
     expect(markerSections.length).toBe(2);
     expect(markerSections[0]!.label).toBe('Start');
     expect(markerSections[0]!.start_event).toBe(50);
-    expect(markerSections[0]!.snapshot).toBe(null);
+    expect(markerSections[0]!.snapshot).not.toBeNull();
     expect(markerSections[0]!.start_line).toBeTypeOf('number');
     expect(markerSections[0]!.end_line).toBeTypeOf('number');
 
     expect(markerSections[1]!.label).toBe('Middle');
     expect(markerSections[1]!.start_event).toBe(100);
-    expect(markerSections[1]!.snapshot).toBe(null);
+    expect(markerSections[1]!.snapshot).not.toBeNull();
     expect(markerSections[1]!.start_line).toBeTypeOf('number');
     expect(markerSections[1]!.end_line).toBeTypeOf('number');
 
