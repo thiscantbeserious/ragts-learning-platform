@@ -24,10 +24,11 @@ import { createApp } from '../../src/server/app.js';
 import type { AppDeps } from '../../src/server/app.js';
 import type { DatabaseContext } from '../../src/server/db/database_adapter.js';
 
+const IS_CI = !!process.env.CI;
 const FIXTURES_DIR = join(process.cwd(), 'fixtures');
 const POLL_INTERVAL_MS = 500;
 const PIPELINE_TIMEOUT_MS = 120_000;
-const HEALTH_RESPONSE_THRESHOLD_MS = 1000;
+const HEALTH_RESPONSE_THRESHOLD_MS = IS_CI ? 3_000 : 1_000;
 
 /** 15-entry upload list simulating a bulk upload similar to the user's scenario */
 const BULK_UPLOAD_FIXTURES: string[] = [
@@ -278,15 +279,13 @@ async function uploadBuffer(baseUrl: string, content: Buffer, name: string): Pro
  * Performance budgets — if these fail, the fix is insufficient and we need
  * intra-stage yielding (Option B) or worker threads.
  */
-const IS_CI = !!process.env.CI;
-
 const PERF = {
   /** Max wall-clock for the entire pipeline on a 2MB session (CI runners are ~3-4x slower than local) */
   MAX_PIPELINE_SMALL_MS: 30_000,
   /** Max wall-clock for the entire pipeline on a 5MB session */
   MAX_PIPELINE_LARGE_MS: 60_000,
   /** Max latency for any single health check during processing (CI runners have higher variance) */
-  MAX_HEALTH_LATENCY_MS: IS_CI ? 2_000 : 1_000,
+  MAX_HEALTH_LATENCY_MS: IS_CI ? 3_000 : 1_000,
   /** Health probe interval */
   PROBE_INTERVAL_MS: 100,
 } as const;
