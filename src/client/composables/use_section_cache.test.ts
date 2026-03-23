@@ -48,8 +48,9 @@ function approxBytes(page: SectionContentPage): number {
 
 describe('makeCacheKey', () => {
   it('produces a stable key from sectionId and offset', () => {
-    expect(makeCacheKey('sec-1', 0)).toBe('sec-1:0');
-    expect(makeCacheKey('sec-2', 500)).toBe('sec-2:500');
+    expect(makeCacheKey('sec-1', 0)).toBe('sec-1:0:all');
+    expect(makeCacheKey('sec-2', 500)).toBe('sec-2:500:all');
+    expect(makeCacheKey('sec-3', 0, 200)).toBe('sec-3:0:200');
   });
 
   it('produces distinct keys for different sectionIds with same offset', () => {

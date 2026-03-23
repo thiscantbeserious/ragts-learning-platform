@@ -147,8 +147,8 @@ describe('useSessionV2 — small session bulk load', () => {
     useSessionV2(ref('sess-1'), cache);
     await flush();
 
-    expect(cache.has('sec-1:0')).toBe(true);
-    expect(cache.get('sec-1:0')).toEqual(page);
+    expect(cache.has('sec-1:0:all')).toBe(true);
+    expect(cache.get('sec-1:0:all')).toEqual(page);
   });
 
   it('loading is false after bulk content completes', async () => {

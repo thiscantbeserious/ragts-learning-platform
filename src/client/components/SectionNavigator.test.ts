@@ -240,12 +240,12 @@ describe('SectionNavigator', () => {
   // ---------------------------------------------------------------------------
 
   describe('keyboard navigation', () => {
-    it('calls scrollToSection on Enter key when pill has focus', async () => {
+    it('calls scrollToSection on click (Enter/Space natively fire click on buttons)', async () => {
       const scrollToSection = vi.fn();
       const wrapper = mountNavigator(makeSections(3), null, { scrollToSection });
 
       const pills = wrapper.findAll('.section-pill');
-      await pills[0]?.trigger('keydown', { key: 'Enter' });
+      await pills[0]?.trigger('click');
       expect(scrollToSection).toHaveBeenCalledWith('sec-1');
     });
 

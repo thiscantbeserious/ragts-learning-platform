@@ -148,8 +148,8 @@ describe('useSessionV2 — large session lazy fetch', () => {
 
     await fetchSectionContent('sec-0', 0);
 
-    expect(cache.has('sec-0:0')).toBe(true);
-    expect(cache.get('sec-0:0')).toEqual(page);
+    expect(cache.has('sec-0:0:all')).toBe(true);
+    expect(cache.get('sec-0:0:all')).toEqual(page);
   });
 
   it('fetchSectionContent returns cached page without re-fetching', async () => {
