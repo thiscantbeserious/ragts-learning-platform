@@ -279,3 +279,51 @@ This vision is broad and largely fictional at this stage. The path forward needs
 - Persist where? Separate table? Inline in sections table with a `source: 'manual'` flag?
 - Can manual marks override detected ones?
 - Collaborative: if multiple users mark the same session, merge or per-user?
+
+## Section-Level Deep Linking
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** Stable URL fragments (`#section-12`) pointing to individual sections. Team leads share links to specific parts of a session — recipients land directly at the referenced section.
+
+**Architecture ready:** Section IDs are nanoid (URL-safe). `scrollToSection(id)` exists. A future `onMounted` hook parses `window.location.hash` and calls `scrollToSection`. No architectural change needed.
+
+## Custom In-App Search
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** Session-scoped search panel replacing Cmd+F for virtualized content. Searches across all sections including those not in the DOM. Highlights and paginates results.
+
+**Why it matters:** Section-level virtualization removes DOM nodes — browser Cmd+F can't find content in unloaded sections. This gap affects power users reviewing detailed agent behavior.
+
+**Architecture ready:** Per-section content endpoints are the data access layer. Content format preserves line-level addressability (`SnapshotLine[]`). Server-side FTS5 indexing is a natural extension.
+
+## Keyboard Section Navigation
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** `j`/`k` or `Ctrl+Down`/`Ctrl+Up` to jump between section headers. `useActiveSection` composable exposes `activeSectionId`, `activeSectionIndex`, `scrollToSection` — a future `useKeyboardNavigation` composable consumes these directly.
+
+## Session Size Indicators
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** Visual indicators on session list cards showing size before opening — line count badge, section count, density bar. Metadata endpoint already includes `sectionCount` and `totalLines`.
+
+## Progressive Section Summaries
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** One-line preview in section navigator pills — first command line or marker label. Turns the aside from positional to comprehension tool. `preview` nullable column added to sections table (migration 005), metadata endpoint includes it.
+
+## Section Density Encoding in Navigator Pills
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** Navigator pills encode section characteristics visually — color by type, brightness by line count. Pill appearance is already data-driven (`type`, `lineCount` in metadata). Future enhancement adds density encoding without component refactoring.
+
+## Line-Level Virtual Scrolling
+
+> [!info] Status: Backlog (from virtual scrolling cycle)
+
+**Core idea:** Within a single section with 5,000+ lines, virtualize at line level. Section content is delivered as `SnapshotLine[]` with pagination (`offset`/`limit`) — maps directly to a line-level virtualizer's data needs. `TerminalSnapshot` component renders from `lines` prop — replacing with a virtualizing variant requires no upstream changes.
