@@ -5,7 +5,7 @@
  * the old Section[] + session-level snapshot approach.
  *
  * Coverage targets:
- *  - empty/null state: completed + 0 sections renders info banner
+ *  - 0-section fallback states (all 5 variants)
  *  - error states: failed/interrupted with 0 sections
  *  - processing state: non-terminal status
  *  - sections > 0: renders section items
@@ -17,6 +17,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import SessionContent from './SessionContent.vue';
 import type { SectionMetadata, SectionContentPage } from '../../shared/types/api.js';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 
 // ---------------------------------------------------------------------------
 // Stub child components
@@ -39,9 +40,27 @@ vi.mock('./OverlayScrollbar.vue', () => ({
   },
 }));
 
+vi.mock('./TerminalSnapshot.vue', () => ({
+  default: {
+    name: 'TerminalSnapshotStub',
+    props: ['lines', 'startLineNumber'],
+    template: '<div class="terminal-snapshot-stub" :data-line-count="lines.length" />',
+  },
+}));
+
 // ---------------------------------------------------------------------------
 // Test data helpers
 // ---------------------------------------------------------------------------
+
+function makeTerminalSnapshot(lineCount = 3): TerminalSnapshot {
+  return {
+    cols: 80,
+    rows: 24,
+    lines: Array.from({ length: lineCount }, (_, i) => ({
+      spans: [{ text: `line ${i + 1}` }],
+    })),
+  };
+}
 
 function makeSection(id: string, lineCount = 10): SectionMetadata {
   return {
@@ -72,19 +91,26 @@ const noopFetch = vi.fn(async (_id: string): Promise<SectionContentPage> => ({
 // ---------------------------------------------------------------------------
 
 describe('SessionContent (Stage 11)', () => {
-  describe('empty state — 0 sections', () => {
-    it('renders info banner when status is completed and no sections', () => {
+  describe('0-section fallback states', () => {
+    it('state 1: completed + snapshot → info banner + full terminal snapshot', () => {
+      const snapshot = makeTerminalSnapshot(5);
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
           fetchSectionContent: noopFetch,
           detectionStatus: 'completed',
+          snapshot,
         },
       });
       expect(wrapper.find('.session-content-banner--info').exists()).toBe(true);
+      expect(wrapper.find('.session-content-banner--info').text()).toContain(
+        'Section boundaries were not detected'
+      );
+      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
+      expect(wrapper.find('.terminal-snapshot-stub').attributes('data-line-count')).toBe('5');
     });
 
-    it('info banner contains expected text', () => {
+    it('state 2: completed + no snapshot → "No content available"', () => {
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
@@ -92,12 +118,51 @@ describe('SessionContent (Stage 11)', () => {
           detectionStatus: 'completed',
         },
       });
-      expect(wrapper.find('.session-content-banner--info').text()).toContain(
-        'Section boundaries were not detected'
-      );
+      expect(wrapper.find('.terminal-empty').text()).toContain('No content available');
+      expect(wrapper.find('.session-content-banner--info').exists()).toBe(false);
+      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(false);
     });
 
-    it('renders processing message for non-terminal status', () => {
+    it('state 3: failed + snapshot → error banner + full terminal snapshot', () => {
+      const snapshot = makeTerminalSnapshot(3);
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections: [],
+          fetchSectionContent: noopFetch,
+          detectionStatus: 'failed',
+          snapshot,
+        },
+      });
+      expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.session-content-banner--error').text()).toContain('error');
+      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
+    });
+
+    it('state 4: failed + no snapshot → "Session processing failed"', () => {
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections: [],
+          fetchSectionContent: noopFetch,
+          detectionStatus: 'failed',
+        },
+      });
+      expect(wrapper.find('.terminal-empty--error').exists()).toBe(true);
+      expect(wrapper.find('.terminal-empty--error').text()).toContain('processing failed');
+      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(false);
+    });
+
+    it('state 4b: interrupted + no snapshot → error state', () => {
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections: [],
+          fetchSectionContent: noopFetch,
+          detectionStatus: 'interrupted',
+        },
+      });
+      expect(wrapper.find('.terminal-empty--error').exists()).toBe(true);
+    });
+
+    it('state 5: processing (non-terminal) → "Session is being processed"', () => {
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
@@ -108,7 +173,7 @@ describe('SessionContent (Stage 11)', () => {
       expect(wrapper.find('.terminal-empty').text()).toContain('being processed');
     });
 
-    it('renders processing message for pending status', () => {
+    it('state 5b: pending (non-terminal) → "Session is being processed"', () => {
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
@@ -119,27 +184,18 @@ describe('SessionContent (Stage 11)', () => {
       expect(wrapper.find('.terminal-empty').text()).toContain('being processed');
     });
 
-    it('renders error empty state when failed and 0 sections', () => {
-      const wrapper = mount(SessionContent, {
-        props: {
-          sections: [],
-          fetchSectionContent: noopFetch,
-          detectionStatus: 'failed',
-        },
-      });
-      expect(wrapper.find('.terminal-empty--error').exists()).toBe(true);
-      expect(wrapper.find('.terminal-empty--error').text()).toContain('processing failed');
-    });
-
-    it('renders error empty state when interrupted and 0 sections', () => {
+    it('interrupted + snapshot → error banner + full snapshot', () => {
+      const snapshot = makeTerminalSnapshot(2);
       const wrapper = mount(SessionContent, {
         props: {
           sections: [],
           fetchSectionContent: noopFetch,
           detectionStatus: 'interrupted',
+          snapshot,
         },
       });
-      expect(wrapper.find('.terminal-empty--error').exists()).toBe(true);
+      expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
+      expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
     });
   });
 

@@ -3,8 +3,10 @@ import { ref, computed } from 'vue';
 import type { SectionMetadata, SectionContentPage } from '../../shared/types/api.js';
 import type { VirtualItem } from '@tanstack/vue-virtual';
 import type { DetectionStatus } from '../../shared/types/pipeline.js';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 import SectionItem from './SectionItem.vue';
 import OverlayScrollbar from './OverlayScrollbar.vue';
+import TerminalSnapshotComponent from './TerminalSnapshot.vue';
 
 /**
  * SessionContent renders the terminal content area for a session.
@@ -26,6 +28,11 @@ const props = withDefaults(defineProps<{
   /** Pipeline detection status — used to render in-progress/empty states. */
   detectionStatus?: DetectionStatus;
   /**
+   * Session-level terminal snapshot — populated for 0-section sessions.
+   * Used to display full terminal content when section detection found no boundaries.
+   */
+  snapshot?: TerminalSnapshot | null;
+  /**
    * Virtual items from useSectionVirtualizer — when provided, enables virtual
    * rendering. Only these items are rendered (large session path).
    */
@@ -43,6 +50,7 @@ const props = withDefaults(defineProps<{
   measureElement?: ((el: Element | null) => void) | null;
 }>(), {
   detectionStatus: 'completed',
+  snapshot: null,
   virtualItems: undefined,
   totalHeight: undefined,
   measureElement: null,
@@ -140,18 +148,41 @@ defineExpose({
       </template>
     </OverlayScrollbar>
 
-    <!-- State A: completed + 0 sections → info banner -->
+    <!-- State A: completed + 0 sections + snapshot exists → full snapshot with info banner -->
+    <template v-else-if="detectionStatus === 'completed' && snapshot">
+      <div class="session-content-banner session-content-banner--info">
+        Section boundaries were not detected for this session.
+      </div>
+      <OverlayScrollbar class="terminal-scroll">
+        <TerminalSnapshotComponent
+          :lines="snapshot.lines"
+          :start-line-number="1"
+        />
+      </OverlayScrollbar>
+    </template>
+
+    <!-- State A (no snapshot): completed + 0 sections + no snapshot -->
     <div
       v-else-if="detectionStatus === 'completed'"
       class="terminal-empty"
     >
-      <div class="session-content-banner session-content-banner--info">
-        Section boundaries were not detected for this session.
-      </div>
       No content available for this session.
     </div>
 
-    <!-- State B (failed/interrupted + 0 sections): error-only state -->
+    <!-- State B (failed/interrupted + snapshot): error banner + full snapshot -->
+    <template v-else-if="isTerminalError && snapshot">
+      <div class="session-content-banner session-content-banner--error">
+        Session processing encountered an error. Showing available content.
+      </div>
+      <OverlayScrollbar class="terminal-scroll">
+        <TerminalSnapshotComponent
+          :lines="snapshot.lines"
+          :start-line-number="1"
+        />
+      </OverlayScrollbar>
+    </template>
+
+    <!-- State B (failed/interrupted + no snapshot): error-only state -->
     <div
       v-else-if="isTerminalError"
       class="terminal-empty terminal-empty--error"

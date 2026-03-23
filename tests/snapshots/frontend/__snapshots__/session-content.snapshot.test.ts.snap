@@ -2,10 +2,8 @@
 
 exports[`SessionContent component snapshots > empty state — completed + 0 sections 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <!-- State A: completed + 0 sections → info banner -->
-  <div data-v-b8c49044="" class="terminal-empty">
-    <div data-v-b8c49044="" class="session-content-banner session-content-banner--info"> Section boundaries were not detected for this session. </div> No content available for this session.
-  </div>
+  <!-- State A (no snapshot): completed + 0 sections + no snapshot -->
+  <div data-v-b8c49044="" class="terminal-empty"> No content available for this session. </div>
 </div>"
 `;
 
@@ -18,7 +16,7 @@ exports[`SessionContent component snapshots > empty state — processing in prog
 
 exports[`SessionContent component snapshots > error state — failed + 0 sections 1`] = `
 "<div data-v-b8c49044="" class="terminal-chrome">
-  <!-- State B (failed/interrupted + 0 sections): error-only state -->
+  <!-- State B (failed/interrupted + no snapshot): error-only state -->
   <div data-v-b8c49044="" class="terminal-empty terminal-empty--error"> Session processing failed and no content is available. </div>
 </div>"
 `;

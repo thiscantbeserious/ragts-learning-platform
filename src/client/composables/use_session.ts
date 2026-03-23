@@ -5,6 +5,7 @@
  * - Small sessions (sectionCount <= SMALL_SESSION_THRESHOLD): bulk-fetches all section
  *   content in a single request via the /sections/content endpoint.
  * - Large sessions: exposes fetchSectionContent() for on-demand per-section loading.
+ * - Zero-section sessions: fetches the full session snapshot via /snapshot endpoint.
  *
  * All fetched content pages are stored in an injected SectionCache (defaults to
  * the module-level singleton from useSectionCache). Cache hits short-circuit HTTP.
@@ -12,11 +13,13 @@
  * SSE integration mirrors useSession: soft re-fetch on terminal state transitions.
  */
 import { ref, computed, watch, toValue, type MaybeRef } from 'vue';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 import type {
   SessionMetadataResponse,
   SectionMetadata,
   SectionContentPage,
   BulkSectionContentResponse,
+  SessionSnapshotResponse,
 } from '../../shared/types/api.js';
 import { SMALL_SESSION_THRESHOLD, DEFAULT_SECTION_PAGE_LIMIT } from '../../shared/constants.js';
 import { useSectionCache, makeCacheKey, type SectionCache } from './use_section_cache.js';
@@ -44,6 +47,12 @@ async function fetchBulkContent(id: string): Promise<BulkSectionContentResponse>
   const res = await fetch(`/api/sessions/${id}/sections/content`);
   if (!res.ok) throw new Error(`Failed to load section content (${res.status})`);
   return res.json() as Promise<BulkSectionContentResponse>;
+}
+
+async function fetchSessionSnapshot(id: string): Promise<SessionSnapshotResponse> {
+  const res = await fetch(`/api/sessions/${id}/snapshot`);
+  if (!res.ok) throw new Error(`Failed to load session snapshot (${res.status})`);
+  return res.json() as Promise<SessionSnapshotResponse>;
 }
 
 async function fetchOneSectionPage(
@@ -84,6 +93,7 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
 
   const session = ref<SessionMetadataResponse | null>(null);
   const sections = ref<SectionMetadata[]>([]);
+  const snapshot = ref<TerminalSnapshot | null>(null);
   const loading = ref(true);
   const error = ref<string | null>(null);
   const detectionStatus = ref<SessionMetadataResponse['detection_status']>('completed');
@@ -97,6 +107,7 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
       error.value = null;
       session.value = null;
       sections.value = [];
+      snapshot.value = null;
     }
     try {
       const meta = await fetchMetadata(id);
@@ -104,7 +115,9 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
       sections.value = meta.sections;
       detectionStatus.value = meta.detection_status;
 
-      if (meta.sectionCount <= SMALL_SESSION_THRESHOLD) {
+      if (meta.sectionCount === 0) {
+        await loadSessionSnapshot(id);
+      } else if (meta.sectionCount <= SMALL_SESSION_THRESHOLD) {
         await loadBulkContent(id);
       }
     } catch (err) {
@@ -117,6 +130,12 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
   async function loadBulkContent(id: string): Promise<void> {
     const bulk = await fetchBulkContent(id);
     storeBulkInCache(bulk, _cache);
+  }
+
+  /** Fetches the session-level snapshot for 0-section sessions. */
+  async function loadSessionSnapshot(id: string): Promise<void> {
+    const result = await fetchSessionSnapshot(id);
+    snapshot.value = result.snapshot;
   }
 
   /**
@@ -156,6 +175,7 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
   return {
     session,
     sections,
+    snapshot,
     loading,
     error,
     filename,

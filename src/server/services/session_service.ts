@@ -16,7 +16,8 @@ import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { EventBusAdapter } from '../events/event_bus_adapter.js';
 import { PipelineStage } from '../../shared/types/pipeline.js';
 import type { Section } from '../../shared/types/section.js';
-import type { SectionMetadata, SessionMetadataResponse } from '../../shared/types/api.js';
+import type { SectionMetadata, SessionMetadataResponse, SessionSnapshotResponse } from '../../shared/types/api.js';
+import type { TerminalSnapshot } from '#vt-wasm/types';
 import { logger } from '../logger.js';
 import { RateLimiter } from '../utils/rate_limiter.js';
 
@@ -132,6 +133,24 @@ export class SessionService {
         totalLines,
         sectionCount: sections.length,
       } as unknown as SessionMetadataResponse,
+    };
+  }
+
+  /**
+   * Retrieve the session-level terminal snapshot for a session.
+   * Used for 0-section sessions where no section content endpoints are available.
+   * Returns null snapshot when no snapshot is stored in the DB.
+   */
+  async getSessionSnapshot(id: string): Promise<SessionServiceResult<SessionSnapshotResponse>> {
+    const session = await this.sessionRepository.findById(id);
+    if (!session) {
+      return { ok: false, status: 404, error: 'Session not found' };
+    }
+
+    const snapshot = parseSnapshotJson(session.snapshot, 'session', id) as TerminalSnapshot | null;
+    return {
+      ok: true,
+      data: { id, snapshot },
     };
   }
 

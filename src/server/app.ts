@@ -34,6 +34,7 @@ import {
   handleDeleteSession,
   handleRedetect,
 } from './routes/sessions.js';
+import { handleGetSessionSnapshot } from './routes/session_snapshot.js';
 import { handleGetSectionContent } from './routes/section_content.js';
 import { handleGetBulkSectionContent } from './routes/bulk_section_content.js';
 import { handleSseEvents } from './routes/sse.js';
@@ -130,6 +131,7 @@ export function createApp(deps: AppDeps): Hono {
   app.get('/api/sessions/:id', (c) => handleGetSession(c, sessionService));
   app.delete('/api/sessions/:id', (c) => handleDeleteSession(c, sessionService));
   app.post('/api/sessions/:id/redetect', (c) => handleRedetect(c, sessionService));
+  app.get('/api/sessions/:id/snapshot', (c) => handleGetSessionSnapshot(c, sessionService));
   // Bulk route MUST be registered before per-section route to avoid :sectionId matching "content".
   app.get('/api/sessions/:id/sections/content', (c) =>
     handleGetBulkSectionContent(c, bulkSectionContentService)

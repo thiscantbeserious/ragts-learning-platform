@@ -28,7 +28,7 @@ import type { SectionOffset } from '../composables/useActiveSection.js';
 const route = useRoute();
 const sessionId = computed(() => route.params['id'] as string);
 
-const { sections, loading, error, detectionStatus, fetchSectionContent } =
+const { sections, snapshot, loading, error, detectionStatus, fetchSectionContent } =
   useSessionV2(sessionId);
 
 /** True when this session requires the large-session treatment. */
@@ -150,6 +150,7 @@ function onHoverSection(id: string): void {
           :sections="sections"
           :fetch-section-content="fetchSectionContent"
           :detection-status="detectionStatus"
+          :snapshot="snapshot"
           :virtual-items="isLargeSession ? virtualItems : undefined"
           :total-height="isLargeSession ? totalHeight : undefined"
           :measure-element="measureElement"

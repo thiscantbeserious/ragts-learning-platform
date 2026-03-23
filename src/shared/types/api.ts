@@ -127,6 +127,18 @@ export interface SessionMetadataResponse {
 }
 
 /**
+ * Response shape for GET /api/sessions/:id/snapshot.
+ * Returns the session-level terminal snapshot for 0-section sessions.
+ * Used as a fallback when section boundaries were not detected.
+ */
+export interface SessionSnapshotResponse {
+  /** Non-empty session identifier. */
+  id: NonEmptyString;
+  /** Full terminal snapshot — may be null when no snapshot is stored. */
+  snapshot: TerminalSnapshot | null;
+}
+
+/**
  * Response shape for GET /api/sessions/:id/status.
  * Reflects the current pipeline job state for the session.
  */
