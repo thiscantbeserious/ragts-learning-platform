@@ -349,7 +349,7 @@ function positionPopover(pillEl: HTMLElement): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--space-4) 0;
+  padding: var(--space-3) 0;
   gap: var(--space-2);
   position: relative;
   width: 100%;
