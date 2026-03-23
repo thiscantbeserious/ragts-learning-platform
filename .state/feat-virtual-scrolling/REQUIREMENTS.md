@@ -58,20 +58,45 @@ Large agent sessions feel fast and navigable at any scale. The user sees session
 
 ## Acceptance Criteria
 
-- [ ] Opening a 50-section, 50,000-line session shows the section navigator and first visible terminal content within 1 second on a standard desktop broadband connection, with no browser tab freeze.
-- [ ] The session structure (navigator populated with section labels) is visible within 300 ms, before any terminal content has rendered.
-- [ ] At any point during navigation of a large session, the total DOM node count stays below 10,000. Sections outside the active render window are replaced by height-preserving placeholders.
-- [ ] Client memory for a 50,000-line session stays below 150 MB (DOM + parsed data + cache) under normal navigation.
-- [ ] Terminal snapshot content for a large session is never transferred as a single monolithic payload. The initial session load does not include terminal snapshot data.
-- [ ] Requesting an unchanged section's content a second time does not transfer the section body over the network (the server confirms unchanged content without re-sending it).
-- [ ] The section navigator aside is visible during session viewing for large sessions and absent for small sessions below the threshold.
-- [ ] The active pill in the aside updates as the user scrolls, always reflecting the currently visible section.
-- [ ] Clicking any pill navigates to the correct section. Content appears within 500 ms for uncached sections and immediately for prefetched sections.
-- [ ] Re-opening a previously viewed session shows previously-loaded section content without new network requests for that content.
-- [ ] A session with 3 sections shows no navigator aside, no skeleton states, and no loading waterfall. Behavior is indistinguishable from the current implementation.
-- [ ] Virtualization and caching logic is encapsulated; active section state is shared between the content view and the navigator rather than duplicated.
-- [ ] Navigator pills and expanded labels are keyboard-navigable. The active pill has a programmatic active indicator readable by assistive technology. Scroll animation respects prefers-reduced-motion.
-- [ ] All existing API endpoints other than the session detail route retain their current contract. No existing database columns are removed or renamed.
+### Load Performance
+- [ ] AC-1: First section header visible within 600ms of navigation (metadata-first load)
+- [ ] AC-2: First terminal content visible within 700ms
+- [ ] AC-3: Initial DOM node count under 2,500 on page load (before scrolling)
+- [ ] AC-4: Metadata response under 50KB for a 50-section session (no snapshot content)
+
+### Scroll Performance
+- [ ] AC-5: Peak DOM node count stays under 10,000 at any scroll position
+- [ ] AC-6: Average DOM node count during full scroll-through stays under 6,000
+- [ ] AC-7: scrollHeight does not change by more than 1% during scroll at any point (no oscillation)
+- [ ] AC-8: No scroll direction reversals caused by virtualizer remeasurement (0 direction changes in automated scroll test)
+- [ ] AC-9: Rendered sections stay between 3-8 at any scroll position (overscan working)
+
+### Memory
+- [ ] AC-10: Heap memory stays under 80MB during full session navigation
+- [ ] AC-11: Section cache evicts content when ceiling (32MB default) is exceeded
+
+### Navigation
+- [ ] AC-12: Clicking a pill scrolls to the correct section within 500ms for uncached, instantly for cached
+- [ ] AC-13: Scrollspy active pill updates correctly through every section when scrolling (no skips except for sections smaller than one wheel-scroll increment)
+- [ ] AC-14: Sticky header appears when real header scrolls above viewport, disappears when scrolling back
+- [ ] AC-15: Sticky header does NOT cause scrollHeight changes (positioned outside scroll container)
+
+### Network
+- [ ] AC-16: Initial session load does not include terminal snapshot data
+- [ ] AC-17: Second request for same section returns 304 Not Modified (ETag match)
+- [ ] AC-18: Small sessions (< 5 sections) load in a single bulk request
+
+### Behavioral
+- [ ] AC-19: Navigator visible for large sessions (>= 5 sections), absent for small
+- [ ] AC-20: Small sessions render identically to main (no navigator, no skeletons, no virtualizer)
+- [ ] AC-21: 0-section sessions show fallback banners (error/info) with full snapshot if available
+- [ ] AC-22: Line numbers continue from section position in session (not reset to 1 per section)
+
+### Architecture
+- [ ] AC-23: Virtualization and caching in composables, not spread across templates
+- [ ] AC-24: Active section state shared between content and navigator
+- [ ] AC-25: Navigator keyboard-navigable with ARIA roles
+- [ ] AC-26: No existing API endpoints broken (except session detail route, intentional)
 
 ## Constraints
 
