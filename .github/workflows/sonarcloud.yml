@@ -26,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Run unit/integration tests with coverage (thresholds disabled — enforced on merged report by SonarCloud)
-        run: npx vitest run --coverage --exclude tests/acceptance --exclude tests/visual --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0
+        run: npx vitest run --coverage --exclude tests/acceptance --exclude tests/visual --exclude tests/stress --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

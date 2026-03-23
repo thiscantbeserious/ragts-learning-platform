@@ -14,7 +14,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { generateLargeCast } from './generate_large_cast.js';
+import { generateLargeCast } from '../integration/generate_large_cast.js';
 import type { Server } from 'node:http';
 import { serve } from '@hono/node-server';
 import { SqliteDatabaseImpl } from '../../src/server/db/sqlite/sqlite_database_impl.js';
