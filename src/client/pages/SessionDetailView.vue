@@ -59,6 +59,17 @@ const totalHeight = computed(() =>
   isLargeSession.value ? virtualizer.value.getTotalSize() : 0
 );
 
+/**
+ * measureElement bound to the virtualizer instance.
+ * Passed to SessionContent so each SectionItem's root div is observed
+ * for size changes — this makes collapse/expand reflow other sections.
+ */
+const measureElement = computed(() =>
+  isLargeSession.value
+    ? (el: Element | null) => { if (el) virtualizer.value.measureElement(el); }
+    : null
+);
+
 // ---------------------------------------------------------------------------
 // Scrollspy — active only for large sessions
 // ---------------------------------------------------------------------------
@@ -113,6 +124,7 @@ function onHoverSection(id: string): void {
         :detection-status="detectionStatus"
         :virtual-items="isLargeSession ? virtualItems : undefined"
         :total-height="isLargeSession ? totalHeight : undefined"
+        :measure-element="measureElement"
         @register-section="onRegisterSection"
       />
       <SectionNavigator
@@ -138,26 +150,24 @@ function onHoverSection(id: string): void {
   flex-direction: column;
   min-height: 0;
   height: 100%;
-  overflow: hidden;
+  overflow-y: auto;
   padding: var(--space-6);
 }
 
 /* Large session: side-by-side content + navigator */
 .session-detail-view--with-nav {
   flex-direction: row;
-  padding: 0;
+  /* Keep padding on parent; remove right padding so navigator sits flush */
+  padding: var(--space-6);
+  padding-right: 0;
   gap: 0;
+  overflow: hidden;
 }
 
 .session-detail-view__content {
   flex: 1;
   min-width: 0;
   min-height: 0;
-}
-
-/* When in nav mode, restore padding on the content area */
-.session-detail-view--with-nav .session-detail-view__content {
-  padding: var(--space-6);
 }
 
 .session-detail-view__nav {

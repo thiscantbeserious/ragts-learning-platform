@@ -35,10 +35,17 @@ const props = withDefaults(defineProps<{
    * Required when virtualItems is provided.
    */
   totalHeight?: number;
+  /**
+   * TanStack Virtual measureElement callback — passed to each SectionItem's root
+   * div so the virtualizer tracks real heights via ResizeObserver.
+   * Required when virtualItems is provided.
+   */
+  measureElement?: ((el: Element | null) => void) | null;
 }>(), {
   detectionStatus: 'completed',
   virtualItems: undefined,
   totalHeight: undefined,
+  measureElement: null,
 });
 
 const emit = defineEmits<{
@@ -103,10 +110,13 @@ defineExpose({
         class="section-virtual-container"
         :style="{ height: `${totalHeight}px`, position: 'relative' }"
       >
-        <div
+        <SectionItem
           v-for="{ item, section } in virtualSections"
           :key="section.id"
-          class="section-virtual-item"
+          :section="section"
+          :fetch-content="fetchSectionContent"
+          :measure-el="measureElement"
+          :data-index="item.index"
           :style="{
             position: 'absolute',
             top: 0,
@@ -114,14 +124,8 @@ defineExpose({
             width: '100%',
             transform: `translateY(${item.start}px)`,
           }"
-          :data-index="item.index"
-        >
-          <SectionItem
-            :section="section"
-            :fetch-content="fetchSectionContent"
-            @register="onSectionRegister"
-          />
-        </div>
+          @register="onSectionRegister"
+        />
       </div>
 
       <!-- Flat mode: render all sections directly -->

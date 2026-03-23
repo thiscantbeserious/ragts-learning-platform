@@ -1,22 +1,17 @@
 /**
  * Snapshot tests for SessionContent component.
- * Locks down the terminal chrome, section layout, preamble, and content rendering.
+ *
+ * Tests use the new SectionMetadata API where content is fetched per-section
+ * via fetchSectionContent. Sections render via SectionItem which loads
+ * content async — these tests verify the structural shell (no-sections states,
+ * terminal chrome, flat rendering).
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import SessionContent from '@client/components/SessionContent.vue';
-import type { Section } from '@client/composables/useSession';
-import type { TerminalSnapshot } from '#vt-wasm/types';
+import type { SectionMetadata, SectionContentPage } from '../../../src/shared/types/api.js';
 
-function makeSnapshot(lineTexts: string[]): TerminalSnapshot {
-  return {
-    cols: 80,
-    rows: 24,
-    lines: lineTexts.map(text => ({ spans: [{ text }] })),
-  };
-}
-
-function makeSection(overrides: Partial<Section>): Section {
+function makeSectionMetadata(overrides: Partial<SectionMetadata> = {}): SectionMetadata {
   return {
     id: 'section-1',
     type: 'marker',
@@ -25,105 +20,114 @@ function makeSection(overrides: Partial<Section>): Section {
     endEvent: 100,
     startLine: 0,
     endLine: 10,
-    snapshot: null,
+    lineCount: 10,
+    preview: null,
     ...overrides,
   };
 }
 
+function makeContentPage(sectionId: string, lineTexts: string[]): SectionContentPage {
+  return {
+    sectionId,
+    lines: lineTexts.map((text) => ({ spans: [{ text }] })),
+    totalLines: lineTexts.length,
+    offset: 0,
+    limit: 'all',
+    hasMore: false,
+    contentHash: 'abc123',
+  };
+}
+
 describe('SessionContent component snapshots', () => {
-  it('CLI sections with line ranges', () => {
-    const snapshot = makeSnapshot([
-      'Line 0', 'Line 1', 'Line 2', 'Line 3', 'Line 4',
-      'Line 5', 'Line 6', 'Line 7', 'Line 8', 'Line 9',
-    ]);
-    const sections: Section[] = [
-      makeSection({ id: 'section-1', label: 'First', startLine: 0, endLine: 5 }),
-      makeSection({ id: 'section-2', label: 'Second', startLine: 5, endLine: 10 }),
-    ];
-
+  it('empty state — completed + 0 sections', () => {
+    const fetchSectionContent = vi.fn().mockResolvedValue(makeContentPage('s', []));
     const wrapper = mount(SessionContent, {
-      props: { snapshot, sections },
+      props: {
+        sections: [],
+        fetchSectionContent,
+        detectionStatus: 'completed',
+      },
     });
     expect(wrapper.html()).toMatchSnapshot();
   });
 
-  it('preamble lines before first section', () => {
-    const snapshot = makeSnapshot([
-      'Preamble A', 'Preamble B',
-      'Section content 1', 'Section content 2',
-    ]);
-    const sections: Section[] = [
-      makeSection({ id: 'section-1', label: 'Main', startLine: 2, endLine: 4 }),
-    ];
-
+  it('empty state — processing in progress', () => {
+    const fetchSectionContent = vi.fn().mockResolvedValue(makeContentPage('s', []));
     const wrapper = mount(SessionContent, {
-      props: { snapshot, sections },
+      props: {
+        sections: [],
+        fetchSectionContent,
+        detectionStatus: 'processing',
+      },
     });
     expect(wrapper.html()).toMatchSnapshot();
   });
 
-  it('TUI section with viewport snapshot', () => {
-    const sessionSnapshot = makeSnapshot(['unused']);
-    const tuiSnapshot: TerminalSnapshot = {
-      cols: 80,
-      rows: 24,
-      lines: [
-        { spans: [{ text: 'TUI viewport line 1' }] },
-        { spans: [{ text: 'TUI viewport line 2' }] },
-      ],
-    };
-    const sections: Section[] = [
-      makeSection({
-        id: 'section-1',
-        label: 'TUI View',
-        startLine: null,
-        endLine: null,
-        snapshot: tuiSnapshot,
-      }),
-    ];
-
+  it('error state — failed + 0 sections', () => {
+    const fetchSectionContent = vi.fn().mockResolvedValue(makeContentPage('s', []));
     const wrapper = mount(SessionContent, {
-      props: { snapshot: sessionSnapshot, sections },
+      props: {
+        sections: [],
+        fetchSectionContent,
+        detectionStatus: 'failed',
+      },
     });
     expect(wrapper.html()).toMatchSnapshot();
   });
 
-  it('empty state (no snapshot, no sections)', () => {
+  it('flat mode — two sections render terminal-chrome + overlay scrollbar', () => {
+    const sections: SectionMetadata[] = [
+      makeSectionMetadata({ id: 'section-1', label: 'First', lineCount: 5 }),
+      makeSectionMetadata({ id: 'section-2', label: 'Second', lineCount: 5 }),
+    ];
+    const fetchSectionContent = vi.fn((id: string) =>
+      Promise.resolve(makeContentPage(id, ['Line 0', 'Line 1']))
+    );
     const wrapper = mount(SessionContent, {
-      props: { snapshot: null, sections: [] },
+      props: { sections, fetchSectionContent },
     });
+    // Verify terminal chrome and scrollbar structure exist
+    expect(wrapper.find('.terminal-chrome').exists()).toBe(true);
+    expect(wrapper.find('.terminal-scroll').exists()).toBe(true);
     expect(wrapper.html()).toMatchSnapshot();
   });
 
-  it('mixed CLI and TUI sections', () => {
-    const snapshot = makeSnapshot([
-      'CLI line 0', 'CLI line 1', 'CLI line 2',
-    ]);
-    const tuiSnap: TerminalSnapshot = {
-      cols: 80,
-      rows: 24,
-      lines: [{ spans: [{ text: 'TUI content' }] }],
-    };
-    const sections: Section[] = [
-      makeSection({ id: 'section-1', label: 'CLI Part', startLine: 0, endLine: 3 }),
-      makeSection({ id: 'section-2', label: 'TUI Part', startLine: null, endLine: null, snapshot: tuiSnap }),
+  it('virtual mode — renders virtual container with total height', () => {
+    const sections: SectionMetadata[] = [
+      makeSectionMetadata({ id: 'section-1', label: 'First', lineCount: 5 }),
     ];
-
+    const fetchSectionContent = vi.fn((id: string) =>
+      Promise.resolve(makeContentPage(id, ['Line 0']))
+    );
     const wrapper = mount(SessionContent, {
-      props: { snapshot, sections },
+      props: {
+        sections,
+        fetchSectionContent,
+        virtualItems: [{ index: 0, key: 'section-1', start: 0, end: 200, size: 200, lane: 0 }],
+        totalHeight: 200,
+      },
     });
+    const container = wrapper.find('.section-virtual-container');
+    expect(container.exists()).toBe(true);
+    expect(container.attributes('style')).toContain('height: 200px');
     expect(wrapper.html()).toMatchSnapshot();
   });
 
-  it('defaultCollapsed prop — sections start collapsed', () => {
-    const snapshot = makeSnapshot(['Line 0', 'Line 1']);
-    const sections: Section[] = [
-      makeSection({ id: 'section-1', label: 'Collapsed', startLine: 0, endLine: 2 }),
+  it('failed status with sections — shows error banner', () => {
+    const sections: SectionMetadata[] = [
+      makeSectionMetadata({ id: 'section-1', label: 'Partial', lineCount: 3 }),
     ];
-
+    const fetchSectionContent = vi.fn((id: string) =>
+      Promise.resolve(makeContentPage(id, ['Line 0']))
+    );
     const wrapper = mount(SessionContent, {
-      props: { snapshot, sections, defaultCollapsed: true },
+      props: {
+        sections,
+        fetchSectionContent,
+        detectionStatus: 'failed',
+      },
     });
+    expect(wrapper.find('.session-content-banner--error').exists()).toBe(true);
     expect(wrapper.html()).toMatchSnapshot();
   });
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, type ComponentPublicInstance } from 'vue';
 import type { SectionMetadata, SectionContentPage } from '../../shared/types/api.js';
 import TerminalSnapshotComponent from './TerminalSnapshot.vue';
 import SectionHeader from './SectionHeader.vue';
@@ -8,16 +8,23 @@ import SectionHeader from './SectionHeader.vue';
  * SectionItem renders a single section: sticky header + lazy-loaded content.
  *
  * On mount it calls fetchContent to load terminal lines for this section.
- * CSS content-visibility: auto enables the browser to skip off-screen rendering.
- * Emits register/unregister events so the parent can wire up the scrollspy.
+ * Accepts a measureElement callback from the virtualizer so TanStack Virtual
+ * can observe real DOM height changes via ResizeObserver (used in virtual mode).
+ * Emits register events so the parent can wire up the scrollspy.
  */
 
 const props = withDefaults(defineProps<{
   section: SectionMetadata;
   fetchContent: (id: string) => Promise<SectionContentPage>;
   defaultCollapsed?: boolean;
+  /** TanStack Virtual measureElement ref callback — pass virtualizer.measureElement here. */
+  measureEl?: ((el: Element | null) => void) | null;
+  /** data-index value for TanStack Virtual measurement (virtual item index). */
+  dataIndex?: number;
 }>(), {
   defaultCollapsed: false,
+  measureEl: null,
+  dataIndex: undefined,
 });
 
 const emit = defineEmits<{
@@ -25,7 +32,7 @@ const emit = defineEmits<{
   (e: 'register', id: string, el: Element): void;
 }>();
 
-const contentRef = ref<HTMLElement | null>(null);
+const rootRef = ref<HTMLElement | null>(null);
 const collapsed = ref(props.defaultCollapsed);
 const lines = ref<SectionContentPage['lines']>([]);
 const startLineNumber = ref(1);
@@ -49,18 +56,31 @@ async function loadContent(): Promise<void> {
   }
 }
 
+/**
+ * Vue ref callback for the root element.
+ * Wires both the local rootRef and the virtualizer's measureElement callback.
+ */
+function setRootRef(el: Element | ComponentPublicInstance | null): void {
+  const htmlEl = el instanceof HTMLElement ? el : null;
+  rootRef.value = htmlEl;
+  if (props.measureEl) {
+    props.measureEl(htmlEl);
+  }
+}
+
 onMounted(() => {
   void loadContent();
-  if (contentRef.value) {
-    emit('register', props.section.id, contentRef.value);
+  if (rootRef.value) {
+    emit('register', props.section.id, rootRef.value);
   }
 });
 </script>
 
 <template>
   <div
-    ref="contentRef"
+    :ref="setRootRef"
     class="section-item"
+    :data-index="dataIndex"
   >
     <SectionHeader
       :section="section"
@@ -98,7 +118,7 @@ onMounted(() => {
   /* content-visibility: auto lets the browser skip off-screen paint/layout */
   content-visibility: auto;
   /* contain-intrinsic-size provides a size hint so layout doesn't collapse */
-  contain-intrinsic-size: auto 200px;
+  contain-intrinsic-size: auto 400px;
 }
 
 .section-content {
