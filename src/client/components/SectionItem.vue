@@ -21,10 +21,17 @@ const props = withDefaults(defineProps<{
   measureEl?: ((el: Element | null) => void) | null;
   /** data-index value for TanStack Virtual measurement (virtual item index). */
   dataIndex?: number;
+  /**
+   * When true, disables CSS content-visibility: auto so TanStack Virtual's
+   * ResizeObserver (measureElement) receives accurate real heights.
+   * Must be true when rendered inside a virtualizer-managed container.
+   */
+  virtualMode?: boolean;
 }>(), {
   defaultCollapsed: false,
   measureEl: null,
   dataIndex: undefined,
+  virtualMode: false,
 });
 
 const emit = defineEmits<{
@@ -80,6 +87,7 @@ onMounted(() => {
   <div
     :ref="setRootRef"
     class="section-item"
+    :class="{ 'section-item--virtual': virtualMode }"
     :data-index="dataIndex"
   >
     <SectionHeader
@@ -119,6 +127,18 @@ onMounted(() => {
   content-visibility: auto;
   /* contain-intrinsic-size provides a size hint so layout doesn't collapse */
   contain-intrinsic-size: auto 400px;
+}
+
+/**
+ * In virtual mode TanStack Virtual manages which items are in the DOM entirely,
+ * making content-visibility: auto redundant. More critically, content-visibility
+ * causes the browser to report contain-intrinsic-size (400px) as the layout height
+ * for off-screen items, so measureElement / ResizeObserver sees the wrong height,
+ * causing massive scrollHeight jumps as the virtualizer corrects its estimates.
+ */
+.section-item--virtual {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
 }
 
 .section-content {

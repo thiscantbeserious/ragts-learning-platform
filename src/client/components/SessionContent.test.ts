@@ -12,6 +12,7 @@
  *  - virtual mode: renders virtual container when virtualItems provided
  *  - flat mode: renders all sections when no virtualItems
  *  - register-section event emitted on section mount
+ *  - sticky overlay header: renders in virtual mode when activeSectionId matches
  */
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -45,6 +46,15 @@ vi.mock('./TerminalSnapshot.vue', () => ({
     name: 'TerminalSnapshotStub',
     props: ['lines', 'startLineNumber'],
     template: '<div class="terminal-snapshot-stub" :data-line-count="lines.length" />',
+  },
+}));
+
+vi.mock('./SectionHeader.vue', () => ({
+  default: {
+    name: 'SectionHeaderStub',
+    props: ['section', 'collapsed', 'lineCount'],
+    emits: ['toggle'],
+    template: '<button class="section-header-stub" :data-section-id="section.id">{{ section.label }}</button>',
   },
 }));
 
@@ -340,6 +350,82 @@ describe('SessionContent (Stage 11)', () => {
       expect(() => {
         wrapper.vm.$emit('register-section', 's1', document.createElement('div'));
       }).not.toThrow();
+    });
+  });
+
+  describe('sticky overlay header (virtual mode)', () => {
+    const virtualItems = [
+      { index: 0, key: 'sec-0', start: 0, end: 500, size: 500, lane: 0 },
+      { index: 1, key: 'sec-1', start: 500, end: 1000, size: 500, lane: 0 },
+    ];
+
+    it('renders sticky overlay header when activeSectionId matches a section in virtual mode', () => {
+      const sections = [makeSection('sec-0'), makeSection('sec-1')];
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections,
+          fetchSectionContent: noopFetch,
+          virtualItems,
+          totalHeight: 1000,
+          activeSectionId: 'sec-1',
+        },
+      });
+      expect(wrapper.find('.section-sticky-overlay').exists()).toBe(true);
+    });
+
+    it('sticky overlay shows the active section label', () => {
+      const sections = [makeSection('sec-0'), makeSection('sec-1')];
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections,
+          fetchSectionContent: noopFetch,
+          virtualItems,
+          totalHeight: 1000,
+          activeSectionId: 'sec-1',
+        },
+      });
+      expect(wrapper.find('.section-sticky-overlay').text()).toContain('Section sec-1');
+    });
+
+    it('does not render sticky overlay when activeSectionId is null', () => {
+      const sections = [makeSection('sec-0'), makeSection('sec-1')];
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections,
+          fetchSectionContent: noopFetch,
+          virtualItems,
+          totalHeight: 1000,
+          activeSectionId: null,
+        },
+      });
+      expect(wrapper.find('.section-sticky-overlay').exists()).toBe(false);
+    });
+
+    it('does not render sticky overlay in flat mode even with activeSectionId', () => {
+      const sections = [makeSection('sec-0'), makeSection('sec-1')];
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections,
+          fetchSectionContent: noopFetch,
+          // No virtualItems — flat mode
+          activeSectionId: 'sec-0',
+        },
+      });
+      expect(wrapper.find('.section-sticky-overlay').exists()).toBe(false);
+    });
+
+    it('does not render sticky overlay when activeSectionId does not match any section', () => {
+      const sections = [makeSection('sec-0'), makeSection('sec-1')];
+      const wrapper = mount(SessionContent, {
+        props: {
+          sections,
+          fetchSectionContent: noopFetch,
+          virtualItems,
+          totalHeight: 1000,
+          activeSectionId: 'unknown-id',
+        },
+      });
+      expect(wrapper.find('.section-sticky-overlay').exists()).toBe(false);
     });
   });
 });

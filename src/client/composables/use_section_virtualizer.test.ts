@@ -100,8 +100,8 @@ describe('useSectionVirtualizer', () => {
     expect(estimateSize(0)).toBe(SECTION_HEADER_HEIGHT);
   });
 
-  it('estimateSize scales with line count', async () => {
-    const { useSectionVirtualizer, SECTION_HEADER_HEIGHT, LINE_HEIGHT } = await import('./use_section_virtualizer.js');
+  it('estimateSize scales with line count including snapshot padding', async () => {
+    const { useSectionVirtualizer, SECTION_HEADER_HEIGHT, LINE_HEIGHT, SNAPSHOT_PADDING } = await import('./use_section_virtualizer.js');
 
     const sections = ref([makeSection('s1', 50)]);
     const scrollEl = ref<HTMLElement | null>(null);
@@ -110,7 +110,7 @@ describe('useSectionVirtualizer', () => {
 
     const opts = capturedOptions[0] as Record<string, unknown>;
     const estimateSize = opts.estimateSize as (i: number) => number;
-    const expected = SECTION_HEADER_HEIGHT + 50 * LINE_HEIGHT;
+    const expected = SECTION_HEADER_HEIGHT + SNAPSHOT_PADDING + 50 * LINE_HEIGHT;
     expect(estimateSize(0)).toBe(expected);
   });
 

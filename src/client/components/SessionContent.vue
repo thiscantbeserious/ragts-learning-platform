@@ -93,56 +93,39 @@ const sectionsToRender = computed((): SectionMetadata[] => {
 
 /**
  * The section whose header should appear in the sticky overlay.
- * This is the last section whose start offset is ABOVE scrollTop —
- * meaning its real header has scrolled under the sticky position.
- * Computed on scroll, independent of the scrollspy activeId.
+ * Derived from activeSectionId — the parent scrollspy reports which section is active.
  */
-const stickySection = ref<SectionMetadata | null>(null);
-const showStickyHeader = ref(false);
+const stickySection = computed((): SectionMetadata | null => {
+  if (!isVirtualized.value || !props.activeSectionId) return null;
+  return props.sections.find((s) => s.id === props.activeSectionId) ?? null;
+});
+
+/**
+ * False when the active section's real header is still visible in the viewport.
+ * The scroll handler sets this — no watcher reset, preventing flicker loops.
+ */
+const realHeaderScrolledAbove = ref(false);
+
+const showStickyHeader = computed(() => stickySection.value !== null && realHeaderScrolledAbove.value);
 
 function onContentScroll(): void {
   const viewport = overlayScrollbarRef.value?.viewport;
-  if (!viewport || !isVirtualized.value || !props.virtualItems) {
-    showStickyHeader.value = false;
-    stickySection.value = null;
+  if (!viewport || !isVirtualized.value || !props.virtualItems || !props.activeSectionId) {
     return;
   }
 
   const scrollTop = viewport.scrollTop;
 
-  // Find the last section whose start is above scrollTop.
-  // That section's real header has scrolled past the top — show it in the sticky.
-  let found: SectionMetadata | null = null;
-  for (const item of props.virtualItems) {
-    const section = props.sections[item.index];
-    if (!section) continue;
-    if (item.start <= scrollTop) {
-      found = section;
-    } else {
-      break;
-    }
-  }
+  // Find the virtual item for the active section.
+  const activeItem = props.virtualItems.find(
+    (item) => props.sections[item.index]?.id === props.activeSectionId
+  );
+  if (!activeItem) return;
 
-  // Only show sticky if we found a section AND its header is actually above the viewport
-  // (not just barely at the top — check that scrollTop is past the section start)
-  if (found && scrollTop > 0) {
-    // Check: is the found section's real header still visible?
-    // The header is at item.start and is ~48px tall. It's fully hidden only when
-    // its bottom edge (start + headerHeight) has scrolled above the viewport.
-    const foundItem = props.virtualItems.find((_item, i) => props.sections[i]?.id === found!.id);
-    const headerHeight = stickyHeaderRef.value?.$el?.offsetHeight ?? 48;
-    if (foundItem && foundItem.start + headerHeight >= scrollTop) {
-      // Real header still partially visible — don't show sticky
-      showStickyHeader.value = false;
-      stickySection.value = null;
-    } else {
-      showStickyHeader.value = true;
-      stickySection.value = found;
-    }
-  } else {
-    showStickyHeader.value = false;
-    stickySection.value = null;
-  }
+  // Suppress sticky when the real header bottom edge is still at or below scrollTop.
+  // headerHeight: use the sticky header's measured height, or fall back to 42px.
+  const headerHeight = stickyHeaderRef.value?.$el?.offsetHeight ?? 42;
+  realHeaderScrolledAbove.value = activeItem.start + headerHeight < scrollTop;
 }
 
 /** Sections to render in virtualized mode (mapped from virtualItems). */
@@ -230,6 +213,7 @@ onUnmounted(() => {
           :fetch-content="fetchSectionContent"
           :measure-el="measureElement"
           :data-index="item.index"
+          :virtual-mode="true"
           :style="{
             position: 'absolute',
             top: 0,
