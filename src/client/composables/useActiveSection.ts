@@ -57,6 +57,12 @@ export interface ActiveSectionOptions {
    * Required in scroll-position mode.
    */
   getItemOffsets?: () => SectionOffset[];
+  /**
+   * Ref to the sticky header element. Its offsetHeight is used to adjust
+   * scroll detection so the active section changes when content passes
+   * under the sticky header, not when it enters the viewport.
+   */
+  stickyHeaderRef?: Ref<HTMLElement | null>;
 }
 
 /**
@@ -75,12 +81,12 @@ export function useActiveSection(
 ): ActiveSectionState {
   const activeId = ref<string | null>(null);
 
-  const { scrollElement, getItemOffsets } = options;
+  const { scrollElement, getItemOffsets, stickyHeaderRef } = options;
 
   const useScrollPositionMode = !!(scrollElement && getItemOffsets);
 
   if (useScrollPositionMode) {
-    return setupScrollPositionMode(elements, activeId, scrollElement!, getItemOffsets!);
+    return setupScrollPositionMode(elements, activeId, scrollElement!, getItemOffsets!, stickyHeaderRef);
   }
 
   return setupIntersectionMode(elements, activeId);
@@ -98,14 +104,16 @@ function setupScrollPositionMode(
   elements: Ref<SectionEntry[]>,
   activeId: Ref<string | null>,
   scrollElement: Ref<HTMLElement | null>,
-  getItemOffsets: () => SectionOffset[]
+  getItemOffsets: () => SectionOffset[],
+  stickyHeaderRef?: Ref<HTMLElement | null>
 ): ActiveSectionState {
   let currentEl: HTMLElement | null = null;
 
   function onScroll(): void {
     const el = scrollElement.value;
     if (!el) return;
-    activeId.value = findActiveSectionByScroll(el.scrollTop, getItemOffsets());
+    const headerOffset = stickyHeaderRef?.value?.offsetHeight ?? 0;
+    activeId.value = findActiveSectionByScroll(el.scrollTop, getItemOffsets(), headerOffset);
   }
 
   function attach(el: HTMLElement | null): void {
@@ -140,9 +148,6 @@ function setupScrollPositionMode(
   return { activeId, cleanup };
 }
 
-/** Height of the sticky section header overlay, used as scroll offset. */
-const STICKY_HEADER_OFFSET = 48;
-
 /**
  * Given scrollTop and an ordered list of section offsets, returns the id of
  * the section whose start is <= scrollTop (adjusted for sticky header height)
@@ -151,14 +156,15 @@ const STICKY_HEADER_OFFSET = 48;
  */
 function findActiveSectionByScroll(
   scrollTop: number,
-  offsets: SectionOffset[]
+  offsets: SectionOffset[],
+  headerOffset = 0
 ): string | null {
   if (offsets.length === 0) return null;
 
   // Adjust scrollTop by the sticky header height so the active section
   // changes when the NEXT section's header reaches the sticky position,
   // not when it first enters the viewport.
-  const adjusted = scrollTop + STICKY_HEADER_OFFSET;
+  const adjusted = scrollTop + headerOffset;
 
   let active: SectionOffset | null = null;
   for (const offset of offsets) {

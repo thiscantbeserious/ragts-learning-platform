@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import type { SectionMetadata, SectionContentPage } from '../../shared/types/api.js';
 import type { VirtualItem } from '@tanstack/vue-virtual';
 import type { DetectionStatus } from '../../shared/types/pipeline.js';
@@ -75,6 +75,7 @@ const emit = defineEmits<{
 }>();
 
 const overlayScrollbarRef = ref<InstanceType<typeof OverlayScrollbar> | null>(null);
+const stickyHeaderRef = ref<InstanceType<typeof SectionHeader> | null>(null);
 
 /** True when large-session virtual mode is active. */
 const isVirtualized = computed(() => props.virtualItems !== undefined);
@@ -99,6 +100,28 @@ const activeSection = computed((): SectionMetadata | null => {
   return props.sections.find((s) => s.id === props.activeSectionId) ?? null;
 });
 
+/**
+ * Show the sticky header only when the active section's real header
+ * has scrolled above the viewport. Compares the active virtual item's
+ * start offset against scrollTop.
+ */
+const showStickyHeader = ref(false);
+
+function onContentScroll(): void {
+  const viewport = overlayScrollbarRef.value?.viewport;
+  if (!viewport || !props.activeSectionId || !props.virtualItems) return;
+
+  const activeItem = props.virtualItems.find((_item, i) => {
+    const section = props.sections[i];
+    return section?.id === props.activeSectionId;
+  });
+  if (!activeItem) { showStickyHeader.value = false; return; }
+
+  // Show sticky when the active section's top has scrolled above the viewport.
+  // At that point the real header is no longer fully visible.
+  showStickyHeader.value = viewport.scrollTop > activeItem.start;
+}
+
 /** Sections to render in virtualized mode (mapped from virtualItems). */
 const virtualSections = computed((): Array<{ item: VirtualItem; section: SectionMetadata }> => {
   if (!isVirtualized.value || !props.virtualItems) return [];
@@ -116,6 +139,22 @@ function onSectionRegister(id: string, el: Element): void {
 /** Expose the scroll viewport so SessionDetailView can wire useSectionVirtualizer. */
 defineExpose({
   scrollViewport: computed(() => overlayScrollbarRef.value?.viewport ?? null),
+  stickyHeaderEl: computed(() => stickyHeaderRef.value?.$el as HTMLElement | null ?? null),
+});
+
+// Wire scroll listener for sticky header visibility
+let scrollListenerEl: HTMLElement | null = null;
+watch(
+  () => overlayScrollbarRef.value?.viewport,
+  (el) => {
+    if (scrollListenerEl) scrollListenerEl.removeEventListener('scroll', onContentScroll);
+    scrollListenerEl = el ?? null;
+    if (el) el.addEventListener('scroll', onContentScroll, { passive: true });
+  },
+  { immediate: true }
+);
+onUnmounted(() => {
+  if (scrollListenerEl) scrollListenerEl.removeEventListener('scroll', onContentScroll);
 });
 </script>
 
@@ -144,9 +183,10 @@ defineExpose({
         </div>
       </div>
 
-      <!-- Sticky overlay header for virtual mode: floats above the virtual container -->
+      <!-- Sticky overlay header for virtual mode: only shown after scrolling past the first header -->
       <SectionHeader
-        v-if="isVirtualized && activeSection"
+        v-if="isVirtualized && activeSection && showStickyHeader"
+        ref="stickyHeaderRef"
         class="section-sticky-overlay"
         :section="activeSection"
         :collapsed="false"

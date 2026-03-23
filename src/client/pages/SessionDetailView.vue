@@ -47,8 +47,11 @@ const sessionContentRef = ref<InstanceType<typeof SessionContent> | null>(null);
  */
 const scrollViewport = ref<HTMLElement | null>(null);
 
+const stickyHeaderEl = ref<HTMLElement | null>(null);
+
 watch(sessionContentRef, (content) => {
   scrollViewport.value = content?.scrollViewport ?? null;
+  stickyHeaderEl.value = content?.stickyHeaderEl ?? null;
 }, { immediate: true });
 
 const { virtualizer, virtualItems, scrollToSection } = useSectionVirtualizer(
@@ -96,6 +99,7 @@ function getItemOffsets(): SectionOffset[] {
 const { activeId } = useActiveSection(sectionEntries, {
   scrollElement: scrollViewport as Ref<HTMLElement | null>,
   getItemOffsets,
+  stickyHeaderRef: stickyHeaderEl,
 });
 
 /**
@@ -154,6 +158,7 @@ function onHoverSection(id: string): void {
           :virtual-items="isLargeSession ? virtualItems : undefined"
           :total-height="isLargeSession ? totalHeight : undefined"
           :measure-element="measureElement"
+          :active-section-id="isLargeSession ? activeId : null"
           @register-section="onRegisterSection"
         />
       </div>
