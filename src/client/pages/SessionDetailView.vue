@@ -202,11 +202,10 @@ function onHoverSection(id: string): void {
   min-height: 0;
 }
 
-/* In the with-nav layout the container has no vertical padding,
-   so we add it back to the content area only — the navigator fills flush. */
+/* Content gets full padding; navigator is outside this and fills flush. */
 .session-detail-view--with-nav .session-detail-view__content {
-  padding-top: var(--space-6);
-  padding-bottom: var(--space-6);
+  padding: var(--space-6);
+  padding-left: 0;
 }
 
 .session-detail-view__nav {
