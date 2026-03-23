@@ -20,6 +20,7 @@ defineEmits<{
       'section-header--marker': section.type === 'marker',
       'section-header--detected': section.type === 'detected',
     }"
+    :aria-expanded="!collapsed"
     @click="$emit('toggle')"
   >
     <div class="section-header__chevron">

@@ -177,6 +177,6 @@ export function resetSectionCache(): void {
  * Produces a stable cache key from a section id and line offset.
  * Format: `<sectionId>:<offset>`
  */
-export function makeCacheKey(sectionId: string, offset: number): string {
-  return `${sectionId}:${offset}`;
+export function makeCacheKey(sectionId: string, offset: number, limit: number | 'all' = 'all'): string {
+  return `${sectionId}:${offset}:${limit}`;
 }

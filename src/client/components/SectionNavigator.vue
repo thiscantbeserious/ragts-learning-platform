@@ -32,8 +32,6 @@
           :title="section.label"
           tabindex="0"
           @click="onPillClick(section.id)"
-          @keydown.enter="onPillClick(section.id)"
-          @keydown.space.prevent="onPillClick(section.id)"
           @keydown.arrow-up.prevent="focusPill(index - 1)"
           @keydown.arrow-down.prevent="focusPill(index + 1)"
           @mouseenter="onPillEnter(section, $event)"
