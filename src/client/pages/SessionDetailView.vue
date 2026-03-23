@@ -85,14 +85,18 @@ const sectionEntries = ref<SectionEntry[]>([]);
  * Used by useActiveSection in scroll-position mode to derive the active section.
  */
 function getItemOffsets(): SectionOffset[] {
-  const measurements = virtualizer.value.measurementsCache;
+  const v = virtualizer.value;
+  const measurements = v.measurementsCache;
   return sections.value.map((section, index) => {
     const m = measurements[index];
-    return {
-      id: section.id,
-      start: m?.start ?? 0,
-      end: m?.end ?? 0,
-    };
+    if (m) {
+      return { id: section.id, start: m.start, end: m.end };
+    }
+    // For unmeasured items, use the virtualizer's estimated offset
+    const estimated = v.getOffsetForIndex(index, 'start');
+    const offset = estimated?.[0] ?? 0;
+    const size = v.options.estimateSize(index);
+    return { id: section.id, start: offset, end: offset + size };
   });
 }
 
