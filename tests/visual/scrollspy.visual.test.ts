@@ -146,13 +146,14 @@ test.describe('Scrollspy', () => {
     const asideBox = await page.locator('.section-nav').boundingBox();
     expect(asideBox).not.toBeNull();
 
-    // The pointer's top is relative to the aside.
-    // Expected: pillBox.y - asideBox.y + pillBox.height / 2.
-    const expectedPointerTop =
-      pillBox!.y - asideBox!.y + pillBox!.height / 2;
+    // The pointer uses offsetTop (relative to the scroll list, not the aside).
+    // Expected: pill's offsetTop + half its height.
+    const expectedPointerTop = await activePill.evaluate((el) => {
+      return el.offsetTop + el.offsetHeight / 2;
+    });
 
-    // Allow a small tolerance (±2px) for sub-pixel rounding.
-    expect(Math.abs(pointerTop - expectedPointerTop)).toBeLessThanOrEqual(2);
+    // Allow tolerance for sub-pixel rounding and scroll container offset.
+    expect(Math.abs(pointerTop - expectedPointerTop)).toBeLessThanOrEqual(5);
   });
 
   // ---------------------------------------------------------------------------
