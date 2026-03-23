@@ -47,9 +47,10 @@ jobs:
             echo "Using vitest-only coverage"
           fi
 
-      - name: Enforce coverage thresholds (matches vite.config.ts)
+      - name: Enforce coverage thresholds (reads from vite.config.ts)
         run: |
-          THRESHOLD=90
+          THRESHOLD=$(node -e "const fs=require('fs');const c=fs.readFileSync('vite.config.ts','utf8');const m=c.match(/branches:\s*(\d+)/);console.log(m?m[1]:'90')")
+          echo "Branch threshold from vite.config.ts: ${THRESHOLD}%"
           if [ ! -f coverage/lcov.info ]; then
             echo "::error::No coverage report found"
             exit 1
