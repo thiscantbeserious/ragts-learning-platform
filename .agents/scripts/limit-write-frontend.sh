@@ -21,7 +21,9 @@ if [[ "$RESOLVED" == "$REPO_ROOT/src/client/"* ]] ||
    [[ "$RESOLVED" == "$REPO_ROOT/src/shared/"* ]] ||
    [[ "$RESOLVED" == "$REPO_ROOT/design/"* ]] ||
    [[ "$RESOLVED" == "$REPO_ROOT/tests/"* ]] ||
-   [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]]; then
+   [[ "$RESOLVED" == "$REPO_ROOT/.state/"* ]] ||
+   [[ "$RESOLVED" == "/tmp/"* ]] ||
+   [[ "$RESOLVED" == "/private/tmp/"* ]]; then
   exit 0
 fi
 
