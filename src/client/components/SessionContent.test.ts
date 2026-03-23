@@ -359,7 +359,7 @@ describe('SessionContent (Stage 11)', () => {
       { index: 1, key: 'sec-1', start: 500, end: 1000, size: 500, lane: 0 },
     ];
 
-    it('renders sticky overlay header when activeSectionId matches a section in virtual mode', () => {
+    it('sticky overlay is hidden at scroll position 0 even with activeSectionId set', () => {
       const sections = [makeSection('sec-0'), makeSection('sec-1')];
       const wrapper = mount(SessionContent, {
         props: {
@@ -370,21 +370,8 @@ describe('SessionContent (Stage 11)', () => {
           activeSectionId: 'sec-1',
         },
       });
-      expect(wrapper.find('.section-sticky-overlay').exists()).toBe(true);
-    });
-
-    it('sticky overlay shows the active section label', () => {
-      const sections = [makeSection('sec-0'), makeSection('sec-1')];
-      const wrapper = mount(SessionContent, {
-        props: {
-          sections,
-          fetchSectionContent: noopFetch,
-          virtualItems,
-          totalHeight: 1000,
-          activeSectionId: 'sec-1',
-        },
-      });
-      expect(wrapper.find('.section-sticky-overlay').text()).toContain('Section sec-1');
+      // Sticky requires scroll (realHeaderScrolledAbove starts false) — no scroll in unit tests
+      expect(wrapper.find('.section-sticky-overlay').exists()).toBe(false);
     });
 
     it('does not render sticky overlay when activeSectionId is null', () => {

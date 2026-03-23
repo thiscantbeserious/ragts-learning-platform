@@ -87,8 +87,8 @@ describe('useSectionVirtualizer', () => {
     expect(opts.overscan).toBe(3);
   });
 
-  it('estimateSize returns header height for empty section', async () => {
-    const { useSectionVirtualizer, SECTION_HEADER_HEIGHT } = await import('./use_section_virtualizer.js');
+  it('estimateSize returns MIN_SECTION_HEIGHT for empty section', async () => {
+    const { useSectionVirtualizer, MIN_SECTION_HEIGHT } = await import('./use_section_virtualizer.js');
 
     const sections = ref([makeSection('s1', 0)]);
     const scrollEl = ref<HTMLElement | null>(null);
@@ -97,7 +97,7 @@ describe('useSectionVirtualizer', () => {
 
     const opts = capturedOptions[0] as Record<string, unknown>;
     const estimateSize = opts.estimateSize as (i: number) => number;
-    expect(estimateSize(0)).toBe(SECTION_HEADER_HEIGHT);
+    expect(estimateSize(0)).toBe(MIN_SECTION_HEIGHT);
   });
 
   it('estimateSize scales with line count including snapshot padding', async () => {
@@ -114,8 +114,8 @@ describe('useSectionVirtualizer', () => {
     expect(estimateSize(0)).toBe(expected);
   });
 
-  it('estimateSize falls back to header height for out-of-range index', async () => {
-    const { useSectionVirtualizer, SECTION_HEADER_HEIGHT } = await import('./use_section_virtualizer.js');
+  it('estimateSize falls back to MIN_SECTION_HEIGHT for out-of-range index', async () => {
+    const { useSectionVirtualizer, MIN_SECTION_HEIGHT } = await import('./use_section_virtualizer.js');
 
     const sections = ref([makeSection('s1', 10)]);
     const scrollEl = ref<HTMLElement | null>(null);
@@ -125,7 +125,7 @@ describe('useSectionVirtualizer', () => {
     const opts = capturedOptions[0] as Record<string, unknown>;
     const estimateSize = opts.estimateSize as (i: number) => number;
     // Index 5 is out of range for a 1-section array
-    expect(estimateSize(5)).toBe(SECTION_HEADER_HEIGHT);
+    expect(estimateSize(5)).toBe(MIN_SECTION_HEIGHT);
   });
 
   it('getScrollElement returns the current scrollEl value', async () => {

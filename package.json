@@ -18,7 +18,7 @@
     "build:wasm": "cd packages/vt-wasm && ./build.sh",
     "start": "NODE_ENV=production node dist/server/start.js",
     "test": "vitest",
-    "test:unit": "vitest run --exclude tests/snapshots --exclude tests/integration",
+    "test:unit": "vitest run --exclude tests/snapshots --exclude tests/integration --exclude tests/acceptance --exclude tests/visual",
     "test:integration": "vitest run tests/integration",
     "test:snapshot": "vitest run tests/snapshots",
     "test:visual": "npx playwright test",

@@ -87,7 +87,6 @@ export function useSectionVirtualizer(
    * the virtualizer's scroll correction loop for bottom items.
    */
   let scrollLockTimer: ReturnType<typeof setTimeout> | null = null;
-  let scrollLocked = false;
 
   function scrollToSection(sectionId: string): void {
     const index = sections.value.findIndex((s) => s.id === sectionId);
@@ -102,11 +101,10 @@ export function useSectionVirtualizer(
     if (el && index > totalItems - 10) {
       const offset = virtualizer.value.getOffsetForIndex(index, 'start')?.[0] ?? 0;
       const maxScroll = el.scrollHeight - el.clientHeight;
-      scrollLocked = true;
       el.scrollTop = Math.min(offset, maxScroll);
-      // Unlock after the virtualizer settles
+      // Debounce to prevent rapid re-scrolls during virtualizer measurement
       if (scrollLockTimer) clearTimeout(scrollLockTimer);
-      scrollLockTimer = setTimeout(() => { scrollLocked = false; }, 500);
+      scrollLockTimer = setTimeout(() => { scrollLockTimer = null; }, 500);
       return;
     }
 
@@ -126,7 +124,7 @@ export function useSectionVirtualizer(
  * Using the actual measured value prevents scrollHeight oscillation when these
  * sections enter/leave the virtualizer's overscan window.
  */
-const MIN_SECTION_HEIGHT = 149;
+export const MIN_SECTION_HEIGHT = 149;
 
 /**
  * Estimates the pixel height of a section by its line count.
