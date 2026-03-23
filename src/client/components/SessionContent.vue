@@ -5,6 +5,7 @@ import type { VirtualItem } from '@tanstack/vue-virtual';
 import type { DetectionStatus } from '../../shared/types/pipeline.js';
 import type { TerminalSnapshot } from '#vt-wasm/types';
 import SectionItem from './SectionItem.vue';
+import SectionHeader from './SectionHeader.vue';
 import OverlayScrollbar from './OverlayScrollbar.vue';
 import TerminalSnapshotComponent from './TerminalSnapshot.vue';
 
@@ -53,6 +54,11 @@ const props = withDefaults(defineProps<{
    * Required when virtualItems is provided.
    */
   measureElement?: ((el: Element | null) => void) | null;
+  /**
+   * The id of the currently active (visible) section — used to render the
+   * sticky overlay header in virtual mode. Provided by the parent scrollspy.
+   */
+  activeSectionId?: string | null;
 }>(), {
   detectionStatus: 'completed',
   snapshot: null,
@@ -60,6 +66,7 @@ const props = withDefaults(defineProps<{
   virtualItems: undefined,
   totalHeight: undefined,
   measureElement: null,
+  activeSectionId: null,
 });
 
 const emit = defineEmits<{
@@ -81,6 +88,15 @@ const isTerminalError = computed(() =>
 const sectionsToRender = computed((): SectionMetadata[] => {
   if (!isVirtualized.value) return props.sections;
   return [];
+});
+
+/**
+ * The active section metadata for the sticky overlay header.
+ * Only resolved in virtual mode when activeSectionId is set.
+ */
+const activeSection = computed((): SectionMetadata | null => {
+  if (!isVirtualized.value || !props.activeSectionId) return null;
+  return props.sections.find((s) => s.id === props.activeSectionId) ?? null;
 });
 
 /** Sections to render in virtualized mode (mapped from virtualItems). */
@@ -127,6 +143,16 @@ defineExpose({
           </div>
         </div>
       </div>
+
+      <!-- Sticky overlay header for virtual mode: floats above the virtual container -->
+      <SectionHeader
+        v-if="isVirtualized && activeSection"
+        class="section-sticky-overlay"
+        :section="activeSection"
+        :collapsed="false"
+        :line-count="activeSection.lineCount"
+        @toggle="() => {}"
+      />
 
       <!-- Virtual mode: absolutely positioned items within a sized container -->
       <div
@@ -290,6 +316,17 @@ defineExpose({
 
 .section-virtual-container {
   position: relative;
+}
+
+/**
+ * Sticky overlay header sits at the top of the scroll viewport in virtual mode.
+ * Rendered directly inside the OverlayScrollbar viewport (not inside the absolute
+ * virtual container) so position: sticky works against the scroll container.
+ */
+.section-sticky-overlay {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .terminal-empty {
