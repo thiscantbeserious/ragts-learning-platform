@@ -122,10 +122,9 @@ function onContentScroll(): void {
   );
   if (!activeItem) return;
 
-  // Suppress sticky when the real header bottom edge is still at or below scrollTop.
-  // headerHeight: use the sticky header's measured height, or fall back to 42px.
-  const headerHeight = stickyHeaderRef.value?.$el?.offsetHeight ?? 42;
-  realHeaderScrolledAbove.value = activeItem.start + headerHeight < scrollTop;
+  // Show sticky as soon as the real header's top reaches scrollTop — at that
+  // moment the sticky seamlessly overlays the real header at position 0.
+  realHeaderScrolledAbove.value = activeItem.start < scrollTop;
 }
 
 /** Sections to render in virtualized mode (mapped from virtualItems). */
