@@ -86,7 +86,6 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-env browser */
 import { ref, computed, watch } from 'vue';
 import OverlayScrollbar from './OverlayScrollbar.vue';
 import { useScheduler } from '../composables/useScheduler.js';
@@ -261,9 +260,9 @@ function positionPopover(pillEl: HTMLElement): void {
 
     const popoverRect = popoverEl.getBoundingClientRect();
 
-    if (popoverRect.bottom > window.innerHeight - margin) {
+    if (popoverRect.bottom > globalThis.innerHeight - margin) {
       popoverClamped.value = true;
-      const top = window.innerHeight - popoverRect.height - margin;
+      const top = globalThis.innerHeight - popoverRect.height - margin;
       popoverStyle.value = {
         left: `${left}px`,
         top: `${top}px`,

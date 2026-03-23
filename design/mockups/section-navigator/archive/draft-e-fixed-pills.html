@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Erika — App Shell Base Mockup</title>
+  <!-- Design system stylesheets (same as the real app) -->
+  <link rel="stylesheet" href="../../styles/layout.css">
+  <link rel="stylesheet" href="../../styles/shell.css">
+  <link rel="stylesheet" href="../../styles/components.css">
+  <link rel="stylesheet" href="../../styles/icons.css">
+  <link rel="stylesheet" href="../../styles/page.css">
+
+  <style>
+    /* ================================================================
+       Vue scoped styles reproduced without data-v-* attributes.
+       These are the exact styles from the running app's Vue SFC
+       components, adapted for a static HTML mockup.
+       ================================================================ */
+
+    /* --- BrandMark --- */
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      height: var(--header-height);
+      padding-inline: var(--space-4);
+      background: var(--bg-surface);
+      position: relative;
+      box-shadow: inset -1px 0 0 var(--border-default);
+    }
+    .brand-mark::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+    }
+    .brand-mark__logotype {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-mark__icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--accent-primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-bold);
+      color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 6%, transparent);
+      box-shadow:
+        0 0 8px color-mix(in srgb, var(--accent-primary) 15%, transparent),
+        inset 0 0 6px color-mix(in srgb, var(--accent-primary) 8%, transparent);
+      flex-shrink: 0;
+    }
+    .brand-mark__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-primary);
+      line-height: var(--lh-lg);
+      text-shadow: 0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    }
+
+    /* --- ShellHeader --- */
+    .shell-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--header-height);
+      padding-inline: var(--space-6) var(--space-4);
+      background: var(--bg-surface);
+      position: relative;
+      overflow: visible;
+    }
+    .shell-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--accent-primary) 60%, transparent),
+        color-mix(in srgb, var(--accent-secondary) 80%, transparent)
+      );
+    }
+    .shell-header__left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      min-width: 0;
+      flex: 1;
+    }
+    .shell-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .shell-header__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      min-width: 0;
+      overflow: hidden;
+    }
+    .shell-header__breadcrumb-home {
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .shell-header__breadcrumb-home:hover {
+      color: var(--text-secondary);
+      text-decoration: underline;
+    }
+    .shell-header__breadcrumb-sep {
+      color: var(--text-disabled);
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .shell-header__breadcrumb-current {
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    /* --- ToolbarPill --- */
+    .toolbar-pill {
+      --toolbar-glass-bg: rgba(0, 212, 255, 0.04);
+      --toolbar-glass-border: rgba(0, 212, 255, 0.15);
+      --toolbar-shadow-outer: rgba(0, 212, 255, 0.06);
+      --toolbar-shadow-inner: rgba(0, 212, 255, 0.03);
+      --toolbar-hover-bg: rgba(0, 212, 255, 0.12);
+      --toolbar-hover-border: rgba(0, 212, 255, 0.3);
+      --toolbar-hover-shadow: rgba(0, 212, 255, 0.2);
+      --toolbar-ring-bg-stroke: rgba(0, 212, 255, 0.12);
+      --toolbar-ring-glow: rgba(0, 212, 255, 0.5);
+      --toolbar-separator: rgba(0, 212, 255, 0.15);
+      --toolbar-avatar-gradient-start: rgba(0, 212, 255, 0.15);
+      --toolbar-avatar-gradient-end: rgba(255, 77, 106, 0.1);
+
+      position: relative;
+      border-radius: var(--radius-full);
+      background: var(--toolbar-glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--toolbar-glass-border);
+      box-shadow: 0 0 12px var(--toolbar-shadow-outer), inset 0 0 8px var(--toolbar-shadow-inner);
+    }
+    .toolbar-pill__content {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-1);
+      --toolbar-pill-height: 38px;
+      --toolbar-pill-padding-y: 2px;
+      --toolbar-pill-padding-x: 2px;
+      --toolbar-btn-size: calc(var(--toolbar-pill-height) - var(--toolbar-pill-padding-y) * 2 - 2px);
+      padding: var(--toolbar-pill-padding-y) var(--toolbar-pill-padding-x);
+      border-radius: var(--radius-full);
+      max-width: 225px;
+      overflow: hidden;
+    }
+    .toolbar-pill__separator {
+      width: 1px;
+      height: 18px;
+      background: var(--toolbar-separator);
+      flex-shrink: 0;
+    }
+
+    /* --- Pipeline Ring Trigger --- */
+    .pipeline-wrap {
+      position: relative;
+      margin-inline-start: 1px;
+    }
+    .pipeline-ring-trigger {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      height: var(--toolbar-btn-size, 30px);
+      padding: 0 var(--space-3) 0 var(--space-1);
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+    }
+    .progress-ring {
+      width: 24px;
+      height: 24px;
+      transform: rotate(-90deg);
+      flex-shrink: 0;
+    }
+    .progress-ring__bg {
+      fill: none;
+      stroke: var(--toolbar-ring-bg-stroke);
+      stroke-width: 2.5;
+    }
+    .progress-ring__fill {
+      fill: none;
+      stroke: var(--accent-primary);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      filter: drop-shadow(0 0 3px var(--toolbar-ring-glow));
+    }
+    .ring-count {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: var(--weight-bold);
+      fill: var(--accent-primary);
+      text-anchor: middle;
+      dominant-baseline: central;
+      transform: rotate(90deg);
+      transform-origin: 12px 12px;
+    }
+    .pipeline-label {
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: var(--weight-medium);
+    }
+
+    /* --- Toolbar Button --- */
+    .toolbar-btn {
+      position: relative;
+      width: var(--toolbar-btn-size, 30px);
+      height: var(--toolbar-btn-size, 30px);
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .toolbar-btn .icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* --- Toolbar Avatar --- */
+    .toolbar-avatar {
+      width: var(--toolbar-btn-size, 30px);
+      height: var(--toolbar-btn-size, 30px);
+      border-radius: var(--radius-full);
+      border: 1px solid transparent;
+      background: linear-gradient(135deg, var(--toolbar-avatar-gradient-start), var(--toolbar-avatar-gradient-end));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-bold);
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    /* --- SidebarPanel --- */
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-surface);
+      width: 100%;
+      overflow: hidden;
+    }
+    .sidebar__search-wrap {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+    .sidebar__search-input {
+      width: 100%;
+      height: var(--input-height-sm);
+      padding: 0 var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      box-sizing: border-box;
+    }
+    .sidebar__search-input::placeholder {
+      color: var(--text-muted);
+    }
+    .sidebar__filters {
+      padding: var(--space-1\.5) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      gap: var(--space-1);
+    }
+    .sidebar__filters .filter-pill {
+      padding: 2px var(--space-1\.5);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      border-radius: var(--radius-sm);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+    .sidebar__list-region {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar__list-region::-webkit-scrollbar {
+      display: none;
+    }
+    .sidebar__session-list {
+      list-style: none;
+      margin: 0;
+      padding: var(--space-1) 0;
+      overflow: hidden;
+    }
+    .sidebar__session-item {
+      list-style: none;
+    }
+    .sidebar__footer {
+      padding: var(--space-3);
+      border-top: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+    .sidebar__new-session-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* --- SessionCard --- */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      padding: var(--space-1\.5) var(--space-3);
+      background: transparent;
+      border: none;
+      border-left: 2px solid transparent;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      box-sizing: border-box;
+    }
+    .session-card:hover {
+      background: var(--accent-primary-subtle);
+    }
+    .session-card--selected {
+      border-left-color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+    }
+    .session-card__row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1\.5);
+      min-width: 0;
+    }
+    .session-card__row--primary {
+      justify-content: flex-start;
+    }
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1;
+    }
+    .session-card--selected .session-card__filename {
+      color: var(--text-primary);
+    }
+    .session-card__meta {
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      gap: var(--space-2);
+      padding-left: calc(6px + var(--space-1\.5));
+    }
+    .session-card__sections,
+    .session-card__age {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .session-card__age {
+      margin-left: auto;
+    }
+    .session-card__status-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+    .session-card__status-dot--ready {
+      background: var(--status-success);
+    }
+    .session-card__status-dot--failed {
+      background: var(--status-error);
+    }
+
+    /* --- SessionDetailView --- */
+    .session-detail-view {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+      overflow-y: auto;
+      padding: var(--space-6);
+    }
+
+    /* --- TerminalChrome --- */
+    .terminal-chrome {
+      font-family: var(--font-mono);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .terminal-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .terminal-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* --- SectionHeader (scoped overrides) --- */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      text-align: left;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      border: none;
+      width: 100%;
+      /* Sticky positioning */
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .section-header__label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .section-header__range {
+      flex-shrink: 0;
+      min-width: 18ch;
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+      font-size: var(--text-xs);
+    }
+    .section-header__badge {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .section-header__chevron {
+      transform: rotate(90deg);
+    }
+    .section-header--collapsed .section-header__chevron {
+      transform: rotate(0deg);
+    }
+
+    /* --- TerminalSnapshot --- */
+    .terminal-snapshot {
+      font-size: var(--text-base);
+      line-height: var(--leading-mono);
+      padding: var(--space-3) 0;
+      overflow: hidden;
+    }
+    .terminal-line {
+      display: flex;
+      min-height: calc(var(--leading-mono) * 1em);
+    }
+    .terminal-line__number {
+      display: inline-block;
+      box-sizing: content-box;
+      width: 4ch;
+      min-width: 4ch;
+      text-align: right;
+      padding-right: 1ch;
+      padding-left: var(--space-3);
+      color: var(--text-muted);
+      user-select: none;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-default);
+      margin-right: 1ch;
+    }
+    .terminal-line__content {
+      white-space: pre;
+      flex: 1;
+    }
+    .terminal-span {
+      white-space: pre;
+    }
+    .terminal-span--bold {
+      font-weight: 700;
+    }
+    .terminal-span--faint {
+      opacity: 0.5;
+    }
+    .terminal-span--italic {
+      font-style: italic;
+    }
+
+    /* body override — suppress background grid for mockup (the real app has it on body,
+       but since this mockup's body is visible behind the shell, keep it) */
+
+    /* ================================================================
+       SECTION NAVIGATOR — aside panel
+       ================================================================
+       48px wide strip on the right side of the shell.
+       Contains numbered pills (26px square) connected by a trace line.
+       Marker sections (pink) vs detected (gray), with active glow.
+       Popover card on hover uses position:fixed to avoid clipping.
+       ================================================================ */
+
+    /* --- Activate aside column --- */
+    .spatial-shell--aside-active {
+      grid-template-columns: var(--sidebar-width) 1fr 48px;
+    }
+
+    /* --- Navigator container --- */
+    .section-nav {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-surface);
+      border-left: 1px solid var(--border-default);
+      overflow: hidden;
+    }
+
+    /* --- Scrollable pill list --- */
+    .section-nav__scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      padding: var(--space-3) 0;
+    }
+    .section-nav__scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* --- Pill list with trace line --- */
+    .section-nav__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Trace line — vertical connector between pills */
+    .section-nav__list::before {
+      content: '';
+      position: absolute;
+      top: 13px;
+      bottom: 13px;
+      left: 50%;
+      width: 1px;
+      background: var(--border-default);
+      z-index: 0;
+    }
+
+    /* --- Individual pill item --- */
+    .section-nav__item {
+      position: relative;
+      z-index: 1;
+      padding: 3px 0;
+    }
+
+    /* --- Pill button --- */
+    .section-nav__pill {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: var(--weight-bold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: all var(--duration-fast) var(--easing-default);
+      position: relative;
+    }
+
+    /* Detected variant (gray) — default styling above is the detected look */
+
+    /* Marker variant (pink/secondary accent) */
+    .section-nav__pill--marker {
+      border-color: color-mix(in srgb, var(--accent-secondary) 40%, transparent);
+      background: color-mix(in srgb, var(--accent-secondary) 10%, var(--bg-elevated));
+      color: var(--accent-secondary);
+    }
+
+    /* Active state — glow ring */
+    .section-nav__pill--active {
+      border-color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-elevated));
+      color: var(--accent-primary);
+      box-shadow:
+        0 0 8px color-mix(in srgb, var(--accent-primary) 30%, transparent),
+        0 0 2px color-mix(in srgb, var(--accent-primary) 50%, transparent);
+    }
+
+    /* Active marker — pink glow instead of cyan */
+    .section-nav__pill--marker.section-nav__pill--active {
+      border-color: var(--accent-secondary);
+      background: color-mix(in srgb, var(--accent-secondary) 15%, var(--bg-elevated));
+      color: var(--accent-secondary);
+      box-shadow:
+        0 0 8px color-mix(in srgb, var(--accent-secondary) 30%, transparent),
+        0 0 2px color-mix(in srgb, var(--accent-secondary) 50%, transparent);
+    }
+
+    /* Hover state */
+    .section-nav__pill:hover {
+      border-color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-primary) 8%, var(--bg-elevated));
+    }
+    .section-nav__pill--marker:hover {
+      border-color: var(--accent-secondary);
+      background: color-mix(in srgb, var(--accent-secondary) 12%, var(--bg-elevated));
+    }
+
+    /* ================================================================
+       POPOVER CARD — position:fixed, never clipped
+       ================================================================ */
+    .section-nav__popover {
+      position: fixed;
+      z-index: 1000;
+      width: 260px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: var(--space-3);
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    /* Arrow pointing right toward the pill */
+    .section-nav__popover::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -6px;
+      transform: translateY(-50%) rotate(45deg);
+      width: 10px;
+      height: 10px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border-strong);
+      border-top: 1px solid var(--border-strong);
+    }
+
+    /* Popover header row */
+    .section-nav__popover-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .section-nav__popover-title {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section-nav__popover-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px var(--space-1\.5);
+      font-size: 9px;
+      font-weight: var(--weight-bold);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wider);
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+    }
+    .section-nav__popover-badge--marker {
+      background: color-mix(in srgb, var(--accent-secondary) 15%, transparent);
+      color: var(--accent-secondary);
+      border: 1px solid color-mix(in srgb, var(--accent-secondary) 30%, transparent);
+    }
+    .section-nav__popover-badge--detected {
+      background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+      color: var(--text-muted);
+      border: 1px solid color-mix(in srgb, var(--text-muted) 20%, transparent);
+    }
+
+    /* Popover meta line */
+    .section-nav__popover-meta {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    /* Popover preview line */
+    .section-nav__popover-preview {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border-radius: var(--radius-sm);
+      padding: var(--space-1\.5) var(--space-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Future slots placeholder */
+    .section-nav__popover-slots {
+      display: flex;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+    .section-nav__popover-slot {
+      width: 100%;
+      height: 4px;
+      background: var(--border-default);
+      border-radius: 2px;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="spatial-shell spatial-shell--aside-active">
+    <!-- ================================ BRAND MARK ================================ -->
+    <div class="spatial-shell__brand brand-mark">
+      <a href="/" class="brand-mark__logotype" aria-label="Erika -- go to home">
+        <div class="brand-mark__icon" aria-hidden="true">E</div>
+        <span class="brand-mark__name">Erika</span>
+      </a>
+    </div>
+
+    <!-- ================================ SHELL HEADER ================================ -->
+    <header class="spatial-shell__header shell-header" aria-label="Application header">
+      <div class="shell-header__left">
+        <nav class="shell-header__breadcrumb" aria-label="Breadcrumb">
+          <a href="/" class="shell-header__breadcrumb-home">Sessions</a>
+          <span class="shell-header__breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="shell-header__breadcrumb-current">agnt-ses-rec_main__0ta839f.cast</span>
+        </nav>
+      </div>
+      <div class="shell-header__right">
+        <div class="toolbar-pill" role="toolbar" aria-label="Main toolbar" style="--toolbar-expanded-width: 225px;">
+          <div class="toolbar-pill__content">
+            <!-- Pipeline ring trigger -->
+            <div class="pipeline-wrap">
+              <button class="pipeline-ring-trigger" type="button" aria-label="Pipeline: 0 active" aria-expanded="false">
+                <svg class="progress-ring" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+                  <circle class="progress-ring__bg" cx="12" cy="12" r="9"></circle>
+                  <circle class="progress-ring__fill" cx="12" cy="12" r="9" stroke-dasharray="56.549" stroke-dashoffset="56.549"></circle>
+                  <text class="ring-count" x="12" y="12">0</text>
+                </svg>
+                <span class="pipeline-label">Pipeline</span>
+              </button>
+            </div>
+            <!-- Separator -->
+            <div class="toolbar-pill__separator"></div>
+            <!-- Settings -->
+            <button class="toolbar-btn" type="button" aria-label="Settings">
+              <span class="icon icon--sm icon-settings"></span>
+            </button>
+            <!-- Separator -->
+            <div class="toolbar-pill__separator"></div>
+            <!-- Notifications -->
+            <button class="toolbar-btn" type="button" aria-label="Notifications">
+              <span class="icon icon--sm icon-bell"></span>
+            </button>
+            <!-- Separator -->
+            <div class="toolbar-pill__separator"></div>
+            <!-- Avatar -->
+            <button class="toolbar-avatar" type="button" aria-label="S">S</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================================ SIDEBAR ================================ -->
+    <nav class="spatial-shell__sidebar" aria-label="Session list">
+      <div class="sidebar-panel">
+        <div class="sidebar__search-wrap">
+          <input type="search" class="sidebar__search-input" placeholder="Filter sessions..." aria-label="Filter sessions by filename">
+        </div>
+        <div class="sidebar__filters" role="group" aria-label="Filter by status">
+          <button class="filter-pill filter-pill--active" aria-pressed="true">All</button>
+          <button class="filter-pill" aria-pressed="false">Processing</button>
+          <button class="filter-pill" aria-pressed="false">Ready</button>
+          <button class="filter-pill" aria-pressed="false">Failed</button>
+        </div>
+        <div class="sidebar__list-region">
+          <ul class="sidebar__session-list">
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">agnt-ses-rec_refactor-sdlc__0ta99vg.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card session-card--selected">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">agnt-ses-rec_main__0ta839f.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">env-ag-fir_main__0ta796r.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">env-ag-fir_initial-prototype__0ta7azo.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">ragts-le-platf_feat--snapshot-testing__0tb4bdb.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">1 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">igp-mono_260209_160738.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">0 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">agnt-ses-rec_main__0ta8hdj.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">codex-pattern-analysis.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">env-ag-fir_initial-prototype__0ta7asn.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">13 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">agnt-ses-rec_main__0ta9h9j.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">28 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">agnt-ses-rec_feature--improve-filename-template__0ta7c9u.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">10 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">agnt-ses-rec_main__0taaq5i.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">5 sections</span>
+                  <span class="session-card__age">yesterday</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">ragts-le-platf_feat--client-design-bootstrap__0tbwa67.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">2d ago</span>
+                </div>
+              </button>
+            </li>
+            <li class="sidebar__session-item">
+              <button class="session-card">
+                <div class="session-card__row session-card__row--primary">
+                  <span class="session-card__status-dot session-card__status-dot--ready"></span>
+                  <span class="session-card__filename">ragts-le-platf_feat--client-design-bootstrap__0tbswua.cast</span>
+                </div>
+                <div class="session-card__row session-card__meta">
+                  <span class="session-card__sections">50 sections</span>
+                  <span class="session-card__age">2d ago</span>
+                </div>
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="sidebar__footer">
+          <button class="sidebar__new-session-btn btn btn--sm btn--primary">+ New Session</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ================================ MAIN CONTENT ================================ -->
+    <main id="main-content" class="spatial-shell__main" tabindex="-1">
+      <div class="session-detail-view">
+        <div class="terminal-chrome">
+          <div class="terminal-scroll">
+            <!-- Section 1 (expanded) -->
+            <button class="section-header section-header--detected">
+              <div class="section-header__chevron">
+                <span class="icon icon--sm icon-chevron-down"></span>
+              </div>
+              <span class="section-header__label">Section 1</span>
+              <span class="section-header__range">L1&ndash;L95 (95&nbsp;lines)</span>
+              <span class="badge badge--sm section-header__badge badge--accent">Detected</span>
+            </button>
+            <div class="section-content">
+              <div class="terminal-snapshot">
+                <div class="terminal-line"><span class="terminal-line__number">1</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">2</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">3</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">4</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">5</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">6</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">7</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">8</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">9</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">10</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">11</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">12</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint">&boxdr;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&boxdl;</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">13</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint">&boxv; &gt;_ </span><span class="terminal-span terminal-span--bold">OpenAI Codex</span><span class="terminal-span terminal-span--faint"> (v0.98.0)                          &boxv;</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">14</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint">&boxv;                                                    &boxv;</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">15</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint">&boxv; model:     </span><span class="terminal-span">gpt-5.2-codex medium</span><span class="terminal-span terminal-span--faint">   </span><span class="terminal-span" style="color: var(--term-color-6);">/model</span><span class="terminal-span terminal-span--faint"> to change &boxv;</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">16</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint">&boxv; directory: </span><span class="terminal-span">~/git/simon/agent-session-recorder</span><span class="terminal-span terminal-span--faint">      &boxv;</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">17</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint">&boxur;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&HorizontalLine;&boxul;</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">18</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">19</span><span class="terminal-line__content"><span class="terminal-span">  </span><span class="terminal-span terminal-span--bold">Tip:</span><span class="terminal-span"> </span><span class="terminal-span terminal-span--italic">New</span><span class="terminal-span"> Try the </span><span class="terminal-span terminal-span--bold">Codex App</span><span class="terminal-span"> with 2x rate limits until </span><span class="terminal-span terminal-span--italic">April 2nd</span><span class="terminal-span">. Run 'codex</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">20</span><span class="terminal-line__content"><span class="terminal-span">  app' or visit https://chatgpt.com/codex</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">21</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">22</span><span class="terminal-line__content"><span class="terminal-span" style="color: var(--term-color-3);">&#9888; The notion MCP server is not logged in. Run `codex mcp login notion`.</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">23</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">24</span><span class="terminal-line__content"><span class="terminal-span" style="color: var(--term-color-3);">&#9888; MCP startup incomplete (failed: notion)</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">25</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">26</span><span class="terminal-line__content"><span class="terminal-span" style="background-color: rgb(28, 28, 28);">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">27</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint" style="background-color: rgb(28, 28, 28);">&rsaquo; </span><span class="terminal-span" style="background-color: rgb(28, 28, 28);">codex app                                                                     </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">28</span><span class="terminal-line__content"><span class="terminal-span" style="background-color: rgb(28, 28, 28);">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">29</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">30</span><span class="terminal-line__content"><span class="terminal-span" style="color: var(--term-color-1);">&#9632; Conversation interrupted - tell the model what to do differently. Something</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">31</span><span class="terminal-line__content"><span class="terminal-span" style="color: var(--term-color-1);">went wrong? Hit `/feedback` to report the issue.</span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">32</span><span class="terminal-line__content"><span class="terminal-span">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">33</span><span class="terminal-line__content"><span class="terminal-span" style="background-color: rgb(28, 28, 28);">                                                                                </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">34</span><span class="terminal-line__content"><span class="terminal-span terminal-span--faint" style="background-color: rgb(28, 28, 28);">&rsaquo; </span><span class="terminal-span" style="color: var(--term-color-6); background-color: rgb(28, 28, 28);">[Image #1]</span><span class="terminal-span" style="background-color: rgb(28, 28, 28);"> i have a drawing issue in lines with the recorder icon with tui    </span></span></div>
+                <div class="terminal-line"><span class="terminal-line__number">35</span><span class="terminal-line__content"><span class="terminal-span" style="background-color: rgb(28, 28, 28);">                                                                                </span></span></div>
+              </div>
+            </div>
+
+            <!-- Section 2 (collapsed) -->
+            <button class="section-header section-header--detected section-header--collapsed">
+              <div class="section-header__chevron">
+                <span class="icon icon--sm icon-chevron-down"></span>
+              </div>
+              <span class="section-header__label">Section 2</span>
+              <span class="section-header__range">L96&ndash;L180 (85&nbsp;lines)</span>
+              <span class="badge badge--sm section-header__badge badge--accent">Detected</span>
+            </button>
+
+            <!-- Section 3 (collapsed) -->
+            <button class="section-header section-header--detected section-header--collapsed">
+              <div class="section-header__chevron">
+                <span class="icon icon--sm icon-chevron-down"></span>
+              </div>
+              <span class="section-header__label">Section 3</span>
+              <span class="section-header__range">L181&ndash;L260 (80&nbsp;lines)</span>
+              <span class="badge badge--sm section-header__badge badge--accent">Detected</span>
+            </button>
+
+            <!-- Section 4 (collapsed) -->
+            <button class="section-header section-header--detected section-header--collapsed">
+              <div class="section-header__chevron">
+                <span class="icon icon--sm icon-chevron-down"></span>
+              </div>
+              <span class="section-header__label">Section 4</span>
+              <span class="section-header__range">L261&ndash;L350 (90&nbsp;lines)</span>
+              <span class="badge badge--sm section-header__badge badge--accent">Detected</span>
+            </button>
+
+            <!-- Section 5 (collapsed) -->
+            <button class="section-header section-header--detected section-header--collapsed">
+              <div class="section-header__chevron">
+                <span class="icon icon--sm icon-chevron-down"></span>
+              </div>
+              <span class="section-header__label">Section 5</span>
+              <span class="section-header__range">L351&ndash;L420 (70&nbsp;lines)</span>
+              <span class="badge badge--sm section-header__badge badge--accent">Detected</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ================================ SECTION NAVIGATOR (ASIDE) ================================ -->
+    <aside class="spatial-shell__aside section-nav" aria-label="Section navigator">
+      <div class="section-nav__scroll">
+        <ul class="section-nav__list" role="listbox" aria-label="Jump to section">
+          <!-- Pills 1-50: mix of marker (pink) and detected (gray) -->
+          <!-- Section 1 — active, detected -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--active" aria-selected="true" title="Section 1">1</button></li>
+          <!-- Section 2 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 2">2</button></li>
+          <!-- Section 3 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 3">3</button></li>
+          <!-- Section 4 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 4">4</button></li>
+          <!-- Section 5 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 5">5</button></li>
+          <!-- Section 6 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 6">6</button></li>
+          <!-- Section 7 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 7">7</button></li>
+          <!-- Section 8 — marker (has visible popover) -->
+          <li class="section-nav__item" id="pill-8"><button class="section-nav__pill section-nav__pill--marker" title="Section 8">8</button></li>
+          <!-- Section 9 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 9">9</button></li>
+          <!-- Section 10 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 10">10</button></li>
+          <!-- Section 11 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 11">11</button></li>
+          <!-- Section 12 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 12">12</button></li>
+          <!-- Section 13 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 13">13</button></li>
+          <!-- Section 14 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 14">14</button></li>
+          <!-- Section 15 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 15">15</button></li>
+          <!-- Section 16 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 16">16</button></li>
+          <!-- Section 17 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 17">17</button></li>
+          <!-- Section 18 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 18">18</button></li>
+          <!-- Section 19 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 19">19</button></li>
+          <!-- Section 20 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 20">20</button></li>
+          <!-- Section 21 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 21">21</button></li>
+          <!-- Section 22 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 22">22</button></li>
+          <!-- Section 23 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 23">23</button></li>
+          <!-- Section 24 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 24">24</button></li>
+          <!-- Section 25 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 25">25</button></li>
+          <!-- Section 26 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 26">26</button></li>
+          <!-- Section 27 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 27">27</button></li>
+          <!-- Section 28 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 28">28</button></li>
+          <!-- Section 29 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 29">29</button></li>
+          <!-- Section 30 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 30">30</button></li>
+          <!-- Section 31 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 31">31</button></li>
+          <!-- Section 32 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 32">32</button></li>
+          <!-- Section 33 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 33">33</button></li>
+          <!-- Section 34 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 34">34</button></li>
+          <!-- Section 35 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 35">35</button></li>
+          <!-- Section 36 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 36">36</button></li>
+          <!-- Section 37 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 37">37</button></li>
+          <!-- Section 38 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 38">38</button></li>
+          <!-- Section 39 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 39">39</button></li>
+          <!-- Section 40 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 40">40</button></li>
+          <!-- Section 41 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 41">41</button></li>
+          <!-- Section 42 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 42">42</button></li>
+          <!-- Section 43 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 43">43</button></li>
+          <!-- Section 44 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 44">44</button></li>
+          <!-- Section 45 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 45">45</button></li>
+          <!-- Section 46 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 46">46</button></li>
+          <!-- Section 47 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 47">47</button></li>
+          <!-- Section 48 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 48">48</button></li>
+          <!-- Section 49 — detected -->
+          <li class="section-nav__item"><button class="section-nav__pill" title="Section 49">49</button></li>
+          <!-- Section 50 — marker -->
+          <li class="section-nav__item"><button class="section-nav__pill section-nav__pill--marker" title="Section 50">50</button></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ================================ STATIC POPOVER (for section 8) ================================ -->
+    <!-- Positioned with JS below to align with pill #8 -->
+    <div class="section-nav__popover" id="popover-8" role="tooltip">
+      <div class="section-nav__popover-header">
+        <span class="section-nav__popover-title">Tool call: read_file</span>
+        <span class="section-nav__popover-badge section-nav__popover-badge--marker">Marker</span>
+      </div>
+      <div class="section-nav__popover-meta">
+        <span>L580 &ndash; L692</span>
+        <span>&middot;</span>
+        <span>113 lines</span>
+      </div>
+      <div class="section-nav__popover-preview">
+        <span style="opacity: 0.5;">&rsaquo;</span> Reading src/client/components/SpatialShell.vue...
+      </div>
+      <div class="section-nav__popover-slots">
+        <div class="section-nav__popover-slot"></div>
+        <div class="section-nav__popover-slot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Position the popover aligned with pill #8 -->
+  <script>
+    function positionPopover() {
+      const pill8 = document.querySelector('#pill-8');
+      const popover = document.querySelector('#popover-8');
+      if (!pill8 || !popover) return;
+
+      const rect = pill8.getBoundingClientRect();
+      const popoverHeight = popover.offsetHeight;
+
+      // Position to the left of the pill, vertically centered
+      popover.style.top = (rect.top + rect.height / 2 - popoverHeight / 2) + 'px';
+      popover.style.right = (window.innerWidth - rect.left + 8) + 'px';
+      popover.style.left = 'auto';
+    }
+
+    // Position on load and resize
+    positionPopover();
+    window.addEventListener('resize', positionPopover);
+    // Re-position after fonts load
+    document.fonts.ready.then(positionPopover);
+  </script>
+</body>
+</html>

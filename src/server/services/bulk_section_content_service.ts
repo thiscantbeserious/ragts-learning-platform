@@ -11,7 +11,6 @@
 import type { SectionAdapter } from '../db/section_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
 import type { BulkSectionContentResponse, SectionContentPage } from '../../shared/types/api.js';
-import type { SnapshotLine } from '#vt-wasm/types';
 import { BULK_MAX_SECTIONS } from '../../shared/constants.js';
 import { parseSnapshotLines } from '../utils/snapshot_lines.js';
 

@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draft E — Fixed Numbered Pills with Popover Cards</title>
+  <link rel="stylesheet" href="../../styles/layout.css">
+  <style>
+    /* ================================================================
+       SPATIAL SHELL GRID (replica from shell.css)
+       ================================================================ */
+    .spatial-shell {
+      background: var(--bg-page);
+      display: grid;
+      grid-template-areas:
+        "brand  header header"
+        "sidebar main   aside";
+      grid-template-columns: var(--sidebar-width) 1fr 48px;
+      grid-template-rows: var(--header-height) 1fr;
+      height: 100dvh;
+    }
+
+    .spatial-shell__brand { grid-area: brand; }
+    .spatial-shell__header { grid-area: header; z-index: 50; }
+    .spatial-shell__sidebar { grid-area: sidebar; overflow: hidden; min-height: 0; }
+    .spatial-shell__main { grid-area: main; min-width: 0; overflow-y: auto; }
+    .spatial-shell__aside { grid-area: aside; overflow: hidden; }
+
+    /* ================================================================
+       BRAND MARK (top-left)
+       ================================================================ */
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0 var(--space-4);
+      height: var(--header-height);
+      background: var(--bg-surface);
+      border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 60%, transparent);
+      border-right: 1px solid var(--border-default);
+    }
+
+    .brand-mark__icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      border-radius: var(--radius-sm);
+      font-weight: var(--weight-bold);
+      font-size: var(--text-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+    }
+
+    .brand-mark__name {
+      font-family: var(--font-mono);
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      letter-spacing: var(--tracking-wide);
+      color: var(--text-primary);
+      text-shadow: 0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+    }
+
+    /* ================================================================
+       SHELL HEADER (top bar)
+       ================================================================ */
+    .shell-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--header-height);
+      padding-inline: var(--space-6) var(--space-4);
+      background: var(--bg-surface);
+      position: relative;
+    }
+
+    .shell-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--accent-primary) 60%, transparent),
+        color-mix(in srgb, var(--accent-secondary) 80%, transparent)
+      );
+    }
+
+    .shell-header__left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      min-width: 0;
+      flex: 1;
+    }
+
+    .shell-header__breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+    }
+
+    .shell-header__breadcrumb-home {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    .shell-header__breadcrumb-sep {
+      color: var(--text-disabled);
+      user-select: none;
+    }
+
+    .shell-header__breadcrumb-current {
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+    }
+
+    .shell-header__right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    /* Toolbar pill shell */
+    .toolbar-pill {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-1) var(--space-2);
+      background: rgba(10, 10, 25, 0.55);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+      height: var(--btn-height-sm);
+    }
+
+    .toolbar-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: var(--text-xs);
+    }
+
+    .toolbar-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-primary-subtle);
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 30%, transparent);
+      color: var(--accent-primary);
+      font-size: 9px;
+      font-weight: var(--weight-semibold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+    }
+
+    /* Pipeline ring trigger */
+    .pipeline-ring {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--status-success);
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pipeline-ring__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--status-success);
+    }
+
+    /* ================================================================
+       SIDEBAR PANEL
+       ================================================================ */
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-default);
+    }
+
+    .sidebar__search-wrap {
+      padding: var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__search-input {
+      width: 100%;
+      height: var(--input-height-sm);
+      padding: 0 var(--space-3);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      box-sizing: border-box;
+    }
+
+    .sidebar__search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .sidebar__filters {
+      display: flex;
+      padding: var(--space-1) var(--space-3);
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+      gap: var(--space-1);
+    }
+
+    .filter-pill {
+      padding: 2px var(--space-1);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      border-radius: var(--radius-sm);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    .filter-pill--active {
+      background: var(--accent-primary-subtle);
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .sidebar__list {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--space-1) 0;
+      min-height: 0;
+    }
+
+    .sidebar__list::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar__list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar__list::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: 2px;
+    }
+
+    /* Session cards in sidebar */
+    .session-card {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: var(--rhythm-half) var(--space-3);
+      margin: 0 var(--space-1);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .session-card:hover {
+      background: rgba(10, 10, 25, 0.55);
+      border-color: rgba(0, 212, 255, 0.15);
+    }
+
+    .session-card--selected {
+      background: rgba(10, 10, 25, 0.85);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 var(--space-0\.5) var(--accent-primary-subtle),
+                  0 0 20px rgba(0, 212, 255, 0.15);
+    }
+
+    .session-card__filename {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .session-card__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+    }
+
+    .sidebar__footer {
+      padding: var(--space-3);
+      border-top: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .sidebar__new-session-btn {
+      width: 100%;
+      padding: var(--space-1) var(--space-3);
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      cursor: pointer;
+      height: var(--btn-height-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ================================================================
+       MAIN CONTENT AREA
+       ================================================================ */
+    .session-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: var(--space-4);
+      gap: 0;
+    }
+
+    .terminal-chrome {
+      font-family: var(--font-mono);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--terminal-bg);
+    }
+
+    .terminal-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .terminal-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .terminal-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .terminal-scroll::-webkit-scrollbar-thumb {
+      background: var(--border-default);
+      border-radius: 3px;
+    }
+
+    /* Section headers */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--rhythm-half) var(--space-4);
+      background: rgba(10, 10, 25, 0.55);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: var(--space-1) var(--space-2);
+    }
+
+    .section-header__chevron {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--space-5);
+      height: var(--space-5);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .section-header__label {
+      flex: 1;
+      font-size: var(--text-base);
+      font-weight: var(--weight-medium);
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .section-header__range {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      flex-shrink: 0;
+    }
+
+    .section-header--detected {
+      border-left: var(--space-2) solid var(--accent-primary);
+    }
+
+    .section-header--detected .section-header__label {
+      color: var(--accent-primary);
+    }
+
+    .section-header--marker {
+      border-left: var(--space-2) solid var(--accent-secondary);
+    }
+
+    .section-header--marker .section-header__label {
+      color: var(--accent-secondary);
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-0\.5) var(--space-1\.5);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-semibold);
+      border-radius: var(--radius-full);
+      letter-spacing: var(--tracking-wide);
+      white-space: nowrap;
+    }
+
+    .badge--accent {
+      background: var(--accent-primary-subtle);
+      color: var(--accent-primary);
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+    }
+
+    .badge--secondary {
+      background: var(--accent-secondary-subtle);
+      color: var(--accent-secondary);
+      border: 1px solid color-mix(in srgb, var(--accent-secondary) 20%, transparent);
+    }
+
+    /* Terminal lines */
+    .terminal-snapshot {
+      font-size: var(--text-base);
+      line-height: var(--lh-mono);
+      padding: var(--space-3) 0;
+      white-space: pre;
+    }
+
+    .terminal-line {
+      display: flex;
+      min-height: calc(var(--lh-mono) * 1em);
+    }
+
+    .terminal-line__number {
+      display: inline-block;
+      box-sizing: content-box;
+      width: 4ch;
+      min-width: 4ch;
+      text-align: right;
+      padding-right: 1ch;
+      padding-left: var(--space-3);
+      color: var(--text-disabled);
+      user-select: none;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-default);
+      margin-right: 1ch;
+    }
+
+    .terminal-line__content {
+      white-space: pre;
+      flex: 1;
+    }
+
+    /* ANSI color helpers */
+    .t-green { color: #8ae234; }
+    .t-cyan { color: #34e2e2; }
+    .t-blue { color: #729fcf; }
+    .t-yellow { color: #fce94f; }
+    .t-red { color: #ef2929; }
+    .t-magenta { color: #ad7fa8; }
+    .t-white { color: #eeeeec; }
+    .t-gray { color: #555753; }
+    .t-bold { font-weight: 700; }
+    .t-dim { opacity: 0.5; }
+    .t-default { color: var(--terminal-text); }
+
+    /* ================================================================
+       SECTION NAVIGATOR — RIGHT-EDGE ASIDE
+       ================================================================
+       48px wide fixed aside. Numbered square pills (26px) connected
+       by a vertical trace line. No container box — just pills on bg.
+       ================================================================ */
+    .section-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      background: var(--bg-page);
+      border-left: 1px solid var(--border-default);
+      position: relative;
+    }
+
+    .section-nav__list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: visible;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-3) 0;
+      gap: var(--space-2);
+      position: relative;
+      /* Clip only Y scrollbar, allow X overflow for popover */
+      clip-path: inset(0 -320px 0 0);
+    }
+
+    /* Hide scrollbar but allow scrolling */
+    .section-nav__list::-webkit-scrollbar {
+      width: 0;
+    }
+
+    /* Trace line connecting pill centers */
+    .section-nav__trace {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1px;
+      background: var(--border-default);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Individual pill */
+    .section-pill {
+      position: relative;
+      z-index: 1;
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: var(--weight-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--easing-default);
+      flex-shrink: 0;
+    }
+
+    .section-pill:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: var(--bg-elevated);
+    }
+
+    /* Detected type — cyan accent */
+    .section-pill--detected {
+      border-color: color-mix(in srgb, var(--accent-primary) 40%, var(--border-default));
+      color: var(--text-secondary);
+    }
+
+    .section-pill--detected:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    /* Marker type — pink accent */
+    .section-pill--marker {
+      border-color: color-mix(in srgb, var(--accent-secondary) 40%, var(--border-default));
+      color: var(--text-secondary);
+    }
+
+    .section-pill--marker:hover {
+      border-color: var(--accent-secondary);
+      color: var(--accent-secondary);
+    }
+
+    /* Active state — cyan glow */
+    .section-pill--active {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      background: var(--accent-primary-subtle);
+      box-shadow:
+        0 0 0 2px var(--accent-primary-subtle),
+        0 0 12px rgba(0, 212, 255, 0.3),
+        0 0 24px rgba(0, 212, 255, 0.15);
+    }
+
+    /* Active marker variant */
+    .section-pill--active.section-pill--marker {
+      border-color: var(--accent-secondary);
+      color: var(--accent-secondary);
+      background: var(--accent-secondary-subtle);
+      box-shadow:
+        0 0 0 2px var(--accent-secondary-subtle),
+        0 0 12px rgba(255, 77, 106, 0.3),
+        0 0 24px rgba(255, 77, 106, 0.15);
+    }
+
+    /* ================================================================
+       POPOVER CARD
+       ================================================================
+       Appears to the LEFT of the pill on hover.
+       Uses position:fixed (portal approach) to avoid clipping.
+       ================================================================ */
+    .section-popover {
+      position: fixed;
+      z-index: 1000;
+      width: 280px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.4);
+      padding: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      pointer-events: none;
+    }
+
+    /* Arrow pointing right toward the pill */
+    .section-popover::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -6px;
+      transform: translateY(-50%) rotate(45deg);
+      width: 10px;
+      height: 10px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border-strong);
+      border-top: 1px solid var(--border-strong);
+    }
+
+    .section-popover__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .section-popover__title {
+      font-size: var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .section-popover__badge {
+      flex-shrink: 0;
+    }
+
+    .section-popover__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .section-popover__preview {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-sm);
+      color: var(--terminal-text);
+      background: var(--terminal-bg);
+      border-radius: var(--radius-sm);
+      padding: var(--space-2);
+      white-space: pre;
+      overflow: hidden;
+      max-height: 54px;
+    }
+
+    .section-popover__slots {
+      display: flex;
+      gap: var(--space-2);
+      padding-top: var(--space-1);
+      border-top: 1px solid var(--border-default);
+    }
+
+    .section-popover__slot {
+      font-size: var(--text-xs);
+      color: var(--text-disabled);
+      font-style: italic;
+    }
+
+    /* Detected-type popover accent line */
+    .section-popover--detected {
+      border-top: 2px solid var(--accent-primary);
+    }
+
+    /* Marker-type popover accent line */
+    .section-popover--marker {
+      border-top: 2px solid var(--accent-secondary);
+    }
+  </style>
+</head>
+<body>
+
+<div class="spatial-shell">
+  <!-- Brand Mark -->
+  <div class="spatial-shell__brand brand-mark">
+    <div class="brand-mark__icon">E</div>
+    <span class="brand-mark__name">Erika</span>
+  </div>
+
+  <!-- Header -->
+  <header class="spatial-shell__header shell-header">
+    <div class="shell-header__left">
+      <nav class="shell-header__breadcrumb">
+        <a href="#" class="shell-header__breadcrumb-home">Sessions</a>
+        <span class="shell-header__breadcrumb-sep">/</span>
+        <span class="shell-header__breadcrumb-current">agent-session-2024-03-15.cast</span>
+      </nav>
+    </div>
+    <div class="shell-header__right">
+      <div class="toolbar-pill">
+        <div class="pipeline-ring"><div class="pipeline-ring__dot"></div></div>
+        <button class="toolbar-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+        <button class="toolbar-btn" title="Notifications">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </button>
+        <div class="toolbar-avatar">SS</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="spatial-shell__sidebar sidebar-panel">
+    <div class="sidebar__search-wrap">
+      <input type="search" class="sidebar__search-input" placeholder="Filter sessions..." />
+    </div>
+    <div class="sidebar__filters">
+      <button class="filter-pill filter-pill--active">ALL</button>
+      <button class="filter-pill">PROCESSING</button>
+      <button class="filter-pill">READY</button>
+      <button class="filter-pill">FAILED</button>
+    </div>
+    <div class="sidebar__list">
+      <div class="session-card session-card--selected">
+        <div class="session-card__filename">agent-session-2024-03-15.cast</div>
+        <div class="session-card__meta">12 sections &middot; 2.4 MB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">debug-pipeline-fix.cast</div>
+        <div class="session-card__meta">8 sections &middot; 1.1 MB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">refactor-auth-module.cast</div>
+        <div class="session-card__meta">15 sections &middot; 3.7 MB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">deploy-staging-v2.cast</div>
+        <div class="session-card__meta">6 sections &middot; 890 KB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">test-runner-output.cast</div>
+        <div class="session-card__meta">22 sections &middot; 5.2 MB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">migration-dry-run.cast</div>
+        <div class="session-card__meta">4 sections &middot; 420 KB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">api-load-test.cast</div>
+        <div class="session-card__meta">18 sections &middot; 4.1 MB</div>
+      </div>
+      <div class="session-card">
+        <div class="session-card__filename">ci-build-2024-03-14.cast</div>
+        <div class="session-card__meta">9 sections &middot; 1.8 MB</div>
+      </div>
+    </div>
+    <div class="sidebar__footer">
+      <button class="sidebar__new-session-btn">+ New Session</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="spatial-shell__main">
+    <div class="session-content">
+      <div class="terminal-chrome">
+        <div class="terminal-scroll" id="terminal-scroll">
+
+          <!-- Section 1: marker -->
+          <div class="section-header section-header--marker" data-section="1">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Setup Environment</span>
+            <span class="section-header__range">L1-L42 (42 lines)</span>
+            <span class="badge badge--secondary">Marker</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">1</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">cd /workspace/erika</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">2</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">nvm use 24</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">3</span><span class="terminal-line__content"><span class="t-default">Now using node v24.0.0 (npm v10.8.1)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">4</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npm install</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">5</span><span class="terminal-line__content"><span class="t-dim">added 847 packages in 12s</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">6</span><span class="terminal-line__content"><span class="t-dim">192 packages are looking for funding</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">7</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npm run build</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">8</span><span class="terminal-line__content"><span class="t-cyan">vite</span> <span class="t-default">v6.1.0 building for production...</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">9</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">42 modules transformed.</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">10</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">built in 1.84s</span></span></div>
+          </div>
+
+          <!-- Section 2: detected -->
+          <div class="section-header section-header--detected" data-section="2">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Running Test Suite</span>
+            <span class="section-header__range">L43-L128 (86 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">43</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npx vitest run</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">44</span><span class="terminal-line__content"><span class="t-cyan"> RUN  </span> <span class="t-default">v3.0.4 /workspace/erika</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">45</span><span class="terminal-line__content"></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">46</span><span class="terminal-line__content"><span class="t-green"> ✓ </span> <span class="t-default">src/server/routes/sessions.test.ts (12 tests) 245ms</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">47</span><span class="terminal-line__content"><span class="t-green"> ✓ </span> <span class="t-default">src/server/routes/upload.test.ts (8 tests) 182ms</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">48</span><span class="terminal-line__content"><span class="t-green"> ✓ </span> <span class="t-default">src/client/composables/useSession.test.ts (15 tests) 89ms</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">49</span><span class="terminal-line__content"><span class="t-green"> ✓ </span> <span class="t-default">src/client/composables/useSessionList.test.ts (9 tests) 67ms</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">50</span><span class="terminal-line__content"><span class="t-green"> ✓ </span> <span class="t-default">src/shared/types/session.test.ts (6 tests) 23ms</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">51</span><span class="terminal-line__content"></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">52</span><span class="terminal-line__content"><span class="t-green t-bold"> Test Files  5 passed</span> <span class="t-dim">(5)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">53</span><span class="terminal-line__content"><span class="t-green t-bold">      Tests  50 passed</span> <span class="t-dim">(50)</span></span></div>
+          </div>
+
+          <!-- Section 3: detected -->
+          <div class="section-header section-header--detected" data-section="3">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Database Migration</span>
+            <span class="section-header__range">L129-L198 (70 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">129</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npm run db:migrate</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">130</span><span class="terminal-line__content"><span class="t-yellow">warn</span> <span class="t-default">Running migration 001_create_sessions...</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">131</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">Migration 001_create_sessions applied (42ms)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">132</span><span class="terminal-line__content"><span class="t-yellow">warn</span> <span class="t-default">Running migration 002_add_sections...</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">133</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">Migration 002_add_sections applied (28ms)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">134</span><span class="terminal-line__content"><span class="t-green t-bold">All migrations complete.</span></span></div>
+          </div>
+
+          <!-- Section 4: marker -->
+          <div class="section-header section-header--marker" data-section="4">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Git Operations</span>
+            <span class="section-header__range">L199-L245 (47 lines)</span>
+            <span class="badge badge--secondary">Marker</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">199</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">git status</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">200</span><span class="terminal-line__content"><span class="t-default">On branch feat/section-navigator</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">201</span><span class="terminal-line__content"><span class="t-green">  modified:   src/client/components/SectionNav.vue</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">202</span><span class="terminal-line__content"><span class="t-green">  modified:   src/client/components/SessionContent.vue</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">203</span><span class="terminal-line__content"><span class="t-green">  new file:   src/client/composables/useSectionNav.ts</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">204</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">git add -A && git commit -m "feat(client): section navigator pills"</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">205</span><span class="terminal-line__content"><span class="t-default">[feat/section-navigator 3a1b2c4] feat(client): section navigator pills</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">206</span><span class="terminal-line__content"><span class="t-default"> 3 files changed, 247 insertions(+), 12 deletions(-)</span></span></div>
+          </div>
+
+          <!-- Section 5: detected -->
+          <div class="section-header section-header--detected" data-section="5">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Linting &amp; Type Check</span>
+            <span class="section-header__range">L246-L312 (67 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">246</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npm run lint</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">247</span><span class="terminal-line__content"><span class="t-cyan">eslint</span> <span class="t-default">Checking 142 files...</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">248</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">No issues found.</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">249</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npx tsc --noEmit</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">250</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">No type errors found.</span></span></div>
+          </div>
+
+          <!-- Section 6: detected -->
+          <div class="section-header section-header--detected" data-section="6">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">E2E Playwright Tests</span>
+            <span class="section-header__range">L313-L402 (90 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">313</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npx playwright test</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">314</span><span class="terminal-line__content"><span class="t-cyan">Running</span> <span class="t-default">24 tests using 4 workers</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">315</span><span class="terminal-line__content"><span class="t-green">  ✓ </span> <span class="t-default">[chromium] session-list.spec.ts:12 loads session list (820ms)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">316</span><span class="terminal-line__content"><span class="t-green">  ✓ </span> <span class="t-default">[chromium] upload.spec.ts:8 drag-drop upload (1.2s)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">317</span><span class="terminal-line__content"><span class="t-green">  ✓ </span> <span class="t-default">[chromium] section-nav.spec.ts:5 navigates sections (640ms)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">318</span><span class="terminal-line__content"><span class="t-green">  ✓ </span> <span class="t-default">[firefox] session-list.spec.ts:12 loads session list (920ms)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">319</span><span class="terminal-line__content"><span class="t-green t-bold">  24 passed</span> <span class="t-dim">(18.4s)</span></span></div>
+          </div>
+
+          <!-- Section 7: marker -->
+          <div class="section-header section-header--marker" data-section="7">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Docker Build</span>
+            <span class="section-header__range">L403-L478 (76 lines)</span>
+            <span class="badge badge--secondary">Marker</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">403</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">docker build -t erika:latest .</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">404</span><span class="terminal-line__content"><span class="t-dim">[+] Building 42.3s (14/14) FINISHED</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">405</span><span class="terminal-line__content"><span class="t-dim"> => [internal] load build definition from Dockerfile</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">406</span><span class="terminal-line__content"><span class="t-dim"> => [build 1/6] FROM node:24-alpine</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">407</span><span class="terminal-line__content"><span class="t-dim"> => [build 2/6] COPY package*.json ./</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">408</span><span class="terminal-line__content"><span class="t-dim"> => [build 3/6] RUN npm ci</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">409</span><span class="terminal-line__content"><span class="t-green">✓</span> <span class="t-default">Image built: erika:latest (184MB)</span></span></div>
+          </div>
+
+          <!-- Section 8: detected -->
+          <div class="section-header section-header--detected" data-section="8">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Deploy to Staging</span>
+            <span class="section-header__range">L479-L556 (78 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">479</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">kubectl apply -f k8s/staging/</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">480</span><span class="terminal-line__content"><span class="t-default">deployment.apps/erika configured</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">481</span><span class="terminal-line__content"><span class="t-default">service/erika unchanged</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">482</span><span class="terminal-line__content"><span class="t-default">ingress.networking.k8s.io/erika configured</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">483</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">kubectl rollout status deploy/erika -n staging</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">484</span><span class="terminal-line__content"><span class="t-default">Waiting for deployment "erika" rollout to finish...</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">485</span><span class="terminal-line__content"><span class="t-green">deployment "erika" successfully rolled out</span></span></div>
+          </div>
+
+          <!-- Section 9: marker -->
+          <div class="section-header section-header--marker" data-section="9">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Smoke Tests</span>
+            <span class="section-header__range">L557-L620 (64 lines)</span>
+            <span class="badge badge--secondary">Marker</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">557</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">curl -s https://staging.erika.dev/api/health | jq</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">558</span><span class="terminal-line__content"><span class="t-default">{</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">559</span><span class="terminal-line__content"><span class="t-blue">  "status"</span><span class="t-default">: </span><span class="t-green">"ok"</span><span class="t-default">,</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">560</span><span class="terminal-line__content"><span class="t-blue">  "version"</span><span class="t-default">: </span><span class="t-green">"1.4.0"</span><span class="t-default">,</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">561</span><span class="terminal-line__content"><span class="t-blue">  "uptime"</span><span class="t-default">: </span><span class="t-yellow">42</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">562</span><span class="terminal-line__content"><span class="t-default">}</span></span></div>
+          </div>
+
+          <!-- Section 10: detected -->
+          <div class="section-header section-header--detected" data-section="10">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Performance Benchmarks</span>
+            <span class="section-header__range">L621-L710 (90 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">621</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">npm run bench</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">622</span><span class="terminal-line__content"><span class="t-cyan">benchmark</span> <span class="t-default">WASM parse: 1000 lines in 2.4ms (avg)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">623</span><span class="terminal-line__content"><span class="t-cyan">benchmark</span> <span class="t-default">Section detection: 50 sections in 0.8ms (avg)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">624</span><span class="terminal-line__content"><span class="t-cyan">benchmark</span> <span class="t-default">Full render: 500 lines in 12ms (p95)</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">625</span><span class="terminal-line__content"><span class="t-green t-bold">All benchmarks within budget.</span></span></div>
+          </div>
+
+          <!-- Section 11: detected -->
+          <div class="section-header section-header--detected" data-section="11">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Log Analysis</span>
+            <span class="section-header__range">L711-L785 (75 lines)</span>
+            <span class="badge badge--accent">Detected</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">711</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">tail -f /var/log/erika/app.log</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">712</span><span class="terminal-line__content"><span class="t-dim">2024-03-15T14:32:01Z</span> <span class="t-blue">INFO</span>  <span class="t-default">Server started on :3000</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">713</span><span class="terminal-line__content"><span class="t-dim">2024-03-15T14:32:02Z</span> <span class="t-blue">INFO</span>  <span class="t-default">Database connection established</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">714</span><span class="terminal-line__content"><span class="t-dim">2024-03-15T14:32:05Z</span> <span class="t-yellow">WARN</span>  <span class="t-default">Session cache miss: abc123</span></span></div>
+          </div>
+
+          <!-- Section 12: marker -->
+          <div class="section-header section-header--marker" data-section="12">
+            <div class="section-header__chevron"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4l4 4-4 4"/></svg></div>
+            <span class="section-header__label">Cleanup &amp; Summary</span>
+            <span class="section-header__range">L786-L842 (57 lines)</span>
+            <span class="badge badge--secondary">Marker</span>
+          </div>
+          <div class="terminal-snapshot">
+            <div class="terminal-line"><span class="terminal-line__number">786</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">docker system prune -f</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">787</span><span class="terminal-line__content"><span class="t-default">Deleted containers: 3</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">788</span><span class="terminal-line__content"><span class="t-default">Total reclaimed space: 1.2GB</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">789</span><span class="terminal-line__content"><span class="t-green t-bold">$</span> <span class="t-default">echo "Session complete."</span></span></div>
+            <div class="terminal-line"><span class="terminal-line__number">790</span><span class="terminal-line__content"><span class="t-default">Session complete.</span></span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Section Navigator Aside -->
+  <aside class="spatial-shell__aside section-nav" aria-label="Section navigator">
+    <div class="section-nav__list">
+      <div class="section-nav__trace"></div>
+
+      <!-- Pill 1: marker -->
+      <div class="section-pill section-pill--marker" data-pill="1" title="Setup Environment">1</div>
+      <!-- Pill 2: detected, ACTIVE -->
+      <div class="section-pill section-pill--detected section-pill--active" data-pill="2" title="Running Test Suite">2</div>
+      <!-- Pill 3: detected -->
+      <div class="section-pill section-pill--detected" data-pill="3" title="Database Migration">3</div>
+      <!-- Pill 4: marker -->
+      <div class="section-pill section-pill--marker" data-pill="4" title="Git Operations">4</div>
+      <!-- Pill 5: detected -->
+      <div class="section-pill section-pill--detected" data-pill="5" title="Linting & Type Check">5</div>
+      <!-- Pill 6: detected -->
+      <div class="section-pill section-pill--detected" data-pill="6" title="E2E Playwright Tests">6</div>
+      <!-- Pill 7: marker -->
+      <div class="section-pill section-pill--marker" data-pill="7" title="Docker Build">7</div>
+      <!-- Pill 8: detected — POPOVER SHOWN STATICALLY -->
+      <div class="section-pill section-pill--detected" data-pill="8" title="Deploy to Staging" id="pill-8">8</div>
+      <!-- Pill 9: marker -->
+      <div class="section-pill section-pill--marker" data-pill="9" title="Smoke Tests">9</div>
+      <!-- Pill 10: detected -->
+      <div class="section-pill section-pill--detected" data-pill="10" title="Performance Benchmarks">10</div>
+      <!-- Pill 11: detected -->
+      <div class="section-pill section-pill--detected" data-pill="11" title="Log Analysis">11</div>
+      <!-- Pill 12: marker -->
+      <div class="section-pill section-pill--marker" data-pill="12" title="Cleanup & Summary">12</div>
+
+      <!-- Additional pills to demonstrate scroll (50 total) -->
+      <div class="section-pill section-pill--detected" data-pill="13">13</div>
+      <div class="section-pill section-pill--marker" data-pill="14">14</div>
+      <div class="section-pill section-pill--detected" data-pill="15">15</div>
+      <div class="section-pill section-pill--detected" data-pill="16">16</div>
+      <div class="section-pill section-pill--marker" data-pill="17">17</div>
+      <div class="section-pill section-pill--detected" data-pill="18">18</div>
+      <div class="section-pill section-pill--detected" data-pill="19">19</div>
+      <div class="section-pill section-pill--marker" data-pill="20">20</div>
+      <div class="section-pill section-pill--detected" data-pill="21">21</div>
+      <div class="section-pill section-pill--detected" data-pill="22">22</div>
+      <div class="section-pill section-pill--marker" data-pill="23">23</div>
+      <div class="section-pill section-pill--detected" data-pill="24">24</div>
+      <div class="section-pill section-pill--detected" data-pill="25">25</div>
+      <div class="section-pill section-pill--marker" data-pill="26">26</div>
+      <div class="section-pill section-pill--detected" data-pill="27">27</div>
+      <div class="section-pill section-pill--detected" data-pill="28">28</div>
+      <div class="section-pill section-pill--marker" data-pill="29">29</div>
+      <div class="section-pill section-pill--detected" data-pill="30">30</div>
+      <div class="section-pill section-pill--detected" data-pill="31">31</div>
+      <div class="section-pill section-pill--marker" data-pill="32">32</div>
+      <div class="section-pill section-pill--detected" data-pill="33">33</div>
+      <div class="section-pill section-pill--detected" data-pill="34">34</div>
+      <div class="section-pill section-pill--marker" data-pill="35">35</div>
+      <div class="section-pill section-pill--detected" data-pill="36">36</div>
+      <div class="section-pill section-pill--detected" data-pill="37">37</div>
+      <div class="section-pill section-pill--marker" data-pill="38">38</div>
+      <div class="section-pill section-pill--detected" data-pill="39">39</div>
+      <div class="section-pill section-pill--detected" data-pill="40">40</div>
+      <div class="section-pill section-pill--marker" data-pill="41">41</div>
+      <div class="section-pill section-pill--detected" data-pill="42">42</div>
+      <div class="section-pill section-pill--detected" data-pill="43">43</div>
+      <div class="section-pill section-pill--marker" data-pill="44">44</div>
+      <div class="section-pill section-pill--detected" data-pill="45">45</div>
+      <div class="section-pill section-pill--detected" data-pill="46">46</div>
+      <div class="section-pill section-pill--marker" data-pill="47">47</div>
+      <div class="section-pill section-pill--detected" data-pill="48">48</div>
+      <div class="section-pill section-pill--detected" data-pill="49">49</div>
+      <div class="section-pill section-pill--marker" data-pill="50">50</div>
+    </div>
+  </aside>
+</div>
+
+<!-- Static popover for pill 8 — positioned via JS after layout -->
+<div class="section-popover section-popover--detected" id="popover-8">
+  <div class="section-popover__header">
+    <span class="section-popover__title">Deploy to Staging</span>
+    <span class="badge badge--accent section-popover__badge">Detected</span>
+  </div>
+  <div class="section-popover__meta">
+    <span>L479-L556</span>
+    <span>78 lines</span>
+  </div>
+  <div class="section-popover__preview"><span class="t-green t-bold">$</span> kubectl apply -f k8s/staging/
+deployment.apps/erika configured
+service/erika unchanged</div>
+  <div class="section-popover__slots">
+    <span class="section-popover__slot">Duration slot</span>
+    <span class="section-popover__slot">Command count slot</span>
+  </div>
+</div>
+
+<script>
+  // Position the popover next to pill 8
+  function positionPopover() {
+    const pill = document.getElementById('pill-8');
+    const popover = document.getElementById('popover-8');
+    if (!pill || !popover) return;
+
+    const rect = pill.getBoundingClientRect();
+    const popoverWidth = 280;
+    const gap = 12;
+
+    popover.style.top = (rect.top + rect.height / 2 - popover.offsetHeight / 2) + 'px';
+    popover.style.left = (rect.left - popoverWidth - gap) + 'px';
+  }
+
+  window.addEventListener('load', positionPopover);
+  window.addEventListener('resize', positionPopover);
+  // Re-position after fonts load
+  document.fonts.ready.then(positionPopover);
+</script>
+
+</body>
+</html>

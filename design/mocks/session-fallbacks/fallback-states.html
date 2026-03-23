@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Session Fallback States</title>
+  <link rel="stylesheet" href="../../styles/layout.css">
+  <style>
+    body {
+      padding: 48px 24px;
+    }
+
+    .mockup-label {
+      font-size: var(--text-sm);
+      color: var(--text-muted);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      font-weight: var(--weight-semibold);
+      margin-bottom: var(--rhythm-half);
+    }
+
+    .mockup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--rhythm-2);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1100px) {
+      .mockup-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mockup-cell {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ================================================================
+       Terminal Chrome — matches the app's .terminal-chrome container
+       ================================================================ */
+    .terminal-chrome {
+      background: var(--terminal-bg);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6),
+                  0 0 8px rgba(0, 212, 255, 0.1);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 380px;
+    }
+
+    /* ================================================================
+       FALLBACK BANNER — shared base
+       ================================================================ */
+    .fallback-banner {
+      position: relative;
+      padding: var(--rhythm-1) var(--space-4);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+      overflow: hidden;
+    }
+
+    /* Scanline texture overlay */
+    .fallback-banner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.06) 2px,
+        rgba(0, 0, 0, 0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .fallback-banner__icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: -1px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .fallback-banner__body {
+      flex: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    .fallback-banner__title {
+      font-weight: var(--weight-semibold);
+      font-size: var(--text-base);
+      line-height: var(--lh-base);
+      margin-bottom: var(--space-1);
+    }
+
+    .fallback-banner__text {
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      line-height: var(--lh-sm);
+    }
+
+    .fallback-banner__detail {
+      margin-top: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: var(--lh-xs);
+      color: var(--text-muted);
+      word-break: break-all;
+    }
+
+    /* ================================================================
+       ERROR VARIANT
+       ================================================================ */
+    .fallback-banner--error {
+      background:
+        linear-gradient(135deg, rgba(215, 69, 123, 0.12) 0%, rgba(215, 69, 123, 0.04) 100%);
+      border-bottom: 1px solid rgba(215, 69, 123, 0.25);
+    }
+
+    .fallback-banner--error .fallback-banner__title {
+      color: var(--status-error);
+    }
+
+    .fallback-banner--error .fallback-banner__icon {
+      color: var(--status-error);
+      filter: drop-shadow(0 0 6px rgba(215, 69, 123, 0.5));
+    }
+
+    .fallback-banner--error .fallback-banner__detail {
+      background: rgba(215, 69, 123, 0.06);
+      border: 1px solid rgba(215, 69, 123, 0.15);
+    }
+
+    /* Left edge glow */
+    .fallback-banner--error::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--status-error);
+      box-shadow: 0 0 12px rgba(215, 69, 123, 0.6),
+                  0 0 4px rgba(215, 69, 123, 0.4);
+      z-index: 2;
+    }
+
+    /* ================================================================
+       INFO VARIANT
+       ================================================================ */
+    .fallback-banner--info {
+      background:
+        linear-gradient(135deg, rgba(143, 218, 252, 0.1) 0%, rgba(143, 218, 252, 0.03) 100%);
+      border-bottom: 1px solid rgba(143, 218, 252, 0.2);
+    }
+
+    .fallback-banner--info .fallback-banner__title {
+      color: var(--status-info);
+    }
+
+    .fallback-banner--info .fallback-banner__icon {
+      color: var(--status-info);
+      filter: drop-shadow(0 0 6px rgba(143, 218, 252, 0.4));
+    }
+
+    /* Left edge glow */
+    .fallback-banner--info::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--status-info);
+      box-shadow: 0 0 12px rgba(143, 218, 252, 0.5),
+                  0 0 4px rgba(143, 218, 252, 0.3);
+      z-index: 2;
+    }
+
+    /* ================================================================
+       EMPTY TERMINAL AREA — for error-only state (no content)
+       ================================================================ */
+    .terminal-empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--rhythm-1);
+      padding: var(--rhythm-4) var(--space-6);
+      text-align: center;
+    }
+
+    .terminal-empty-state__icon {
+      width: 48px;
+      height: 48px;
+      opacity: 0.3;
+      color: var(--text-disabled);
+    }
+
+    .terminal-empty-state--error .terminal-empty-state__icon {
+      color: var(--status-error);
+      opacity: 0.25;
+      filter: drop-shadow(0 0 20px rgba(215, 69, 123, 0.3));
+    }
+
+    .terminal-empty-state__label {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      color: var(--text-disabled);
+      letter-spacing: var(--tracking-wide);
+    }
+
+    .terminal-empty-state--error .terminal-empty-state__label {
+      color: color-mix(in srgb, var(--status-error) 50%, var(--text-disabled));
+    }
+
+    /* ================================================================
+       TERMINAL CONTENT AREA — for snapshot content below banners
+       ================================================================ */
+    .terminal-content {
+      flex: 1;
+      padding: var(--rhythm-half) 0;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--lh-mono);
+      color: var(--terminal-text);
+      overflow: auto;
+    }
+
+    .terminal-line {
+      display: flex;
+      padding: 0 var(--space-4);
+      min-height: 20px;
+    }
+
+    .terminal-line:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .terminal-line__number {
+      flex-shrink: 0;
+      width: 40px;
+      text-align: right;
+      padding-right: var(--space-3);
+      color: var(--text-disabled);
+      user-select: none;
+      font-size: var(--text-xs);
+    }
+
+    .terminal-line__text {
+      flex: 1;
+      white-space: pre;
+    }
+
+    /* Color coding for terminal content */
+    .terminal-line__text--prompt { color: var(--accent-primary); }
+    .terminal-line__text--muted { color: var(--text-muted); }
+    .terminal-line__text--accent { color: var(--accent-secondary); }
+    .terminal-line__text--success { color: var(--status-success); }
+
+    /* ================================================================
+       SVG ICONS
+       ================================================================ */
+    .icon {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <div class="mockup-grid">
+
+    <!-- ============================================================
+         STATE 1: Session Processing Failed (with no content)
+         ============================================================ -->
+    <div class="mockup-cell">
+      <div class="mockup-label">State 1 -- Processing Failed (no content)</div>
+      <div class="terminal-chrome">
+        <div class="fallback-banner fallback-banner--error">
+          <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div class="fallback-banner__body">
+            <div class="fallback-banner__title">Session processing failed</div>
+            <div class="fallback-banner__text">
+              The pipeline encountered an error while analyzing this recording.
+              No terminal content could be recovered.
+            </div>
+            <div class="fallback-banner__detail">
+              exit code 1 &mdash; ffmpeg: error while decoding stream #0:0 &mdash; broken pipe at frame 2847
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal-empty-state terminal-empty-state--error">
+          <svg class="terminal-empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+          <div class="terminal-empty-state__label">No terminal output available</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         STATE 1b: Session Processing Failed (with partial content)
+         ============================================================ -->
+    <div class="mockup-cell">
+      <div class="mockup-label">State 1b -- Processing Failed (partial content)</div>
+      <div class="terminal-chrome">
+        <div class="fallback-banner fallback-banner--error">
+          <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div class="fallback-banner__body">
+            <div class="fallback-banner__title">Session processing failed</div>
+            <div class="fallback-banner__text">
+              The pipeline encountered an error. Showing recovered terminal content below.
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal-content">
+          <div class="terminal-line">
+            <span class="terminal-line__number">1</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">2</span>
+            <span class="terminal-line__text">    <span class="terminal-line__text--muted">Claude Code</span> v2.1.37</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">3</span>
+            <span class="terminal-line__text">    <span class="terminal-line__text--muted">Opus 4.6 . Claude Team</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">4</span>
+            <span class="terminal-line__text">    ~/git/simon/agent-session-recorder</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">5</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">6</span>
+            <span class="terminal-line__text"><span class="terminal-line__text--prompt">&gt;</span> <span class="terminal-line__text--accent">/exit</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">7</span>
+            <span class="terminal-line__text">  Catch you later!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         STATE 2: No Sections Detected (content exists)
+         ============================================================ -->
+    <div class="mockup-cell">
+      <div class="mockup-label">State 2 -- No Sections Detected (content exists)</div>
+      <div class="terminal-chrome">
+        <div class="fallback-banner fallback-banner--info">
+          <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <div class="fallback-banner__body">
+            <div class="fallback-banner__title">No sections detected</div>
+            <div class="fallback-banner__text">
+              Session completed successfully, but no section boundaries were found.
+              Showing raw terminal output as a single block.
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal-content">
+          <div class="terminal-line">
+            <span class="terminal-line__number">1</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">2</span>
+            <span class="terminal-line__text">    <span class="terminal-line__text--muted">Claude Code</span> v2.1.37</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">3</span>
+            <span class="terminal-line__text">    <span class="terminal-line__text--muted">Opus 4.6 . Claude Team</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">4</span>
+            <span class="terminal-line__text">    ~/git/simon/agent-session-recorder</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">5</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">6</span>
+            <span class="terminal-line__text"><span class="terminal-line__text--prompt">&gt;</span> <span class="terminal-line__text--accent">/exit</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">7</span>
+            <span class="terminal-line__text">  Catch you later!</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">8</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">9</span>
+            <span class="terminal-line__text"><span class="terminal-line__text--muted">--------------------------------------------</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">10</span>
+            <span class="terminal-line__text"><span class="terminal-line__text--prompt">&gt;</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">11</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">12</span>
+            <span class="terminal-line__text">  <span class="terminal-line__text--success">PR #128</span> . ctrl+t to hide tasks</span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">13</span>
+            <span class="terminal-line__text"></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">14</span>
+            <span class="terminal-line__text"><span class="terminal-line__text--muted">Resume this session with:</span></span>
+          </div>
+          <div class="terminal-line">
+            <span class="terminal-line__number">15</span>
+            <span class="terminal-line__text">claude --resume fd5f82b1-93a1-4606-b01b-063986bdbd4c</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         STATE 2b: No Sections Detected (no content)
+         ============================================================ -->
+    <div class="mockup-cell">
+      <div class="mockup-label">State 2b -- Completed, No Content</div>
+      <div class="terminal-chrome">
+        <div class="fallback-banner fallback-banner--info">
+          <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <div class="fallback-banner__body">
+            <div class="fallback-banner__title">No sections detected</div>
+            <div class="fallback-banner__text">
+              Session completed successfully, but no section boundaries or terminal content were found.
+            </div>
+          </div>
+        </div>
+
+        <div class="terminal-empty-state">
+          <svg class="terminal-empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+          <div class="terminal-empty-state__label">No terminal output available</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

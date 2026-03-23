@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section Navigator — Draft F: Fresh Variants</title>
+<link rel="stylesheet" href="../../styles/layout.css">
+<style>
+  /* ============================================================
+     DRAFT F — 6 Fresh Variants
+     ============================================================
+     F1: Horizontal progress bar (minimap)
+     F2: Collapsible cluster groups for 50+ sections
+     F3: Minimal tick marks on content edge
+     F4: Refined Draft E tooltip (better pills, density, active)
+     F5: Refined Draft E popover card (polished layout)
+     F6: Circuit trace dots + tooltip (TRON aesthetic)
+     ============================================================ */
+
+  body { padding: var(--rhythm-2); }
+
+  h1 {
+    font-size: var(--text-2xl);
+    line-height: var(--lh-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--rhythm-half);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  .subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--rhythm-2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    line-height: var(--lh-xl);
+    font-weight: var(--weight-bold);
+    color: var(--accent-primary);
+    margin: var(--rhythm-3) 0 var(--rhythm-half) 0;
+    padding-bottom: var(--rhythm-half);
+    border-bottom: 1px solid var(--border-default);
+    letter-spacing: var(--tracking-tight);
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+    color: var(--text-primary);
+    margin: var(--rhythm-2) 0 var(--rhythm-half) 0;
+  }
+
+  .desc {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--rhythm-1);
+  }
+
+  /* --- Shared demo layout --- */
+  .demo {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--rhythm-1);
+    margin-bottom: var(--rhythm-2);
+  }
+
+  .demo--horizontal {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .demo--minimal {
+    grid-template-columns: 1fr auto;
+    position: relative;
+  }
+
+  .demo__content {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--rhythm-1) var(--space-inline);
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .demo__content-label {
+    font-size: var(--text-sm);
+    color: var(--text-disabled);
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  /* ============================================================
+     F1 — HORIZONTAL MINIMAP BAR
+     ============================================================
+     A horizontal strip above the content showing proportional
+     section segments. Each segment width = section line count /
+     total lines. Hovering a segment shows a tooltip below.
+     Active segment is highlighted. Feels like a genome browser
+     or audio waveform overview.
+     ============================================================ */
+
+  .minimap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+  }
+
+  .minimap__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-1);
+  }
+
+  .minimap__title {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    font-weight: var(--weight-medium);
+  }
+
+  .minimap__count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--accent-primary);
+  }
+
+  .minimap__bar {
+    display: flex;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    overflow: visible;
+    position: relative;
+    gap: 1px;
+  }
+
+  .minimap__seg {
+    height: 100%;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    transition:
+      filter var(--duration-fast) var(--easing-default),
+      transform var(--duration-fast) var(--easing-default);
+    min-width: 4px;
+  }
+
+  .minimap__seg--detected {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+  }
+
+  .minimap__seg--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 15%, var(--bg-elevated));
+    border: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, var(--border-default));
+  }
+
+  .minimap__seg:hover {
+    filter: brightness(1.3);
+    transform: scaleY(1.15);
+    z-index: 10;
+  }
+
+  .minimap__seg--active.minimap__seg--detected {
+    background: color-mix(in srgb, var(--accent-primary) 25%, var(--bg-elevated));
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
+  }
+
+  .minimap__seg--active.minimap__seg--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 30%, var(--bg-elevated));
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 6px rgba(255, 77, 106, 0.3);
+  }
+
+  /* Segment number overlay */
+  .minimap__seg-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-disabled);
+    pointer-events: none;
+  }
+
+  .minimap__seg--active .minimap__seg-num {
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  /* Tooltip below segment */
+  .minimap__tip {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.95);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-1\.5) var(--space-2);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast), transform var(--duration-fast);
+    box-shadow: var(--shadow-md);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .minimap__tip::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: var(--border-strong);
+  }
+
+  .minimap__seg:hover .minimap__tip {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+
+  .minimap__tip-title {
+    font-size: var(--text-xs);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .minimap__tip-meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .minimap__tip-type--marker { color: var(--accent-secondary); }
+
+  /* Position indicator below bar */
+  .minimap__pos {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding-top: 2px;
+  }
+
+  .minimap__pos-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+  }
+
+  .minimap__pos-current {
+    color: var(--accent-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  /* ============================================================
+     F2 — COLLAPSIBLE CLUSTER GROUPS
+     ============================================================
+     Sections grouped by type (marker sections as group headers,
+     detected sections nested under them). Each group is
+     collapsible. At 50 sections, only the active group is open.
+     Fixed 48px width. Groups show a count badge.
+     ============================================================ */
+
+  .cluster-aside {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    width: 48px;
+    overflow: visible;
+    position: relative;
+  }
+
+  .cluster-aside__header {
+    padding: var(--space-1\.5);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    flex-shrink: 0;
+  }
+
+  .cluster-aside__count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    color: var(--accent-primary);
+  }
+
+  .cluster-aside__body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: visible;
+    padding: var(--space-1) 0;
+  }
+
+  .cluster-aside__body::-webkit-scrollbar { width: 0; }
+
+  /* Group header (marker section) */
+  .cluster__group {
+    position: relative;
+  }
+
+  .cluster__head {
+    width: 36px;
+    height: 22px;
+    margin: 2px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: var(--weight-medium);
+    color: var(--accent-secondary);
+    background: color-mix(in srgb, var(--accent-secondary) 8%, var(--bg-elevated));
+    border: 1px solid color-mix(in srgb, var(--accent-secondary) 25%, var(--border-default));
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: all var(--duration-fast) var(--easing-default);
+  }
+
+  .cluster__head:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 16%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 45%, var(--border-default));
+    z-index: 10;
+  }
+
+  .cluster__head--active {
+    background: color-mix(in srgb, var(--accent-secondary) 20%, var(--bg-elevated));
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 6px rgba(255, 77, 106, 0.3);
+  }
+
+  /* Count badge on group header */
+  .cluster__badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 7px;
+    color: var(--text-disabled);
+  }
+
+  /* Nested children (detected sections) */
+  .cluster__children {
+    overflow: hidden;
+    transition: max-height var(--duration-normal) var(--easing-default);
+  }
+
+  .cluster__children--collapsed {
+    max-height: 0;
+  }
+
+  .cluster__children--open {
+    max-height: 300px;
+  }
+
+  .cluster__child {
+    width: 26px;
+    height: 20px;
+    margin: 2px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--text-muted);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: all var(--duration-fast) var(--easing-default);
+  }
+
+  .cluster__child:hover {
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, var(--border-default));
+    color: var(--accent-primary);
+    z-index: 10;
+  }
+
+  .cluster__child--active {
+    background: color-mix(in srgb, var(--accent-primary) 15%, var(--bg-elevated));
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 6px rgba(0, 212, 255, 0.3);
+  }
+
+  /* Connector line between group head and children */
+  .cluster__connector {
+    width: 1px;
+    height: 4px;
+    background: var(--border-default);
+    margin: 0 auto;
+  }
+
+  /* Tooltip for clusters (shared with F4/F6) */
+  .cluster__tip {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-1\.5) var(--space-2);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast);
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .cluster__tip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: var(--border-strong);
+  }
+
+  .cluster__head:hover .cluster__tip,
+  .cluster__child:hover .cluster__tip {
+    opacity: 1;
+  }
+
+  .cluster__tip-title {
+    font-size: var(--text-xs);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .cluster__tip-meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+  }
+
+  /* ============================================================
+     F3 — MINIMAL TICK MARKS
+     ============================================================
+     No aside panel at all. Instead, small tick marks appear on
+     the right edge of the content area. Each tick is 3px wide,
+     flush with the content border. Marker ticks are pink,
+     detected ticks are dim. Active tick is brighter + wider.
+     Hovering a tick shows a tooltip.
+     Total count shown as a tiny badge at top-right.
+     ============================================================ */
+
+  .demo--ticks {
+    position: relative;
+  }
+
+  .demo--ticks .demo__content {
+    position: relative;
+    overflow: visible;
+  }
+
+  .tick-rail {
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    right: -1px;
+    width: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 5;
+  }
+
+  .tick-rail__count {
+    position: absolute;
+    top: -10px;
+    right: 0;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--accent-primary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 3px;
+    padding: 1px 3px;
+    z-index: 10;
+  }
+
+  .tick {
+    width: 4px;
+    height: 3px;
+    border-radius: 1px 0 0 1px;
+    cursor: pointer;
+    position: relative;
+    transition: all var(--duration-fast) var(--easing-default);
+  }
+
+  .tick--detected {
+    background: var(--border-strong);
+  }
+
+  .tick--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 50%, var(--border-strong));
+    width: 5px;
+  }
+
+  .tick:hover {
+    width: 10px;
+    z-index: 20;
+  }
+
+  .tick--active.tick--detected {
+    background: var(--accent-primary);
+    width: 8px;
+    height: 4px;
+    box-shadow: 0 0 4px rgba(0, 212, 255, 0.4);
+  }
+
+  .tick--active.tick--marker {
+    background: var(--accent-secondary);
+    width: 8px;
+    height: 4px;
+    box-shadow: 0 0 4px rgba(255, 77, 106, 0.4);
+  }
+
+  .tick__tip {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-1\.5) var(--space-2);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast);
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tick__tip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: var(--border-strong);
+  }
+
+  .tick:hover .tick__tip {
+    opacity: 1;
+  }
+
+  .tick__tip-title {
+    font-size: var(--text-xs);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .tick__tip-meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+  }
+
+  .tick__tip-type--marker { color: var(--accent-secondary); }
+
+  /* ============================================================
+     F4 — REFINED TOOLTIP (Draft E Approach 1 improved)
+     ============================================================
+     Fixed 48px aside. Numbered square pills with rounded corners.
+     Improvements over Draft E:
+     - Softer pill shape (radius-md instead of radius-sm)
+     - Subtle inner shadow for depth
+     - Better active state with animated ring
+     - Density dot below pill number
+     - Tooltip repositions to avoid viewport edge
+     - Tighter 4px gap for 50-section density
+     ============================================================ */
+
+  .f4-aside {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    width: 48px;
+    overflow: visible;
+    position: relative;
+  }
+
+  .f4-aside__header {
+    padding: var(--space-1\.5);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    flex-shrink: 0;
+  }
+
+  .f4-aside__count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    color: var(--accent-primary);
+  }
+
+  .f4-aside__list {
+    flex: 1;
+    overflow: visible;
+    padding: var(--space-1) 0;
+  }
+
+  .f4-aside__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-1) 0;
+  }
+
+  /* Trace line */
+  .f4-aside__inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-0.5px);
+    width: 1px;
+    background: var(--border-default);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .f4-pill {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: var(--weight-medium);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    transition: all var(--duration-fast) var(--easing-default);
+    border: 1px solid var(--border-default);
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Density dot under number */
+  .f4-pill__density {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    margin-top: -1px;
+    opacity: 0.5;
+  }
+
+  .f4-pill__density--low { background: var(--border-strong); width: 2px; height: 2px; }
+  .f4-pill__density--med { background: var(--text-disabled); }
+  .f4-pill__density--high { background: var(--accent-primary); opacity: 0.7; }
+
+  .f4-pill--detected {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+  }
+
+  .f4-pill--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 8%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 25%, var(--border-default));
+    color: var(--accent-secondary);
+  }
+
+  .f4-pill:hover {
+    z-index: 10;
+  }
+
+  .f4-pill--detected:hover {
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, var(--border-default));
+    color: var(--accent-primary);
+  }
+
+  .f4-pill--marker:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 16%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 45%, var(--border-default));
+  }
+
+  /* Active state with animated pulse ring */
+  .f4-pill--active.f4-pill--detected {
+    background: color-mix(in srgb, var(--accent-primary) 18%, var(--bg-elevated));
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.15),
+      0 0 0 2px rgba(0, 212, 255, 0.15),
+      0 0 8px rgba(0, 212, 255, 0.25);
+    animation: f4-pulse 2s ease-in-out infinite;
+  }
+
+  .f4-pill--active.f4-pill--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 22%, var(--bg-elevated));
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.15),
+      0 0 0 2px rgba(255, 77, 106, 0.15),
+      0 0 8px rgba(255, 77, 106, 0.3);
+    animation: f4-pulse-pink 2s ease-in-out infinite;
+  }
+
+  @keyframes f4-pulse {
+    0%, 100% { box-shadow: inset 0 1px 2px rgba(0,0,0,0.15), 0 0 0 2px rgba(0,212,255,0.15), 0 0 8px rgba(0,212,255,0.25); }
+    50% { box-shadow: inset 0 1px 2px rgba(0,0,0,0.15), 0 0 0 3px rgba(0,212,255,0.08), 0 0 12px rgba(0,212,255,0.15); }
+  }
+
+  @keyframes f4-pulse-pink {
+    0%, 100% { box-shadow: inset 0 1px 2px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,77,106,0.15), 0 0 8px rgba(255,77,106,0.3); }
+    50% { box-shadow: inset 0 1px 2px rgba(0,0,0,0.15), 0 0 0 3px rgba(255,77,106,0.08), 0 0 12px rgba(255,77,106,0.2); }
+  }
+
+  /* F4 Tooltip */
+  .f4-tip {
+    position: absolute;
+    right: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-1\.5) var(--space-2);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast);
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .f4-tip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: var(--border-strong);
+  }
+
+  .f4-pill:hover .f4-tip {
+    opacity: 1;
+  }
+
+  .f4-tip__title {
+    font-size: var(--text-xs);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .f4-tip__meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .f4-tip__type--marker { color: var(--accent-secondary); }
+
+  /* ============================================================
+     F5 — REFINED POPOVER CARD (Draft E Approach 3 improved)
+     ============================================================
+     Same 48px fixed aside with numbered pills. The popover card
+     is more polished: accent top border, clearer hierarchy,
+     subtle entrance animation, better slot layout for future
+     comments/errors/AI summary.
+     ============================================================ */
+
+  .f5-aside {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    width: 48px;
+    overflow: visible;
+    position: relative;
+  }
+
+  .f5-aside__header {
+    padding: var(--space-1\.5);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    flex-shrink: 0;
+  }
+
+  .f5-aside__count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    color: var(--accent-primary);
+  }
+
+  .f5-aside__list {
+    flex: 1;
+    overflow: visible;
+    padding: var(--space-1) 0;
+  }
+
+  .f5-aside__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: var(--space-1) 0;
+  }
+
+  .f5-aside__inner::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    transform: translateX(-0.5px);
+    width: 1px;
+    background: var(--border-default);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .f5-pill {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: var(--weight-medium);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    overflow: visible;
+    transition: all var(--duration-fast) var(--easing-default);
+    border: 1px solid var(--border-default);
+    flex-shrink: 0;
+  }
+
+  .f5-pill--detected {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+  }
+
+  .f5-pill--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 8%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 25%, var(--border-default));
+    color: var(--accent-secondary);
+  }
+
+  .f5-pill:hover { z-index: 10; }
+
+  .f5-pill--detected:hover {
+    background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-primary) 35%, var(--border-default));
+    color: var(--accent-primary);
+  }
+
+  .f5-pill--marker:hover {
+    background: color-mix(in srgb, var(--accent-secondary) 16%, var(--bg-elevated));
+    border-color: color-mix(in srgb, var(--accent-secondary) 45%, var(--border-default));
+  }
+
+  .f5-pill--active.f5-pill--detected {
+    background: color-mix(in srgb, var(--accent-primary) 15%, var(--bg-elevated));
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  }
+
+  .f5-pill--active.f5-pill--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 20%, var(--bg-elevated));
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+    box-shadow: 0 0 8px rgba(255, 77, 106, 0.3);
+  }
+
+  /* F5 Popover Card */
+  .f5-card {
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%) scale(0.96);
+    transform-origin: right center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    min-width: 240px;
+    max-width: 300px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--easing-default), transform var(--duration-normal) var(--easing-default);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    overflow: hidden;
+  }
+
+  /* Accent top bar */
+  .f5-card--detected { border-top: 2px solid var(--accent-primary); }
+  .f5-card--marker { border-top: 2px solid var(--accent-secondary); }
+
+  .f5-pill:hover .f5-card {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+
+  /* Triangle pointer */
+  .f5-card::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: var(--border-strong);
+  }
+
+  .f5-card__body {
+    padding: var(--space-2) var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1\.5);
+  }
+
+  .f5-card__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1\.5);
+  }
+
+  .f5-card__num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: var(--weight-semibold);
+    min-width: 22px;
+  }
+
+  .f5-card__num--detected { color: var(--accent-primary); }
+  .f5-card__num--marker { color: var(--accent-secondary); }
+
+  .f5-card__title {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .f5-card__badge {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  .f5-card__badge--marker {
+    color: var(--accent-secondary);
+    background: rgba(255, 77, 106, 0.1);
+  }
+
+  .f5-card__badge--detected {
+    color: var(--text-disabled);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .f5-card__meta {
+    display: flex;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+  }
+
+  .f5-card__preview {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    background: var(--terminal-bg);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-1\.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Future slots row */
+  .f5-card__slots {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--border-default);
+  }
+
+  .f5-card__slot {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+  }
+
+  .f5-card__slot-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+  }
+
+  /* ============================================================
+     F6 — CIRCUIT TRACE DOTS + TOOLTIP (TRON aesthetic)
+     ============================================================
+     Fixed 36px aside. No numbers visible — just dots on a
+     glowing trace line. Dot color encodes type. Dot brightness
+     encodes density. Active dot pulses. Hovering shows tooltip.
+     The trace line has neon glow segments near the active dot.
+     Pure cyberpunk circuit board feel.
+     ============================================================ */
+
+  .f6-aside {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    width: 36px;
+    overflow: visible;
+    position: relative;
+  }
+
+  .f6-aside__header {
+    padding: var(--space-1\.5);
+    border-bottom: 1px solid var(--border-default);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    flex-shrink: 0;
+  }
+
+  .f6-aside__count {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: var(--weight-medium);
+    color: var(--accent-primary);
+  }
+
+  .f6-aside__list {
+    flex: 1;
+    overflow: visible;
+    padding: var(--space-1) 0;
+  }
+
+  .f6-aside__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: var(--space-2) 0;
+  }
+
+  /* Trace line with glow */
+  .f6-aside__inner::before {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    transform: translateX(-0.5px);
+    width: 1px;
+    background: linear-gradient(
+      to bottom,
+      var(--border-default) 0%,
+      color-mix(in srgb, var(--accent-primary) 40%, var(--border-default)) 40%,
+      var(--accent-primary) 50%,
+      color-mix(in srgb, var(--accent-primary) 40%, var(--border-default)) 60%,
+      var(--border-default) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
+    filter: drop-shadow(0 0 3px rgba(0, 212, 255, 0.3));
+  }
+
+  .f6-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: all var(--duration-fast) var(--easing-default);
+    flex-shrink: 0;
+  }
+
+  .f6-dot--detected {
+    background: var(--border-strong);
+    box-shadow: 0 0 2px rgba(0, 212, 255, 0.1);
+  }
+
+  .f6-dot--detected.f6-dot--dense {
+    background: color-mix(in srgb, var(--accent-primary) 40%, var(--border-strong));
+  }
+
+  .f6-dot--marker {
+    background: color-mix(in srgb, var(--accent-secondary) 60%, var(--border-strong));
+    box-shadow: 0 0 3px rgba(255, 77, 106, 0.2);
+  }
+
+  .f6-dot--marker.f6-dot--dense {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 4px rgba(255, 77, 106, 0.3);
+  }
+
+  .f6-dot:hover {
+    transform: scale(1.5);
+    z-index: 10;
+  }
+
+  .f6-dot--detected:hover {
+    background: var(--accent-primary);
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+  }
+
+  .f6-dot--marker:hover {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 8px rgba(255, 77, 106, 0.5);
+  }
+
+  /* Active dot: larger, pulsing glow */
+  .f6-dot--active.f6-dot--detected {
+    width: 10px;
+    height: 10px;
+    background: var(--accent-primary);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.6), 0 0 3px rgba(0, 212, 255, 0.8);
+    animation: f6-glow 2s ease-in-out infinite;
+  }
+
+  .f6-dot--active.f6-dot--marker {
+    width: 10px;
+    height: 10px;
+    background: var(--accent-secondary);
+    box-shadow: 0 0 10px rgba(255, 77, 106, 0.6), 0 0 3px rgba(255, 77, 106, 0.8);
+    animation: f6-glow-pink 2s ease-in-out infinite;
+  }
+
+  @keyframes f6-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(0,212,255,0.6), 0 0 3px rgba(0,212,255,0.8); }
+    50% { box-shadow: 0 0 16px rgba(0,212,255,0.4), 0 0 4px rgba(0,212,255,0.6); }
+  }
+
+  @keyframes f6-glow-pink {
+    0%, 100% { box-shadow: 0 0 10px rgba(255,77,106,0.6), 0 0 3px rgba(255,77,106,0.8); }
+    50% { box-shadow: 0 0 16px rgba(255,77,106,0.4), 0 0 4px rgba(255,77,106,0.6); }
+  }
+
+  /* F6 Tooltip */
+  .f6-tip {
+    position: absolute;
+    right: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    padding: var(--space-1\.5) var(--space-2);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-fast);
+    box-shadow: var(--shadow-md), 0 0 8px rgba(0, 212, 255, 0.1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .f6-tip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-left-color: var(--border-strong);
+  }
+
+  .f6-dot:hover .f6-tip {
+    opacity: 1;
+  }
+
+  .f6-tip__num {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+  }
+
+  .f6-tip__title {
+    font-size: var(--text-xs);
+    color: var(--text-primary);
+    font-weight: var(--weight-medium);
+  }
+
+  .f6-tip__meta {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-disabled);
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .f6-tip__type--marker { color: var(--accent-secondary); }
+
+  /* ============================================================
+     SHARED HELPERS
+     ============================================================ */
+  .separator {
+    height: 1px;
+    background: var(--border-default);
+    margin: var(--rhythm-2) 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Draft F: Fresh Variants</h1>
+<p class="subtitle">3 new concepts + 3 refinements of existing work</p>
+
+<!-- ============================================================
+     F1 — HORIZONTAL MINIMAP BAR
+     ============================================================ -->
+<h2>F1 -- Horizontal Minimap Bar</h2>
+<p class="desc">A horizontal strip above the content. Each segment is proportional to section line count. Hovering shows a tooltip below. Active segment highlighted. Works like a genome browser or audio waveform overview — you see the shape of the whole session at once.</p>
+
+<h3>5 Sections</h3>
+<div class="demo demo--horizontal">
+  <div class="minimap">
+    <div class="minimap__header">
+      <span class="minimap__title">Sections</span>
+      <span class="minimap__count">5</span>
+    </div>
+    <div class="minimap__bar">
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;">
+        <span class="minimap__seg-num">1</span>
+        <div class="minimap__tip"><span class="minimap__tip-title">Initialize project</span><span class="minimap__tip-meta"><span class="minimap__tip-type--marker">marker</span><span>42 lines</span></span></div>
+      </div>
+      <div class="minimap__seg minimap__seg--detected minimap__seg--active" style="flex: 3;">
+        <span class="minimap__seg-num">2</span>
+        <div class="minimap__tip"><span class="minimap__tip-title">Install dependencies</span><span class="minimap__tip-meta"><span>detected</span><span>1,240 lines</span></span></div>
+      </div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;">
+        <span class="minimap__seg-num">3</span>
+      </div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 5;">
+        <span class="minimap__seg-num">4</span>
+      </div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;">
+        <span class="minimap__seg-num">5</span>
+      </div>
+    </div>
+    <div class="minimap__pos">
+      <span class="minimap__pos-label">Position:</span>
+      <span class="minimap__pos-label minimap__pos-current">Section 2 of 5</span>
+    </div>
+  </div>
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+</div>
+
+<h3>20 Sections</h3>
+<div class="demo demo--horizontal">
+  <div class="minimap">
+    <div class="minimap__header">
+      <span class="minimap__title">Sections</span>
+      <span class="minimap__count">20</span>
+    </div>
+    <div class="minimap__bar">
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"><span class="minimap__seg-num">1</span></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 3;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected minimap__seg--active" style="flex: 5;"><span class="minimap__seg-num">8</span></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 3;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 2;"><span class="minimap__seg-num">10</span></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+    </div>
+    <div class="minimap__pos">
+      <span class="minimap__pos-label">Position:</span>
+      <span class="minimap__pos-label minimap__pos-current">Section 8 of 20</span>
+    </div>
+  </div>
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+</div>
+
+<h3>50 Sections</h3>
+<div class="demo demo--horizontal">
+  <div class="minimap">
+    <div class="minimap__header">
+      <span class="minimap__title">Sections</span>
+      <span class="minimap__count">50</span>
+    </div>
+    <div class="minimap__bar">
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected minimap__seg--active" style="flex: 5;"><span class="minimap__seg-num">23</span></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 2;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--marker" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+      <div class="minimap__seg minimap__seg--detected" style="flex: 1;"></div>
+    </div>
+    <div class="minimap__pos">
+      <span class="minimap__pos-label">Position:</span>
+      <span class="minimap__pos-label minimap__pos-current">Section 23 of 50</span>
+    </div>
+  </div>
+  <div class="demo__content" style="min-height: 400px;">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+</div>
+
+<div class="separator"></div>
+
+<!-- ============================================================
+     F2 — COLLAPSIBLE CLUSTER GROUPS
+     ============================================================ -->
+<h2>F2 -- Collapsible Cluster Groups</h2>
+<p class="desc">Optimized for 50+ sections. Marker sections act as group headers (wider, pink). Detected sections nest under them as smaller pills. Groups collapse to hide children, showing only the marker pill + a count badge. At 50 sections, only the active group is expanded. Fixed 48px width. Tooltip on hover.</p>
+
+<h3>5 Sections (1 marker group)</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="cluster-aside">
+    <div class="cluster-aside__header">
+      <span class="cluster-aside__count">5</span>
+    </div>
+    <div class="cluster-aside__body">
+      <div class="cluster__group">
+        <div class="cluster__head">
+          1
+          <div class="cluster__tip"><span class="cluster__tip-title">Initialize project</span><span class="cluster__tip-meta">marker -- 42 lines</span></div>
+        </div>
+        <div class="cluster__connector"></div>
+        <div class="cluster__children cluster__children--open">
+          <div class="cluster__child cluster__child--active">
+            2
+            <div class="cluster__tip"><span class="cluster__tip-title">Install dependencies</span><span class="cluster__tip-meta">detected -- 1,240 lines</span></div>
+          </div>
+          <div class="cluster__child">3</div>
+          <div class="cluster__child">4</div>
+          <div class="cluster__child">5</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>20 Sections (4 marker groups)</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="cluster-aside">
+    <div class="cluster-aside__header">
+      <span class="cluster-aside__count">20</span>
+    </div>
+    <div class="cluster-aside__body">
+      <div class="cluster__group">
+        <div class="cluster__head">1<span class="cluster__badge">3</span></div>
+        <div class="cluster__connector"></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+
+      <div class="cluster__group">
+        <div class="cluster__head">5<span class="cluster__badge">5</span></div>
+        <div class="cluster__connector"></div>
+        <div class="cluster__children cluster__children--open">
+          <div class="cluster__child">6</div>
+          <div class="cluster__child">7</div>
+          <div class="cluster__child cluster__child--active">8</div>
+          <div class="cluster__child">9</div>
+          <div class="cluster__child">10</div>
+        </div>
+      </div>
+
+      <div class="cluster__group">
+        <div class="cluster__head">11<span class="cluster__badge">4</span></div>
+        <div class="cluster__connector"></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+
+      <div class="cluster__group">
+        <div class="cluster__head">16<span class="cluster__badge">4</span></div>
+        <div class="cluster__connector"></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>50 Sections (10 marker groups, only active open)</h3>
+<div class="demo">
+  <div class="demo__content" style="min-height: 400px;">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="cluster-aside">
+    <div class="cluster-aside__header">
+      <span class="cluster-aside__count">50</span>
+    </div>
+    <div class="cluster-aside__body">
+      <div class="cluster__group">
+        <div class="cluster__head">1<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">6<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">11<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">16<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head cluster__head--active">21<span class="cluster__badge">5</span></div>
+        <div class="cluster__connector"></div>
+        <div class="cluster__children cluster__children--open">
+          <div class="cluster__child">22</div>
+          <div class="cluster__child cluster__child--active">23</div>
+          <div class="cluster__child">24</div>
+          <div class="cluster__child">25</div>
+          <div class="cluster__child">26</div>
+        </div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">27<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">32<span class="cluster__badge">5</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">38<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">43<span class="cluster__badge">4</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+      <div class="cluster__group">
+        <div class="cluster__head">48<span class="cluster__badge">2</span></div>
+        <div class="cluster__children cluster__children--collapsed"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="separator"></div>
+
+<!-- ============================================================
+     F3 — MINIMAL TICK MARKS
+     ============================================================ -->
+<h2>F3 -- Minimal Tick Marks</h2>
+<p class="desc">No separate aside at all. Tiny tick marks sit flush on the right edge of the content area. Each tick represents a section. Marker ticks are pink and slightly wider. Active tick glows. Hover to see tooltip. Absolute minimum chrome — the content area loses zero horizontal space. Count badge at top-right corner.</p>
+
+<h3>5 Sections</h3>
+<div class="demo--ticks" style="margin-bottom: var(--rhythm-2);">
+  <div class="demo__content" style="min-height: 200px; position: relative; overflow: visible;">
+    <span class="demo__content-label">Session content area</span>
+    <div class="tick-rail">
+      <span class="tick-rail__count">5</span>
+      <div class="tick tick--marker">
+        <div class="tick__tip"><span class="tick__tip-title">Initialize project</span><span class="tick__tip-meta"><span class="tick__tip-type--marker">marker</span> -- 42 lines</span></div>
+      </div>
+      <div class="tick tick--detected tick--active">
+        <div class="tick__tip"><span class="tick__tip-title">Install dependencies</span><span class="tick__tip-meta">detected -- 1,240 lines</span></div>
+      </div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div>
+    </div>
+  </div>
+</div>
+
+<h3>20 Sections</h3>
+<div class="demo--ticks" style="margin-bottom: var(--rhythm-2);">
+  <div class="demo__content" style="min-height: 300px; position: relative; overflow: visible;">
+    <span class="demo__content-label">Session content area</span>
+    <div class="tick-rail">
+      <span class="tick-rail__count">20</span>
+      <div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected tick--active"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div>
+    </div>
+  </div>
+</div>
+
+<h3>50 Sections</h3>
+<div class="demo--ticks" style="margin-bottom: var(--rhythm-2);">
+  <div class="demo__content" style="min-height: 400px; position: relative; overflow: visible;">
+    <span class="demo__content-label">Session content area</span>
+    <div class="tick-rail">
+      <span class="tick-rail__count">50</span>
+      <div class="tick tick--marker"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--marker"></div><div class="tick tick--detected"></div>
+      <div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div><div class="tick tick--detected"></div><div class="tick tick--detected tick--active"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--marker"></div>
+      <div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div>
+      <div class="tick tick--marker"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div><div class="tick tick--detected"></div>
+    </div>
+  </div>
+</div>
+
+<div class="separator"></div>
+
+<!-- ============================================================
+     F4 — REFINED TOOLTIP (Draft E Approach 1 improved)
+     ============================================================ -->
+<h2>F4 -- Refined Tooltip Pills</h2>
+<p class="desc">Refinement of Draft E Approach 1. Fixed 48px aside with numbered pills. Improvements: softer pill radius (6px), subtle inner shadow for depth, animated pulse ring on active state, density dot below number to encode section weight, tighter 4px gap at 50 sections for better density.</p>
+
+<h3>5 Sections</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f4-aside">
+    <div class="f4-aside__header"><span class="f4-aside__count">5</span></div>
+    <div class="f4-aside__list">
+      <div class="f4-aside__inner">
+        <div class="f4-pill f4-pill--marker">1<span class="f4-pill__density f4-pill__density--low"></span>
+          <div class="f4-tip"><span class="f4-tip__title">Initialize project</span><span class="f4-tip__meta"><span class="f4-tip__type--marker">marker</span><span>42 ln</span></span></div>
+        </div>
+        <div class="f4-pill f4-pill--detected f4-pill--active">2<span class="f4-pill__density f4-pill__density--high"></span>
+          <div class="f4-tip"><span class="f4-tip__title">Install dependencies</span><span class="f4-tip__meta"><span>detected</span><span>1,240 ln</span></span></div>
+        </div>
+        <div class="f4-pill f4-pill--detected">3<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--marker">4<span class="f4-pill__density f4-pill__density--high"></span></div>
+        <div class="f4-pill f4-pill--detected">5<span class="f4-pill__density f4-pill__density--low"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>20 Sections</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f4-aside">
+    <div class="f4-aside__header"><span class="f4-aside__count">20</span></div>
+    <div class="f4-aside__list">
+      <div class="f4-aside__inner">
+        <div class="f4-pill f4-pill--marker">1<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">2<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">3<span class="f4-pill__density f4-pill__density--high"></span></div>
+        <div class="f4-pill f4-pill--marker">4<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">5<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">6<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">7<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected f4-pill--active">8<span class="f4-pill__density f4-pill__density--high"></span>
+          <div class="f4-tip"><span class="f4-tip__title">Run unit tests</span><span class="f4-tip__meta"><span>detected</span><span>2,341 ln</span></span></div>
+        </div>
+        <div class="f4-pill f4-pill--detected">9<span class="f4-pill__density f4-pill__density--high"></span></div>
+        <div class="f4-pill f4-pill--marker">10<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">11<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">12<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">13<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">14<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">15<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">16<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">17<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">18<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">19<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">20<span class="f4-pill__density f4-pill__density--low"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>50 Sections</h3>
+<div class="demo">
+  <div class="demo__content" style="min-height: 500px;">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f4-aside">
+    <div class="f4-aside__header"><span class="f4-aside__count">50</span></div>
+    <div class="f4-aside__list">
+      <div class="f4-aside__inner">
+        <div class="f4-pill f4-pill--marker">1<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">2<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">3<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--marker">4<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">5<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">6<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">7<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">8<span class="f4-pill__density f4-pill__density--high"></span></div>
+        <div class="f4-pill f4-pill--detected">9<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">10<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">11<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">12<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">13<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">14<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">15<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">16<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">17<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">18<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">19<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">20<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">21<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">22<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected f4-pill--active">23<span class="f4-pill__density f4-pill__density--high"></span>
+          <div class="f4-tip"><span class="f4-tip__title">Run full test suite</span><span class="f4-tip__meta"><span>detected</span><span>2,341 ln</span></span></div>
+        </div>
+        <div class="f4-pill f4-pill--detected">24<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">25<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--marker">26<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">27<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">28<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">29<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">30<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">31<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">32<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">33<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">34<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">35<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">36<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">37<span class="f4-pill__density f4-pill__density--med"></span></div>
+        <div class="f4-pill f4-pill--detected">38<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">39<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">40<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">41<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">42<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">43<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">44<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">45<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--marker">46<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">47<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">48<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">49<span class="f4-pill__density f4-pill__density--low"></span></div>
+        <div class="f4-pill f4-pill--detected">50<span class="f4-pill__density f4-pill__density--low"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="separator"></div>
+
+<!-- ============================================================
+     F5 — REFINED POPOVER CARD (Draft E Approach 3 improved)
+     ============================================================ -->
+<h2>F5 -- Refined Popover Card</h2>
+<p class="desc">Refinement of Draft E Approach 3. Fixed 48px aside. The popover card has: accent-colored top border matching section type, section number + title row, type badge + line count meta row, terminal preview line, and future slot indicators (comments, errors, AI summary) with a subtle divider. Smooth scale entrance animation.</p>
+
+<h3>5 Sections (hover pill 2 to see card)</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f5-aside">
+    <div class="f5-aside__header"><span class="f5-aside__count">5</span></div>
+    <div class="f5-aside__list">
+      <div class="f5-aside__inner">
+        <div class="f5-pill f5-pill--marker">1
+          <div class="f5-card f5-card--marker">
+            <div class="f5-card__body">
+              <div class="f5-card__row"><span class="f5-card__num f5-card__num--marker">#1</span><span class="f5-card__title">Initialize project</span></div>
+              <div class="f5-card__row"><span class="f5-card__badge f5-card__badge--marker">marker</span><span class="f5-card__meta"><span>42 lines</span><span>0.3 KB</span></span></div>
+              <div class="f5-card__preview">$ mkdir project && cd project</div>
+              <div class="f5-card__slots">
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">C</span>0</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">E</span>0</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">A</span>--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="f5-pill f5-pill--detected f5-pill--active">2
+          <div class="f5-card f5-card--detected">
+            <div class="f5-card__body">
+              <div class="f5-card__row"><span class="f5-card__num f5-card__num--detected">#2</span><span class="f5-card__title">Install dependencies</span></div>
+              <div class="f5-card__row"><span class="f5-card__badge f5-card__badge--detected">detected</span><span class="f5-card__meta"><span>1,240 lines</span><span>48 KB</span></span></div>
+              <div class="f5-card__preview">$ npm install --save-dev typescript</div>
+              <div class="f5-card__slots">
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">C</span>2</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">E</span>0</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">A</span>--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="f5-pill f5-pill--detected">3</div>
+        <div class="f5-pill f5-pill--marker">4</div>
+        <div class="f5-pill f5-pill--detected">5</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>20 Sections</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f5-aside">
+    <div class="f5-aside__header"><span class="f5-aside__count">20</span></div>
+    <div class="f5-aside__list">
+      <div class="f5-aside__inner">
+        <div class="f5-pill f5-pill--marker">1</div>
+        <div class="f5-pill f5-pill--detected">2</div>
+        <div class="f5-pill f5-pill--detected">3</div>
+        <div class="f5-pill f5-pill--marker">4</div>
+        <div class="f5-pill f5-pill--detected">5</div>
+        <div class="f5-pill f5-pill--detected">6</div>
+        <div class="f5-pill f5-pill--detected">7</div>
+        <div class="f5-pill f5-pill--detected f5-pill--active">8
+          <div class="f5-card f5-card--detected">
+            <div class="f5-card__body">
+              <div class="f5-card__row"><span class="f5-card__num f5-card__num--detected">#8</span><span class="f5-card__title">Run unit tests</span></div>
+              <div class="f5-card__row"><span class="f5-card__badge f5-card__badge--detected">detected</span><span class="f5-card__meta"><span>2,341 lines</span><span>92 KB</span></span></div>
+              <div class="f5-card__preview">$ npx vitest run --reporter=verbose</div>
+              <div class="f5-card__slots">
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">C</span>5</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">E</span>3</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">A</span>--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="f5-pill f5-pill--detected">9</div>
+        <div class="f5-pill f5-pill--marker">10</div>
+        <div class="f5-pill f5-pill--detected">11</div>
+        <div class="f5-pill f5-pill--detected">12</div>
+        <div class="f5-pill f5-pill--detected">13</div>
+        <div class="f5-pill f5-pill--detected">14</div>
+        <div class="f5-pill f5-pill--marker">15</div>
+        <div class="f5-pill f5-pill--detected">16</div>
+        <div class="f5-pill f5-pill--detected">17</div>
+        <div class="f5-pill f5-pill--detected">18</div>
+        <div class="f5-pill f5-pill--detected">19</div>
+        <div class="f5-pill f5-pill--detected">20</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>50 Sections</h3>
+<div class="demo">
+  <div class="demo__content" style="min-height: 500px;">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f5-aside">
+    <div class="f5-aside__header"><span class="f5-aside__count">50</span></div>
+    <div class="f5-aside__list">
+      <div class="f5-aside__inner">
+        <div class="f5-pill f5-pill--marker">1</div><div class="f5-pill f5-pill--detected">2</div><div class="f5-pill f5-pill--detected">3</div><div class="f5-pill f5-pill--marker">4</div><div class="f5-pill f5-pill--detected">5</div>
+        <div class="f5-pill f5-pill--detected">6</div><div class="f5-pill f5-pill--detected">7</div><div class="f5-pill f5-pill--detected">8</div><div class="f5-pill f5-pill--detected">9</div><div class="f5-pill f5-pill--marker">10</div>
+        <div class="f5-pill f5-pill--detected">11</div><div class="f5-pill f5-pill--detected">12</div><div class="f5-pill f5-pill--detected">13</div><div class="f5-pill f5-pill--detected">14</div><div class="f5-pill f5-pill--marker">15</div>
+        <div class="f5-pill f5-pill--detected">16</div><div class="f5-pill f5-pill--detected">17</div><div class="f5-pill f5-pill--detected">18</div><div class="f5-pill f5-pill--detected">19</div><div class="f5-pill f5-pill--detected">20</div>
+        <div class="f5-pill f5-pill--marker">21</div><div class="f5-pill f5-pill--detected">22</div>
+        <div class="f5-pill f5-pill--detected f5-pill--active">23
+          <div class="f5-card f5-card--detected">
+            <div class="f5-card__body">
+              <div class="f5-card__row"><span class="f5-card__num f5-card__num--detected">#23</span><span class="f5-card__title">Run full test suite</span></div>
+              <div class="f5-card__row"><span class="f5-card__badge f5-card__badge--detected">detected</span><span class="f5-card__meta"><span>2,341 lines</span><span>92 KB</span></span></div>
+              <div class="f5-card__preview">$ npx vitest run --reporter=verbose</div>
+              <div class="f5-card__slots">
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">C</span>5</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">E</span>3</span>
+                <span class="f5-card__slot"><span class="f5-card__slot-icon">A</span>--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="f5-pill f5-pill--detected">24</div><div class="f5-pill f5-pill--detected">25</div><div class="f5-pill f5-pill--marker">26</div><div class="f5-pill f5-pill--detected">27</div><div class="f5-pill f5-pill--detected">28</div>
+        <div class="f5-pill f5-pill--detected">29</div><div class="f5-pill f5-pill--marker">30</div><div class="f5-pill f5-pill--detected">31</div><div class="f5-pill f5-pill--detected">32</div><div class="f5-pill f5-pill--detected">33</div>
+        <div class="f5-pill f5-pill--detected">34</div><div class="f5-pill f5-pill--marker">35</div><div class="f5-pill f5-pill--detected">36</div><div class="f5-pill f5-pill--detected">37</div><div class="f5-pill f5-pill--detected">38</div>
+        <div class="f5-pill f5-pill--detected">39</div><div class="f5-pill f5-pill--marker">40</div><div class="f5-pill f5-pill--detected">41</div><div class="f5-pill f5-pill--detected">42</div><div class="f5-pill f5-pill--detected">43</div>
+        <div class="f5-pill f5-pill--detected">44</div><div class="f5-pill f5-pill--detected">45</div><div class="f5-pill f5-pill--marker">46</div><div class="f5-pill f5-pill--detected">47</div><div class="f5-pill f5-pill--detected">48</div>
+        <div class="f5-pill f5-pill--detected">49</div><div class="f5-pill f5-pill--detected">50</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="separator"></div>
+
+<!-- ============================================================
+     F6 — CIRCUIT TRACE DOTS + TOOLTIP (TRON aesthetic)
+     ============================================================ -->
+<h2>F6 -- Circuit Trace Dots</h2>
+<p class="desc">Refinement of Draft C's circuit board aesthetic at fixed 36px width. No numbers visible — just dots on a glowing neon trace line. Dot color encodes type (cyan = detected, pink = marker). Dot brightness encodes density (dim = small section, bright = large). Active dot is larger and pulses. Hovering shows a tooltip with number, title, and metadata. The trace line itself glows near the active position. Pure TRON/cyberpunk feel.</p>
+
+<h3>5 Sections</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f6-aside">
+    <div class="f6-aside__header"><span class="f6-aside__count">5</span></div>
+    <div class="f6-aside__list">
+      <div class="f6-aside__inner">
+        <div class="f6-dot f6-dot--marker">
+          <div class="f6-tip"><span class="f6-tip__num">#1</span><span class="f6-tip__title">Initialize project</span><span class="f6-tip__meta"><span class="f6-tip__type--marker">marker</span><span>42 ln</span></span></div>
+        </div>
+        <div class="f6-dot f6-dot--detected f6-dot--dense f6-dot--active">
+          <div class="f6-tip"><span class="f6-tip__num">#2</span><span class="f6-tip__title">Install dependencies</span><span class="f6-tip__meta"><span>detected</span><span>1,240 ln</span></span></div>
+        </div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--marker f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>20 Sections</h3>
+<div class="demo">
+  <div class="demo__content">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f6-aside">
+    <div class="f6-aside__header"><span class="f6-aside__count">20</span></div>
+    <div class="f6-aside__list">
+      <div class="f6-aside__inner">
+        <div class="f6-dot f6-dot--marker"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--marker"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--detected f6-dot--dense f6-dot--active">
+          <div class="f6-tip"><span class="f6-tip__num">#8</span><span class="f6-tip__title">Run unit tests</span><span class="f6-tip__meta"><span>detected</span><span>2,341 ln</span></span></div>
+        </div>
+        <div class="f6-dot f6-dot--detected f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--marker f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--marker"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>50 Sections</h3>
+<div class="demo">
+  <div class="demo__content" style="min-height: 500px;">
+    <span class="demo__content-label">Session content area</span>
+  </div>
+  <div class="f6-aside">
+    <div class="f6-aside__header"><span class="f6-aside__count">50</span></div>
+    <div class="f6-aside__list">
+      <div class="f6-aside__inner">
+        <div class="f6-dot f6-dot--marker"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected f6-dot--dense"></div><div class="f6-dot f6-dot--marker"></div><div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected f6-dot--dense"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--marker f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected f6-dot--dense"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--marker"></div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--marker"></div><div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--detected f6-dot--dense f6-dot--active">
+          <div class="f6-tip"><span class="f6-tip__num">#23</span><span class="f6-tip__title">Run full test suite</span><span class="f6-tip__meta"><span>detected</span><span>2,341 ln</span></span></div>
+        </div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--marker"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--marker f6-dot--dense"></div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--marker"></div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected f6-dot--dense"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--marker"></div>
+        <div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div>
+        <div class="f6-dot f6-dot--marker"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div><div class="f6-dot f6-dot--detected"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
