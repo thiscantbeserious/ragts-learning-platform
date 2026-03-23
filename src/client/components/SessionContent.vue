@@ -92,34 +92,55 @@ const sectionsToRender = computed((): SectionMetadata[] => {
 });
 
 /**
- * The active section metadata for the sticky overlay header.
- * Only resolved in virtual mode when activeSectionId is set.
+ * The section whose header should appear in the sticky overlay.
+ * This is the last section whose start offset is ABOVE scrollTop —
+ * meaning its real header has scrolled under the sticky position.
+ * Computed on scroll, independent of the scrollspy activeId.
  */
-const activeSection = computed((): SectionMetadata | null => {
-  if (!isVirtualized.value || !props.activeSectionId) return null;
-  return props.sections.find((s) => s.id === props.activeSectionId) ?? null;
-});
-
-/**
- * Show the sticky header only when the active section's real header
- * has scrolled above the viewport. Compares the active virtual item's
- * start offset against scrollTop.
- */
+const stickySection = ref<SectionMetadata | null>(null);
 const showStickyHeader = ref(false);
 
 function onContentScroll(): void {
   const viewport = overlayScrollbarRef.value?.viewport;
-  if (!viewport || !props.activeSectionId || !props.virtualItems) return;
+  if (!viewport || !isVirtualized.value || !props.virtualItems) {
+    showStickyHeader.value = false;
+    stickySection.value = null;
+    return;
+  }
 
-  const activeItem = props.virtualItems.find((_item, i) => {
-    const section = props.sections[i];
-    return section?.id === props.activeSectionId;
-  });
-  if (!activeItem) { showStickyHeader.value = false; return; }
+  const scrollTop = viewport.scrollTop;
 
-  // Show sticky when the active section's top has scrolled above the viewport.
-  // At that point the real header is no longer fully visible.
-  showStickyHeader.value = viewport.scrollTop > activeItem.start;
+  // Find the last section whose start is above scrollTop.
+  // That section's real header has scrolled past the top — show it in the sticky.
+  let found: SectionMetadata | null = null;
+  for (const item of props.virtualItems) {
+    const section = props.sections[item.index];
+    if (!section) continue;
+    if (item.start <= scrollTop) {
+      found = section;
+    } else {
+      break;
+    }
+  }
+
+  // Only show sticky if we found a section AND its header is actually above the viewport
+  // (not just barely at the top — check that scrollTop is past the section start)
+  if (found && scrollTop > 0) {
+    // Check: is the found section's real header still visible?
+    // It's visible if its virtual item start is within [scrollTop, scrollTop + viewportHeight]
+    const foundItem = props.virtualItems.find((_item, i) => props.sections[i]?.id === found!.id);
+    if (foundItem && foundItem.start >= scrollTop) {
+      // Real header is still on screen — don't show sticky for this section
+      showStickyHeader.value = false;
+      stickySection.value = null;
+    } else {
+      showStickyHeader.value = true;
+      stickySection.value = found;
+    }
+  } else {
+    showStickyHeader.value = false;
+    stickySection.value = null;
+  }
 }
 
 /** Sections to render in virtualized mode (mapped from virtualItems). */
@@ -183,14 +204,14 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Sticky overlay header for virtual mode: only shown after scrolling past the first header -->
+      <!-- Sticky overlay header: shows when the current section's real header has scrolled above -->
       <SectionHeader
-        v-if="isVirtualized && activeSection && showStickyHeader"
+        v-if="showStickyHeader && stickySection"
         ref="stickyHeaderRef"
         class="section-sticky-overlay"
-        :section="activeSection"
+        :section="stickySection"
         :collapsed="false"
-        :line-count="activeSection.lineCount"
+        :line-count="stickySection.lineCount"
         @toggle="() => {}"
       />
 
