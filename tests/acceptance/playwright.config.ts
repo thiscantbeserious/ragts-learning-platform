@@ -9,7 +9,8 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
-import { collectV8Coverage } from '@bgotink/playwright-coverage';
+import pkg from '@bgotink/playwright-coverage';
+const { collectV8Coverage } = pkg;
 
 export default defineConfig({
   testDir: '.',
