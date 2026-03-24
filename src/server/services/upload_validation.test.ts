@@ -14,9 +14,8 @@ describe('validateHeader', () => {
     const result = validateHeader(content);
     expect(result.ok).toBe(false);
     assert(!result.ok);
-      expect(result.error.status).toBe(400);
-      expect(result.error.error).toContain('JSON');
-
+    expect(result.error.status).toBe(400);
+    expect(result.error.error).toContain('JSON');
   });
 
   it('returns 400 when first line is a JSON array', () => {
@@ -24,9 +23,8 @@ describe('validateHeader', () => {
     const result = validateHeader(content);
     expect(result.ok).toBe(false);
     assert(!result.ok);
-      expect(result.error.status).toBe(400);
-      expect(result.error.error).toContain('object');
-
+    expect(result.error.status).toBe(400);
+    expect(result.error.error).toContain('object');
   });
 
   it('returns 400 when first line is a JSON string', () => {
@@ -34,9 +32,8 @@ describe('validateHeader', () => {
     const result = validateHeader(content);
     expect(result.ok).toBe(false);
     assert(!result.ok);
-      expect(result.error.status).toBe(400);
-      expect(result.error.error).toContain('object');
-
+    expect(result.error.status).toBe(400);
+    expect(result.error.error).toContain('object');
   });
 
   it('returns 400 when first line is JSON null', () => {
@@ -44,8 +41,7 @@ describe('validateHeader', () => {
     const result = validateHeader(content);
     expect(result.ok).toBe(false);
     assert(!result.ok);
-      expect(result.error.status).toBe(400);
-
+    expect(result.error.status).toBe(400);
   });
 
   it('returns 422 when header fails Typia validation (version 2)', () => {
@@ -77,7 +73,9 @@ describe('sanitizeFilename', () => {
   });
 
   it('replaces unsafe characters with underscores', () => {
-    expect(sanitizeFilename('file with spaces & (parens).cast')).toBe('file_with_spaces____parens_.cast');
+    expect(sanitizeFilename('file with spaces & (parens).cast')).toBe(
+      'file_with_spaces____parens_.cast',
+    );
   });
 
   it('extracts basename from path with slashes', () => {
@@ -104,7 +102,8 @@ describe('sanitizeFilename', () => {
 
 describe('countMarkers', () => {
   it('counts marker events', () => {
-    const content = '{"version":3,"width":80,"height":24}\n[0,"o","hello"]\n[1,"m","marker1"]\n[2,"m","marker2"]';
+    const content =
+      '{"version":3,"width":80,"height":24}\n[0,"o","hello"]\n[1,"m","marker1"]\n[2,"m","marker2"]';
     expect(countMarkers(content)).toBe(2);
   });
 

@@ -60,7 +60,7 @@ function createMockEventSource(url: string): MockEventSourceInstance {
       const event = new MessageEvent('pipeline-status', {
         data: JSON.stringify(snapshot),
       });
-      handlers.get('pipeline-status')?.forEach(h => h(event));
+      handlers.get('pipeline-status')?.forEach((h) => h(event));
     },
 
     simulateError() {
@@ -180,7 +180,9 @@ describe('usePipelineStatus()', () => {
       mockInstances[0]!.simulateOpen();
 
       const snapshot = makeSnapshot({
-        recentlyCompleted: [{ id: 's3', name: 'c.cast', status: 'completed', completedAt: '2024-01-01T00:00:00Z' }],
+        recentlyCompleted: [
+          { id: 's3', name: 'c.cast', status: 'completed', completedAt: '2024-01-01T00:00:00Z' },
+        ],
       });
       mockInstances[0]!.simulateStatus(snapshot);
       await nextTick();
@@ -195,12 +197,14 @@ describe('usePipelineStatus()', () => {
       const composable = usePipelineStatus();
       mockInstances[0]!.simulateOpen();
 
-      mockInstances[0]!.simulateStatus(makeSnapshot({
-        processing: [
-          { id: 's1', name: 'a.cast', status: 'processing' },
-          { id: 's2', name: 'b.cast', status: 'processing' },
-        ],
-      }));
+      mockInstances[0]!.simulateStatus(
+        makeSnapshot({
+          processing: [
+            { id: 's1', name: 'a.cast', status: 'processing' },
+            { id: 's2', name: 'b.cast', status: 'processing' },
+          ],
+        }),
+      );
       await nextTick();
 
       expect(composable.processingCount.value).toBe(2);
@@ -210,9 +214,11 @@ describe('usePipelineStatus()', () => {
       const composable = usePipelineStatus();
       mockInstances[0]!.simulateOpen();
 
-      mockInstances[0]!.simulateStatus(makeSnapshot({
-        queued: [{ id: 's1', name: 'a.cast', status: 'queued' }],
-      }));
+      mockInstances[0]!.simulateStatus(
+        makeSnapshot({
+          queued: [{ id: 's1', name: 'a.cast', status: 'queued' }],
+        }),
+      );
       await nextTick();
 
       expect(composable.queuedCount.value).toBe(1);
@@ -222,10 +228,12 @@ describe('usePipelineStatus()', () => {
       const composable = usePipelineStatus();
       mockInstances[0]!.simulateOpen();
 
-      mockInstances[0]!.simulateStatus(makeSnapshot({
-        processing: [{ id: 's1', name: 'a.cast', status: 'processing' }],
-        queued: [{ id: 's2', name: 'b.cast', status: 'queued' }],
-      }));
+      mockInstances[0]!.simulateStatus(
+        makeSnapshot({
+          processing: [{ id: 's1', name: 'a.cast', status: 'processing' }],
+          queued: [{ id: 's2', name: 'b.cast', status: 'queued' }],
+        }),
+      );
       await nextTick();
 
       expect(composable.totalActive.value).toBe(2);

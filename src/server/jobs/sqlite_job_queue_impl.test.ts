@@ -22,7 +22,7 @@ describe('SqliteJobQueueImpl', () => {
 
     // Create a test session to use as FK target
     const session = await ctx.sessionRepository.create(
-      createTestSession({ filename: 'job-test.cast', filepath: 'sessions/job-test.cast' })
+      createTestSession({ filename: 'job-test.cast', filepath: 'sessions/job-test.cast' }),
     );
     sessionId = session.id;
   });
@@ -47,7 +47,7 @@ describe('SqliteJobQueueImpl', () => {
 
     it('generates a unique id', async () => {
       const session2 = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'job2.cast', filepath: 'sessions/job2.cast' })
+        createTestSession({ filename: 'job2.cast', filepath: 'sessions/job2.cast' }),
       );
       const job1 = await queue.create(sessionId);
       const job2 = await queue.create(session2.id);
@@ -196,10 +196,10 @@ describe('SqliteJobQueueImpl', () => {
 
     it('does not return completed or failed jobs', async () => {
       const session2 = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'j2.cast', filepath: 'sessions/j2.cast' })
+        createTestSession({ filename: 'j2.cast', filepath: 'sessions/j2.cast' }),
       );
       const session3 = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'j3.cast', filepath: 'sessions/j3.cast' })
+        createTestSession({ filename: 'j3.cast', filepath: 'sessions/j3.cast' }),
       );
 
       const job1 = await queue.create(sessionId);
@@ -239,10 +239,10 @@ describe('SqliteJobQueueImpl', () => {
 
     it('does not affect pending or completed jobs', async () => {
       const session2 = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'rec2.cast', filepath: 'sessions/rec2.cast' })
+        createTestSession({ filename: 'rec2.cast', filepath: 'sessions/rec2.cast' }),
       );
       const session3 = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'rec3.cast', filepath: 'sessions/rec3.cast' })
+        createTestSession({ filename: 'rec3.cast', filepath: 'sessions/rec3.cast' }),
       );
 
       await queue.create(sessionId); // pending — untouched

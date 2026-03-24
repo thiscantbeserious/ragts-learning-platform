@@ -4,7 +4,7 @@ exports[`SessionList component snapshots > empty state (no sessions) 1`] = `
 "<div data-v-2189a348="" class="session-list">
   <div data-v-2189a348="" class="session-list__empty">
     <p data-v-2189a348="">No sessions yet.</p>
-    <p data-v-2189a348="" class="session-list__empty-hint"> Upload a <code data-v-2189a348="">.cast</code> file to get started. </p>
+    <p data-v-2189a348="" class="session-list__empty-hint">Upload a <code data-v-2189a348="">.cast</code> file to get started.</p>
   </div>
 </div>"
 `;
@@ -17,7 +17,7 @@ exports[`SessionList component snapshots > error state 1`] = `
 
 exports[`SessionList component snapshots > loading state 1`] = `
 "<div data-v-2189a348="" class="session-list">
-  <div data-v-2189a348="" class="session-list__loading"> Loading sessions... </div>
+  <div data-v-2189a348="" class="session-list__loading">Loading sessions...</div>
 </div>"
 `;
 

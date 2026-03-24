@@ -6,7 +6,7 @@ How learning works — from first principles to the asynchronous refinement loop
 
 ## Step 1: The Human Loop
 
-Humans learn through failure and repetition. The critical ingredient isn't the failure — it's the reflection between attempts. Without understanding *why* something failed, repetition is just noise.
+Humans learn through failure and repetition. The critical ingredient isn't the failure — it's the reflection between attempts. Without understanding _why_ something failed, repetition is just noise.
 
 ```mermaid
 %%{ init: { 'flowchart': { 'curve': 'basis', 'nodeSpacing': 40, 'rankSpacing': 60 } } }%%
@@ -104,7 +104,7 @@ Right now, agents write their own context. MEMORY.md, AGENTS.md, CLAUDE.md — t
 
 Instead of requiring humans to supervise agents in real-time, Erika captures every session and makes it reviewable after the fact. Humans browse what happened, understand why, mark what mattered, and annotate what should have gone differently — on their own time, at their own pace.
 
-Those curated insights feed back to agents as structured context. Not raw logs. Not keyword-matched snippets. Not files the agent wrote to itself. Human-validated, intent-aware context that tells agents not just what happened, but what *should* have happened — delivered however the agent can consume it.
+Those curated insights feed back to agents as structured context. Not raw logs. Not keyword-matched snippets. Not files the agent wrote to itself. Human-validated, intent-aware context that tells agents not just what happened, but what _should_ have happened — delivered however the agent can consume it.
 
 ```mermaid
 %%{ init: { 'flowchart': { 'nodeSpacing': 50, 'rankSpacing': 60 } } }%%

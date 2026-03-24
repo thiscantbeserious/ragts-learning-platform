@@ -59,7 +59,7 @@ async function fetchOneSectionPage(
   sessionId: string,
   sectionId: string,
   offset: number,
-  limit: number
+  limit: number,
 ): Promise<SectionContentPage> {
   const url = `/api/sessions/${sessionId}/sections/${sectionId}/content?offset=${offset}&limit=${limit}`;
   const res = await fetch(url);
@@ -67,10 +67,7 @@ async function fetchOneSectionPage(
   return res.json() as Promise<SectionContentPage>;
 }
 
-function storeBulkInCache(
-  bulk: BulkSectionContentResponse,
-  cache: SectionCache
-): void {
+function storeBulkInCache(bulk: BulkSectionContentResponse, cache: SectionCache): void {
   for (const [, page] of Object.entries(bulk.sections)) {
     cache.set(makeCacheKey(page.sectionId, page.offset), page);
   }
@@ -146,7 +143,7 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
   async function fetchSectionContent(
     sectionId: string,
     offset = 0,
-    limit = DEFAULT_SECTION_PAGE_LIMIT
+    limit = DEFAULT_SECTION_PAGE_LIMIT,
   ): Promise<SectionContentPage> {
     const key = makeCacheKey(sectionId, offset);
     const cached = _cache.get(key);
@@ -158,9 +155,13 @@ export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) 
     return page;
   }
 
-  watch(sessionIdRef, (id) => {
-    if (id) void load(id);
-  }, { immediate: true });
+  watch(
+    sessionIdRef,
+    (id) => {
+      if (id) void load(id);
+    },
+    { immediate: true },
+  );
 
   const { status: sseStatus } = useSSE(sessionIdRef, detectionStatus);
 

@@ -5,7 +5,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { buildCleanDocument, type EpochBoundary } from '../../../src/server/processing/scrollback_dedup.js';
+import {
+  buildCleanDocument,
+  type EpochBoundary,
+} from '../../../src/server/processing/scrollback_dedup.js';
 import { initVt, createVt } from '#vt-wasm';
 import type { TerminalSnapshot } from '#vt-wasm/types';
 import { makeSnapshot, makeStyledLine, snapshotToText } from '../../helpers/test-utils.js';
@@ -21,11 +24,7 @@ function textSnapshot(texts: string[], cols = 80, rows = 24): TerminalSnapshot {
 
 describe('scrollback-dedup snapshots', () => {
   it('zero epochs — identity transform', () => {
-    const raw = textSnapshot([
-      'Line one',
-      'Line two',
-      'Line three',
-    ]);
+    const raw = textSnapshot(['Line one', 'Line two', 'Line three']);
     const result = buildCleanDocument(raw, []);
 
     expect(snapshotToText(result.cleanSnapshot)).toMatchSnapshot();
@@ -82,9 +81,18 @@ describe('scrollback-dedup snapshots', () => {
 
   it('3-epoch progressive re-renders — rawToClean mapping array', () => {
     const raw = textSnapshot([
-      'A', 'B', 'C',         // epoch 0: lines 0-2
-      'A', 'B', 'C', 'D',    // epoch 1: re-render A,B,C + new D
-      'A', 'B', 'C', 'D', 'E', // epoch 2: re-render A,B,C,D + new E
+      'A',
+      'B',
+      'C', // epoch 0: lines 0-2
+      'A',
+      'B',
+      'C',
+      'D', // epoch 1: re-render A,B,C + new D
+      'A',
+      'B',
+      'C',
+      'D',
+      'E', // epoch 2: re-render A,B,C,D + new E
     ]);
 
     const epochs: EpochBoundary[] = [
@@ -111,15 +119,13 @@ describe('scrollback-dedup snapshots', () => {
       'Content A',
       'Content B',
       // Epoch boundary falls here
-      'Header',       // This re-renders the header
-      'Content A',    // This re-renders Content A
-      'Content B',    // This re-renders Content B
+      'Header', // This re-renders the header
+      'Content A', // This re-renders Content A
+      'Content B', // This re-renders Content B
       'New stuff',
     ]);
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 5, rawLineCount: 3 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 5, rawLineCount: 3 }];
 
     const result = buildCleanDocument(raw, epochs);
     const cleanTexts = snapshotToText(result.cleanSnapshot);
@@ -133,16 +139,14 @@ describe('scrollback-dedup snapshots', () => {
   it('stutter removal — clean output', () => {
     // Pattern: line K is non-trivial, followed by trivial lines, then same text at K+N
     const raw = textSnapshot([
-      'Important header text here',  // stuttered copy
-      '',                             // trivial
-      '',                             // trivial
-      'Important header text here',  // real copy
+      'Important header text here', // stuttered copy
+      '', // trivial
+      '', // trivial
+      'Important header text here', // real copy
       'Next content line',
     ]);
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 5, rawLineCount: 0 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 5, rawLineCount: 0 }];
 
     const result = buildCleanDocument(raw, epochs);
     const cleanTexts = snapshotToText(result.cleanSnapshot);
@@ -153,15 +157,13 @@ describe('scrollback-dedup snapshots', () => {
   it('rawToClean for stuttered line index — probe-forward fallback', () => {
     // Stuttered lines have no direct mapping — rawToClean probes forward
     const raw = textSnapshot([
-      'Stutter line here!!!!',  // index 0: will be stuttered
-      '',                        // index 1: trivial
-      'Stutter line here!!!!',  // index 2: real
-      'Following content',       // index 3
+      'Stutter line here!!!!', // index 0: will be stuttered
+      '', // index 1: trivial
+      'Stutter line here!!!!', // index 2: real
+      'Following content', // index 3
     ]);
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 3, rawLineCount: 0 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 3, rawLineCount: 0 }];
 
     const result = buildCleanDocument(raw, epochs);
 
@@ -192,9 +194,7 @@ describe('scrollback-dedup snapshots', () => {
       'Appended content',
     ]);
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 10, rawLineCount: 7 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 10, rawLineCount: 7 }];
 
     const result = buildCleanDocument(raw, epochs);
     const cleanTexts = snapshotToText(result.cleanSnapshot);
@@ -217,9 +217,7 @@ describe('scrollback-dedup snapshots', () => {
       'New content',
     ]);
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 5, rawLineCount: 2 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 5, rawLineCount: 2 }];
 
     const result = buildCleanDocument(raw, epochs);
     const cleanTexts = snapshotToText(result.cleanSnapshot);
@@ -246,9 +244,7 @@ describe('scrollback-dedup snapshots', () => {
       ],
     };
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 5, rawLineCount: 3 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 5, rawLineCount: 3 }];
 
     const result = buildCleanDocument(raw, epochs);
     const cleanTexts = snapshotToText(result.cleanSnapshot);
@@ -260,13 +256,16 @@ describe('scrollback-dedup snapshots', () => {
 
   it('rawLineCountToClean — boundary values', () => {
     const raw = textSnapshot([
-      'A', 'B', 'C',       // epoch 0
-      'A', 'B', 'C', 'D',  // epoch 1: re-render + new
+      'A',
+      'B',
+      'C', // epoch 0
+      'A',
+      'B',
+      'C',
+      'D', // epoch 1: re-render + new
     ]);
 
-    const epochs: EpochBoundary[] = [
-      { eventIndex: 5, rawLineCount: 3 },
-    ];
+    const epochs: EpochBoundary[] = [{ eventIndex: 5, rawLineCount: 3 }];
 
     const result = buildCleanDocument(raw, epochs);
 
@@ -285,11 +284,11 @@ describe('scrollback-dedup snapshots', () => {
     // Read the synthetic TUI session .cast and process through VT + dedup
     const castContent = readFileSync(
       join(__dirname, '../../fixtures/synthetic-tui-session.cast'),
-      'utf-8'
+      'utf-8',
     );
-    const lines = castContent.split('\n').filter(l => l.trim());
+    const lines = castContent.split('\n').filter((l) => l.trim());
     const header = JSON.parse(lines[0]);
-    const events = lines.slice(1).map(l => JSON.parse(l));
+    const events = lines.slice(1).map((l) => JSON.parse(l));
 
     // Replay through VT
     const vt = createVt(header.term.cols, header.term.rows, 200000);
@@ -313,7 +312,7 @@ describe('scrollback-dedup snapshots', () => {
     vt.free();
 
     const result = buildCleanDocument(rawSnapshot, epochBoundaries);
-    const cleanTexts = snapshotToText(result.cleanSnapshot).map(t => t.trimEnd());
+    const cleanTexts = snapshotToText(result.cleanSnapshot).map((t) => t.trimEnd());
 
     expect(cleanTexts).toMatchSnapshot();
     // Clean snapshot should have dedup applied (fewer or equal lines to raw)

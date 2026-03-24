@@ -93,8 +93,18 @@ describe('SessionList component snapshots', () => {
     await router.isReady();
 
     const sessions: Session[] = [
-      makeSession({ id: 'sess-001', filename: 'claude-session.cast', size_bytes: 245678, marker_count: 5 }),
-      makeSession({ id: 'sess-002', filename: 'codex-session.cast', size_bytes: 1234567, marker_count: 0 }),
+      makeSession({
+        id: 'sess-001',
+        filename: 'claude-session.cast',
+        size_bytes: 245678,
+        marker_count: 5,
+      }),
+      makeSession({
+        id: 'sess-002',
+        filename: 'codex-session.cast',
+        size_bytes: 1234567,
+        marker_count: 0,
+      }),
       makeSession({ id: 'sess-003', filename: 'simple.cast', size_bytes: 512, marker_count: 1 }),
     ];
 
@@ -110,9 +120,7 @@ describe('SessionList component snapshots', () => {
     await router.push('/');
     await router.isReady();
 
-    const sessions: Session[] = [
-      makeSession({ id: 'sess-no-markers', marker_count: 0 }),
-    ];
+    const sessions: Session[] = [makeSession({ id: 'sess-no-markers', marker_count: 0 })];
 
     const wrapper = mount(SessionList, {
       props: { sessions, loading: false, error: null },

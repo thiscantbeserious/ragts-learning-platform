@@ -50,7 +50,7 @@ describe('SqliteDatabaseImpl', () => {
       const session = await ctx.sessionRepository.create(createTestSession());
 
       const section = await ctx.sectionRepository.create(
-        createTestSection(session.id, { label: 'Setup' })
+        createTestSection(session.id, { label: 'Setup' }),
       );
 
       expect(section.id).toBeTruthy();
@@ -80,7 +80,7 @@ describe('SqliteDatabaseImpl', () => {
       });
 
       const session = await inMemoryCtx.sessionRepository.create(
-        createTestSession({ filename: 'mem.cast', filepath: 'sessions/mem.cast', size_bytes: 512 })
+        createTestSession({ filename: 'mem.cast', filepath: 'sessions/mem.cast', size_bytes: 512 }),
       );
 
       expect(session.id).toBeTruthy();
@@ -102,9 +102,7 @@ describe('SqliteDatabaseImpl', () => {
     it('should prevent further database operations after close', async () => {
       await ctx.close();
 
-      await expect(
-        ctx.sessionRepository.findAll()
-      ).rejects.toThrow();
+      await expect(ctx.sessionRepository.findAll()).rejects.toThrow();
     });
   });
 
@@ -123,7 +121,11 @@ describe('SqliteDatabaseImpl', () => {
     it('should have sessions table with required columns', async () => {
       // Verify schema by inserting and querying a session
       const session = await memCtx.sessionRepository.create(
-        createTestSession({ filename: 'schema-test.cast', filepath: 'sessions/schema-test.cast', size_bytes: 100 })
+        createTestSession({
+          filename: 'schema-test.cast',
+          filepath: 'sessions/schema-test.cast',
+          size_bytes: 100,
+        }),
       );
 
       expect(session.id).toBeTruthy();
@@ -134,11 +136,15 @@ describe('SqliteDatabaseImpl', () => {
 
     it('should have sections table with required columns (migration 002)', async () => {
       const session = await memCtx.sessionRepository.create(
-        createTestSession({ filename: 'section-test.cast', filepath: 'sessions/section-test.cast', size_bytes: 100 })
+        createTestSession({
+          filename: 'section-test.cast',
+          filepath: 'sessions/section-test.cast',
+          size_bytes: 100,
+        }),
       );
 
       const section = await memCtx.sectionRepository.create(
-        createTestSection(session.id, { type: 'detected', endEvent: null, label: null })
+        createTestSection(session.id, { type: 'detected', endEvent: null, label: null }),
       );
 
       expect(section.id).toBeTruthy();
@@ -148,7 +154,11 @@ describe('SqliteDatabaseImpl', () => {
 
     it('should support snapshot column (migration 003)', async () => {
       const session = await memCtx.sessionRepository.create(
-        createTestSession({ filename: 'snap-test.cast', filepath: 'sessions/snap-test.cast', size_bytes: 100 })
+        createTestSession({
+          filename: 'snap-test.cast',
+          filepath: 'sessions/snap-test.cast',
+          size_bytes: 100,
+        }),
       );
 
       const snapshot = JSON.stringify({ cursor: { x: 0, y: 0 } });
@@ -162,11 +172,15 @@ describe('SqliteDatabaseImpl', () => {
     it('should enforce foreign key constraints on sections', async () => {
       // Deleting a session should cascade-delete its sections
       const session = await memCtx.sessionRepository.create(
-        createTestSession({ filename: 'fk-test.cast', filepath: 'sessions/fk-test.cast', size_bytes: 100 })
+        createTestSession({
+          filename: 'fk-test.cast',
+          filepath: 'sessions/fk-test.cast',
+          size_bytes: 100,
+        }),
       );
 
       await memCtx.sectionRepository.create(
-        createTestSection(session.id, { endEvent: 5, label: 'test' })
+        createTestSection(session.id, { endEvent: 5, label: 'test' }),
       );
 
       await memCtx.sessionRepository.deleteById(session.id);
@@ -179,7 +193,11 @@ describe('SqliteDatabaseImpl', () => {
       // Verify jobs table exists: if migrate004 failed, initialize() would have thrown.
       // Round-trip a session to confirm the DB is operational post-migration.
       const session = await memCtx.sessionRepository.create(
-        createTestSession({ filename: 'jobs-test.cast', filepath: 'sessions/jobs-test.cast', size_bytes: 100 })
+        createTestSession({
+          filename: 'jobs-test.cast',
+          filepath: 'sessions/jobs-test.cast',
+          size_bytes: 100,
+        }),
       );
 
       await expect(memCtx.ping()).resolves.not.toThrow();
@@ -196,7 +214,11 @@ describe('SqliteDatabaseImpl', () => {
       const freshCtx = await freshImpl.initialize({ dataDir: testDir, dbPath: ':memory:' });
 
       const session = await freshCtx.sessionRepository.create(
-        createTestSession({ filename: 'fresh.cast', filepath: 'sessions/fresh.cast', size_bytes: 200 })
+        createTestSession({
+          filename: 'fresh.cast',
+          filepath: 'sessions/fresh.cast',
+          size_bytes: 200,
+        }),
       );
 
       expect(session.id).toBeTruthy();

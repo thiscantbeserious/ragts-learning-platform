@@ -65,11 +65,19 @@ export class RetryService {
     }
 
     if (job.attempts >= job.maxAttempts) {
-      return { ok: false, status: 400, error: `Maximum retry attempts (${job.maxAttempts}) exceeded` };
+      return {
+        ok: false,
+        status: 400,
+        error: `Maximum retry attempts (${job.maxAttempts}) exceeded`,
+      };
     }
 
     if (job.status === 'running') {
-      return { ok: false, status: 409, error: 'Session is already processing — cannot retry a running job' };
+      return {
+        ok: false,
+        status: 409,
+        error: 'Session is already processing — cannot retry a running job',
+      };
     }
 
     if (job.status === 'pending' || job.status === 'completed') {

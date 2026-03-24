@@ -81,7 +81,7 @@ describe('SessionContent component snapshots', () => {
       makeSectionMetadata({ id: 'section-2', label: 'Second', lineCount: 5 }),
     ];
     const fetchSectionContent = vi.fn((id: string) =>
-      Promise.resolve(makeContentPage(id, ['Line 0', 'Line 1']))
+      Promise.resolve(makeContentPage(id, ['Line 0', 'Line 1'])),
     );
     const wrapper = mount(SessionContent, {
       props: { sections, fetchSectionContent },
@@ -97,7 +97,7 @@ describe('SessionContent component snapshots', () => {
       makeSectionMetadata({ id: 'section-1', label: 'First', lineCount: 5 }),
     ];
     const fetchSectionContent = vi.fn((id: string) =>
-      Promise.resolve(makeContentPage(id, ['Line 0']))
+      Promise.resolve(makeContentPage(id, ['Line 0'])),
     );
     const wrapper = mount(SessionContent, {
       props: {
@@ -118,7 +118,7 @@ describe('SessionContent component snapshots', () => {
       makeSectionMetadata({ id: 'section-1', label: 'Partial', lineCount: 3 }),
     ];
     const fetchSectionContent = vi.fn((id: string) =>
-      Promise.resolve(makeContentPage(id, ['Line 0']))
+      Promise.resolve(makeContentPage(id, ['Line 0'])),
     );
     const wrapper = mount(SessionContent, {
       props: {

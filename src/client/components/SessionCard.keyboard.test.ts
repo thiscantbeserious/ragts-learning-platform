@@ -156,7 +156,11 @@ describe('SessionCard — status transition watch (lines 106-112)', () => {
   });
 
   it('fires success toast when liveStatus transitions to "completed"', async () => {
-    const session = makeSession({ id: 'watch-1', detection_status: 'processing', filename: 'sess.cast' });
+    const session = makeSession({
+      id: 'watch-1',
+      detection_status: 'processing',
+      filename: 'sess.cast',
+    });
 
     mountCard(session);
     await nextTick();
@@ -172,7 +176,11 @@ describe('SessionCard — status transition watch (lines 106-112)', () => {
   });
 
   it('fires error toast when liveStatus transitions to "failed"', async () => {
-    const session = makeSession({ id: 'watch-2', detection_status: 'processing', filename: 'err.cast' });
+    const session = makeSession({
+      id: 'watch-2',
+      detection_status: 'processing',
+      filename: 'err.cast',
+    });
 
     mountCard(session);
     await nextTick();
@@ -188,7 +196,11 @@ describe('SessionCard — status transition watch (lines 106-112)', () => {
   });
 
   it('fires error toast when liveStatus transitions to "interrupted"', async () => {
-    const session = makeSession({ id: 'watch-3', detection_status: 'processing', filename: 'int.cast' });
+    const session = makeSession({
+      id: 'watch-3',
+      detection_status: 'processing',
+      filename: 'int.cast',
+    });
 
     mountCard(session);
     await nextTick();

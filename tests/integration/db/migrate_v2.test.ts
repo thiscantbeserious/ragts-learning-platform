@@ -101,11 +101,14 @@ describe('migrateV2', () => {
 
     // Manually set status to completed and add a unified snapshot
     await sessionRepo.updateDetectionStatus(session.id, 'completed', 200, 0);
-    await sessionRepo.updateSnapshot(session.id, JSON.stringify({
-      cols: 80,
-      rows: 24,
-      lines: [{ spans: [{ text: 'test', fg: null, bg: null, attrs: 0 }] }],
-    }));
+    await sessionRepo.updateSnapshot(
+      session.id,
+      JSON.stringify({
+        cols: 80,
+        rows: 24,
+        lines: [{ spans: [{ text: 'test', fg: null, bg: null, attrs: 0 }] }],
+      }),
+    );
 
     // Create a marker section manually to verify no duplicates are created
     await ctx.sectionRepository.create({

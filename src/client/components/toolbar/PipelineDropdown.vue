@@ -1,11 +1,5 @@
 <template>
-  <div
-    v-if="open"
-    class="pipeline-dropdown"
-    role="menu"
-    @keydown="handleArrowKey"
-    @click.stop
-  >
+  <div v-if="open" class="pipeline-dropdown" role="menu" @keydown="handleArrowKey" @click.stop>
     <div class="pipeline-dropdown__header">
       <span class="pipeline-dropdown__title">Pipeline Status</span>
       <span class="pipeline-dropdown__summary">{{ summaryText }}</span>
@@ -16,9 +10,7 @@
       v-if="processingSessions.length"
       class="pipeline-dropdown__section pipeline-dropdown__section--processing"
     >
-      <div class="pipeline-dropdown__label">
-        Processing
-      </div>
+      <div class="pipeline-dropdown__label">Processing</div>
       <div
         v-for="session in processingSessions"
         :key="session.id"
@@ -26,12 +18,11 @@
         role="menuitem"
         tabindex="-1"
       >
-        <div
-          class="mini-spinner"
-          aria-hidden="true"
-        />
+        <div class="mini-spinner" aria-hidden="true" />
         <span class="pipeline-item__name">{{ session.name }}</span>
-        <span class="pipeline-item__status">{{ session.progress !== undefined ? session.progress + '%' : '' }}</span>
+        <span class="pipeline-item__status">{{
+          session.progress !== undefined ? session.progress + '%' : ''
+        }}</span>
       </div>
     </div>
 
@@ -40,9 +31,7 @@
       v-if="queuedSessions.length"
       class="pipeline-dropdown__section pipeline-dropdown__section--queued"
     >
-      <div class="pipeline-dropdown__label">
-        Queued
-      </div>
+      <div class="pipeline-dropdown__label">Queued</div>
       <div
         v-for="session in queuedSessions"
         :key="session.id"
@@ -50,12 +39,11 @@
         role="menuitem"
         tabindex="-1"
       >
-        <div
-          class="queue-dot"
-          aria-hidden="true"
-        />
+        <div class="queue-dot" aria-hidden="true" />
         <span class="pipeline-item__name">{{ session.name }}</span>
-        <span class="pipeline-item__status">{{ session.queuePosition !== undefined ? '#' + session.queuePosition : '' }}</span>
+        <span class="pipeline-item__status">{{
+          session.queuePosition !== undefined ? '#' + session.queuePosition : ''
+        }}</span>
       </div>
     </div>
 
@@ -64,9 +52,7 @@
       v-if="recentlyCompleted.length"
       class="pipeline-dropdown__section pipeline-dropdown__section--completed"
     >
-      <div class="pipeline-dropdown__label">
-        Recently Completed
-      </div>
+      <div class="pipeline-dropdown__label">Recently Completed</div>
       <div
         v-for="session in recentlyCompleted"
         :key="session.id"
@@ -74,12 +60,11 @@
         role="menuitem"
         tabindex="-1"
       >
-        <span
-          class="icon icon-check pipeline-item__check"
-          aria-hidden="true"
-        />
+        <span class="icon icon-check pipeline-item__check" aria-hidden="true" />
         <span class="pipeline-item__name">{{ session.name }}</span>
-        <span class="pipeline-item__status">{{ session.completedAt ? formatRelativeTime(session.completedAt) : '' }}</span>
+        <span class="pipeline-item__status">{{
+          session.completedAt ? formatRelativeTime(session.completedAt) : ''
+        }}</span>
       </div>
     </div>
   </div>
@@ -141,7 +126,7 @@ function handleArrowKey(event: KeyboardEvent): void {
   if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
   event.preventDefault();
 
-  const container = (event.currentTarget as HTMLElement);
+  const container = event.currentTarget as HTMLElement;
   const items = Array.from(container.querySelectorAll<HTMLElement>('.pipeline-item'));
   if (items.length === 0) return;
 
@@ -150,7 +135,6 @@ function handleArrowKey(event: KeyboardEvent): void {
   const nextIndex = (currentIndex + direction + items.length) % items.length;
   items[nextIndex]?.focus();
 }
-
 </script>
 
 <style scoped>
@@ -173,7 +157,9 @@ function handleArrowKey(event: KeyboardEvent): void {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--toolbar-dropdown-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg), 0 0 30px var(--toolbar-dropdown-glow);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 30px var(--toolbar-dropdown-glow);
   z-index: calc(var(--z-overlay-panel, 201) + 1);
   overflow: hidden;
 }
@@ -265,7 +251,9 @@ function handleArrowKey(event: KeyboardEvent): void {
 }
 
 @keyframes pipeline-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .queue-dot {

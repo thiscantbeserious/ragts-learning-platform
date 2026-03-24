@@ -39,7 +39,9 @@ describe('useLayout() — onMediaChange handler (line 50)', () => {
 
     const scope = effectScope();
     let layout: ReturnType<typeof useLayout> | undefined;
-    scope.run(() => { layout = useLayout(); });
+    scope.run(() => {
+      layout = useLayout();
+    });
 
     // Initially desktop
     expect(layout?.isMobile.value).toBe(false);
@@ -65,7 +67,9 @@ describe('useLayout() — onMediaChange handler (line 50)', () => {
 
     const scope = effectScope();
     let layout: ReturnType<typeof useLayout> | undefined;
-    scope.run(() => { layout = useLayout(); });
+    scope.run(() => {
+      layout = useLayout();
+    });
 
     // Initially mobile
     expect(layout?.isMobile.value).toBe(true);

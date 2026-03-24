@@ -71,8 +71,19 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should return all sessions', async () => {
-      const data1 = createTestSession({ filename: 'test1.cast', filepath: 'sessions/test1.cast', marker_count: 3, uploaded_at: '2026-02-16T10:30:00Z' });
-      const data2 = createTestSession({ filename: 'test2.cast', filepath: 'sessions/test2.cast', size_bytes: 2048, marker_count: 5, uploaded_at: '2026-02-16T11:00:00Z' });
+      const data1 = createTestSession({
+        filename: 'test1.cast',
+        filepath: 'sessions/test1.cast',
+        marker_count: 3,
+        uploaded_at: '2026-02-16T10:30:00Z',
+      });
+      const data2 = createTestSession({
+        filename: 'test2.cast',
+        filepath: 'sessions/test2.cast',
+        size_bytes: 2048,
+        marker_count: 5,
+        uploaded_at: '2026-02-16T11:00:00Z',
+      });
 
       const session1 = await repository.create(data1);
       const session2 = await repository.create(data2);
@@ -80,13 +91,22 @@ describe('SqliteSessionImpl', () => {
       const sessions = await repository.findAll();
 
       expect(sessions).toHaveLength(2);
-      expect(sessions.map(s => s.id)).toContain(session1.id);
-      expect(sessions.map(s => s.id)).toContain(session2.id);
+      expect(sessions.map((s) => s.id)).toContain(session1.id);
+      expect(sessions.map((s) => s.id)).toContain(session2.id);
     });
 
     it('should return sessions ordered by uploaded_at DESC (newest first)', async () => {
-      const older = createTestSession({ filename: 'older.cast', filepath: 'sessions/older.cast', uploaded_at: '2026-02-15T10:00:00Z' });
-      const newer = createTestSession({ filename: 'newer.cast', filepath: 'sessions/newer.cast', size_bytes: 2048, uploaded_at: '2026-02-16T10:00:00Z' });
+      const older = createTestSession({
+        filename: 'older.cast',
+        filepath: 'sessions/older.cast',
+        uploaded_at: '2026-02-15T10:00:00Z',
+      });
+      const newer = createTestSession({
+        filename: 'newer.cast',
+        filepath: 'sessions/newer.cast',
+        size_bytes: 2048,
+        uploaded_at: '2026-02-16T10:00:00Z',
+      });
 
       await repository.create(older);
       const newerSession = await repository.create(newer);
@@ -141,8 +161,17 @@ describe('SqliteSessionImpl', () => {
     });
 
     it('should not affect other sessions', async () => {
-      const data1 = createTestSession({ filename: 'test1.cast', filepath: 'sessions/test1.cast', uploaded_at: '2026-02-16T10:30:00Z' });
-      const data2 = createTestSession({ filename: 'test2.cast', filepath: 'sessions/test2.cast', size_bytes: 2048, uploaded_at: '2026-02-16T11:00:00Z' });
+      const data1 = createTestSession({
+        filename: 'test1.cast',
+        filepath: 'sessions/test1.cast',
+        uploaded_at: '2026-02-16T10:30:00Z',
+      });
+      const data2 = createTestSession({
+        filename: 'test2.cast',
+        filepath: 'sessions/test2.cast',
+        size_bytes: 2048,
+        uploaded_at: '2026-02-16T11:00:00Z',
+      });
 
       const session1 = await repository.create(data1);
       const session2 = await repository.create(data2);
@@ -171,7 +200,7 @@ describe('SqliteSessionImpl', () => {
     function buildProcessedSession(
       sessionId: string,
       sessionSnapshot: object,
-      sections: ProcessedSession['sections']
+      sections: ProcessedSession['sections'],
     ): ProcessedSession {
       return {
         sessionId,
@@ -198,7 +227,7 @@ describe('SqliteSessionImpl', () => {
             startLine: 0,
             endLine: 10,
           },
-        ])
+        ]),
       );
 
       const sections = await sectionRepository.findBySessionId(session.id);
@@ -225,7 +254,7 @@ describe('SqliteSessionImpl', () => {
             startLine: 5,
             endLine: 15,
           },
-        ])
+        ]),
       );
 
       const sections = await sectionRepository.findBySessionId(session.id);
@@ -250,7 +279,7 @@ describe('SqliteSessionImpl', () => {
             startLine: null,
             endLine: null,
           },
-        ])
+        ]),
       );
 
       const sections = await sectionRepository.findBySessionId(session.id);
@@ -274,7 +303,7 @@ describe('SqliteSessionImpl', () => {
             startLine: 0,
             endLine: 25,
           },
-        ])
+        ]),
       );
 
       const sections = await sectionRepository.findBySessionId(session.id);
@@ -299,7 +328,7 @@ describe('SqliteSessionImpl', () => {
             startLine: null,
             endLine: null,
           },
-        ])
+        ]),
       );
 
       const sections = await sectionRepository.findBySessionId(session.id);
@@ -322,7 +351,7 @@ describe('SqliteSessionImpl', () => {
             startLine: 0,
             endLine: 5,
           },
-        ])
+        ]),
       );
 
       const sections = await sectionRepository.findBySessionId(session.id);
@@ -351,9 +380,7 @@ describe('SqliteSessionImpl', () => {
       await repository.completeProcessing(processed);
       await repository.completeProcessing({
         ...processed,
-        sections: [
-          { ...processed.sections[0]!, label: 'Second', startLine: 5, endLine: 10 },
-        ],
+        sections: [{ ...processed.sections[0]!, label: 'Second', startLine: 5, endLine: 10 }],
       });
 
       const sections = await sectionRepository.findBySessionId(session.id);

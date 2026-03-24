@@ -61,7 +61,10 @@ const TRIVIAL_THRESHOLD = 3;
  * Trims trailing whitespace (terminal lines are padded to width).
  */
 function lineKey(line: SnapshotLine): string {
-  return line.spans.map(span => span.text ?? '').join('').trimEnd();
+  return line.spans
+    .map((span) => span.text ?? '')
+    .join('')
+    .trimEnd();
 }
 
 /**
@@ -159,7 +162,7 @@ function findBestBlock(
   state: DeduplicationState,
   epochStart: number,
   epochLen: number,
-  i: number
+  i: number,
 ): { bestLen: number; bestCleanStart: number } {
   const key = lineKey(getLine(state.rawLines, epochStart + i));
   const candidates = state.cleanIndex.get(key);
@@ -173,7 +176,8 @@ function findBestBlock(
     while (
       i + len < epochLen &&
       cleanPos + len < state.cleanLines.length &&
-      lineKey(getLine(state.rawLines, epochStart + i + len)) === lineKey(getLine(state.cleanLines, cleanPos + len))
+      lineKey(getLine(state.rawLines, epochStart + i + len)) ===
+        lineKey(getLine(state.cleanLines, cleanPos + len))
     ) {
       len++;
     }
@@ -191,11 +195,7 @@ function findBestBlock(
  * Re-rendered blocks (>= MIN_MATCH consecutive matches) are mapped to existing positions.
  * Genuinely new lines are appended and immediately indexed for future epochs.
  */
-function processEpoch(
-  state: DeduplicationState,
-  epochStart: number,
-  epochEnd: number
-): void {
+function processEpoch(state: DeduplicationState, epochStart: number, epochEnd: number): void {
   const epochLen = epochEnd - epochStart;
   if (epochLen === 0) return;
 
@@ -230,7 +230,7 @@ function processEpoch(
  */
 function buildEpochRanges(
   epochBoundaries: EpochBoundary[],
-  totalLines: number
+  totalLines: number,
 ): { start: number; end: number }[] {
   const ranges: { start: number; end: number }[] = [];
   let prevEnd = 0;
@@ -248,7 +248,7 @@ function buildEpochRanges(
  */
 function buildRawToCleanCountArray(
   rawToCleanMap: Map<number, number>,
-  rawLineCount: number
+  rawLineCount: number,
 ): number[] {
   const maxCleanAtRaw = new Array(rawLineCount + 1).fill(0);
   let runningMax = 0;
@@ -282,7 +282,7 @@ function buildRawToCleanCountArray(
  */
 export function buildCleanDocument(
   rawSnapshot: TerminalSnapshot,
-  epochBoundaries: EpochBoundary[]
+  epochBoundaries: EpochBoundary[],
 ): CleanDocumentResult {
   // Zero epochs → identity transform
   if (epochBoundaries.length === 0) {

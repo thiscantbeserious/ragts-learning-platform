@@ -2,15 +2,8 @@
   <ToolbarPill>
     <PipelineRingTrigger />
     <div class="toolbar-pill__separator" />
-    <ToolbarButton
-      icon="icon-settings"
-      label="Settings"
-      @click="navigateToSettings"
-    />
-    <ToolbarButton
-      icon="icon-bell"
-      label="Notifications"
-    />
+    <ToolbarButton icon="icon-settings" label="Settings" @click="navigateToSettings" />
+    <ToolbarButton icon="icon-bell" label="Notifications" />
     <div class="toolbar-pill__separator" />
     <ToolbarAvatar />
   </ToolbarPill>

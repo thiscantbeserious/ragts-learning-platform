@@ -5,14 +5,20 @@
 import { NdjsonStream } from '../src/server/processing/ndjson-stream.js';
 import { normalizeHeader } from '../src/shared/asciicast.js';
 import { createVt, initVt } from '../packages/vt-wasm/index.js';
-import { buildCleanDocument, type EpochBoundary } from '../src/server/processing/scrollback-dedup.js';
+import {
+  buildCleanDocument,
+  type EpochBoundary,
+} from '../src/server/processing/scrollback-dedup.js';
 import type { AsciicastHeader, AsciicastEvent } from '../src/shared/asciicast-types.js';
 
 async function main() {
   await initVt();
 
   const filePath = process.argv[2];
-  if (!filePath) { console.error('Usage: tsx dedup-diag2.ts <file>'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: tsx dedup-diag2.ts <file>');
+    process.exit(1);
+  }
 
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -40,7 +46,10 @@ async function main() {
       if (str.includes('\x1b[?1049l')) inAltScreen = false;
       if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
         const lineCount = vt.getAllLines().lines.length;
-        if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+        if (
+          epochBoundaries.length === 0 ||
+          epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount
+        ) {
           epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
         }
       }
@@ -59,7 +68,9 @@ async function main() {
     console.log(`  Epoch ${i}: lines ${start}-${end} (${end - start} lines)`);
     prevEnd = end;
   }
-  console.log(`  Final epoch: lines ${prevEnd}-${rawSnapshot.lines.length} (${rawSnapshot.lines.length - prevEnd} lines)`);
+  console.log(
+    `  Final epoch: lines ${prevEnd}-${rawSnapshot.lines.length} (${rawSnapshot.lines.length - prevEnd} lines)`,
+  );
 
   // Run dedup
   const t0 = performance.now();
@@ -71,7 +82,7 @@ async function main() {
   // Count headers in clean doc
   let headerCount = 0;
   for (let i = 0; i < result.cleanSnapshot.lines.length; i++) {
-    const text = result.cleanSnapshot.lines[i].spans.map(s => s.text ?? '').join('');
+    const text = result.cleanSnapshot.lines[i].spans.map((s) => s.text ?? '').join('');
     if (text.includes('Claude Code v')) {
       headerCount++;
       if (headerCount <= 5) {
@@ -84,7 +95,10 @@ async function main() {
   // Show first 15 lines of clean doc
   console.log('\n=== First 15 lines of clean doc ===');
   for (let i = 0; i < Math.min(15, result.cleanSnapshot.lines.length); i++) {
-    const text = result.cleanSnapshot.lines[i].spans.map(s => s.text ?? '').join('').trimEnd();
+    const text = result.cleanSnapshot.lines[i].spans
+      .map((s) => s.text ?? '')
+      .join('')
+      .trimEnd();
     console.log(`  L${i + 1}: ${text.slice(0, 120)}`);
   }
 }

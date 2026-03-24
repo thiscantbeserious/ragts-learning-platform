@@ -44,11 +44,16 @@ function makeOkResponse(body: unknown): Response {
   } as unknown as Response;
 }
 
-function makeSessionResponse(overrides: Partial<SessionDetailResponse> = {}): SessionDetailResponse {
+function makeSessionResponse(
+  overrides: Partial<SessionDetailResponse> = {},
+): SessionDetailResponse {
   return {
     id: 'sess-1',
     filename: 'session.cast',
-    content: { header: { version: 2, width: 80, height: 24, timestamp: 0, title: '' }, markers: [] },
+    content: {
+      header: { version: 2, width: 80, height: 24, timestamp: 0, title: '' },
+      markers: [],
+    },
     snapshot: null,
     sections: [],
     detection_status: 'completed',
@@ -73,9 +78,21 @@ describe('useSession — SSE auto-refresh integration (Bug 4)', () => {
 
   it('re-fetches session when SSE status transitions to completed', async () => {
     const initialResponse = makeSessionResponse({ detection_status: 'processing', sections: [] });
-    const refreshedResponse = makeSessionResponse({ detection_status: 'completed', sections: [
-      { id: 'sec-1', type: 'detected', label: 'Section 1', startEvent: 0, endEvent: 5, startLine: null, endLine: null, snapshot: null },
-    ]});
+    const refreshedResponse = makeSessionResponse({
+      detection_status: 'completed',
+      sections: [
+        {
+          id: 'sec-1',
+          type: 'detected',
+          label: 'Section 1',
+          startEvent: 0,
+          endEvent: 5,
+          startLine: null,
+          endLine: null,
+          snapshot: null,
+        },
+      ],
+    });
 
     vi.mocked(fetch)
       .mockResolvedValueOnce(makeOkResponse(initialResponse))

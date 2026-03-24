@@ -79,7 +79,8 @@ describe('validateAsciicast', () => {
   });
 
   it('validates AGR-format header with term.cols/term.rows', () => {
-    const content = '{"version":3,"term":{"cols":80,"rows":24,"type":"xterm-256color"},"command":"claude"}\n[0.1,"o","hello\\n"]';
+    const content =
+      '{"version":3,"term":{"cols":80,"rows":24,"type":"xterm-256color"},"command":"claude"}\n[0.1,"o","hello\\n"]';
     const result = validateAsciicast(content);
     expect(result.valid).toBe(true);
   });
@@ -113,7 +114,9 @@ describe('validateAsciicast', () => {
   });
 
   it('rejects event with non-numeric timestamp', () => {
-    const result = validateAsciicast('{"version":3,"width":80,"height":24}\n["notanumber","o","data"]');
+    const result = validateAsciicast(
+      '{"version":3,"width":80,"height":24}\n["notanumber","o","data"]',
+    );
     expect(result.valid).toBe(false);
     expect(result.error).toContain('timestamp must be a number');
     expect(result.line).toBe(2);
@@ -125,7 +128,6 @@ describe('validateAsciicast', () => {
     expect(result.error).toContain('type must be a string');
     expect(result.line).toBe(2);
   });
-
 });
 
 describe('parseAsciicast', () => {
@@ -268,9 +270,7 @@ describe('extractMarkers', () => {
   });
 
   it('handles non-string marker data', () => {
-    const events: ParsedEvent[] = [
-      { time: 0.5, relativeTime: 0.5, type: 'm', data: 123 as any },
-    ];
+    const events: ParsedEvent[] = [{ time: 0.5, relativeTime: 0.5, type: 'm', data: 123 as any }];
 
     const markers = extractMarkers(events);
     expect(markers.length).toBe(1);
@@ -308,7 +308,8 @@ describe('Integration: full parsing flow', () => {
   });
 
   it('normalizes AGR-format header to width/height', () => {
-    const content = '{"version":3,"term":{"cols":100,"rows":50,"type":"xterm-256color"},"command":"claude"}\n[0.1,"o","hello\\n"]';
+    const content =
+      '{"version":3,"term":{"cols":100,"rows":50,"type":"xterm-256color"},"command":"claude"}\n[0.1,"o","hello\\n"]';
     const file = parseAsciicast(content);
 
     expect(file.header.width).toBe(100);
@@ -326,7 +327,8 @@ describe('Integration: full parsing flow', () => {
   });
 
   it('does not overwrite existing width/height when term also has cols/rows', () => {
-    const content = '{"version":3,"width":80,"height":24,"term":{"cols":100,"rows":50}}\n[0.1,"o","hello\\n"]';
+    const content =
+      '{"version":3,"width":80,"height":24,"term":{"cols":100,"rows":50}}\n[0.1,"o","hello\\n"]';
     const file = parseAsciicast(content);
 
     // width/height already present, should not be overwritten by term.cols/rows

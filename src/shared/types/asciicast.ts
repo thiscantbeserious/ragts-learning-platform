@@ -59,18 +59,18 @@ export interface AsciicastHeader {
  * - data: string for o/i/m/r (resize is "COLSxROWS"), number for x (exit code)
  */
 export type AsciicastEvent =
-  | [number, "o", string]  // output
-  | [number, "i", string]  // input
-  | [number, "m", string]  // marker
-  | [number, "r", string]  // resize "COLSxROWS"
-  | [number, "x", number]; // exit code
+  | [number, 'o', string] // output
+  | [number, 'i', string] // input
+  | [number, 'm', string] // marker
+  | [number, 'r', string] // resize "COLSxROWS"
+  | [number, 'x', number]; // exit code
 
 /**
  * Parsed event with cumulative timestamp.
  */
 export interface ParsedEvent {
-  time: number;           // cumulative timestamp (seconds from start)
-  relativeTime: number;   // original delta
+  time: number; // cumulative timestamp (seconds from start)
+  relativeTime: number; // original delta
   type: string;
   data: string | number;
 }
@@ -102,5 +102,5 @@ export interface AsciicastFile {
 export interface ValidationResult {
   valid: boolean;
   error?: string;
-  line?: number;  // line number where error occurred
+  line?: number; // line number where error occurred
 }

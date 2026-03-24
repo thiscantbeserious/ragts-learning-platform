@@ -23,7 +23,6 @@ vi.mock('vue-router', () => ({
  * test environment where EventSource is unavailable.
  */
 class StubEventSource {
-   
   constructor(_url: string) {}
   onopen: null = null;
   onerror: null = null;
@@ -134,8 +133,14 @@ describe('SessionCard', () => {
 
   describe('status indicator — processing', () => {
     const processingStatuses: Session['detection_status'][] = [
-      'pending', 'processing', 'queued', 'validating',
-      'detecting', 'replaying', 'deduplicating', 'storing',
+      'pending',
+      'processing',
+      'queued',
+      'validating',
+      'detecting',
+      'replaying',
+      'deduplicating',
+      'storing',
     ];
 
     for (const status of processingStatuses) {
@@ -239,7 +244,9 @@ describe('SessionCard', () => {
     });
 
     it('shows "Processing" text instead of section count when processing', () => {
-      const wrapper = mountCard(makeSession({ detection_status: 'processing', detected_sections_count: 5 }));
+      const wrapper = mountCard(
+        makeSession({ detection_status: 'processing', detected_sections_count: 5 }),
+      );
       expect(wrapper.find('.session-card__processing-text').exists()).toBe(true);
       expect(wrapper.find('.session-card__processing-text').text()).toContain('Processing');
     });

@@ -6,11 +6,7 @@
  * once the Rust wrapper is complete.
  */
 
-import type {
-  TerminalSnapshot,
-  CursorPosition,
-  TerminalSize,
-} from './types.js';
+import type { TerminalSnapshot, CursorPosition, TerminalSize } from './types.js';
 
 // WASM module interface (will be provided by wasm-pack build output)
 interface VtWasmModule {
@@ -43,13 +39,15 @@ export async function initVt(): Promise<void> {
     // The module exports a default object with the create function
     const mod = await import('./pkg/vt_wasm.js');
     if (typeof mod.create !== 'function') {
-      throw new Error('WASM module missing create() function. Binary may be corrupted or out of sync.');
+      throw new Error(
+        'WASM module missing create() function. Binary may be corrupted or out of sync.',
+      );
     }
     wasmModule = mod as unknown as VtWasmModule;
   } catch (error) {
     throw new Error(
       `Failed to load vt-wasm module: ${error instanceof Error ? error.message : String(error)}. ` +
-      `Ensure the WASM binary has been built by running ./build.sh in packages/vt-wasm/.`
+        `Ensure the WASM binary has been built by running ./build.sh in packages/vt-wasm/.`,
     );
   }
 }
@@ -104,22 +102,16 @@ export interface VtInstance {
  * @param scrollbackLimit - Maximum scrollback lines to retain (optional, default: no limit)
  * @returns VT instance
  */
-export function createVt(
-  cols: number,
-  rows: number,
-  scrollbackLimit?: number
-): VtInstance {
+export function createVt(cols: number, rows: number, scrollbackLimit?: number): VtInstance {
   if (!wasmModule) {
-    throw new Error(
-      'WASM module not initialized. Call initVt() before createVt().'
-    );
+    throw new Error('WASM module not initialized. Call initVt() before createVt().');
   }
 
   // Create the underlying WASM instance
   const wasmInstance = wasmModule.create(
     cols,
     rows,
-    scrollbackLimit ?? 0 // 0 means unlimited in avt
+    scrollbackLimit ?? 0, // 0 means unlimited in avt
   );
 
   // Return typed wrapper

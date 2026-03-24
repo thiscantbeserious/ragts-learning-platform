@@ -42,7 +42,7 @@ export async function resolveWorkerScript(tsEntryPoint: string): Promise<BuiltWo
   } catch {
     throw new Error(
       `Cannot resolve worker script: ${tsEntryPoint} does not have a compiled .js version ` +
-      `and esbuild is not available. Run 'npm run build' first or install dev dependencies.`
+        `and esbuild is not available. Run 'npm run build' first or install dev dependencies.`,
     );
   }
 
@@ -85,7 +85,11 @@ export async function resolveWorkerScript(tsEntryPoint: string): Promise<BuiltWo
   return {
     path: outfile,
     cleanup: () => {
-      try { rmSync(outfile, { force: true }); } catch { /* best-effort */ }
+      try {
+        rmSync(outfile, { force: true });
+      } catch {
+        /* best-effort */
+      }
     },
   };
 }

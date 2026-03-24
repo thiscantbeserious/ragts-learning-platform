@@ -30,13 +30,13 @@ export interface SnapshotSpan {
   text: string;
   fg?: string | number; // undefined=default, number=palette(0-255), string="#RRGGBB"
   bg?: string | number; // undefined=default, number=palette(0-255), string="#RRGGBB"
-  bold?: boolean;       // mapped from Pen.intensity (Bold)
-  faint?: boolean;      // mapped from Pen.intensity (Faint)
-  italic?: boolean;     // from Pen.attrs bit 0 (avt layout)
-  underline?: boolean;  // from Pen.attrs bit 1 (avt layout)
+  bold?: boolean; // mapped from Pen.intensity (Bold)
+  faint?: boolean; // mapped from Pen.intensity (Faint)
+  italic?: boolean; // from Pen.attrs bit 0 (avt layout)
+  underline?: boolean; // from Pen.attrs bit 1 (avt layout)
   strikethrough?: boolean; // from Pen.attrs bit 2 (avt layout)
-  blink?: boolean;      // from Pen.attrs bit 3 (avt layout)
-  inverse?: boolean;    // from Pen.attrs bit 4 (avt layout)
+  blink?: boolean; // from Pen.attrs bit 3 (avt layout)
+  inverse?: boolean; // from Pen.attrs bit 4 (avt layout)
 }
 
 /**

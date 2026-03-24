@@ -135,7 +135,7 @@ describe('SidebarPanel — drag-drop onOptimisticInsert callback (line 282-290)'
     await callbacks.onUploadComplete('temp-drag-2');
 
     // Temp session should be removed from the list
-    expect(state.sessions.value.find(s => s.id === 'temp-drag-2')).toBeUndefined();
+    expect(state.sessions.value.find((s) => s.id === 'temp-drag-2')).toBeUndefined();
     // fetchSessions should have been called to refresh
     expect(state.fetchSessions).toHaveBeenCalled();
   });

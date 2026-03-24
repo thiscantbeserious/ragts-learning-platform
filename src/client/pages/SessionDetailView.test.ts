@@ -29,7 +29,14 @@ vi.mock('../components/SkeletonMain.vue', () => ({
 
 vi.mock('../components/SessionContent.vue', () => ({
   default: {
-    props: ['sections', 'fetchSectionContent', 'virtualItems', 'totalHeight', 'detectionStatus', 'sectionEntries'],
+    props: [
+      'sections',
+      'fetchSectionContent',
+      'virtualItems',
+      'totalHeight',
+      'detectionStatus',
+      'sectionEntries',
+    ],
     template: '<div class="session-content-stub" :data-section-count="sections.length" />',
     emits: ['register-section'],
   },
@@ -66,7 +73,17 @@ function makeSections(count: number) {
 
 function mountView(overrides: Partial<UseSessionV2Return> = {}) {
   const mockedUseSessionV2 = vi.mocked(useSessionV2);
-  const fetchSectionContent = vi.fn().mockResolvedValue({ sectionId: 'sec-0', lines: [], totalLines: 0, offset: 0, limit: 500, hasMore: false, contentHash: 'abc' });
+  const fetchSectionContent = vi
+    .fn()
+    .mockResolvedValue({
+      sectionId: 'sec-0',
+      lines: [],
+      totalLines: 0,
+      offset: 0,
+      limit: 500,
+      hasMore: false,
+      contentHash: 'abc',
+    });
 
   mockedUseSessionV2.mockReturnValue({
     session: ref(null),
@@ -81,9 +98,7 @@ function mountView(overrides: Partial<UseSessionV2Return> = {}) {
 
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [
-      { path: '/session/:id', name: 'session-detail', component: SessionDetailView },
-    ],
+    routes: [{ path: '/session/:id', name: 'session-detail', component: SessionDetailView }],
   });
 
   return { router, fetchSectionContent, mockedUseSessionV2 };
@@ -235,8 +250,16 @@ describe('SessionDetailView (Stage 11)', () => {
     it('passes detectionStatus from useSessionV2 to SessionContent', async () => {
       const SessionContentStub = {
         name: 'SessionContentPropsCapture',
-        props: ['sections', 'fetchSectionContent', 'virtualItems', 'totalHeight', 'detectionStatus', 'sectionEntries'],
-        template: '<div class="session-content-props-stub" :data-detection-status="detectionStatus" />',
+        props: [
+          'sections',
+          'fetchSectionContent',
+          'virtualItems',
+          'totalHeight',
+          'detectionStatus',
+          'sectionEntries',
+        ],
+        template:
+          '<div class="session-content-props-stub" :data-detection-status="detectionStatus" />',
       };
 
       const { router } = mountView({

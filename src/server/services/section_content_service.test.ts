@@ -24,9 +24,7 @@ function makeLines(count: number): SnapshotLine[] {
 }
 
 function makeSection(overrides: Partial<SectionRow> = {}): SectionRow {
-  const lines = overrides.snapshot
-    ? JSON.parse(overrides.snapshot)
-    : makeLines(10);
+  const lines = overrides.snapshot ? JSON.parse(overrides.snapshot) : makeLines(10);
   const snapshot = overrides.snapshot !== undefined ? overrides.snapshot : JSON.stringify(lines);
   return {
     id: 'sect-1',
@@ -68,7 +66,10 @@ function makeService(section: SectionRow | null = makeSection(), sessionExists =
     (sessionRepo.findById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
   }
   const sectionRepo = makeMockSectionRepo(section);
-  return new SectionContentService({ sessionRepository: sessionRepo, sectionRepository: sectionRepo });
+  return new SectionContentService({
+    sessionRepository: sessionRepo,
+    sectionRepository: sectionRepo,
+  });
 }
 
 // ---------------------------------------------------------------------------

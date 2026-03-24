@@ -25,7 +25,9 @@ function makeEmptySnapshot(): PipelineStatusSnapshot {
   return { processing: [], queued: [], recentlyCompleted: [] };
 }
 
-function makeMockService(snapshot: PipelineStatusSnapshot = makeEmptySnapshot()): PipelineStatusService {
+function makeMockService(
+  snapshot: PipelineStatusSnapshot = makeEmptySnapshot(),
+): PipelineStatusService {
   return {
     init: vi.fn().mockResolvedValue(undefined),
     getSnapshot: vi.fn().mockReturnValue(snapshot),

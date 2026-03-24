@@ -31,7 +31,7 @@ async function flush(count = 10): Promise<void> {
 }
 
 export function makeMetaResponse(
-  overrides: Partial<SessionMetadataResponse> = {}
+  overrides: Partial<SessionMetadataResponse> = {},
 ): SessionMetadataResponse {
   return {
     id: 'sess-1',
@@ -129,7 +129,7 @@ describe('useSessionV2 — metadata fetch', () => {
 
   it('populates filename from the response', async () => {
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ filename: 'my-session.cast' }))
+      makeOkResponse(makeMetaResponse({ filename: 'my-session.cast' })),
     );
     const { filename } = useSessionV2(ref('sess-1'));
     await flush();
@@ -138,7 +138,7 @@ describe('useSessionV2 — metadata fetch', () => {
 
   it('populates detection_status from the response', async () => {
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ detection_status: 'completed' }))
+      makeOkResponse(makeMetaResponse({ detection_status: 'completed' })),
     );
     const { detectionStatus } = useSessionV2(ref('sess-1'));
     await flush();
@@ -147,12 +147,18 @@ describe('useSessionV2 — metadata fetch', () => {
 
   it('populates sections from metadata response', async () => {
     const section = {
-      id: 'sec-1', type: 'detected' as const, label: 'Section sec-1',
-      startEvent: 0, endEvent: 10, startLine: 0, endLine: 9,
-      lineCount: 10, preview: null,
+      id: 'sec-1',
+      type: 'detected' as const,
+      label: 'Section sec-1',
+      startEvent: 0,
+      endEvent: 10,
+      startLine: 0,
+      endLine: 9,
+      lineCount: 10,
+      preview: null,
     };
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ sections: [section], sectionCount: 6 }))
+      makeOkResponse(makeMetaResponse({ sections: [section], sectionCount: 6 })),
     );
     const { sections } = useSessionV2(ref('sess-1'));
     await flush();

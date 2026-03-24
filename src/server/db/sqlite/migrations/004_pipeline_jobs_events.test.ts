@@ -47,7 +47,7 @@ function getColumns(db: Database.Database, table: string): string[] {
 function getIndexes(db: Database.Database, table: string): string[] {
   const rows = db
     .prepare(
-      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=? AND name NOT LIKE 'sqlite_%'"
+      "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=? AND name NOT LIKE 'sqlite_%'",
     )
     .all(table) as Array<{ name: string }>;
   return rows.map((r) => r.name);
@@ -55,9 +55,7 @@ function getIndexes(db: Database.Database, table: string): string[] {
 
 /** Returns true if a table exists. */
 function tableExists(db: Database.Database, table: string): boolean {
-  const row = db
-    .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
-    .get(table);
+  const row = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?").get(table);
   return row !== undefined;
 }
 
@@ -98,12 +96,10 @@ describe('migrate004PipelineJobsEvents', () => {
       migrate004PipelineJobsEvents(db);
 
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s1', 'test.cast', 'sessions/test.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s1', 'test.cast', 'sessions/test.cast', 100, '2026-01-01T00:00:00Z')",
       );
 
-      db.exec(
-        "INSERT INTO jobs (id, session_id) VALUES ('j1', 's1')"
-      );
+      db.exec("INSERT INTO jobs (id, session_id) VALUES ('j1', 's1')");
 
       const job = db.prepare('SELECT * FROM jobs WHERE id=?').get('j1') as Record<string, unknown>;
       expect(job['current_stage']).toBe('validate');
@@ -134,7 +130,7 @@ describe('migrate004PipelineJobsEvents', () => {
       migrate004PipelineJobsEvents(db);
 
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s2', 'b.cast', 'sessions/b.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s2', 'b.cast', 'sessions/b.cast', 100, '2026-01-01T00:00:00Z')",
       );
 
       db.exec("INSERT INTO events (session_id, event_type) VALUES ('s2', 'session.uploaded')");
@@ -167,19 +163,21 @@ describe('migrate004PipelineJobsEvents', () => {
     beforeEach(() => {
       migrate004PipelineJobsEvents(db);
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('sc1', 'chk.cast', 'sessions/chk.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('sc1', 'chk.cast', 'sessions/chk.cast', 100, '2026-01-01T00:00:00Z')",
       );
     });
 
     it('rejects invalid current_stage value', () => {
       expect(() =>
-        db.exec("INSERT INTO jobs (id, session_id, current_stage) VALUES ('jc1', 'sc1', 'invalid_stage')")
+        db.exec(
+          "INSERT INTO jobs (id, session_id, current_stage) VALUES ('jc1', 'sc1', 'invalid_stage')",
+        ),
       ).toThrow();
     });
 
     it('rejects invalid status value', () => {
       expect(() =>
-        db.exec("INSERT INTO jobs (id, session_id, status) VALUES ('jc2', 'sc1', 'bogus_status')")
+        db.exec("INSERT INTO jobs (id, session_id, status) VALUES ('jc2', 'sc1', 'bogus_status')"),
       ).toThrow();
     });
 
@@ -187,10 +185,12 @@ describe('migrate004PipelineJobsEvents', () => {
       const stages = ['validate', 'detect', 'replay', 'dedup', 'store'];
       stages.forEach((stage, i) => {
         db.exec(
-          `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('ss${i}', 'f${i}.cast', 'sessions/f${i}.cast', 100, '2026-01-01T00:00:00Z')`
+          `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('ss${i}', 'f${i}.cast', 'sessions/f${i}.cast', 100, '2026-01-01T00:00:00Z')`,
         );
         expect(() =>
-          db.exec(`INSERT INTO jobs (id, session_id, current_stage) VALUES ('jv${i}', 'ss${i}', '${stage}')`)
+          db.exec(
+            `INSERT INTO jobs (id, session_id, current_stage) VALUES ('jv${i}', 'ss${i}', '${stage}')`,
+          ),
         ).not.toThrow();
       });
     });
@@ -199,10 +199,12 @@ describe('migrate004PipelineJobsEvents', () => {
       const statuses = ['pending', 'running', 'completed', 'failed'];
       statuses.forEach((status, i) => {
         db.exec(
-          `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('sq${i}', 'g${i}.cast', 'sessions/g${i}.cast', 100, '2026-01-01T00:00:00Z')`
+          `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('sq${i}', 'g${i}.cast', 'sessions/g${i}.cast', 100, '2026-01-01T00:00:00Z')`,
         );
         expect(() =>
-          db.exec(`INSERT INTO jobs (id, session_id, status) VALUES ('js${i}', 'sq${i}', '${status}')`)
+          db.exec(
+            `INSERT INTO jobs (id, session_id, status) VALUES ('js${i}', 'sq${i}', '${status}')`,
+          ),
         ).not.toThrow();
       });
     });
@@ -212,12 +214,10 @@ describe('migrate004PipelineJobsEvents', () => {
     it('rejects two jobs with the same session_id', () => {
       migrate004PipelineJobsEvents(db);
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('su1', 'u.cast', 'sessions/u.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('su1', 'u.cast', 'sessions/u.cast', 100, '2026-01-01T00:00:00Z')",
       );
       db.exec("INSERT INTO jobs (id, session_id) VALUES ('ju1', 'su1')");
-      expect(() =>
-        db.exec("INSERT INTO jobs (id, session_id) VALUES ('ju2', 'su1')")
-      ).toThrow();
+      expect(() => db.exec("INSERT INTO jobs (id, session_id) VALUES ('ju2', 'su1')")).toThrow();
     });
   });
 
@@ -225,15 +225,18 @@ describe('migrate004PipelineJobsEvents', () => {
     it('updates updated_at when a job row is updated', () => {
       migrate004PipelineJobsEvents(db);
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('st1', 't.cast', 'sessions/t.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('st1', 't.cast', 'sessions/t.cast', 100, '2026-01-01T00:00:00Z')",
       );
       db.exec(
-        "INSERT INTO jobs (id, session_id, created_at, updated_at) VALUES ('jt1', 'st1', '2026-01-01T00:00:00', '2026-01-01T00:00:00')"
+        "INSERT INTO jobs (id, session_id, created_at, updated_at) VALUES ('jt1', 'st1', '2026-01-01T00:00:00', '2026-01-01T00:00:00')",
       );
 
       db.exec("UPDATE jobs SET status = 'running' WHERE id = 'jt1'");
 
-      const job = db.prepare("SELECT updated_at FROM jobs WHERE id='jt1'").get() as Record<string, unknown>;
+      const job = db.prepare("SELECT updated_at FROM jobs WHERE id='jt1'").get() as Record<
+        string,
+        unknown
+      >;
       expect(job['updated_at']).not.toBe('2026-01-01T00:00:00');
     });
   });
@@ -265,12 +268,15 @@ describe('migrate004PipelineJobsEvents', () => {
   describe('pre-existing session preservation', () => {
     it('sessions existing before migration are untouched', () => {
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('pre1', 'old.cast', 'sessions/old.cast', 512, '2026-01-01T00:00:00Z', 'completed')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('pre1', 'old.cast', 'sessions/old.cast', 512, '2026-01-01T00:00:00Z', 'completed')",
       );
 
       migrate004PipelineJobsEvents(db);
 
-      const session = db.prepare('SELECT * FROM sessions WHERE id=?').get('pre1') as Record<string, unknown>;
+      const session = db.prepare('SELECT * FROM sessions WHERE id=?').get('pre1') as Record<
+        string,
+        unknown
+      >;
       expect(session['filename']).toBe('old.cast');
       expect(session['size_bytes']).toBe(512);
       expect(session['detection_status']).toBe('completed');
@@ -278,23 +284,27 @@ describe('migrate004PipelineJobsEvents', () => {
 
     it('sessions with detection_status=completed are untouched after migration', () => {
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-done', 'done.cast', 'sessions/done.cast', 100, '2026-01-01T00:00:00Z', 'completed')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-done', 'done.cast', 'sessions/done.cast', 100, '2026-01-01T00:00:00Z', 'completed')",
       );
 
       migrate004PipelineJobsEvents(db);
 
-      const session = db.prepare("SELECT detection_status FROM sessions WHERE id='s-done'").get() as Record<string, unknown>;
+      const session = db
+        .prepare("SELECT detection_status FROM sessions WHERE id='s-done'")
+        .get() as Record<string, unknown>;
       expect(session['detection_status']).toBe('completed');
     });
 
     it('sessions with detection_status=failed are untouched after migration', () => {
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-failed', 'fail.cast', 'sessions/fail.cast', 100, '2026-01-01T00:00:00Z', 'failed')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-failed', 'fail.cast', 'sessions/fail.cast', 100, '2026-01-01T00:00:00Z', 'failed')",
       );
 
       migrate004PipelineJobsEvents(db);
 
-      const session = db.prepare("SELECT detection_status FROM sessions WHERE id='s-failed'").get() as Record<string, unknown>;
+      const session = db
+        .prepare("SELECT detection_status FROM sessions WHERE id='s-failed'")
+        .get() as Record<string, unknown>;
       expect(session['detection_status']).toBe('failed');
     });
   });
@@ -302,23 +312,27 @@ describe('migrate004PipelineJobsEvents', () => {
   describe('interrupted status assignment', () => {
     it('sessions in processing state are marked interrupted', () => {
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-proc', 'proc.cast', 'sessions/proc.cast', 100, '2026-01-01T00:00:00Z', 'processing')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-proc', 'proc.cast', 'sessions/proc.cast', 100, '2026-01-01T00:00:00Z', 'processing')",
       );
 
       migrate004PipelineJobsEvents(db);
 
-      const session = db.prepare("SELECT detection_status FROM sessions WHERE id='s-proc'").get() as Record<string, unknown>;
+      const session = db
+        .prepare("SELECT detection_status FROM sessions WHERE id='s-proc'")
+        .get() as Record<string, unknown>;
       expect(session['detection_status']).toBe('interrupted');
     });
 
     it('sessions in pending state are not changed to interrupted', () => {
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-pend', 'pend.cast', 'sessions/pend.cast', 100, '2026-01-01T00:00:00Z', 'pending')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, detection_status) VALUES ('s-pend', 'pend.cast', 'sessions/pend.cast', 100, '2026-01-01T00:00:00Z', 'pending')",
       );
 
       migrate004PipelineJobsEvents(db);
 
-      const session = db.prepare("SELECT detection_status FROM sessions WHERE id='s-pend'").get() as Record<string, unknown>;
+      const session = db
+        .prepare("SELECT detection_status FROM sessions WHERE id='s-pend'")
+        .get() as Record<string, unknown>;
       expect(session['detection_status']).toBe('pending');
     });
   });
@@ -328,7 +342,7 @@ describe('migrate004PipelineJobsEvents', () => {
       migrate004PipelineJobsEvents(db);
 
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s3', 'c.cast', 'sessions/c.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s3', 'c.cast', 'sessions/c.cast', 100, '2026-01-01T00:00:00Z')",
       );
       db.exec("INSERT INTO jobs (id, session_id) VALUES ('j2', 's3')");
       db.exec("DELETE FROM sessions WHERE id='s3'");
@@ -341,7 +355,7 @@ describe('migrate004PipelineJobsEvents', () => {
       migrate004PipelineJobsEvents(db);
 
       db.exec(
-        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s4', 'd.cast', 'sessions/d.cast', 100, '2026-01-01T00:00:00Z')"
+        "INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES ('s4', 'd.cast', 'sessions/d.cast', 100, '2026-01-01T00:00:00Z')",
       );
       db.exec("INSERT INTO events (session_id, event_type) VALUES ('s4', 'session.uploaded')");
       db.exec("DELETE FROM sessions WHERE id='s4'");

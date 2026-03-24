@@ -14,7 +14,11 @@ import type { SectionMetadata } from '../../shared/types/api.js';
 // ---------------------------------------------------------------------------
 
 /** Build a minimal SectionMetadata for testing. */
-function makeSection(id: string, lineCount: number, type: 'marker' | 'detected' = 'detected'): SectionMetadata {
+function makeSection(
+  id: string,
+  lineCount: number,
+  type: 'marker' | 'detected' = 'detected',
+): SectionMetadata {
   return {
     id,
     type,
@@ -40,7 +44,9 @@ vi.mock('@tanstack/vue-virtual', () => {
   return {
     useVirtualizer: vi.fn((opts: unknown) => {
       // useVirtualizer may receive a computed ref or plain object — resolve it
-      const resolved = isRef(opts) ? (opts.value as Record<string, unknown>) : (opts as Record<string, unknown>);
+      const resolved = isRef(opts)
+        ? (opts.value as Record<string, unknown>)
+        : (opts as Record<string, unknown>);
       capturedOptions.push(resolved);
       return ref({
         getVirtualItems: () => [],
@@ -88,7 +94,8 @@ describe('useSectionVirtualizer', () => {
   });
 
   it('estimateSize returns MIN_SECTION_HEIGHT for empty section', async () => {
-    const { useSectionVirtualizer, MIN_SECTION_HEIGHT } = await import('./use_section_virtualizer.js');
+    const { useSectionVirtualizer, MIN_SECTION_HEIGHT } =
+      await import('./use_section_virtualizer.js');
 
     const sections = ref([makeSection('s1', 0)]);
     const scrollEl = ref<HTMLElement | null>(null);
@@ -101,7 +108,8 @@ describe('useSectionVirtualizer', () => {
   });
 
   it('estimateSize scales with line count including snapshot padding', async () => {
-    const { useSectionVirtualizer, SECTION_HEADER_HEIGHT, LINE_HEIGHT, SNAPSHOT_PADDING } = await import('./use_section_virtualizer.js');
+    const { useSectionVirtualizer, SECTION_HEADER_HEIGHT, LINE_HEIGHT, SNAPSHOT_PADDING } =
+      await import('./use_section_virtualizer.js');
 
     const sections = ref([makeSection('s1', 50)]);
     const scrollEl = ref<HTMLElement | null>(null);
@@ -115,7 +123,8 @@ describe('useSectionVirtualizer', () => {
   });
 
   it('estimateSize falls back to MIN_SECTION_HEIGHT for out-of-range index', async () => {
-    const { useSectionVirtualizer, MIN_SECTION_HEIGHT } = await import('./use_section_virtualizer.js');
+    const { useSectionVirtualizer, MIN_SECTION_HEIGHT } =
+      await import('./use_section_virtualizer.js');
 
     const sections = ref([makeSection('s1', 10)]);
     const scrollEl = ref<HTMLElement | null>(null);

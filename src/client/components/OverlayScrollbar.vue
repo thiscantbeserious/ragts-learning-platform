@@ -12,11 +12,7 @@
     @focusin="isFocusWithin = true"
     @focusout="onFocusOut"
   >
-    <div
-      ref="viewportRef"
-      class="overlay-scrollbar__viewport"
-      @scroll="onScroll"
-    >
+    <div ref="viewportRef" class="overlay-scrollbar__viewport" @scroll="onScroll">
       <slot />
     </div>
     <div
@@ -53,13 +49,16 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
  *   - Thumb drag
  */
 
-const props = withDefaults(defineProps<{
-  showTrack?: boolean;
-  showOnHover?: boolean;
-}>(), {
-  showTrack: false,
-  showOnHover: true,
-});
+const props = withDefaults(
+  defineProps<{
+    showTrack?: boolean;
+    showOnHover?: boolean;
+  }>(),
+  {
+    showTrack: false,
+    showOnHover: true,
+  },
+);
 
 const MIN_THUMB_HEIGHT = 24;
 const SCROLL_IDLE_MS = 1500;
@@ -161,7 +160,7 @@ function onContainerLeave(): void {
 
 /** Hides scrollbar when focus leaves the container entirely. */
 function onFocusOut(event: FocusEvent): void {
-  const container = (event.currentTarget as HTMLElement);
+  const container = event.currentTarget as HTMLElement;
   const relatedTarget = event.relatedTarget as Node | null;
   if (!relatedTarget || !container.contains(relatedTarget)) {
     isFocusWithin.value = false;
@@ -308,8 +307,12 @@ defineExpose({
 /* Rider animation: Knight Rider style — light bounces up and down the thumb.
    Uses alternate direction so ease-in-out applies to each sweep individually. */
 @keyframes thumb-rider {
-  0%   { transform: translateY(-50%); }
-  100% { transform: translateY(250%); }
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(250%);
+  }
 }
 
 /* Thumb */

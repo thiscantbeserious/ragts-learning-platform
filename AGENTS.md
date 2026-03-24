@@ -34,6 +34,7 @@ Read `README.md` for the project vision and public-facing description.
 ## Required Reading
 
 Before starting any task, read these files in order:
+
 1. `MEMORY.md` - Full project context, decisions made, decisions open, and project state
 2. `README.md` - Project vision and public-facing description
 3. `ARCHITECTURE.md` - System design baseline
@@ -68,11 +69,11 @@ This project is licensed under AGPL-3.0. Be aware of its implications when contr
 
 ### Services
 
-| Service | Command | Port | Notes |
-|---------|---------|------|-------|
-| Backend (Hono + SQLite) | `npm run dev:server` | 3000 | Auto-creates `data/ragts.db` and `data/sessions/` |
-| Frontend (Vite + Vue 3) | `npm run dev:client` | 5173 | Proxies `/api` to backend on port 3000 |
-| Both (combined) | `npm run dev` | 3000 + 5173 | Uses `concurrently` |
+| Service                 | Command              | Port        | Notes                                             |
+| ----------------------- | -------------------- | ----------- | ------------------------------------------------- |
+| Backend (Hono + SQLite) | `npm run dev:server` | 3000        | Auto-creates `data/ragts.db` and `data/sessions/` |
+| Frontend (Vite + Vue 3) | `npm run dev:client` | 5173        | Proxies `/api` to backend on port 3000            |
+| Both (combined)         | `npm run dev`        | 3000 + 5173 | Uses `concurrently`                               |
 
 No external databases, Redis, or Docker containers are needed for development. The project targets Node 24 LTS (see `.nvmrc` and `engines` in `package.json`); Node 22.12+ also supported; the update script runs `nvm install` to match.
 

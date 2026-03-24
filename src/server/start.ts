@@ -16,7 +16,9 @@ import { init } from './bootstrap.js';
 import { createApp } from './app.js';
 import { logger } from './logger.js';
 
-const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8')) as { name: string };
+const pkg = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf-8')) as {
+  name: string;
+};
 
 const runtime = await init();
 const app = createApp(runtime);
@@ -30,19 +32,17 @@ const port = runtime.config.port;
 
 logger.info({ port, name: pkg.name }, `Starting ${pkg.name} server`);
 
-const server = serve(
-  { fetch: app.fetch, port },
-  (info) => {
-    logger.info({ port: info.port }, `Server running at http://localhost:${info.port}`);
-  },
-);
+const server = serve({ fetch: app.fetch, port }, (info) => {
+  logger.info({ port: info.port }, `Server running at http://localhost:${info.port}`);
+});
 
 /** Graceful shutdown: stop HTTP server, orchestrator, then DB. */
 function shutdown(signal: string) {
   logger.info({ signal }, 'Shutting down server');
   server.close(() => {
     logger.info('HTTP server closed');
-    runtime.orchestrator.stop()
+    runtime.orchestrator
+      .stop()
       .then(() => runtime.close())
       .then(() => process.exit(0))
       .catch((err) => {

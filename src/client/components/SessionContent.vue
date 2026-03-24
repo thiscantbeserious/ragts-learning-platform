@@ -21,53 +21,56 @@ import TerminalSnapshotComponent from './TerminalSnapshot.vue';
  * Exposes scrollViewport for parent virtualizer wiring.
  */
 
-const props = withDefaults(defineProps<{
-  /** Ordered list of section metadata — drives section rendering. */
-  sections: SectionMetadata[];
-  /** Callback to load terminal lines for a section by id (cache-backed). */
-  fetchSectionContent: (id: string) => Promise<SectionContentPage>;
-  /** Pipeline detection status — used to render in-progress/empty states. */
-  detectionStatus?: DetectionStatus;
-  /**
-   * Session-level terminal snapshot — populated for 0-section sessions.
-   * Used to display full terminal content when section detection found no boundaries.
-   */
-  snapshot?: TerminalSnapshot | null;
-  /**
-   * Optional error detail string — shown in the error banner detail block
-   * when the pipeline failed (e.g. last error message from the status endpoint).
-   */
-  errorDetail?: string | null;
-  /**
-   * Virtual items from useSectionVirtualizer — when provided, enables virtual
-   * rendering. Only these items are rendered (large session path).
-   */
-  virtualItems?: VirtualItem[];
-  /**
-   * Total scrollable height in pixels from the virtualizer.
-   * Required when virtualItems is provided.
-   */
-  totalHeight?: number;
-  /**
-   * TanStack Virtual measureElement callback — passed to each SectionItem's root
-   * div so the virtualizer tracks real heights via ResizeObserver.
-   * Required when virtualItems is provided.
-   */
-  measureElement?: ((el: Element | null) => void) | null;
-  /**
-   * The id of the currently active (visible) section — used to render the
-   * sticky overlay header in virtual mode. Provided by the parent scrollspy.
-   */
-  activeSectionId?: string | null;
-}>(), {
-  detectionStatus: 'completed',
-  snapshot: null,
-  errorDetail: null,
-  virtualItems: undefined,
-  totalHeight: undefined,
-  measureElement: null,
-  activeSectionId: null,
-});
+const props = withDefaults(
+  defineProps<{
+    /** Ordered list of section metadata — drives section rendering. */
+    sections: SectionMetadata[];
+    /** Callback to load terminal lines for a section by id (cache-backed). */
+    fetchSectionContent: (id: string) => Promise<SectionContentPage>;
+    /** Pipeline detection status — used to render in-progress/empty states. */
+    detectionStatus?: DetectionStatus;
+    /**
+     * Session-level terminal snapshot — populated for 0-section sessions.
+     * Used to display full terminal content when section detection found no boundaries.
+     */
+    snapshot?: TerminalSnapshot | null;
+    /**
+     * Optional error detail string — shown in the error banner detail block
+     * when the pipeline failed (e.g. last error message from the status endpoint).
+     */
+    errorDetail?: string | null;
+    /**
+     * Virtual items from useSectionVirtualizer — when provided, enables virtual
+     * rendering. Only these items are rendered (large session path).
+     */
+    virtualItems?: VirtualItem[];
+    /**
+     * Total scrollable height in pixels from the virtualizer.
+     * Required when virtualItems is provided.
+     */
+    totalHeight?: number;
+    /**
+     * TanStack Virtual measureElement callback — passed to each SectionItem's root
+     * div so the virtualizer tracks real heights via ResizeObserver.
+     * Required when virtualItems is provided.
+     */
+    measureElement?: ((el: Element | null) => void) | null;
+    /**
+     * The id of the currently active (visible) section — used to render the
+     * sticky overlay header in virtual mode. Provided by the parent scrollspy.
+     */
+    activeSectionId?: string | null;
+  }>(),
+  {
+    detectionStatus: 'completed',
+    snapshot: null,
+    errorDetail: null,
+    virtualItems: undefined,
+    totalHeight: undefined,
+    measureElement: null,
+    activeSectionId: null,
+  },
+);
 
 const emit = defineEmits<{
   /** Fired when a section mounts, for scrollspy wiring in the parent. */
@@ -81,8 +84,8 @@ const stickyHeaderRef = ref<InstanceType<typeof SectionHeader> | null>(null);
 const isVirtualized = computed(() => props.virtualItems !== undefined);
 
 /** True when status is a terminal error (failed or interrupted). */
-const isTerminalError = computed(() =>
-  props.detectionStatus === 'failed' || props.detectionStatus === 'interrupted'
+const isTerminalError = computed(
+  () => props.detectionStatus === 'failed' || props.detectionStatus === 'interrupted',
 );
 
 /** Sections to render in flat (non-virtualized) mode. */
@@ -106,7 +109,9 @@ const stickySection = computed((): SectionMetadata | null => {
  */
 const realHeaderScrolledAbove = ref(false);
 
-const showStickyHeader = computed(() => stickySection.value !== null && realHeaderScrolledAbove.value);
+const showStickyHeader = computed(
+  () => stickySection.value !== null && realHeaderScrolledAbove.value,
+);
 
 function onContentScroll(): void {
   const viewport = overlayScrollbarRef.value?.viewport;
@@ -118,7 +123,7 @@ function onContentScroll(): void {
 
   // Find the virtual item for the active section.
   const activeItem = props.virtualItems.find(
-    (item) => props.sections[item.index]?.id === props.activeSectionId
+    (item) => props.sections[item.index]?.id === props.activeSectionId,
   );
   if (!activeItem) return;
 
@@ -144,7 +149,7 @@ function onSectionRegister(id: string, el: Element): void {
 /** Expose the scroll viewport so SessionDetailView can wire useSectionVirtualizer. */
 defineExpose({
   scrollViewport: computed(() => overlayScrollbarRef.value?.viewport ?? null),
-  stickyHeaderEl: computed(() => stickyHeaderRef.value?.$el as HTMLElement | null ?? null),
+  stickyHeaderEl: computed(() => (stickyHeaderRef.value?.$el as HTMLElement | null) ?? null),
 });
 
 // Wire scroll listener for sticky header visibility
@@ -156,7 +161,7 @@ watch(
     scrollListenerEl = el ?? null;
     if (el) el.addEventListener('scroll', onContentScroll, { passive: true });
   },
-  { immediate: true }
+  { immediate: true },
 );
 onUnmounted(() => {
   if (scrollListenerEl) scrollListenerEl.removeEventListener('scroll', onContentScroll);
@@ -176,20 +181,23 @@ onUnmounted(() => {
       @toggle="() => {}"
     />
 
-    <OverlayScrollbar
-      v-if="sections.length > 0"
-      ref="overlayScrollbarRef"
-      class="terminal-scroll"
-    >
+    <OverlayScrollbar v-if="sections.length > 0" ref="overlayScrollbarRef" class="terminal-scroll">
       <!-- Error banner for failed sessions that have partial sections -->
-      <div
-        v-if="isTerminalError"
-        class="fallback-banner fallback-banner--error"
-      >
-        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
+      <div v-if="isTerminalError" class="fallback-banner fallback-banner--error">
+        <svg
+          class="fallback-banner__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polygon
+            points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"
+          />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <div class="fallback-banner__body">
           <div class="fallback-banner__title">Session processing failed</div>
@@ -239,24 +247,42 @@ onUnmounted(() => {
     <!-- State 1: Processing failed + no content -->
     <template v-else-if="isTerminalError && !snapshot">
       <div class="fallback-banner fallback-banner--error">
-        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <svg
+          class="fallback-banner__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polygon
+            points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"
+          />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <div class="fallback-banner__body">
           <div class="fallback-banner__title">Session processing failed</div>
           <div class="fallback-banner__text">
-            The pipeline encountered an error while analyzing this recording.
-            No terminal content could be recovered.
+            The pipeline encountered an error while analyzing this recording. No terminal content
+            could be recovered.
           </div>
           <div v-if="errorDetail" class="fallback-banner__detail">{{ errorDetail }}</div>
         </div>
       </div>
       <div class="terminal-empty-state terminal-empty-state--error">
-        <svg class="terminal-empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="4 17 10 11 4 5"/>
-          <line x1="12" y1="19" x2="20" y2="19"/>
+        <svg
+          class="terminal-empty-state__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" y1="19" x2="20" y2="19" />
         </svg>
         <div class="terminal-empty-state__label">No terminal output available</div>
       </div>
@@ -265,10 +291,20 @@ onUnmounted(() => {
     <!-- State 2: Processing failed + partial content (snapshot) -->
     <template v-else-if="isTerminalError && snapshot">
       <div class="fallback-banner fallback-banner--error">
-        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        <svg
+          class="fallback-banner__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polygon
+            points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"
+          />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <div class="fallback-banner__body">
           <div class="fallback-banner__title">Session processing failed</div>
@@ -278,68 +314,82 @@ onUnmounted(() => {
         </div>
       </div>
       <OverlayScrollbar class="terminal-scroll">
-        <TerminalSnapshotComponent
-          :lines="snapshot.lines"
-          :start-line-number="1"
-        />
+        <TerminalSnapshotComponent :lines="snapshot.lines" :start-line-number="1" />
       </OverlayScrollbar>
     </template>
 
     <!-- State 3: No sections detected + content exists -->
     <template v-else-if="detectionStatus === 'completed' && snapshot">
       <div class="fallback-banner fallback-banner--info">
-        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="16" x2="12" y2="12"/>
-          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        <svg
+          class="fallback-banner__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
         </svg>
         <div class="fallback-banner__body">
           <div class="fallback-banner__title">No sections detected</div>
           <div class="fallback-banner__text">
-            Session completed successfully, but no section boundaries were found.
-            Showing raw terminal output as a single block.
+            Session completed successfully, but no section boundaries were found. Showing raw
+            terminal output as a single block.
           </div>
         </div>
       </div>
       <OverlayScrollbar class="terminal-scroll">
-        <TerminalSnapshotComponent
-          :lines="snapshot.lines"
-          :start-line-number="1"
-        />
+        <TerminalSnapshotComponent :lines="snapshot.lines" :start-line-number="1" />
       </OverlayScrollbar>
     </template>
 
     <!-- State 4: Completed + no content -->
     <template v-else-if="detectionStatus === 'completed'">
       <div class="fallback-banner fallback-banner--info">
-        <svg class="fallback-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="16" x2="12" y2="12"/>
-          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        <svg
+          class="fallback-banner__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
         </svg>
         <div class="fallback-banner__body">
           <div class="fallback-banner__title">No sections detected</div>
           <div class="fallback-banner__text">
-            Session completed successfully, but no section boundaries or terminal content were found.
+            Session completed successfully, but no section boundaries or terminal content were
+            found.
           </div>
         </div>
       </div>
       <div class="terminal-empty-state">
-        <svg class="terminal-empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="4 17 10 11 4 5"/>
-          <line x1="12" y1="19" x2="20" y2="19"/>
+        <svg
+          class="terminal-empty-state__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" y1="19" x2="20" y2="19" />
         </svg>
         <div class="terminal-empty-state__label">No terminal output available</div>
       </div>
     </template>
 
     <!-- Non-terminal status: session is still being processed -->
-    <div
-      v-else
-      class="terminal-empty"
-    >
-      Session is being processed&hellip;
-    </div>
+    <div v-else class="terminal-empty">Session is being processed&hellip;</div>
   </div>
 </template>
 
@@ -460,8 +510,7 @@ onUnmounted(() => {
    ERROR VARIANT
    ================================================================ */
 .fallback-banner--error {
-  background:
-    linear-gradient(135deg, rgba(215, 69, 123, 0.12) 0%, rgba(215, 69, 123, 0.04) 100%);
+  background: linear-gradient(135deg, rgba(215, 69, 123, 0.12) 0%, rgba(215, 69, 123, 0.04) 100%);
   border-bottom: 1px solid rgba(215, 69, 123, 0.25);
 }
 
@@ -488,8 +537,9 @@ onUnmounted(() => {
   bottom: 0;
   width: 3px;
   background: var(--status-error);
-  box-shadow: 0 0 12px rgba(215, 69, 123, 0.6),
-              0 0 4px rgba(215, 69, 123, 0.4);
+  box-shadow:
+    0 0 12px rgba(215, 69, 123, 0.6),
+    0 0 4px rgba(215, 69, 123, 0.4);
   z-index: 2;
 }
 
@@ -497,8 +547,7 @@ onUnmounted(() => {
    INFO VARIANT
    ================================================================ */
 .fallback-banner--info {
-  background:
-    linear-gradient(135deg, rgba(143, 218, 252, 0.1) 0%, rgba(143, 218, 252, 0.03) 100%);
+  background: linear-gradient(135deg, rgba(143, 218, 252, 0.1) 0%, rgba(143, 218, 252, 0.03) 100%);
   border-bottom: 1px solid rgba(143, 218, 252, 0.2);
 }
 
@@ -520,8 +569,9 @@ onUnmounted(() => {
   bottom: 0;
   width: 3px;
   background: var(--status-info);
-  box-shadow: 0 0 12px rgba(143, 218, 252, 0.5),
-              0 0 4px rgba(143, 218, 252, 0.3);
+  box-shadow:
+    0 0 12px rgba(143, 218, 252, 0.5),
+    0 0 4px rgba(143, 218, 252, 0.3);
   z-index: 2;
 }
 

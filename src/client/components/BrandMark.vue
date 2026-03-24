@@ -1,16 +1,7 @@
 <template>
   <div class="spatial-shell__brand brand-mark">
-    <router-link
-      to="/"
-      class="brand-mark__logotype"
-      aria-label="Erika — go to home"
-    >
-      <div
-        class="brand-mark__icon"
-        aria-hidden="true"
-      >
-        E
-      </div>
+    <router-link to="/" class="brand-mark__logotype" aria-label="Erika — go to home">
+      <div class="brand-mark__icon" aria-hidden="true">E</div>
       <span class="brand-mark__name">Erika</span>
     </router-link>
   </div>

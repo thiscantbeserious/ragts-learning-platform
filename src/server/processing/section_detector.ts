@@ -158,7 +158,7 @@ export class SectionDetector {
 
     // Sort by event index and generate labels for non-marker boundaries
     const result = Array.from(uniqueBoundaries.values()).sort(
-      (a, b) => a.eventIndex - b.eventIndex
+      (a, b) => a.eventIndex - b.eventIndex,
     );
 
     // Generate labels for detected boundaries (markers keep their labels)
@@ -346,7 +346,7 @@ export class SectionDetector {
    */
   private processCandidates(
     candidates: BoundaryCandidate[],
-    skipMinimumSize = false
+    skipMinimumSize = false,
   ): SectionBoundary[] {
     if (candidates.length === 0) return [];
 

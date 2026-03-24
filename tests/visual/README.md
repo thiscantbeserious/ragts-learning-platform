@@ -5,6 +5,7 @@
 Screenshots are generated using Playwright with Chromium headless.
 
 ### Environment
+
 - **Browser**: Chromium (Playwright managed)
 - **Viewport**: 1280x720
 - **maxDiffPixelRatio**: 0.05 (5% pixel tolerance)

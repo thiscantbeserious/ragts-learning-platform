@@ -22,7 +22,7 @@ const DEFAULT_INTERVAL_MS = 30_000;
 export function startKeepalive(
   stream: SseStream,
   onClose: () => void,
-  intervalMs = DEFAULT_INTERVAL_MS
+  intervalMs = DEFAULT_INTERVAL_MS,
 ): () => void {
   const timer = setInterval(async () => {
     if (stream.closed) {

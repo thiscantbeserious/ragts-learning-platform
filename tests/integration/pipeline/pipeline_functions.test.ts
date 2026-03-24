@@ -24,7 +24,7 @@ import type { ProcessedSession } from '../../../src/server/processing/types.js';
  */
 function createCapturingSessionRepo(
   real: SessionAdapter,
-  onComplete: (ps: ProcessedSession) => void
+  onComplete: (ps: ProcessedSession) => void,
 ): SessionAdapter {
   return {
     create: (data) => real.create(data),
@@ -61,7 +61,9 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
 
   it('calls completeProcessing with correct section structure for marker session', async () => {
     let captured: ProcessedSession | null = null;
-    const mockRepo = createCapturingSessionRepo(sessionRepo, ps => { captured = ps; });
+    const mockRepo = createCapturingSessionRepo(sessionRepo, (ps) => {
+      captured = ps;
+    });
 
     const castContent = buildMarkerCastFile();
     const filePath = join(tmpDir, 'markers.cast');
@@ -78,8 +80,11 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
     await processSessionPipeline(
       filePath,
       session.id,
-      [{ time: 1.0, label: 'Start', index: 10 }, { time: 2.0, label: 'End', index: 20 }],
-      mockRepo
+      [
+        { time: 1.0, label: 'Start', index: 10 },
+        { time: 2.0, label: 'End', index: 20 },
+      ],
+      mockRepo,
     );
 
     expect(captured).not.toBeNull();
@@ -88,7 +93,7 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
     expect(captured!.snapshot).toBeTruthy();
     // 2 marker sections + possible preamble
     expect(captured!.sections.length).toBeGreaterThanOrEqual(2);
-    const markerSections = captured!.sections.filter(s => s.type === 'marker');
+    const markerSections = captured!.sections.filter((s) => s.type === 'marker');
     expect(markerSections.length).toBe(2);
     expect(markerSections[0]!.label).toBe('Start');
     expect(markerSections[1]!.label).toBe('End');
@@ -96,7 +101,9 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
 
   it('calls completeProcessing with zero sections for event-count-below-threshold file', async () => {
     let captured: ProcessedSession | null = null;
-    const mockRepo = createCapturingSessionRepo(sessionRepo, ps => { captured = ps; });
+    const mockRepo = createCapturingSessionRepo(sessionRepo, (ps) => {
+      captured = ps;
+    });
 
     const castContent = buildShortCastFile();
     const filePath = join(tmpDir, 'short.cast');
@@ -119,7 +126,9 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
 
   it('detectedSectionsCount excludes marker-type sections', async () => {
     let captured: ProcessedSession | null = null;
-    const mockRepo = createCapturingSessionRepo(sessionRepo, ps => { captured = ps; });
+    const mockRepo = createCapturingSessionRepo(sessionRepo, (ps) => {
+      captured = ps;
+    });
 
     const castContent = buildMarkerCastFile();
     const filePath = join(tmpDir, 'markers2.cast');
@@ -136,19 +145,24 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
     await processSessionPipeline(
       filePath,
       session.id,
-      [{ time: 1.0, label: 'Alpha', index: 10 }, { time: 2.0, label: 'Beta', index: 20 }],
-      mockRepo
+      [
+        { time: 1.0, label: 'Alpha', index: 10 },
+        { time: 2.0, label: 'Beta', index: 20 },
+      ],
+      mockRepo,
     );
 
     expect(captured).not.toBeNull();
     // detectedSectionsCount should only count non-marker sections
-    const nonMarkerCount = captured!.sections.filter(s => s.type !== 'marker').length;
+    const nonMarkerCount = captured!.sections.filter((s) => s.type !== 'marker').length;
     expect(captured!.detectedSectionsCount).toBe(nonMarkerCount);
   });
 
   it('section endEvent matches next section startEvent', async () => {
     let captured: ProcessedSession | null = null;
-    const mockRepo = createCapturingSessionRepo(sessionRepo, ps => { captured = ps; });
+    const mockRepo = createCapturingSessionRepo(sessionRepo, (ps) => {
+      captured = ps;
+    });
 
     const castContent = buildMarkerCastFile();
     const filePath = join(tmpDir, 'end-events.cast');
@@ -165,8 +179,11 @@ describe('processSessionPipeline — produces correct ProcessedSession via compl
     await processSessionPipeline(
       filePath,
       session.id,
-      [{ time: 1.0, label: 'Alpha', index: 10 }, { time: 2.0, label: 'Beta', index: 20 }],
-      mockRepo
+      [
+        { time: 1.0, label: 'Alpha', index: 10 },
+        { time: 2.0, label: 'Beta', index: 20 },
+      ],
+      mockRepo,
     );
 
     expect(captured).not.toBeNull();
@@ -262,7 +279,7 @@ describe('processSessionPipeline — WASM resource cleanup via try/finally', () 
 
     // Pipeline should not throw — error is caught internally and status set to failed
     await expect(
-      processSessionPipeline(filePath, session.id, [], throwingRepo)
+      processSessionPipeline(filePath, session.id, [], throwingRepo),
     ).resolves.toBeUndefined();
 
     // Session should be marked failed
@@ -315,7 +332,9 @@ describe('preamble synthesis in detectBoundaries', () => {
 
   it('synthesizes preamble when markers exist and pre-marker content is present', async () => {
     let captured: ProcessedSession | null = null;
-    const mockRepo = createCapturingSessionRepo(sessionRepo, ps => { captured = ps; });
+    const mockRepo = createCapturingSessionRepo(sessionRepo, (ps) => {
+      captured = ps;
+    });
 
     // File with pre-marker output, then a marker at index > 0
     const castContent = buildFileWithPreamble();
@@ -334,18 +353,20 @@ describe('preamble synthesis in detectBoundaries', () => {
       filePath,
       session.id,
       [{ time: 1.0, label: 'Section A', index: 5 }],
-      mockRepo
+      mockRepo,
     );
 
     expect(captured).not.toBeNull();
-    const preamble = captured!.sections.find(s => s.label === 'Preamble');
+    const preamble = captured!.sections.find((s) => s.label === 'Preamble');
     expect(preamble).toBeDefined();
     expect(preamble!.startEvent).toBe(0);
   });
 
   it('does not synthesize preamble when first marker is at event 0', async () => {
     let captured: ProcessedSession | null = null;
-    const mockRepo = createCapturingSessionRepo(sessionRepo, ps => { captured = ps; });
+    const mockRepo = createCapturingSessionRepo(sessionRepo, (ps) => {
+      captured = ps;
+    });
 
     const castContent = buildMarkerCastFile();
     const filePath = join(tmpDir, 'no-preamble.cast');
@@ -364,11 +385,11 @@ describe('preamble synthesis in detectBoundaries', () => {
       filePath,
       session.id,
       [{ time: 0.05, label: 'First', index: 0 }],
-      mockRepo
+      mockRepo,
     );
 
     expect(captured).not.toBeNull();
-    const preamble = captured!.sections.find(s => s.label === 'Preamble');
+    const preamble = captured!.sections.find((s) => s.label === 'Preamble');
     expect(preamble).toBeUndefined();
   });
 });

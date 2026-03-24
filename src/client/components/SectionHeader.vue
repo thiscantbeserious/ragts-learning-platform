@@ -24,24 +24,16 @@ defineEmits<{
     @click="$emit('toggle')"
   >
     <div class="section-header__chevron">
-      <span
-        v-if="collapsed"
-        class="icon icon--sm icon-chevron-right"
-      />
-      <span
-        v-else
-        class="icon icon--sm icon-chevron-down"
-      />
+      <span v-if="collapsed" class="icon icon--sm icon-chevron-right" />
+      <span v-else class="icon icon--sm icon-chevron-down" />
     </div>
     <span class="section-header__label">{{ section.label }}</span>
-    <span
-      v-if="section.startLine != null && section.endLine != null"
-      class="section-header__range"
-    >L{{ section.startLine + 1 }}&ndash;L{{ section.endLine }} ({{ lineCount }}&nbsp;lines)</span>
-    <span
-      v-else-if="lineCount > 0"
-      class="section-header__range"
-    >{{ lineCount }}&nbsp;lines (viewport)</span>
+    <span v-if="section.startLine != null && section.endLine != null" class="section-header__range"
+      >L{{ section.startLine + 1 }}&ndash;L{{ section.endLine }} ({{ lineCount }}&nbsp;lines)</span
+    >
+    <span v-else-if="lineCount > 0" class="section-header__range"
+      >{{ lineCount }}&nbsp;lines (viewport)</span
+    >
     <span
       class="badge badge--sm section-header__badge"
       :class="section.type === 'marker' ? 'badge--secondary' : 'badge--accent'"

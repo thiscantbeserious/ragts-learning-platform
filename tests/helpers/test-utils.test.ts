@@ -174,7 +174,10 @@ describe('createCastContentWithEpochs', () => {
   });
 
   it('accepts custom cols and rows', () => {
-    const content = createCastContentWithEpochs([{ rerender: [], newContent: ['x'] }], { cols: 100, rows: 30 });
+    const content = createCastContentWithEpochs([{ rerender: [], newContent: ['x'] }], {
+      cols: 100,
+      rows: 30,
+    });
     const header = JSON.parse(content.split('\n')[0]!);
     expect(header.term.cols).toBe(100);
     expect(header.term.rows).toBe(30);

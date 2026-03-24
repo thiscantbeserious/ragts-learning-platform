@@ -29,7 +29,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
     it('defaults to false on init', () => {
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
       expect(layout?.isMobileOverlayOpen.value).toBe(false);
       scope.stop();
     });
@@ -46,7 +48,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
 
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       layout?.openMobileOverlay();
       expect(layout?.isMobileOverlayOpen.value).toBe(true);
@@ -64,7 +68,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
 
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       layout?.openMobileOverlay();
       expect(layout?.isMobileOverlayOpen.value).toBe(false);
@@ -84,7 +90,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
 
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       layout?.openMobileOverlay();
       layout?.closeMobileOverlay();
@@ -96,7 +104,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
     it('is a no-op when overlay is already closed', () => {
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       layout?.closeMobileOverlay();
       expect(layout?.isMobileOverlayOpen.value).toBe(false);
@@ -118,7 +128,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
 
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       // Open the overlay while on mobile
       layout?.openMobileOverlay();
@@ -127,7 +139,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
       // Simulate viewport widening to desktop width
       mqStub.matches = false;
       if (changeHandler) {
-        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({ matches: false } as MediaQueryListEvent);
+        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({
+          matches: false,
+        } as MediaQueryListEvent);
       }
       await nextTick();
 
@@ -150,7 +164,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
 
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       // Overlay is already closed on desktop
       expect(layout?.isMobileOverlayOpen.value).toBe(false);
@@ -158,7 +174,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
       // Simulate viewport narrowing to mobile
       mqStub.matches = true;
       if (changeHandler) {
-        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({ matches: true } as MediaQueryListEvent);
+        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({
+          matches: true,
+        } as MediaQueryListEvent);
       }
       await nextTick();
 
@@ -174,7 +192,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
     it('exposes isMobileOverlayOpen, openMobileOverlay, closeMobileOverlay', () => {
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       expect('isMobileOverlayOpen' in (layout ?? {})).toBe(true);
       expect('openMobileOverlay' in (layout ?? {})).toBe(true);
@@ -185,7 +205,9 @@ describe('useLayout() — mobile overlay (Stage 13)', () => {
     it('isMobileOverlayOpen is readonly (ref-like)', () => {
       const scope = effectScope();
       let layout: ReturnType<typeof useLayout> | undefined;
-      scope.run(() => { layout = useLayout(); });
+      scope.run(() => {
+        layout = useLayout();
+      });
 
       // Should be a ref (has .value)
       expect(typeof layout?.isMobileOverlayOpen?.value).toBe('boolean');

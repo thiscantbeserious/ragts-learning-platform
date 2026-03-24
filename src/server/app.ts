@@ -63,29 +63,42 @@ const log = logger.child({ module: 'server' });
  * Side effects (DB init, signal handlers) are the caller's responsibility.
  */
 export function createApp(deps: AppDeps): Hono {
-  const { sessionRepository, sectionRepository, storageAdapter, jobQueue, eventLog, eventBus, ping, config } = deps;
+  const {
+    sessionRepository,
+    sectionRepository,
+    storageAdapter,
+    jobQueue,
+    eventLog,
+    eventBus,
+    ping,
+    config,
+  } = deps;
   const app = new Hono();
 
-  app.use(pinoLogger({
-    pino: logger,
-    http: {
-      onReqBindings: (c) => ({
-        method: c.req.method,
-        url: c.req.path,
-      }),
-      onResBindings: (c) => ({
-        status: c.res.status,
-      }),
-    },
-  }));
+  app.use(
+    pinoLogger({
+      pino: logger,
+      http: {
+        onReqBindings: (c) => ({
+          method: c.req.method,
+          url: c.req.path,
+        }),
+        onResBindings: (c) => ({
+          status: c.res.status,
+        }),
+      },
+    }),
+  );
 
-  app.use(cors({
-    origin: config.corsOrigin ?? '*',
-    allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Last-Event-ID', 'If-None-Match'],
-    exposeHeaders: ['Content-Type', 'ETag'],
-    maxAge: 86400,
-  }));
+  app.use(
+    cors({
+      origin: config.corsOrigin ?? '*',
+      allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+      allowHeaders: ['Content-Type', 'Last-Event-ID', 'If-None-Match'],
+      exposeHeaders: ['Content-Type', 'ETag'],
+      maxAge: 86400,
+    }),
+  );
 
   const uploadService = new UploadService({
     sessionRepository,
@@ -107,13 +120,18 @@ export function createApp(deps: AppDeps): Hono {
   const retryService = new RetryService({ sessionRepository, jobQueue, eventBus });
   const eventLogService = new EventLogService({ sessionRepository, eventLog });
   const sectionContentService = new SectionContentService({ sessionRepository, sectionRepository });
-  const bulkSectionContentService = new BulkSectionContentService({ sessionRepository, sectionRepository });
+  const bulkSectionContentService = new BulkSectionContentService({
+    sessionRepository,
+    sectionRepository,
+  });
 
   const pipelineStatusService = new PipelineStatusService({
     eventBus,
     sessionAdapter: sessionRepository,
   });
-  void pipelineStatusService.init().catch(err => log.error({ err }, 'PipelineStatusService init failed'));
+  void pipelineStatusService
+    .init()
+    .catch((err) => log.error({ err }, 'PipelineStatusService init failed'));
 
   app.get('/api/health', async (c) => {
     try {
@@ -134,14 +152,14 @@ export function createApp(deps: AppDeps): Hono {
   app.get('/api/sessions/:id/snapshot', (c) => handleGetSessionSnapshot(c, sessionService));
   // Bulk route MUST be registered before per-section route to avoid :sectionId matching "content".
   app.get('/api/sessions/:id/sections/content', (c) =>
-    handleGetBulkSectionContent(c, bulkSectionContentService)
+    handleGetBulkSectionContent(c, bulkSectionContentService),
   );
   app.get('/api/sessions/:id/sections/:sectionId/content', (c) =>
-    handleGetSectionContent(c, sectionContentService)
+    handleGetSectionContent(c, sectionContentService),
   );
 
   app.get('/api/sessions/:id/events', (c) =>
-    handleSseEvents(c, sessionRepository, eventBus, eventLog)
+    handleSseEvents(c, sessionRepository, eventBus, eventLog),
   );
 
   app.get('/api/pipeline/status', (c) => handlePipelineStatus(c, pipelineStatusService));

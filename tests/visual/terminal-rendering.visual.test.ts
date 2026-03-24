@@ -106,6 +106,8 @@ test.describe('Terminal Rendering', () => {
     const count = await headers.count();
     expect(count).toBeGreaterThan(1);
 
-    await expect(page.locator('.terminal-chrome')).toHaveScreenshot('terminal-multiple-sections.png');
+    await expect(page.locator('.terminal-chrome')).toHaveScreenshot(
+      'terminal-multiple-sections.png',
+    );
   });
 });

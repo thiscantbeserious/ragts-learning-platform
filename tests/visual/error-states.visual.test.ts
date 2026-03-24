@@ -49,7 +49,9 @@ test('error: upload of non-.cast file shows error', async ({ page }) => {
 
   // Wait briefly for any error state to appear in the sidebar
   await page.waitForTimeout(1000);
-  await expect(page.locator('.spatial-shell__main')).toHaveScreenshot('error-invalid-file-upload.png');
+  await expect(page.locator('.spatial-shell__main')).toHaveScreenshot(
+    'error-invalid-file-upload.png',
+  );
 });
 
 test('error: direct navigation to session detail without data', async ({ page }) => {

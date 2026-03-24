@@ -200,7 +200,10 @@ describe('useActiveSection', () => {
       expect(firstObserver?.observe).toHaveBeenCalledWith(el1);
 
       const el2 = makeElement('sec-2');
-      elements.value = [{ id: 'sec-1', el: el1 }, { id: 'sec-2', el: el2 }];
+      elements.value = [
+        { id: 'sec-1', el: el1 },
+        { id: 'sec-2', el: el2 },
+      ];
       await nextTick();
 
       // A new observer is created when the list changes

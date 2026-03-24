@@ -17,10 +17,7 @@ const log = logger.child({ module: 'routes/events' });
  * Returns all pipeline events for a session ordered by id ASC.
  * Returns 400 if sessionId is missing, 404 if session not found.
  */
-export async function handleGetEventLog(
-  c: Context,
-  service: EventLogService
-): Promise<Response> {
+export async function handleGetEventLog(c: Context, service: EventLogService): Promise<Response> {
   try {
     const sessionId = c.req.query('sessionId');
     if (sessionId !== undefined) {

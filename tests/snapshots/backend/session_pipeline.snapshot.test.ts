@@ -29,8 +29,8 @@ function _writeTempCast(content: string, name: string): string {
 /** Load a .cast fixture and extract markers from its events. */
 function loadFixtureWithMarkers(fixturePath: string) {
   const content = readFileSync(fixturePath, 'utf-8');
-  const lines = content.split('\n').filter(l => l.trim());
-  const events = lines.slice(1).map(l => JSON.parse(l));
+  const lines = content.split('\n').filter((l) => l.trim());
+  const events = lines.slice(1).map((l) => JSON.parse(l));
   const markers = events
     .map((e: any, i: number) => ({ event: e, index: i }))
     .filter((x: any) => x.event[1] === 'm')
@@ -52,14 +52,24 @@ function createMockSessionRepo() {
       if (status === 'failed') failedStatus = status;
     },
     updateSnapshot(_id: string, _snapshot: string) {},
-    create: async () => { throw new Error('not implemented'); },
-    createWithId: async () => { throw new Error('not implemented'); },
+    create: async () => {
+      throw new Error('not implemented');
+    },
+    createWithId: async () => {
+      throw new Error('not implemented');
+    },
     findAll: async () => [],
     findById: async () => null,
     deleteById: async () => false,
-    completeProcessing: async (ps: ProcessedSession) => { processed = ps; },
-    getProcessed() { return processed; },
-    getFailedStatus() { return failedStatus; },
+    completeProcessing: async (ps: ProcessedSession) => {
+      processed = ps;
+    },
+    getProcessed() {
+      return processed;
+    },
+    getFailedStatus() {
+      return failedStatus;
+    },
   };
 }
 
@@ -80,7 +90,9 @@ function serializeSections(sections: ProcessedSession['sections']) {
 
 describe('session-pipeline snapshots', () => {
   afterAll(() => {
-    try { rmSync(TEST_DATA_DIR, { recursive: true, force: true }); } catch {}
+    try {
+      rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    } catch {}
   });
 
   it('CLI session with markers — section structure', async () => {
@@ -89,12 +101,7 @@ describe('session-pipeline snapshots', () => {
 
     const sessionRepo = createMockSessionRepo();
 
-    await processSessionPipeline(
-      castPath,
-      'test-session-markers',
-      markers,
-      sessionRepo as any,
-    );
+    await processSessionPipeline(castPath, 'test-session-markers', markers, sessionRepo as any);
 
     const processed = sessionRepo.getProcessed();
     expect(processed).not.toBeNull();
@@ -109,12 +116,7 @@ describe('session-pipeline snapshots', () => {
 
     const sessionRepo = createMockSessionRepo();
 
-    await processSessionPipeline(
-      castPath,
-      'test-session-tui',
-      [],
-      sessionRepo as any,
-    );
+    await processSessionPipeline(castPath, 'test-session-tui', [], sessionRepo as any);
 
     const processed = sessionRepo.getProcessed();
     expect(processed).not.toBeNull();
@@ -131,12 +133,7 @@ describe('session-pipeline snapshots', () => {
 
     const sessionRepo = createMockSessionRepo();
 
-    await processSessionPipeline(
-      castPath,
-      'test-pipeline-full',
-      markers,
-      sessionRepo as any,
-    );
+    await processSessionPipeline(castPath, 'test-pipeline-full', markers, sessionRepo as any);
 
     const processed = sessionRepo.getProcessed();
     const snapshot = processed!.snapshot ? JSON.parse(processed!.snapshot) : null;
@@ -156,16 +153,11 @@ describe('session-pipeline snapshots', () => {
 
     const sessionRepo = createMockSessionRepo();
 
-    await processSessionPipeline(
-      castPath,
-      'test-empty-session',
-      [],
-      sessionRepo as any,
-    );
+    await processSessionPipeline(castPath, 'test-empty-session', [], sessionRepo as any);
 
     const processed = sessionRepo.getProcessed();
     expect({
-      status: processed ? 'completed' : sessionRepo.getFailedStatus() ?? 'failed',
+      status: processed ? 'completed' : (sessionRepo.getFailedStatus() ?? 'failed'),
       eventCount: processed?.eventCount ?? 0,
       sectionsCount: processed?.detectedSectionsCount ?? 0,
     }).toMatchSnapshot();

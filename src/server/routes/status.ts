@@ -17,10 +17,7 @@ const log = logger.child({ module: 'routes/status' });
  * Handle GET /api/sessions/:id/status
  * Returns current job status; 404 if session doesn't exist.
  */
-export async function handleGetStatus(
-  c: Context,
-  service: StatusService
-): Promise<Response> {
+export async function handleGetStatus(c: Context, service: StatusService): Promise<Response> {
   try {
     const id = c.req.param('id');
     const invalid = validatePathId(c, id);
@@ -31,7 +28,10 @@ export async function handleGetStatus(
     }
     const validation = typia.validate<SessionStatusResponse>(result.data);
     if (!validation.success) {
-      log.warn({ errors: validation.errors }, 'Response validation warning: session status shape mismatch');
+      log.warn(
+        { errors: validation.errors },
+        'Response validation warning: session status shape mismatch',
+      );
     }
     return c.json(result.data);
   } catch (err) {

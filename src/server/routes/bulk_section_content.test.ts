@@ -9,7 +9,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import { handleGetBulkSectionContent } from './bulk_section_content.js';
-import type { BulkSectionContentService, BulkSectionContentResult } from '../services/bulk_section_content_service.js';
+import type {
+  BulkSectionContentService,
+  BulkSectionContentResult,
+} from '../services/bulk_section_content_service.js';
 import type { BulkSectionContentResponse } from '../../shared/types/api.js';
 
 // ---------------------------------------------------------------------------
@@ -40,9 +43,7 @@ function makeMockService(result: BulkSectionContentResult): BulkSectionContentSe
 
 function makeApp(service: BulkSectionContentService) {
   const app = new Hono();
-  app.get('/api/sessions/:id/sections/content', (c) =>
-    handleGetBulkSectionContent(c, service)
-  );
+  app.get('/api/sessions/:id/sections/content', (c) => handleGetBulkSectionContent(c, service));
   return app;
 }
 
@@ -61,7 +62,7 @@ describe('GET /api/sessions/:id/sections/content', () => {
   it('returns 200 with bulk content response', async () => {
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/content'),
     );
     expect(res.status).toBe(200);
   });
@@ -69,18 +70,18 @@ describe('GET /api/sessions/:id/sections/content', () => {
   it('response body contains sections map keyed by section id', async () => {
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/content'),
     );
-    const body = await res.json() as BulkSectionContentResponse;
+    const body = (await res.json()) as BulkSectionContentResponse;
     expect(Object.keys(body.sections)).toEqual(['sect-1', 'sect-2']);
   });
 
   it('each section entry has the expected SectionContentPage shape', async () => {
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/content'),
     );
-    const body = await res.json() as BulkSectionContentResponse;
+    const body = (await res.json()) as BulkSectionContentResponse;
     const page = body.sections['sect-1'];
     expect(page).toMatchObject({
       sectionId: 'sect-1',
@@ -94,10 +95,10 @@ describe('GET /api/sessions/:id/sections/content', () => {
     const service = makeMockService({ ok: false, status: 404, error: 'Session not found' });
     const app = makeApp(service);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/missing/sections/content')
+      new Request('http://localhost/api/sessions/missing/sections/content'),
     );
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('not found');
   });
 
@@ -109,18 +110,16 @@ describe('GET /api/sessions/:id/sections/content', () => {
     });
     const app = makeApp(service);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/content'),
     );
     expect(res.status).toBe(413);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('sections');
   });
 
   it('passes session id from path to service', async () => {
     const app = makeApp(mockService);
-    await app.fetch(
-      new Request('http://localhost/api/sessions/my-session-id/sections/content')
-    );
+    await app.fetch(new Request('http://localhost/api/sessions/my-session-id/sections/content'));
     expect(mockService.getBulkSectionContent).toHaveBeenCalledWith('my-session-id');
   });
 
@@ -128,7 +127,7 @@ describe('GET /api/sessions/:id/sections/content', () => {
     const service = makeMockService({ ok: true, data: { sections: {} } });
     const app = makeApp(service);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/content'),
     );
     expect(res.status).toBe(200);
   });
@@ -139,7 +138,7 @@ describe('GET /api/sessions/:id/sections/content', () => {
     } as unknown as BulkSectionContentService;
     const app = makeApp(service);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/content'),
     );
     expect(res.status).toBe(500);
   });

@@ -18,7 +18,7 @@ import { test, expect } from '@playwright/test';
 const BASE_URL = 'http://localhost:5173';
 const LARGE_SESSION_ID = 'xrKyjIoqjPnuNTtvhFQnV'; // 50 sections
 const SMALL_SESSION_ID = 'P57U6W984QVuRhg8s9hzU'; // 5 sections (< SMALL_SESSION_THRESHOLD of 5, shows no nav)
-const ZERO_SESSION_ID = 'WE3ipDl1EK325oCJYyJu1';  // 0 sections
+const ZERO_SESSION_ID = 'WE3ipDl1EK325oCJYyJu1'; // 0 sections
 
 const LARGE_SESSION_URL = `${BASE_URL}/session/${LARGE_SESSION_ID}`;
 const SMALL_SESSION_URL = `${BASE_URL}/session/${SMALL_SESSION_ID}`;
@@ -29,7 +29,10 @@ const ZERO_SESSION_URL = `${BASE_URL}/session/${ZERO_SESSION_ID}`;
 // ---------------------------------------------------------------------------
 
 /** Navigate and wait for the scroll viewport to be ready. */
-async function navigateToSession(page: import('@playwright/test').Page, url: string): Promise<void> {
+async function navigateToSession(
+  page: import('@playwright/test').Page,
+  url: string,
+): Promise<void> {
   await page.goto(url);
   // Wait until either content or fallback banner is visible
   await page.waitForSelector('.terminal-chrome, .session-detail-view__state', { timeout: 15000 });
@@ -47,7 +50,9 @@ async function countDomNodes(page: import('@playwright/test').Page): Promise<num
 }
 
 /** Get the scrollable viewport element and its scrollHeight. */
-async function getScrollInfo(page: import('@playwright/test').Page): Promise<{ scrollHeight: number; scrollTop: number }> {
+async function getScrollInfo(
+  page: import('@playwright/test').Page,
+): Promise<{ scrollHeight: number; scrollTop: number }> {
   return page.evaluate(() => {
     const el = document.querySelector('.overlay-scrollbar__viewport') as HTMLElement | null;
     if (!el) return { scrollHeight: 0, scrollTop: 0 };
@@ -73,9 +78,13 @@ async function scrollViewportTo(page: import('@playwright/test').Page, top: numb
  * identified by the `.terminal-scroll` ancestor — the OverlayScrollbar wrapper
  * class set in SessionContent.vue.
  */
-async function getContentScrollInfo(page: import('@playwright/test').Page): Promise<{ scrollHeight: number; scrollTop: number }> {
+async function getContentScrollInfo(
+  page: import('@playwright/test').Page,
+): Promise<{ scrollHeight: number; scrollTop: number }> {
   return page.evaluate(() => {
-    const el = document.querySelector('.terminal-scroll .overlay-scrollbar__viewport') as HTMLElement | null;
+    const el = document.querySelector(
+      '.terminal-scroll .overlay-scrollbar__viewport',
+    ) as HTMLElement | null;
     if (!el) return { scrollHeight: 0, scrollTop: 0 };
     return { scrollHeight: el.scrollHeight, scrollTop: el.scrollTop };
   });
@@ -84,7 +93,9 @@ async function getContentScrollInfo(page: import('@playwright/test').Page): Prom
 /** Scroll the main terminal content viewport to a specific position. */
 async function scrollContentTo(page: import('@playwright/test').Page, top: number): Promise<void> {
   await page.evaluate((t) => {
-    const el = document.querySelector('.terminal-scroll .overlay-scrollbar__viewport') as HTMLElement | null;
+    const el = document.querySelector(
+      '.terminal-scroll .overlay-scrollbar__viewport',
+    ) as HTMLElement | null;
     if (el) el.scrollTop = t;
   }, top);
   // Brief pause for virtualizer to process scroll
@@ -161,7 +172,9 @@ test.describe('Scroll Performance', () => {
     expect(peakNodes).toBeLessThan(10000);
   });
 
-  test('AC-6: average DOM node count during full scroll-through stays under 6000', async ({ page }) => {
+  test('AC-6: average DOM node count during full scroll-through stays under 6000', async ({
+    page,
+  }) => {
     await navigateToLargeSession(page);
     await page.waitForTimeout(300);
 
@@ -200,7 +213,9 @@ test.describe('Scroll Performance', () => {
     expect(maxDeviation).toBeLessThanOrEqual(0.01);
   });
 
-  test('AC-8: no scroll direction reversals caused by virtualizer remeasurement', async ({ page }) => {
+  test('AC-8: no scroll direction reversals caused by virtualizer remeasurement', async ({
+    page,
+  }) => {
     await navigateToLargeSession(page);
     await page.waitForTimeout(300);
 
@@ -236,8 +251,8 @@ test.describe('Scroll Performance', () => {
       const position = Math.floor((i / steps) * scrollHeight);
       await scrollViewportTo(page, position);
 
-      const renderedCount = await page.evaluate(() =>
-        document.querySelectorAll('[data-index]').length
+      const renderedCount = await page.evaluate(
+        () => document.querySelectorAll('[data-index]').length,
       );
 
       // Skip first step (may be loading) and last (near end of list)
@@ -310,7 +325,7 @@ test.describe('Navigation', () => {
         return (el as HTMLElement).scrollTop > args.initial + 50;
       },
       { sel: '.terminal-scroll .overlay-scrollbar__viewport', initial: initialScrollTop },
-      { timeout: 2000 }
+      { timeout: 2000 },
     );
     const elapsed = Date.now() - start;
 
@@ -321,7 +336,9 @@ test.describe('Navigation', () => {
     await expect(sectionHeader).toBeVisible();
   });
 
-  test('AC-13: scrollspy active pill updates correctly through first 5 sections', async ({ page }) => {
+  test('AC-13: scrollspy active pill updates correctly through first 5 sections', async ({
+    page,
+  }) => {
     await navigateToLargeSession(page);
     await page.waitForSelector('.section-nav', { timeout: 5000 });
     // Allow virtualizer to settle and measure initial sections
@@ -409,7 +426,7 @@ test.describe('Network', () => {
     const response = await page.request.get(`${BASE_URL}/api/sessions/${LARGE_SESSION_ID}`);
     expect(response.ok()).toBe(true);
 
-    const data = await response.json() as Record<string, unknown>;
+    const data = (await response.json()) as Record<string, unknown>;
     const content = data['content'] as Record<string, unknown> | undefined;
 
     // content should have no 'snapshot' field — snapshot is served separately
@@ -420,7 +437,7 @@ test.describe('Network', () => {
   test('AC-17: second request for same section returns 304 Not Modified', async ({ page }) => {
     // First request — get the ETag
     const firstResponse = await page.request.get(
-      `${BASE_URL}/api/sessions/${LARGE_SESSION_ID}/sections/Cc01ecDefC8_xxFzpULjG/content?limit=10`
+      `${BASE_URL}/api/sessions/${LARGE_SESSION_ID}/sections/Cc01ecDefC8_xxFzpULjG/content?limit=10`,
     );
     expect(firstResponse.ok()).toBe(true);
 
@@ -430,7 +447,7 @@ test.describe('Network', () => {
     // Second request with If-None-Match — should get 304
     const secondResponse = await page.request.get(
       `${BASE_URL}/api/sessions/${LARGE_SESSION_ID}/sections/Cc01ecDefC8_xxFzpULjG/content?limit=10`,
-      { headers: { 'If-None-Match': etag } }
+      { headers: { 'If-None-Match': etag } },
     );
 
     expect(secondResponse.status()).toBe(304);
@@ -438,11 +455,11 @@ test.describe('Network', () => {
 
   test('AC-18: small sessions load in a single bulk request', async ({ page }) => {
     const response = await page.request.get(
-      `${BASE_URL}/api/sessions/${SMALL_SESSION_ID}/sections/content`
+      `${BASE_URL}/api/sessions/${SMALL_SESSION_ID}/sections/content`,
     );
     expect(response.ok()).toBe(true);
 
-    const data = await response.json() as { sections: Record<string, unknown> };
+    const data = (await response.json()) as { sections: Record<string, unknown> };
     expect(data.sections).toBeDefined();
 
     // All sections should be in the response.
@@ -482,7 +499,9 @@ test.describe('Behavioral', () => {
     expect(bannerCount).toBeGreaterThan(0);
   });
 
-  test('AC-22: line numbers continue from section position (not reset to 1 per section)', async ({ page }) => {
+  test('AC-22: line numbers continue from section position (not reset to 1 per section)', async ({
+    page,
+  }) => {
     await navigateToLargeSession(page);
     await page.waitForSelector('.terminal-line', { timeout: 10000 });
 
@@ -496,9 +515,9 @@ test.describe('Behavioral', () => {
 
     // Read visible line numbers in the current viewport
     const lineNumbers = await page.evaluate(() => {
-      const allNumbers = Array.from(
-        document.querySelectorAll('.terminal-line__number')
-      ).map((el) => parseInt(el.textContent?.trim() ?? '0', 10));
+      const allNumbers = Array.from(document.querySelectorAll('.terminal-line__number')).map((el) =>
+        parseInt(el.textContent?.trim() ?? '0', 10),
+      );
       return allNumbers.filter((n) => !Number.isNaN(n) && n > 0);
     });
 

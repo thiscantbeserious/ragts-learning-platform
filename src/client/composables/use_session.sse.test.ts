@@ -32,7 +32,7 @@ async function flush(count = 10): Promise<void> {
 
 /** Makes a meta response with sectionCount above threshold (no bulk fetch). */
 function makeMetaResponse(
-  overrides: Partial<SessionMetadataResponse> = {}
+  overrides: Partial<SessionMetadataResponse> = {},
 ): SessionMetadataResponse {
   return {
     id: 'sess-1',
@@ -75,7 +75,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
 
   it('re-fetches when SSE transitions to completed', async () => {
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ detection_status: 'processing' }))
+      makeOkResponse(makeMetaResponse({ detection_status: 'processing' })),
     );
 
     const { detectionStatus } = useSessionV2(ref('sess-1'));
@@ -83,7 +83,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
 
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ detection_status: 'completed' }))
+      makeOkResponse(makeMetaResponse({ detection_status: 'completed' })),
     );
     mockSseStatus.value = 'completed';
     await flush();
@@ -94,7 +94,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
 
   it('re-fetches when SSE transitions to failed', async () => {
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ detection_status: 'processing' }))
+      makeOkResponse(makeMetaResponse({ detection_status: 'processing' })),
     );
 
     useSessionV2(ref('sess-1'));
@@ -102,7 +102,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
 
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ detection_status: 'failed' }))
+      makeOkResponse(makeMetaResponse({ detection_status: 'failed' })),
     );
     mockSseStatus.value = 'failed';
     await flush();
@@ -112,7 +112,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
 
   it('does not re-fetch when SSE transitions to an intermediate state', async () => {
     vi.mocked(fetch).mockResolvedValue(
-      makeOkResponse(makeMetaResponse({ detection_status: 'processing' }))
+      makeOkResponse(makeMetaResponse({ detection_status: 'processing' })),
     );
 
     useSessionV2(ref('sess-1'));

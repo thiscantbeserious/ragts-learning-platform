@@ -70,10 +70,7 @@ export default defineConfig({
       'tests/**/*.{test,spec}.{js,ts}',
       'packages/**/*.{test,spec}.{js,ts}',
     ],
-    exclude: [
-      'tests/visual/**',
-      'node_modules/**',
-    ],
+    exclude: ['tests/visual/**', 'tests/acceptance/**', 'node_modules/**'],
     // Integration tests that spawn PipelineOrchestrator (which creates worker
     // threads) must run sequentially to avoid resource cleanup races.
     // Unit tests and client tests still run in parallel for speed.

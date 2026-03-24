@@ -11,9 +11,7 @@
 import { createReadStream } from 'node:fs';
 import { createInterface } from 'node:readline';
 
-export type NdjsonItem =
-  | { header: any; event?: never }
-  | { event: any; header?: never };
+export type NdjsonItem = { header: any; event?: never } | { event: any; header?: never };
 
 /**
  * Streaming parser for .cast files.

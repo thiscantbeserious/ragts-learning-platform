@@ -139,7 +139,9 @@ describe('SidebarPanel — file input change handler (lines 282-313)', () => {
       0: file,
       length: 1,
       item: (i: number) => (i === 0 ? file : null),
-      [Symbol.iterator]: function* () { yield file; },
+      [Symbol.iterator]: function* () {
+        yield file;
+      },
     };
     Object.defineProperty(inputEl, 'files', { value: fileList, configurable: true });
 
@@ -162,7 +164,10 @@ describe('SidebarPanel — file input change handler (lines 282-313)', () => {
       1: file2,
       length: 2,
       item: (i: number) => [file1, file2][i] ?? null,
-      [Symbol.iterator]: function* () { yield file1; yield file2; },
+      [Symbol.iterator]: function* () {
+        yield file1;
+        yield file2;
+      },
     };
     Object.defineProperty(inputEl, 'files', { value: fileList, configurable: true });
 
@@ -183,7 +188,9 @@ describe('SidebarPanel — file input change handler (lines 282-313)', () => {
       0: file,
       length: 1,
       item: (i: number) => (i === 0 ? file : null),
-      [Symbol.iterator]: function* () { yield file; },
+      [Symbol.iterator]: function* () {
+        yield file;
+      },
     };
     Object.defineProperty(inputEl, 'files', { value: fileList, configurable: true });
 
@@ -216,7 +223,9 @@ describe('SidebarPanel — file input change handler (lines 282-313)', () => {
       0: file,
       length: 1,
       item: (i: number) => (i === 0 ? file : null),
-      [Symbol.iterator]: function* () { yield file; },
+      [Symbol.iterator]: function* () {
+        yield file;
+      },
     };
     Object.defineProperty(inputEl, 'files', { value: fileList, configurable: true });
 
@@ -228,7 +237,7 @@ describe('SidebarPanel — file input change handler (lines 282-313)', () => {
     await callbacks.onUploadComplete('temp-abc');
 
     // temp session should be removed
-    expect(state.sessions.value.find(s => s.id === 'temp-abc')).toBeUndefined();
+    expect(state.sessions.value.find((s) => s.id === 'temp-abc')).toBeUndefined();
     expect(state.fetchSessions).toHaveBeenCalled();
   });
 });

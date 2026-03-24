@@ -43,7 +43,7 @@ export class FsStorageImpl implements StorageAdapter {
    */
   async read(id: string): Promise<string> {
     const filepath = this.resolvePath(id);
-    if (!await this.fileExists(filepath)) {
+    if (!(await this.fileExists(filepath))) {
       throw new Error(`Session file not found: ${filepath}`);
     }
     return readFile(filepath, 'utf-8');
@@ -55,7 +55,7 @@ export class FsStorageImpl implements StorageAdapter {
    */
   async delete(id: string): Promise<boolean> {
     const filepath = this.resolvePath(id);
-    if (!await this.fileExists(filepath)) {
+    if (!(await this.fileExists(filepath))) {
       return false;
     }
     await unlink(filepath);

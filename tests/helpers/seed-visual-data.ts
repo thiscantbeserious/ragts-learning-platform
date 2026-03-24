@@ -34,7 +34,7 @@ export async function uploadFixture(fixtureName: string): Promise<string> {
     throw new Error(`Upload failed: ${response.status} ${await response.text()}`);
   }
 
-  const data = await response.json() as { id: string };
+  const data = (await response.json()) as { id: string };
   return data.id;
 }
 
@@ -49,7 +49,7 @@ export async function waitForProcessing(sessionId: string, timeoutMs = 30000): P
     if (!response.ok) {
       throw new Error(`Polling failed: ${response.status} ${await response.text()}`);
     }
-    const data = await response.json() as { detection_status: string };
+    const data = (await response.json()) as { detection_status: string };
     if (data.detection_status === 'completed') {
       return;
     }
@@ -88,7 +88,7 @@ export async function deleteAllSessions(): Promise<void> {
   if (!response.ok) {
     throw new Error(`List sessions failed: ${response.status} ${await response.text()}`);
   }
-  const sessions = await response.json() as Array<{ id: string }>;
+  const sessions = (await response.json()) as Array<{ id: string }>;
   for (const session of sessions) {
     const del = await fetch(`${API_BASE}/api/sessions/${session.id}`, { method: 'DELETE' });
     if (!del.ok) {

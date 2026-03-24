@@ -56,7 +56,7 @@ export interface SessionAdapter {
     id: string,
     status: DetectionStatus,
     eventCount?: number,
-    detectedSectionsCount?: number
+    detectedSectionsCount?: number,
   ): Promise<void>;
 
   /**

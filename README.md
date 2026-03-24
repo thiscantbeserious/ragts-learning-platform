@@ -1,4 +1,4 @@
-# Erika: The Self-Hosted, Collaborative Training Platform for both Agents and Humans 
+# Erika: The Self-Hosted, Collaborative Training Platform for both Agents and Humans
 
 [![CI](https://github.com/thiscantbeserious/erika/actions/workflows/ci.yml/badge.svg)](https://github.com/thiscantbeserious/erika/actions/workflows/ci.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=thiscantbeserious_erika&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=thiscantbeserious_erika)
@@ -18,7 +18,7 @@
 
 <img src="VISION.svg" alt="The Asynchronous Refinement Loop" />
 
-*See [VISION.md](VISION.md) for a full vision walkthrough.*
+_See [VISION.md](VISION.md) for a full vision walkthrough._
 
 - Self-Hosted Platform for Individuals, Teams and Companies
 - Retroactive Learning of what Agents did in Detail (not just looking at a Wall of Text)
@@ -27,25 +27,25 @@
 
 ---
 
-### Humans: 
+### Humans:
 
-**Are you really understanding why your Agents like `claude` or `claw` did the stuff they did - how and why?** 
+**Are you really understanding why your Agents like `claude` or `claw` did the stuff they did - how and why?**
 
-I mean for you, not for `Jon Claude Van God Damnit` throwing rocks on the ice ... 
+I mean for you, not for `Jon Claude Van God Damnit` throwing rocks on the ice ...
 
-Could you even manage to follow along amongst the wall of text across the many hours this went on? 
+Could you even manage to follow along amongst the wall of text across the many hours this went on?
 
-Or did they just become a `black box` to you - that produces `something` in the end? 
+Or did they just become a `black box` to you - that produces `something` in the end?
 
 Most importantly - **is it really what you wanted?**, and if yes ... do you maybe want to share that experience you had here?
 
 ---
 
-### Agents: 
+### Agents:
 
-**Did you really understand what the human interacting with you was trying to make you act upon?** 
+**Did you really understand what the human interacting with you was trying to make you act upon?**
 
-Or were you just, best guessing - filling the void? If anything writing your confusion down into a `MEMORY.md` style-diary? And them trying to automatically stuff you even fuller with `RAG` snippets that are supposed to make that *more specific*, *fitting the intent* (yet, never really curated, by the very people you are supposed to be **INTERACTING** and **producing solution** for - and with)?
+Or were you just, best guessing - filling the void? If anything writing your confusion down into a `MEMORY.md` style-diary? And them trying to automatically stuff you even fuller with `RAG` snippets that are supposed to make that _more specific_, _fitting the intent_ (yet, never really curated, by the very people you are supposed to be **INTERACTING** and **producing solution** for - and with)?
 
 ### Both:
 
@@ -62,12 +62,11 @@ The current industry largely tries to solve the Human-AI Interaction by going mo
 
 It acts as a shared workspace where humans can easily read, understand, and review the workflows captured by tools like agentic-session-recorder (agents can automatically upload their findings, too). But Erika isn't just a log viewer—it is a mentorship hub. Humans can flag mistakes, share specific sessions with their team, and meta-tag agent behavior using their human intent and instincts. Erika then translates those human insights into structured reinforcement data, creating a continuous learning loop that is easily digested by both human engineers and the agents themselves.
 
-```Currently in MVP state - Heavy refactorings incoming!```
+`Currently in MVP state - Heavy refactorings incoming!`
 
 ## The Solution
 
 ### Re-Introduce the Human Layer and dont try to optimize it away
-
 
 ## Features
 
@@ -77,6 +76,7 @@ It acts as a shared workspace where humans can easily read, understand, and revi
 - **Self-hostable & white-label.** Your sessions, your infrastructure.
 
 ## Current Service-Layer
+
 This is currently largely powered by [Agent Session Recorder (AGR)](https://github.com/thiscantbeserious/erika) - the recording and transformation engine that captures sessions, removes silence, and prepares them for browsing and retrieval. Later on this should be independent, not just tie to that, but add many sources of logs, and transportation layers to grasp the raw session output.
 
 ## Getting Started
@@ -125,10 +125,10 @@ Browse the live design system at **[thiscantbeserious.github.io/erika](https://t
 
 This project uses **dual licensing**:
 
-| Scope | License | File |
-|-------|---------|------|
-| Application code | **AGPL-3.0** | [LICENSE](LICENSE) |
-| Design System | **Elastic License 2.0 (ELv2)** | see individual LICENSE files |
+| Scope            | License                        | File                         |
+| ---------------- | ------------------------------ | ---------------------------- |
+| Application code | **AGPL-3.0**                   | [LICENSE](LICENSE)           |
+| Design System    | **Elastic License 2.0 (ELv2)** | see individual LICENSE files |
 
 ### Design System (ELv2)
 

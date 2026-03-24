@@ -16,7 +16,11 @@ import { fileURLToPath } from 'node:url';
 import type { EventBusAdapter, EventHandler } from '../events/event_bus_adapter.js';
 import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import { PipelineStage, type PipelineEvent, type DetectionStatus } from '../../shared/types/pipeline.js';
+import {
+  PipelineStage,
+  type PipelineEvent,
+  type DetectionStatus,
+} from '../../shared/types/pipeline.js';
 import { store } from './stages/store.js';
 import { logger } from '../logger.js';
 import { WorkerPool } from '../workers/worker_pool.js';
@@ -80,11 +84,11 @@ export class PipelineOrchestrator {
     // Try both relative paths to find the worker entry.
     const thisDir = dirname(fileURLToPath(import.meta.url));
     const candidates = [
-      join(thisDir, '../workers/pipeline_worker.ts'),   // source layout
-      join(thisDir, 'workers/pipeline_worker.ts'),      // bundled layout (dist/server/)
+      join(thisDir, '../workers/pipeline_worker.ts'), // source layout
+      join(thisDir, 'workers/pipeline_worker.ts'), // bundled layout (dist/server/)
     ];
-    const workerEntry = candidates.find(p =>
-      existsSync(p) || existsSync(p.replace(/\.ts$/, '.js'))
+    const workerEntry = candidates.find(
+      (p) => existsSync(p) || existsSync(p.replace(/\.ts$/, '.js')),
     );
     if (!workerEntry) {
       throw new Error(`Pipeline worker not found. Tried: ${candidates.join(', ')}`);
@@ -178,7 +182,11 @@ export class PipelineOrchestrator {
       // Emit batched stage events now that the worker has completed all four stages
       this.eventBus.emit({ type: 'session.validated', sessionId, eventCount: result.eventCount });
       await this.advanceStage(job.id, sessionId, PipelineStage.Detect);
-      this.eventBus.emit({ type: 'session.detected', sessionId, sectionCount: result.detectedSectionsCount });
+      this.eventBus.emit({
+        type: 'session.detected',
+        sessionId,
+        sectionCount: result.detectedSectionsCount,
+      });
       await this.advanceStage(job.id, sessionId, PipelineStage.Replay);
       this.eventBus.emit({ type: 'session.replayed', sessionId, lineCount: 0 });
       await this.advanceStage(job.id, sessionId, PipelineStage.Dedup);
@@ -197,7 +205,11 @@ export class PipelineOrchestrator {
   }
 
   /** Advance job to the next stage and update the session's detection_status. */
-  private async advanceStage(jobId: string, sessionId: string, stage: PipelineStage): Promise<void> {
+  private async advanceStage(
+    jobId: string,
+    sessionId: string,
+    stage: PipelineStage,
+  ): Promise<void> {
     await this.jobQueue.advance(jobId, stage);
     await this.deps.sessionRepository.updateDetectionStatus(sessionId, STAGE_STATUS[stage]);
   }
@@ -212,7 +224,12 @@ export class PipelineOrchestrator {
       const stage = job?.currentStage ?? PipelineStage.Validate;
       await this.jobQueue.fail(jobId, rawMessage);
       await this.deps.sessionRepository.updateDetectionStatus(sessionId, 'failed');
-      this.eventBus.emit({ type: 'session.failed', sessionId, stage, error: sanitizeErrorMessage(error) });
+      this.eventBus.emit({
+        type: 'session.failed',
+        sessionId,
+        stage,
+        error: sanitizeErrorMessage(error),
+      });
     } catch (innerErr) {
       log.error({ sessionId, err: innerErr }, 'Failed to record stage error');
     }

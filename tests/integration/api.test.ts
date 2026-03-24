@@ -51,15 +51,9 @@ describe('API Routes', () => {
   let eventBus: EmitterEventBusImpl;
   let orchestrator: PipelineOrchestrator;
 
-  const validFixture = readFileSync(
-    join(FIXTURES_DIR, 'valid-with-markers.cast'),
-    'utf-8'
-  );
+  const validFixture = readFileSync(join(FIXTURES_DIR, 'valid-with-markers.cast'), 'utf-8');
 
-  const invalidFixture = readFileSync(
-    join(FIXTURES_DIR, 'invalid-version.cast'),
-    'utf-8'
-  );
+  const invalidFixture = readFileSync(join(FIXTURES_DIR, 'invalid-version.cast'), 'utf-8');
 
   beforeEach(async () => {
     await initVt();
@@ -115,7 +109,7 @@ describe('API Routes', () => {
     app.post('/api/sessions/:id/retry', (c) => handleRetry(c, retryService));
     app.get('/api/events', (c) => handleGetEventLog(c, eventLogService));
     app.get('/api/sessions/:id/events', (c) =>
-      handleSseEvents(c, sessionRepository, eventBus, ctx.eventLog)
+      handleSseEvents(c, sessionRepository, eventBus, ctx.eventLog),
     );
   });
 
@@ -217,7 +211,7 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
 
       const req = new Request('http://localhost/api/sessions');
@@ -240,13 +234,11 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
       const uploadData = await uploadRes.json();
 
-      const req = new Request(
-        `http://localhost/api/sessions/${uploadData.id}`
-      );
+      const req = new Request(`http://localhost/api/sessions/${uploadData.id}`);
       const res = await app.fetch(req);
       const data = await res.json();
 
@@ -282,25 +274,22 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
       const uploadData = await uploadRes.json();
 
       await orchestrator.waitForPending();
 
-      const deleteReq = new Request(
-        `http://localhost/api/sessions/${uploadData.id}`,
-        { method: 'DELETE' }
-      );
+      const deleteReq = new Request(`http://localhost/api/sessions/${uploadData.id}`, {
+        method: 'DELETE',
+      });
       const deleteRes = await app.fetch(deleteReq);
       const deleteData = await deleteRes.json();
 
       expect(deleteRes.status).toBe(200);
       expect(deleteData.success).toBe(true);
 
-      const getReq = new Request(
-        `http://localhost/api/sessions/${uploadData.id}`
-      );
+      const getReq = new Request(`http://localhost/api/sessions/${uploadData.id}`);
       const getRes = await app.fetch(getReq);
 
       expect(getRes.status).toBe(404);
@@ -329,25 +318,21 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
       const session = await uploadRes.json();
 
       expect(uploadRes.status).toBe(201);
 
       // 2. List
-      const listRes = await app.fetch(
-        new Request('http://localhost/api/sessions')
-      );
+      const listRes = await app.fetch(new Request('http://localhost/api/sessions'));
       const sessions = await listRes.json();
 
       expect(sessions).toHaveLength(1);
       expect(sessions[0].id).toBe(session.id);
 
       // 3. Get
-      const getRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${session.id}`)
-      );
+      const getRes = await app.fetch(new Request(`http://localhost/api/sessions/${session.id}`));
       const retrieved = await getRes.json();
 
       expect(retrieved.id).toBe(session.id);
@@ -359,16 +344,14 @@ describe('API Routes', () => {
       const deleteRes = await app.fetch(
         new Request(`http://localhost/api/sessions/${session.id}`, {
           method: 'DELETE',
-        })
+        }),
       );
       const deleteData = await deleteRes.json();
 
       expect(deleteData.success).toBe(true);
 
       // 5. Verify deletion
-      const listAfterDelete = await app.fetch(
-        new Request('http://localhost/api/sessions')
-      );
+      const listAfterDelete = await app.fetch(new Request('http://localhost/api/sessions'));
       const sessionsAfterDelete = await listAfterDelete.json();
 
       expect(sessionsAfterDelete).toHaveLength(0);
@@ -385,16 +368,15 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
       const uploadData = await uploadRes.json();
 
       await orchestrator.waitForPending();
 
-      const req = new Request(
-        `http://localhost/api/sessions/${uploadData.id}/redetect`,
-        { method: 'POST' }
-      );
+      const req = new Request(`http://localhost/api/sessions/${uploadData.id}/redetect`, {
+        method: 'POST',
+      });
       const res = await app.fetch(req);
       const data = await res.json();
 
@@ -404,10 +386,9 @@ describe('API Routes', () => {
     });
 
     it('should return 404 for non-existent session', async () => {
-      const req = new Request(
-        'http://localhost/api/sessions/nonexistent/redetect',
-        { method: 'POST' }
-      );
+      const req = new Request('http://localhost/api/sessions/nonexistent/redetect', {
+        method: 'POST',
+      });
       const res = await app.fetch(req);
       const data = await res.json();
 
@@ -426,21 +407,21 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
       const uploadData = await uploadRes.json();
 
       await orchestrator.waitForPending();
 
-      const getRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`)
-      );
+      const getRes = await app.fetch(new Request(`http://localhost/api/sessions/${uploadData.id}`));
       const sessionData = await getRes.json();
 
       expect(sessionData.sections).toBeDefined();
       expect(Array.isArray(sessionData.sections)).toBe(true);
 
-      const markerSections = sessionData.sections.filter((s: { type: string }) => s.type === 'marker');
+      const markerSections = sessionData.sections.filter(
+        (s: { type: string }) => s.type === 'marker',
+      );
       expect(markerSections.length).toBeGreaterThan(0);
     });
 
@@ -453,15 +434,13 @@ describe('API Routes', () => {
         new Request('http://localhost/api/upload', {
           method: 'POST',
           body: formData,
-        })
+        }),
       );
       const uploadData = await uploadRes.json();
 
       await orchestrator.waitForPending();
 
-      const getRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`)
-      );
+      const getRes = await app.fetch(new Request(`http://localhost/api/sessions/${uploadData.id}`));
       const sessionData = await getRes.json();
 
       expect(sessionData.detection_status).toBe('completed');
@@ -474,16 +453,14 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
 
       await storageAdapter.delete(uploadData.id);
 
-      const getRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`)
-      );
+      const getRes = await app.fetch(new Request(`http://localhost/api/sessions/${uploadData.id}`));
       expect(getRes.status).toBe(404);
       const body = await getRes.json();
       expect(body.error).toContain('not found');
@@ -491,14 +468,14 @@ describe('API Routes', () => {
 
     it('should return 404 when deleting non-existent session', async () => {
       const res = await app.fetch(
-        new Request('http://localhost/api/sessions/does-not-exist', { method: 'DELETE' })
+        new Request('http://localhost/api/sessions/does-not-exist', { method: 'DELETE' }),
       );
       expect(res.status).toBe(404);
     });
 
     it('should return 404 when redetecting non-existent session', async () => {
       const res = await app.fetch(
-        new Request('http://localhost/api/sessions/nonexistent/redetect', { method: 'POST' })
+        new Request('http://localhost/api/sessions/nonexistent/redetect', { method: 'POST' }),
       );
       expect(res.status).toBe(404);
     });
@@ -507,7 +484,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
@@ -515,7 +492,7 @@ describe('API Routes', () => {
       await storageAdapter.delete(uploadData.id);
 
       const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}/redetect`, { method: 'POST' })
+        new Request(`http://localhost/api/sessions/${uploadData.id}/redetect`, { method: 'POST' }),
       );
       // Redetect treats storage read failures as an internal error
       expect(res.status).toBe(500);
@@ -527,16 +504,14 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
 
       await sessionRepository.updateSnapshot(uploadData.id, '{invalid json');
 
-      const getRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`)
-      );
+      const getRes = await app.fetch(new Request(`http://localhost/api/sessions/${uploadData.id}`));
       expect(getRes.status).toBe(200);
       const body = await getRes.json();
       // The metadata endpoint no longer returns snapshot content — corrupt snapshot is ignored
@@ -547,7 +522,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
@@ -563,9 +538,7 @@ describe('API Routes', () => {
         endLine: null,
       });
 
-      const getRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`)
-      );
+      const getRes = await app.fetch(new Request(`http://localhost/api/sessions/${uploadData.id}`));
       expect(getRes.status).toBe(200);
       const body = await getRes.json();
       const corruptSection = body.sections.find((s: { label: string }) => s.label === 'corrupt');
@@ -577,7 +550,9 @@ describe('API Routes', () => {
     it('should return 500 when list sessions fails', async () => {
       const failApp = new Hono();
       const failingRepo = {
-        findAll: () => { throw new Error('DB connection lost'); },
+        findAll: () => {
+          throw new Error('DB connection lost');
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failingRepo,
@@ -598,14 +573,16 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
 
       const failApp = new Hono();
       const failRepo = {
-        findById: () => { throw new Error('DB connection failed'); },
+        findById: () => {
+          throw new Error('DB connection failed');
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failRepo,
@@ -617,7 +594,7 @@ describe('API Routes', () => {
       failApp.get('/api/sessions/:id', (c) => handleGetSession(c, failService));
 
       const res = await failApp.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`)
+        new Request(`http://localhost/api/sessions/${uploadData.id}`),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -628,7 +605,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
@@ -648,7 +625,7 @@ describe('API Routes', () => {
       failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -658,7 +635,9 @@ describe('API Routes', () => {
     it('should return 500 when delete session throws from findById', async () => {
       const failApp = new Hono();
       const failRepo = {
-        findById: () => { throw new Error('DB crashed'); },
+        findById: () => {
+          throw new Error('DB crashed');
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failRepo,
@@ -670,7 +649,7 @@ describe('API Routes', () => {
       failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
-        new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' })
+        new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -680,7 +659,9 @@ describe('API Routes', () => {
     it('should return 500 without internal details when non-Error is thrown from list sessions', async () => {
       const failApp = new Hono();
       const failRepo = {
-        findAll: () => { throw 'string error code'; },
+        findAll: () => {
+          throw 'string error code';
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failRepo,
@@ -701,7 +682,9 @@ describe('API Routes', () => {
     it('should return 500 without internal details when non-Error is thrown from get session', async () => {
       const failApp = new Hono();
       const failRepo = {
-        findById: () => { throw 'non-error-value'; },
+        findById: () => {
+          throw 'non-error-value';
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failRepo,
@@ -712,9 +695,7 @@ describe('API Routes', () => {
       });
       failApp.get('/api/sessions/:id', (c) => handleGetSession(c, failService));
 
-      const res = await failApp.fetch(
-        new Request('http://localhost/api/sessions/some-id')
-      );
+      const res = await failApp.fetch(new Request('http://localhost/api/sessions/some-id'));
       expect(res.status).toBe(500);
       const body = await res.json();
       expect(body.error).toBe('Failed to retrieve session');
@@ -724,7 +705,9 @@ describe('API Routes', () => {
     it('should return 500 without internal details when non-Error is thrown from delete session', async () => {
       const failApp = new Hono();
       const failRepo = {
-        findById: () => { throw 42; },
+        findById: () => {
+          throw 42;
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failRepo,
@@ -736,7 +719,7 @@ describe('API Routes', () => {
       failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
-        new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' })
+        new Request('http://localhost/api/sessions/any-id', { method: 'DELETE' }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -747,7 +730,9 @@ describe('API Routes', () => {
     it('should return 500 without internal details when non-Error is thrown from redetect', async () => {
       const failApp = new Hono();
       const failRepo = {
-        findById: () => { throw 'redetect-error'; },
+        findById: () => {
+          throw 'redetect-error';
+        },
       } as unknown as SessionAdapter;
       const failService = new SessionService({
         sessionRepository: failRepo,
@@ -759,7 +744,7 @@ describe('API Routes', () => {
       failApp.post('/api/sessions/:id/redetect', (c) => handleRedetect(c, failService));
 
       const res = await failApp.fetch(
-        new Request('http://localhost/api/sessions/any-id/redetect', { method: 'POST' })
+        new Request('http://localhost/api/sessions/any-id/redetect', { method: 'POST' }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -770,7 +755,9 @@ describe('API Routes', () => {
     it('should return safe details when storage save fails during upload', async () => {
       const failApp = new Hono();
       const failStorage = {
-        save: () => { throw 'disk-quota-exceeded'; },
+        save: () => {
+          throw 'disk-quota-exceeded';
+        },
         read: storageAdapter.read.bind(storageAdapter),
         delete: storageAdapter.delete.bind(storageAdapter),
         exists: storageAdapter.exists.bind(storageAdapter),
@@ -787,7 +774,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const res = await failApp.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -799,7 +786,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
@@ -807,7 +794,7 @@ describe('API Routes', () => {
       await storageAdapter.delete(uploadData.id);
 
       const deleteRes = await app.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' }),
       );
       expect(deleteRes.status).toBe(200);
     });
@@ -816,14 +803,16 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const uploadData = await uploadRes.json();
       await orchestrator.waitForPending();
 
       const failApp = new Hono();
       const failStorage = {
-        delete: () => { throw new Error('Permission denied'); },
+        delete: () => {
+          throw new Error('Permission denied');
+        },
       } as unknown as StorageAdapter;
       const failService = new SessionService({
         sessionRepository,
@@ -835,7 +824,7 @@ describe('API Routes', () => {
       failApp.delete('/api/sessions/:id', (c) => handleDeleteSession(c, failService));
 
       const res = await failApp.fetch(
-        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' })
+        new Request(`http://localhost/api/sessions/${uploadData.id}`, { method: 'DELETE' }),
       );
       expect(res.status).toBe(200);
     });
@@ -843,7 +832,9 @@ describe('API Routes', () => {
     it('should return 500 when upload storage fails', async () => {
       const failApp = new Hono();
       const failStorage = {
-        save: () => { throw new Error('Disk full'); },
+        save: () => {
+          throw new Error('Disk full');
+        },
         read: storageAdapter.read.bind(storageAdapter),
         delete: storageAdapter.delete.bind(storageAdapter),
         exists: storageAdapter.exists.bind(storageAdapter),
@@ -860,7 +851,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const res = await failApp.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -870,7 +861,9 @@ describe('API Routes', () => {
     it('should return 500 when job queue fails after DB insert — updateDetectionStatus succeeds', async () => {
       const failApp = new Hono();
       const failJobQueue = {
-        create: () => { throw new Error('Queue unavailable'); },
+        create: () => {
+          throw new Error('Queue unavailable');
+        },
         findPending: jobQueue.findPending.bind(jobQueue),
         findBySessionId: jobQueue.findBySessionId.bind(jobQueue),
         start: jobQueue.start.bind(jobQueue),
@@ -891,7 +884,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const res = await failApp.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -901,11 +894,15 @@ describe('API Routes', () => {
     it('should return 500 when job queue fails and updateDetectionStatus also fails (best-effort catch)', async () => {
       const failApp = new Hono();
       const failJobQueue = {
-        create: () => { throw new Error('Queue unavailable'); },
+        create: () => {
+          throw new Error('Queue unavailable');
+        },
       } as unknown as JobQueueAdapter;
       const failRepo = {
         createWithId: sessionRepository.createWithId.bind(sessionRepository),
-        updateDetectionStatus: () => { throw new Error('DB gone during status update'); },
+        updateDetectionStatus: () => {
+          throw new Error('DB gone during status update');
+        },
       } as unknown as SessionAdapter;
       const failUploadService = new UploadService({
         sessionRepository: failRepo,
@@ -919,7 +916,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const res = await failApp.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -929,7 +926,9 @@ describe('API Routes', () => {
     it('should return 500 when DB insert fails during upload', async () => {
       const failApp = new Hono();
       const failRepo = {
-        createWithId: () => { throw new Error('UNIQUE constraint failed'); },
+        createWithId: () => {
+          throw new Error('UNIQUE constraint failed');
+        },
       } as unknown as SessionAdapter;
       const failUploadService = new UploadService({
         sessionRepository: failRepo,
@@ -943,7 +942,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const res = await failApp.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -953,12 +952,16 @@ describe('API Routes', () => {
     it('should return 500 when DB insert fails and cleanup delete also fails', async () => {
       const failApp = new Hono();
       const failRepo = {
-        createWithId: () => { throw new Error('UNIQUE constraint failed'); },
+        createWithId: () => {
+          throw new Error('UNIQUE constraint failed');
+        },
       } as unknown as SessionAdapter;
       const failStorage = {
         save: storageAdapter.save.bind(storageAdapter),
         read: storageAdapter.read.bind(storageAdapter),
-        delete: () => { throw new Error('Permission denied on cleanup'); },
+        delete: () => {
+          throw new Error('Permission denied on cleanup');
+        },
         exists: storageAdapter.exists.bind(storageAdapter),
       } as unknown as StorageAdapter;
       const failUploadService = new UploadService({
@@ -973,7 +976,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const res = await failApp.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       expect(res.status).toBe(500);
       const body = await res.json();
@@ -990,7 +993,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const { id } = await uploadRes.json();
       await orchestrator.waitForPending();
@@ -1003,9 +1006,7 @@ describe('API Routes', () => {
     });
 
     it('returns 404 for non-existent session', async () => {
-      const res = await app.fetch(
-        new Request('http://localhost/api/sessions/nonexistent/status')
-      );
+      const res = await app.fetch(new Request('http://localhost/api/sessions/nonexistent/status'));
       expect(res.status).toBe(404);
       const body = await res.json();
       expect(body.error).toContain('not found');
@@ -1027,7 +1028,7 @@ describe('API Routes', () => {
       await jobQueue.fail(job.id, 'Simulated pipeline failure');
 
       const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' })
+        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' }),
       );
       expect(res.status).toBe(200);
       const body = await res.json();
@@ -1046,7 +1047,7 @@ describe('API Routes', () => {
       });
 
       const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' })
+        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' }),
       );
       expect(res.status).toBe(400);
       const body = await res.json();
@@ -1065,14 +1066,14 @@ describe('API Routes', () => {
       await jobQueue.start(job.id);
 
       const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' })
+        new Request(`http://localhost/api/sessions/${session.id}/retry`, { method: 'POST' }),
       );
       expect(res.status).toBe(409);
     });
 
     it('returns 404 for non-existent session', async () => {
       const res = await app.fetch(
-        new Request('http://localhost/api/sessions/nonexistent/retry', { method: 'POST' })
+        new Request('http://localhost/api/sessions/nonexistent/retry', { method: 'POST' }),
       );
       expect(res.status).toBe(404);
       const body = await res.json();
@@ -1085,14 +1086,12 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const { id } = await uploadRes.json();
       await orchestrator.waitForPending();
 
-      const res = await app.fetch(
-        new Request(`http://localhost/api/events?sessionId=${id}`)
-      );
+      const res = await app.fetch(new Request(`http://localhost/api/events?sessionId=${id}`));
       expect(res.status).toBe(200);
       const body = await res.json();
       expect(Array.isArray(body)).toBe(true);
@@ -1106,9 +1105,7 @@ describe('API Routes', () => {
     });
 
     it('returns 404 for non-existent session', async () => {
-      const res = await app.fetch(
-        new Request('http://localhost/api/events?sessionId=nonexistent')
-      );
+      const res = await app.fetch(new Request('http://localhost/api/events?sessionId=nonexistent'));
       expect(res.status).toBe(404);
       const body = await res.json();
       expect(body.error).toContain('not found');
@@ -1120,7 +1117,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const { id } = await uploadRes.json();
 
@@ -1129,18 +1126,14 @@ describe('API Routes', () => {
         eventBus.emit({ type: 'session.ready', sessionId: id });
       });
 
-      const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${id}/events`)
-      );
+      const res = await app.fetch(new Request(`http://localhost/api/sessions/${id}/events`));
       expect(res.status).toBe(200);
       expect(res.headers.get('content-type')).toContain('text/event-stream');
       await res.text();
     });
 
     it('returns 404 for non-existent session', async () => {
-      const res = await app.fetch(
-        new Request('http://localhost/api/sessions/nonexistent/events')
-      );
+      const res = await app.fetch(new Request('http://localhost/api/sessions/nonexistent/events'));
       expect(res.status).toBe(404);
       const body = await res.json();
       expect(body.error).toContain('not found');
@@ -1150,7 +1143,7 @@ describe('API Routes', () => {
       const formData = new FormData();
       formData.append('file', new File([validFixture], 'test.cast'));
       const uploadRes = await app.fetch(
-        new Request('http://localhost/api/upload', { method: 'POST', body: formData })
+        new Request('http://localhost/api/upload', { method: 'POST', body: formData }),
       );
       const { id } = await uploadRes.json();
 
@@ -1159,9 +1152,7 @@ describe('API Routes', () => {
         eventBus.emit({ type: 'session.ready', sessionId: id });
       });
 
-      const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${id}/events`)
-      );
+      const res = await app.fetch(new Request(`http://localhost/api/sessions/${id}/events`));
       expect(res.status).toBe(200);
       const text = await res.text();
       expect(text).toContain('session.ready');
@@ -1186,7 +1177,7 @@ describe('API Routes', () => {
       });
 
       const res = await app.fetch(
-        new Request(`http://localhost/api/sessions/${session.id}/events`)
+        new Request(`http://localhost/api/sessions/${session.id}/events`),
       );
       expect(res.status).toBe(200);
       const text = await res.text();

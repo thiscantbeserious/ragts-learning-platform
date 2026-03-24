@@ -101,11 +101,13 @@ describe('SpatialShell', () => {
     // Child route renders ConsumerComponent so it is inside SpatialShell's provide scope.
     const testRouter = createRouter({
       history: createMemoryHistory(),
-      routes: [{
-        path: '/',
-        component: SpatialShell,
-        children: [{ path: '', component: ConsumerComponent }],
-      }],
+      routes: [
+        {
+          path: '/',
+          component: SpatialShell,
+          children: [{ path: '', component: ConsumerComponent }],
+        },
+      ],
     });
 
     await testRouter.push('/');

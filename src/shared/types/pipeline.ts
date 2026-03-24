@@ -52,14 +52,19 @@ export enum PipelineStage {
  * middleware (Stage 2b) calls typia.validate() on the event.
  */
 export type PipelineEvent =
-  | { type: 'session.uploaded';  sessionId: NonEmptyString; filename: NonEmptyString }
+  | { type: 'session.uploaded'; sessionId: NonEmptyString; filename: NonEmptyString }
   | { type: 'session.validated'; sessionId: NonEmptyString; eventCount: UInt32 }
-  | { type: 'session.detected';  sessionId: NonEmptyString; sectionCount: UInt32 }
-  | { type: 'session.replayed';  sessionId: NonEmptyString; lineCount: UInt32 }
-  | { type: 'session.deduped';   sessionId: NonEmptyString; rawLines: UInt32; cleanLines: UInt32 }
-  | { type: 'session.ready';     sessionId: NonEmptyString }
-  | { type: 'session.failed';    sessionId: NonEmptyString; stage: PipelineStage; error: string }
-  | { type: 'session.retrying';  sessionId: NonEmptyString; stage: PipelineStage; attempt: PositiveUInt32 };
+  | { type: 'session.detected'; sessionId: NonEmptyString; sectionCount: UInt32 }
+  | { type: 'session.replayed'; sessionId: NonEmptyString; lineCount: UInt32 }
+  | { type: 'session.deduped'; sessionId: NonEmptyString; rawLines: UInt32; cleanLines: UInt32 }
+  | { type: 'session.ready'; sessionId: NonEmptyString }
+  | { type: 'session.failed'; sessionId: NonEmptyString; stage: PipelineStage; error: string }
+  | {
+      type: 'session.retrying';
+      sessionId: NonEmptyString;
+      stage: PipelineStage;
+      attempt: PositiveUInt32;
+    };
 
 /** All possible `type` string values — useful for type-safe handler maps. */
 export type PipelineEventType = PipelineEvent['type'];
@@ -72,7 +77,12 @@ export type PipelineEventPayload<T extends PipelineEventType> = Extract<Pipeline
  * Used for registering event bus handlers across all pipeline events.
  */
 export const ALL_PIPELINE_EVENT_TYPES: PipelineEventType[] = [
-  'session.uploaded', 'session.validated', 'session.detected',
-  'session.replayed', 'session.deduped', 'session.ready',
-  'session.failed', 'session.retrying',
+  'session.uploaded',
+  'session.validated',
+  'session.detected',
+  'session.replayed',
+  'session.deduped',
+  'session.ready',
+  'session.failed',
+  'session.retrying',
 ];

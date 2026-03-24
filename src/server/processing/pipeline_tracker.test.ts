@@ -44,7 +44,7 @@ describe('pipeline-tracker semaphore', () => {
 
     expect(started).toHaveLength(3);
 
-    deferreds.forEach(d => d.resolve());
+    deferreds.forEach((d) => d.resolve());
     await waitForPipelines();
   });
 
@@ -54,14 +54,18 @@ describe('pipeline-tracker semaphore', () => {
 
     for (let i = 0; i < 3; i++) {
       const idx = i;
-      runPipeline(async () => { await deferreds[idx]!.promise; });
+      runPipeline(async () => {
+        await deferreds[idx]!.promise;
+      });
     }
 
     // Yield so the 3 pipelines acquire their slots
     await Promise.resolve();
     await Promise.resolve();
 
-    runPipeline(async () => { fourthStarted = true; });
+    runPipeline(async () => {
+      fourthStarted = true;
+    });
 
     await Promise.resolve();
     await Promise.resolve();
@@ -71,7 +75,7 @@ describe('pipeline-tracker semaphore', () => {
 
     // Release one slot
     deferreds[0]!.resolve();
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 10));
 
     expect(fourthStarted).toBe(true);
 
@@ -87,7 +91,9 @@ describe('pipeline-tracker semaphore', () => {
     // Fill 2 slots with blocking pipelines
     for (let i = 0; i < 2; i++) {
       const idx = i;
-      runPipeline(async () => { await blockDeferreds[idx]!.promise; });
+      runPipeline(async () => {
+        await blockDeferreds[idx]!.promise;
+      });
     }
 
     // Fill slot 3 with a throwing pipeline
@@ -101,7 +107,9 @@ describe('pipeline-tracker semaphore', () => {
     await Promise.resolve();
 
     // Queue a 4th pipeline
-    runPipeline(async () => { afterThrowStarted = true; });
+    runPipeline(async () => {
+      afterThrowStarted = true;
+    });
 
     await Promise.resolve();
     await Promise.resolve();
@@ -110,7 +118,7 @@ describe('pipeline-tracker semaphore', () => {
 
     // Trigger the throw — slot should be released
     throwDeferred.resolve();
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 10));
 
     expect(afterThrowStarted).toBe(true);
 
@@ -126,7 +134,9 @@ describe('pipeline-tracker semaphore', () => {
     // Fill 3 slots
     for (let i = 0; i < 3; i++) {
       const idx = i;
-      runPipeline(async () => { await blockDeferreds[idx]!.promise; });
+      runPipeline(async () => {
+        await blockDeferreds[idx]!.promise;
+      });
     }
 
     await Promise.resolve();
@@ -135,7 +145,9 @@ describe('pipeline-tracker semaphore', () => {
     // Queue 3 waiters in order 0, 1, 2
     for (let i = 0; i < 3; i++) {
       const idx = i;
-      runPipeline(async () => { order.push(idx); });
+      runPipeline(async () => {
+        order.push(idx);
+      });
     }
 
     await Promise.resolve();
@@ -143,7 +155,7 @@ describe('pipeline-tracker semaphore', () => {
     // Release slots one at a time and verify FIFO order
     for (let i = 0; i < 3; i++) {
       blockDeferreds[i]!.resolve();
-      await new Promise(r => setTimeout(r, 10));
+      await new Promise((r) => setTimeout(r, 10));
     }
 
     await waitForPipelines();
@@ -156,7 +168,9 @@ describe('NdjsonStream malformedLineCount', () => {
   it('starts at 0 for a valid .cast file', async () => {
     const fixturePath = path.resolve(__dirname, '../../../fixtures/sample.cast');
     const stream = new NdjsonStream(fixturePath);
-    for await (const _item of stream) { /* consume */ }
+    for await (const _item of stream) {
+      /* consume */
+    }
     expect(stream.malformedLineCount).toBe(0);
   });
 
@@ -172,7 +186,9 @@ describe('NdjsonStream malformedLineCount', () => {
 
     const stream = new NdjsonStream(tmpFile);
     const items: unknown[] = [];
-    for await (const item of stream) { items.push(item); }
+    for await (const item of stream) {
+      items.push(item);
+    }
     await fs.unlink(tmpFile);
 
     expect(stream.malformedLineCount).toBe(2);
@@ -182,16 +198,18 @@ describe('NdjsonStream malformedLineCount', () => {
     const tmpFile = path.join(os.tmpdir(), `test-nonarray-${Date.now()}.cast`);
     const content = [
       '{"version":2,"width":80,"height":24}',
-      '[0.1, "o", "hello"]',   // valid event
-      '{"not": "an array"}',    // non-array event -> malformed
-      '"just a string"',        // non-array event -> malformed
-      '[0.3, "o", "world"]',   // valid event
+      '[0.1, "o", "hello"]', // valid event
+      '{"not": "an array"}', // non-array event -> malformed
+      '"just a string"', // non-array event -> malformed
+      '[0.3, "o", "world"]', // valid event
     ].join('\n');
     await fs.writeFile(tmpFile, content, 'utf-8');
 
     const stream = new NdjsonStream(tmpFile);
     const items: unknown[] = [];
-    for await (const item of stream) { items.push(item); }
+    for await (const item of stream) {
+      items.push(item);
+    }
     await fs.unlink(tmpFile);
 
     expect(stream.malformedLineCount).toBe(2);

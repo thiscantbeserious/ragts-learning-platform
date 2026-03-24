@@ -21,17 +21,10 @@ const emit = defineEmits<{
       :aria-live="toast.role === 'alert' ? 'assertive' : 'polite'"
       aria-atomic="true"
     >
-      <div
-        class="toast__icon"
-        aria-hidden="true"
-      >
+      <div class="toast__icon" aria-hidden="true">
         <!-- Custom icon from design system -->
         <template v-if="toast.icon">
-          <span
-            class="icon icon--md"
-            :class="toast.icon"
-            aria-hidden="true"
-          />
+          <span class="icon icon--md" :class="toast.icon" aria-hidden="true" />
         </template>
         <!-- Default inline SVG icons -->
         <template v-else>
@@ -45,11 +38,7 @@ const emit = defineEmits<{
             stroke="currentColor"
             stroke-width="1.5"
           >
-            <circle
-              cx="10"
-              cy="10"
-              r="8"
-            />
+            <circle cx="10" cy="10" r="8" />
             <path d="M7 10l2 2 4-4" />
           </svg>
           <!-- warning -->
@@ -75,11 +64,7 @@ const emit = defineEmits<{
             stroke="currentColor"
             stroke-width="1.5"
           >
-            <circle
-              cx="10"
-              cy="10"
-              r="8"
-            />
+            <circle cx="10" cy="10" r="8" />
             <path d="M7 7l6 6M13 7l-6 6" />
           </svg>
           <!-- info (default) -->
@@ -92,20 +77,13 @@ const emit = defineEmits<{
             stroke="currentColor"
             stroke-width="1.5"
           >
-            <circle
-              cx="10"
-              cy="10"
-              r="8"
-            />
+            <circle cx="10" cy="10" r="8" />
             <path d="M10 9v5M10 6.5v.5" />
           </svg>
         </template>
       </div>
       <div class="toast__content">
-        <div
-          v-if="toast.title"
-          class="toast__title"
-        >
+        <div v-if="toast.title" class="toast__title">
           {{ toast.title }}
         </div>
         <div class="toast__message">

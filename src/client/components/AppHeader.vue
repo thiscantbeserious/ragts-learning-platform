@@ -1,16 +1,10 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <header class="app-header">
     <div class="app-header__left">
-      <router-link
-        to="/"
-        class="app-header__brand"
-      >
-        <div class="app-header__logo">
-          E
-        </div>
+      <router-link to="/" class="app-header__brand">
+        <div class="app-header__logo">E</div>
         <span class="app-header__name">Erika</span>
       </router-link>
       <nav class="app-header__nav">
@@ -25,10 +19,7 @@
       </nav>
     </div>
     <div class="app-header__right">
-      <router-link
-        to="/"
-        class="btn btn--primary btn--sm"
-      >
+      <router-link to="/" class="btn btn--primary btn--sm">
         <span class="icon icon--sm icon-upload" />
         Upload
       </router-link>

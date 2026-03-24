@@ -58,8 +58,17 @@ describe('useSessionList() — refreshOnSessionComplete', () => {
   });
 
   it('refreshOnSessionComplete calls fetchSessions (re-fetches the list)', async () => {
-    const initialSessions = [makeSession({ id: '1', filename: 'a.cast', detection_status: 'processing' })];
-    const updatedSessions = [makeSession({ id: '1', filename: 'a.cast', detection_status: 'completed', detected_sections_count: 5 })];
+    const initialSessions = [
+      makeSession({ id: '1', filename: 'a.cast', detection_status: 'processing' }),
+    ];
+    const updatedSessions = [
+      makeSession({
+        id: '1',
+        filename: 'a.cast',
+        detection_status: 'completed',
+        detected_sections_count: 5,
+      }),
+    ];
 
     vi.mocked(fetch)
       .mockResolvedValueOnce(makeOkResponse(initialSessions))

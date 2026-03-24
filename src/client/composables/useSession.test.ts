@@ -41,11 +41,16 @@ function makeErrorResponse(status: number, body: unknown = {}): Response {
 }
 
 /** Minimal valid SessionDetailResponse with no sections and no snapshot. */
-function makeSessionResponse(overrides: Partial<SessionDetailResponse> = {}): SessionDetailResponse {
+function makeSessionResponse(
+  overrides: Partial<SessionDetailResponse> = {},
+): SessionDetailResponse {
   return {
     id: 'sess-1',
     filename: 'session.cast',
-    content: { header: { version: 2, width: 80, height: 24, timestamp: 0, title: '' }, markers: [] },
+    content: {
+      header: { version: 2, width: 80, height: 24, timestamp: 0, title: '' },
+      markers: [],
+    },
     snapshot: null,
     sections: [],
     detection_status: 'completed',
@@ -104,7 +109,7 @@ describe('useSession', () => {
 
     it('populates filename from the response', async () => {
       vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ filename: 'my-session.cast' }))
+        makeOkResponse(makeSessionResponse({ filename: 'my-session.cast' })),
       );
       const { filename } = useSession(ref('sess-1'));
       await nextTick();
@@ -114,7 +119,7 @@ describe('useSession', () => {
 
     it('populates detection_status from the response', async () => {
       vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ detection_status: 'completed' }))
+        makeOkResponse(makeSessionResponse({ detection_status: 'completed' })),
       );
       const { detectionStatus } = useSession(ref('sess-1'));
       await nextTick();
@@ -125,13 +130,17 @@ describe('useSession', () => {
     it('maps sections from the response', async () => {
       const sections = [
         {
-          id: 'sec-1', type: 'marker' as const, label: 'Intro',
-          startEvent: 0, endEvent: 10, startLine: null, endLine: null, snapshot: null,
+          id: 'sec-1',
+          type: 'marker' as const,
+          label: 'Intro',
+          startEvent: 0,
+          endEvent: 10,
+          startLine: null,
+          endLine: null,
+          snapshot: null,
         },
       ];
-      vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ sections }))
-      );
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeSessionResponse({ sections })));
       const { sections: sectionsRef } = useSession(ref('sess-1'));
       await nextTick();
       await nextTick();
@@ -142,16 +151,17 @@ describe('useSession', () => {
     it('coerces undefined startLine/endLine to null in sections', async () => {
       const sections = [
         {
-          id: 'sec-2', type: 'detected' as const, label: 'Body',
-          startEvent: 5, endEvent: 20,
+          id: 'sec-2',
+          type: 'detected' as const,
+          label: 'Body',
+          startEvent: 5,
+          endEvent: 20,
           startLine: undefined as unknown as null,
           endLine: undefined as unknown as null,
           snapshot: null,
         },
       ];
-      vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ sections }))
-      );
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeSessionResponse({ sections })));
       const { sections: sectionsRef } = useSession(ref('sess-1'));
       await nextTick();
       await nextTick();
@@ -162,7 +172,7 @@ describe('useSession', () => {
     it('parses a JSON string snapshot into an object', async () => {
       const snapshotObj = { screen: [], cursor: { x: 0, y: 0, visible: true } };
       vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ snapshot: JSON.stringify(snapshotObj) }))
+        makeOkResponse(makeSessionResponse({ snapshot: JSON.stringify(snapshotObj) })),
       );
       const { snapshot } = useSession(ref('sess-1'));
       await nextTick();
@@ -173,7 +183,7 @@ describe('useSession', () => {
     it('accepts an already-parsed snapshot object', async () => {
       const snapshotObj = { screen: [], cursor: { x: 1, y: 2, visible: false } };
       vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ snapshot: snapshotObj as never }))
+        makeOkResponse(makeSessionResponse({ snapshot: snapshotObj as never })),
       );
       const { snapshot } = useSession(ref('sess-1'));
       await nextTick();
@@ -182,9 +192,7 @@ describe('useSession', () => {
     });
 
     it('sets snapshot to null when response has no snapshot', async () => {
-      vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ snapshot: null }))
-      );
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeSessionResponse({ snapshot: null })));
       const { snapshot } = useSession(ref('sess-1'));
       await nextTick();
       await nextTick();
@@ -192,9 +200,7 @@ describe('useSession', () => {
     });
 
     it('sets snapshot to null when snapshot JSON is empty string', async () => {
-      vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ snapshot: '' }))
-      );
+      vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeSessionResponse({ snapshot: '' })));
       const { snapshot } = useSession(ref('sess-1'));
       await nextTick();
       await nextTick();
@@ -203,7 +209,7 @@ describe('useSession', () => {
 
     it('sets snapshot to null when snapshot JSON is invalid', async () => {
       vi.mocked(fetch).mockResolvedValue(
-        makeOkResponse(makeSessionResponse({ snapshot: 'not-json{{{' }))
+        makeOkResponse(makeSessionResponse({ snapshot: 'not-json{{{' })),
       );
       const { snapshot } = useSession(ref('sess-1'));
       await nextTick();

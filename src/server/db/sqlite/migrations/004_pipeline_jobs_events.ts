@@ -90,7 +90,7 @@ function createUpdatedAtTrigger(db: Database.Database): void {
  */
 function markInterruptedSessions(db: Database.Database): void {
   db.prepare(
-    "UPDATE sessions SET detection_status = 'interrupted' WHERE detection_status = 'processing'"
+    "UPDATE sessions SET detection_status = 'interrupted' WHERE detection_status = 'processing'",
   ).run();
 }
 

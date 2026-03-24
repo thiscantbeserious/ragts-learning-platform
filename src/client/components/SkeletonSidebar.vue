@@ -1,15 +1,6 @@
 <template>
-  <div
-    class="skeleton-sidebar"
-    role="status"
-    aria-busy="true"
-    aria-label="Loading sessions"
-  >
-    <div
-      v-for="n in cardCount"
-      :key="n"
-      class="skeleton--card skeleton-sidebar__card"
-    >
+  <div class="skeleton-sidebar" role="status" aria-busy="true" aria-label="Loading sessions">
+    <div v-for="n in cardCount" :key="n" class="skeleton--card skeleton-sidebar__card">
       <div class="skeleton--card-row">
         <div class="skeleton skeleton--text skeleton-sidebar__filename" />
         <div class="skeleton skeleton--badge skeleton-sidebar__status" />
@@ -41,7 +32,9 @@ const cardCount = 4;
  * --rhythm-half (9px) top/bottom + row1 (16px) + gap (9px) + row2 (12px) = ~46px
  */
 .skeleton-sidebar__card {
-  min-height: calc(var(--rhythm-2) + var(--rhythm-half)); /* 36 + 9 = 45px, matching session card target */
+  min-height: calc(
+    var(--rhythm-2) + var(--rhythm-half)
+  ); /* 36 + 9 = 45px, matching session card target */
 }
 
 .skeleton-sidebar__filename {

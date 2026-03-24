@@ -21,7 +21,7 @@ const log = logger.child({ module: 'routes/session_snapshot' });
  */
 export async function handleGetSessionSnapshot(
   c: Context,
-  service: SessionService
+  service: SessionService,
 ): Promise<Response> {
   try {
     const id = c.req.param('id');

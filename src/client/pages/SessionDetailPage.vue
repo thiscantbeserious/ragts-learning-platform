@@ -21,29 +21,18 @@ const { sections, loading, error, filename, detectionStatus, fetchSectionContent
   <div class="session-detail-page container">
     <header class="session-detail-page__header">
       <nav class="breadcrumb">
-        <router-link
-          to="/"
-          class="breadcrumb__link"
-        >
-          Sessions
-        </router-link>
+        <router-link to="/" class="breadcrumb__link"> Sessions </router-link>
         <span class="breadcrumb__separator">
           <span class="icon icon--xs icon-chevron-right" />
         </span>
-        <span
-          v-if="filename"
-          class="breadcrumb__current"
-        >
+        <span v-if="filename" class="breadcrumb__current">
           {{ filename }}
         </span>
       </nav>
     </header>
 
     <SkeletonMain v-if="loading" />
-    <div
-      v-else-if="error"
-      class="session-detail-page__state session-detail-page__state--error"
-    >
+    <div v-else-if="error" class="session-detail-page__state session-detail-page__state--error">
       {{ error }}
     </div>
     <SessionContent

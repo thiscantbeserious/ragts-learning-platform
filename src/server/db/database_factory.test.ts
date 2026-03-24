@@ -46,7 +46,11 @@ describe('DatabaseFactory', () => {
 
     it('should return a working sessionRepository (insert + query round-trip)', async () => {
       const session = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'factory-test.cast', filepath: 'sessions/factory-test.cast', size_bytes: 2048 })
+        createTestSession({
+          filename: 'factory-test.cast',
+          filepath: 'sessions/factory-test.cast',
+          size_bytes: 2048,
+        }),
       );
 
       expect(session.id).toBeTruthy();
@@ -58,11 +62,15 @@ describe('DatabaseFactory', () => {
 
     it('should return a working sectionRepository (insert + query round-trip)', async () => {
       const session = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'section-factory.cast', filepath: 'sessions/section-factory.cast', size_bytes: 512 })
+        createTestSession({
+          filename: 'section-factory.cast',
+          filepath: 'sessions/section-factory.cast',
+          size_bytes: 512,
+        }),
       );
 
       const section = await ctx.sectionRepository.create(
-        createTestSection(session.id, { endEvent: 5, label: 'Intro' })
+        createTestSection(session.id, { endEvent: 5, label: 'Intro' }),
       );
 
       expect(section.id).toBeTruthy();

@@ -6,10 +6,7 @@
     role="toolbar"
     aria-label="Main toolbar"
   >
-    <div
-      class="toolbar-pill__content"
-      :class="{ 'toolbar-pill__content--collapsed': isCollapsed }"
-    >
+    <div class="toolbar-pill__content" :class="{ 'toolbar-pill__content--collapsed': isCollapsed }">
       <slot />
     </div>
   </div>
@@ -95,7 +92,9 @@ provide(toolbarCollapseKey, {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--toolbar-glass-border);
-  box-shadow: 0 0 12px var(--toolbar-shadow-outer), inset 0 0 8px var(--toolbar-shadow-inner);
+  box-shadow:
+    0 0 12px var(--toolbar-shadow-outer),
+    inset 0 0 8px var(--toolbar-shadow-inner);
   transition: box-shadow var(--duration-normal) var(--easing-default);
 }
 
@@ -116,8 +115,9 @@ provide(toolbarCollapseKey, {
   height: 6px;
   border-radius: 50%;
   background: var(--accent-primary);
-  box-shadow: 0 0 8px 2px var(--accent-primary-glow),
-              0 0 20px 4px var(--toolbar-tron-glow);
+  box-shadow:
+    0 0 8px 2px var(--accent-primary-glow),
+    0 0 20px 4px var(--toolbar-tron-glow);
   offset-path: rect(0% 100% 100% 0% round var(--radius-full));
   animation: tron-trail 4s linear infinite;
   z-index: 10;

@@ -29,7 +29,7 @@ function computeContentHash(content: string): string {
 function buildDenormalizedSnapshot(
   sessionSnapshotJson: string,
   startLine: number,
-  endLine: number
+  endLine: number,
 ): string {
   let sessionLines: unknown[] = [];
   try {
@@ -53,7 +53,7 @@ function buildDenormalizedSnapshot(
  */
 function computeSectionFields(
   section: CreateSectionInput,
-  sessionSnapshotJson: string
+  sessionSnapshotJson: string,
 ): { snapshot: string | null; lineCount: number; contentHash: string } {
   if (section.snapshot !== null) {
     // TUI section: snapshot already populated; compute hash and count.
@@ -67,7 +67,7 @@ function computeSectionFields(
     const snapshot = buildDenormalizedSnapshot(
       sessionSnapshotJson,
       section.startLine,
-      section.endLine
+      section.endLine,
     );
     const lineCount = Math.max(0, section.endLine - section.startLine);
     const contentHash = computeContentHash(snapshot);
@@ -175,7 +175,7 @@ export class SqliteSessionImpl implements SessionAdapter {
       if (!stmt) {
         const placeholders = Array.from({ length: n }, () => '?').join(', ');
         stmt = db.prepare(
-          `SELECT * FROM sessions WHERE detection_status IN (${placeholders}) ORDER BY created_at DESC`
+          `SELECT * FROM sessions WHERE detection_status IN (${placeholders}) ORDER BY created_at DESC`,
         );
         statusStmtCache.set(n, stmt);
       }
@@ -189,7 +189,7 @@ export class SqliteSessionImpl implements SessionAdapter {
         // session.snapshot is already available in this transaction.
         const { snapshot, lineCount, contentHash } = computeSectionFields(
           section,
-          session.snapshot
+          session.snapshot,
         );
         this.insertSectionStmt.run(
           nanoid(),
@@ -203,7 +203,7 @@ export class SqliteSessionImpl implements SessionAdapter {
           section.endLine,
           lineCount,
           contentHash,
-          section.preview ?? null
+          section.preview ?? null,
         );
       }
       this.updateSnapshotStmt.run(session.snapshot, session.sessionId);
@@ -211,7 +211,7 @@ export class SqliteSessionImpl implements SessionAdapter {
         'completed',
         session.eventCount,
         session.detectedSectionsCount,
-        session.sessionId
+        session.sessionId,
       );
     });
   }
@@ -228,7 +228,7 @@ export class SqliteSessionImpl implements SessionAdapter {
       data.filepath,
       data.size_bytes,
       data.marker_count,
-      data.uploaded_at
+      data.uploaded_at,
     );
 
     // Retrieve the created session to get generated created_at
@@ -262,13 +262,13 @@ export class SqliteSessionImpl implements SessionAdapter {
     id: string,
     status: DetectionStatus,
     eventCount?: number,
-    detectedSectionsCount?: number
+    detectedSectionsCount?: number,
   ): Promise<void> {
     this.updateDetectionStatusStmt.run(
       status,
       eventCount ?? null,
       detectedSectionsCount ?? null,
-      id
+      id,
     );
   }
 

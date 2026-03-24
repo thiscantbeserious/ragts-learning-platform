@@ -212,7 +212,7 @@ describe('SqliteSessionImpl.completeProcessing', () => {
     });
 
     const stored = await ctx.sectionRepository.findBySessionId(session.id);
-    const ids = stored.map(s => s.id);
+    const ids = stored.map((s) => s.id);
     const uniqueIds = new Set(ids);
     expect(uniqueIds.size).toBe(5);
   });
@@ -319,7 +319,9 @@ describe('SqliteSessionImpl.completeProcessing — atomicity on constraint viola
     await expect(sessionRepo.completeProcessing(invalidProcessed)).rejects.toThrow();
 
     // Original sections must still be present (transaction rolled back)
-    const sections = rawDb.prepare('SELECT * FROM sections WHERE session_id = ?').all(session.id) as any[];
+    const sections = rawDb
+      .prepare('SELECT * FROM sections WHERE session_id = ?')
+      .all(session.id) as any[];
     expect(sections.length).toBe(2);
     expect(sections.map((s: any) => s.label).sort()).toEqual(['Original A', 'Original B']);
 

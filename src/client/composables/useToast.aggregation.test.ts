@@ -63,9 +63,18 @@ describe('useToast aggregation', () => {
     it('third toast with same category updates to count=3', () => {
       const { toasts, fireToast } = useToast();
       const template = (count: number) => `${count} sessions uploaded`;
-      fireToast('f1', 'success', { category: ToastCategory.UPLOAD_SUCCESS, summaryTemplate: template });
-      fireToast('f2', 'success', { category: ToastCategory.UPLOAD_SUCCESS, summaryTemplate: template });
-      fireToast('f3', 'success', { category: ToastCategory.UPLOAD_SUCCESS, summaryTemplate: template });
+      fireToast('f1', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryTemplate: template,
+      });
+      fireToast('f2', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryTemplate: template,
+      });
+      fireToast('f3', 'success', {
+        category: ToastCategory.UPLOAD_SUCCESS,
+        summaryTemplate: template,
+      });
       expect(toasts.value).toHaveLength(1);
       expect(toasts.value[0]?.message).toBe('3 sessions uploaded');
     });

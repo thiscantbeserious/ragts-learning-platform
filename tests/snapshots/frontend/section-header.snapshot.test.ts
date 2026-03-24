@@ -67,7 +67,11 @@ describe('SectionHeader component snapshots', () => {
         section: makeSection({
           startLine: null,
           endLine: null,
-          snapshot: { cols: 80, rows: 24, lines: Array.from({ length: 24 }, () => ({ spans: [{ text: 'x' }] })) },
+          snapshot: {
+            cols: 80,
+            rows: 24,
+            lines: Array.from({ length: 24 }, () => ({ spans: [{ text: 'x' }] })),
+          },
         }),
         collapsed: false,
         lineCount: 24,

@@ -35,7 +35,7 @@ function buildEventPayload(snapshot: PipelineStatusSnapshot): string {
  */
 export async function handlePipelineStatus(
   c: Context,
-  service: PipelineStatusService
+  service: PipelineStatusService,
 ): Promise<Response> {
   c.header('Cache-Control', 'no-cache');
   c.header('Connection', 'keep-alive');
@@ -70,7 +70,10 @@ export async function handlePipelineStatus(
     };
 
     const handleUpdate = (snapshot: PipelineStatusSnapshot) => {
-      if (closed || stream.closed) { cleanup(); return; }
+      if (closed || stream.closed) {
+        cleanup();
+        return;
+      }
       pendingSnapshot = snapshot;
       if (writing) return; // current drainQueue will pick up pendingSnapshot
       void drainQueue();
@@ -87,7 +90,10 @@ export async function handlePipelineStatus(
       // Keep stream open until client disconnects using the request abort signal.
       // Falls back to stream.closed check when the signal is already aborted.
       await new Promise<void>((resolve) => {
-        if (c.req.raw.signal.aborted) { resolve(); return; }
+        if (c.req.raw.signal.aborted) {
+          resolve();
+          return;
+        }
         c.req.raw.signal.addEventListener('abort', () => resolve(), { once: true });
       });
     } finally {
@@ -100,11 +106,10 @@ export async function handlePipelineStatus(
 /** Write a single pipeline-status SSE event to the stream. */
 async function writeStatusEvent(
   stream: { writeSSE: (msg: SseMessage) => Promise<void> },
-  snapshot: PipelineStatusSnapshot
+  snapshot: PipelineStatusSnapshot,
 ): Promise<void> {
   await stream.writeSSE({
     event: 'pipeline-status',
     data: buildEventPayload(snapshot),
   });
 }
-

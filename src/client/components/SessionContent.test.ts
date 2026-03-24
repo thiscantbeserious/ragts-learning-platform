@@ -54,7 +54,8 @@ vi.mock('./SectionHeader.vue', () => ({
     name: 'SectionHeaderStub',
     props: ['section', 'collapsed', 'lineCount'],
     emits: ['toggle'],
-    template: '<button class="section-header-stub" :data-section-id="section.id">{{ section.label }}</button>',
+    template:
+      '<button class="section-header-stub" :data-section-id="section.id">{{ section.label }}</button>',
   },
 }));
 
@@ -86,15 +87,17 @@ function makeSection(id: string, lineCount = 10): SectionMetadata {
   };
 }
 
-const noopFetch = vi.fn(async (_id: string): Promise<SectionContentPage> => ({
-  sectionId: _id,
-  lines: [],
-  totalLines: 0,
-  offset: 0,
-  limit: 500,
-  hasMore: false,
-  contentHash: 'abc',
-}));
+const noopFetch = vi.fn(
+  async (_id: string): Promise<SectionContentPage> => ({
+    sectionId: _id,
+    lines: [],
+    totalLines: 0,
+    offset: 0,
+    limit: 500,
+    hasMore: false,
+    contentHash: 'abc',
+  }),
+);
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -113,9 +116,7 @@ describe('SessionContent (Stage 11)', () => {
         },
       });
       expect(wrapper.find('.fallback-banner--info').exists()).toBe(true);
-      expect(wrapper.find('.fallback-banner--info').text()).toContain(
-        'No sections detected'
-      );
+      expect(wrapper.find('.fallback-banner--info').text()).toContain('No sections detected');
       expect(wrapper.find('.terminal-snapshot-stub').exists()).toBe(true);
       expect(wrapper.find('.terminal-snapshot-stub').attributes('data-line-count')).toBe('5');
     });
@@ -267,9 +268,7 @@ describe('SessionContent (Stage 11)', () => {
 
   describe('virtual mode — virtualItems provided', () => {
     it('renders virtual container when virtualItems are provided', () => {
-      const virtualItems = [
-        { index: 0, key: 'sec-0', start: 0, end: 500, size: 500, lane: 0 },
-      ];
+      const virtualItems = [{ index: 0, key: 'sec-0', start: 0, end: 500, size: 500, lane: 0 }];
       const wrapper = mount(SessionContent, {
         props: {
           sections: [makeSection('sec-0')],
@@ -282,9 +281,7 @@ describe('SessionContent (Stage 11)', () => {
     });
 
     it('sets virtual container height from totalHeight prop', () => {
-      const virtualItems = [
-        { index: 0, key: 'sec-0', start: 0, end: 500, size: 500, lane: 0 },
-      ];
+      const virtualItems = [{ index: 0, key: 'sec-0', start: 0, end: 500, size: 500, lane: 0 }];
       const wrapper = mount(SessionContent, {
         props: {
           sections: [makeSection('sec-0')],
@@ -299,9 +296,7 @@ describe('SessionContent (Stage 11)', () => {
 
     it('renders only the virtual items (not all sections)', () => {
       const sections = [makeSection('s0'), makeSection('s1'), makeSection('s2')];
-      const virtualItems = [
-        { index: 1, key: 's1', start: 500, end: 1000, size: 500, lane: 0 },
-      ];
+      const virtualItems = [{ index: 1, key: 's1', start: 500, end: 1000, size: 500, lane: 0 }];
       const wrapper = mount(SessionContent, {
         props: {
           sections,
@@ -318,9 +313,7 @@ describe('SessionContent (Stage 11)', () => {
 
     it('only renders section items inside the virtual container in virtual mode', () => {
       const sections = [makeSection('sec-0'), makeSection('sec-1')];
-      const virtualItems = [
-        { index: 0, key: 'sec-0', start: 0, end: 200, size: 200, lane: 0 },
-      ];
+      const virtualItems = [{ index: 0, key: 'sec-0', start: 0, end: 200, size: 200, lane: 0 }];
       const wrapper = mount(SessionContent, {
         props: {
           sections,

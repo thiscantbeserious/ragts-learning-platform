@@ -75,11 +75,11 @@ export function useSectionVirtualizer(
       getScrollElement: () => scrollElement.value as Element | null,
       estimateSize: (index: number) => estimateSectionHeight(sections.value, index),
       overscan: OVERSCAN,
-    }))
+    })),
   );
 
-  const virtualItems: ComputedRef<VirtualItem[]> = computed(
-    () => virtualizer.value.getVirtualItems()
+  const virtualItems: ComputedRef<VirtualItem[]> = computed(() =>
+    virtualizer.value.getVirtualItems(),
   );
 
   /**
@@ -104,7 +104,9 @@ export function useSectionVirtualizer(
       el.scrollTop = Math.min(offset, maxScroll);
       // Debounce to prevent rapid re-scrolls during virtualizer measurement
       if (scrollLockTimer) clearTimeout(scrollLockTimer);
-      scrollLockTimer = setTimeout(() => { scrollLockTimer = null; }, 500);
+      scrollLockTimer = setTimeout(() => {
+        scrollLockTimer = null;
+      }, 500);
       return;
     }
 

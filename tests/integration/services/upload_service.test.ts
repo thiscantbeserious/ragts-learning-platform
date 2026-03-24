@@ -158,7 +158,9 @@ describe('UploadService.upload', () => {
 
   it('returns 500 when storage save fails', async () => {
     const failStorage = {
-      save: () => { throw new Error('Disk full'); },
+      save: () => {
+        throw new Error('Disk full');
+      },
       read: storageAdapter.read.bind(storageAdapter),
       delete: storageAdapter.delete.bind(storageAdapter),
       exists: storageAdapter.exists.bind(storageAdapter),
@@ -182,7 +184,9 @@ describe('UploadService.upload', () => {
 
   it('returns safe details when storage save fails — does not expose raw error', async () => {
     const failStorage = {
-      save: () => { throw 'quota-exceeded'; },
+      save: () => {
+        throw 'quota-exceeded';
+      },
       read: storageAdapter.read.bind(storageAdapter),
       delete: storageAdapter.delete.bind(storageAdapter),
       exists: storageAdapter.exists.bind(storageAdapter),
@@ -205,7 +209,9 @@ describe('UploadService.upload', () => {
 
   it('throws when DB insert fails (triggers cleanup path)', async () => {
     const failRepo = {
-      createWithId: () => { throw new Error('UNIQUE constraint failed'); },
+      createWithId: () => {
+        throw new Error('UNIQUE constraint failed');
+      },
     } as unknown as SessionAdapter;
     const failService = new UploadService({
       sessionRepository: failRepo,
@@ -222,7 +228,9 @@ describe('UploadService.upload', () => {
 
   it('throws when job queue fails after DB insert', async () => {
     const failJobQueue = {
-      create: () => { throw new Error('Queue unavailable'); },
+      create: () => {
+        throw new Error('Queue unavailable');
+      },
       findPending: jobQueue.findPending.bind(jobQueue),
       findBySessionId: jobQueue.findBySessionId.bind(jobQueue),
       start: jobQueue.start.bind(jobQueue),

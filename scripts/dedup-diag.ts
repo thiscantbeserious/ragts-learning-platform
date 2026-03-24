@@ -7,7 +7,10 @@ async function main() {
   await initVt();
 
   const filePath = process.argv[2];
-  if (!filePath) { console.error('Usage: tsx diag.ts <file>'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: tsx diag.ts <file>');
+    process.exit(1);
+  }
 
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -38,7 +41,10 @@ async function main() {
       if (str.includes('\x1b[?1049l')) inAltScreen = false;
       if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
         const lineCount = vt.getAllLines().lines.length;
-        if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+        if (
+          epochBoundaries.length === 0 ||
+          epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount
+        ) {
           epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
         }
       }
@@ -59,7 +65,10 @@ async function main() {
   epochs.push({ start: prevEnd, end: rawSnapshot.lines.length });
 
   function lineText(idx: number): string {
-    return rawSnapshot.lines[idx].spans.map(s => s.text ?? '').join('').trimEnd();
+    return rawSnapshot.lines[idx].spans
+      .map((s) => s.text ?? '')
+      .join('')
+      .trimEnd();
   }
 
   // Show first 3 epochs
@@ -97,7 +106,9 @@ async function main() {
         console.log(`    ep1: ${JSON.stringify(l1).slice(0, 120)}`);
       }
     }
-    console.log(`  Match: ${matchCount}/${checkLen} (${(matchCount/checkLen*100).toFixed(1)}%)`);
+    console.log(
+      `  Match: ${matchCount}/${checkLen} (${((matchCount / checkLen) * 100).toFixed(1)}%)`,
+    );
 
     // Also check: does epoch 1 start with epoch 0's LAST lines? (suffix match)
     console.log(`\n=== Suffix check: epoch 1 prefix vs epoch 0 SUFFIX ===`);
@@ -109,7 +120,9 @@ async function main() {
       if (l0 === l1) suffixMatch++;
       else {
         console.log(`  Diff at offset ${i}:`);
-        console.log(`    ep0_suffix: ${JSON.stringify(lineText(ep0.end - suffixCheckLen + i)).slice(0, 120)}`);
+        console.log(
+          `    ep0_suffix: ${JSON.stringify(lineText(ep0.end - suffixCheckLen + i)).slice(0, 120)}`,
+        );
         console.log(`    ep1_prefix: ${JSON.stringify(lineText(ep1.start + i)).slice(0, 120)}`);
         break;
       }

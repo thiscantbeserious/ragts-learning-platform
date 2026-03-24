@@ -62,16 +62,22 @@ function createTestRouter() {
   });
 }
 
-function makeLayoutState(overrides: Partial<{
-  isMobileOverlayOpen: boolean;
-  isSidebarOpen: boolean;
-  isMobile: boolean;
-}> = {}) {
+function makeLayoutState(
+  overrides: Partial<{
+    isMobileOverlayOpen: boolean;
+    isSidebarOpen: boolean;
+    isMobile: boolean;
+  }> = {},
+) {
   const isMobileOverlayOpen = ref(overrides.isMobileOverlayOpen ?? false);
   const isSidebarOpen = ref(overrides.isSidebarOpen ?? true);
   const isMobile = ref(overrides.isMobile ?? true);
-  const closeMobileOverlay = vi.fn(() => { isMobileOverlayOpen.value = false; });
-  const openMobileOverlay = vi.fn(() => { isMobileOverlayOpen.value = true; });
+  const closeMobileOverlay = vi.fn(() => {
+    isMobileOverlayOpen.value = false;
+  });
+  const openMobileOverlay = vi.fn(() => {
+    isMobileOverlayOpen.value = true;
+  });
   const toggleSidebar = vi.fn();
 
   return {
@@ -126,9 +132,9 @@ function q(selector: string): Element | null {
 
 afterEach(() => {
   // Clean up any Teleport-appended elements after each test.
-  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach(el => el.remove());
-  document.querySelectorAll('.mobile-sidebar-overlay__backdrop').forEach(el => el.remove());
-  document.querySelectorAll('.mobile-sidebar-overlay__panel').forEach(el => el.remove());
+  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach((el) => el.remove());
+  document.querySelectorAll('.mobile-sidebar-overlay__backdrop').forEach((el) => el.remove());
+  document.querySelectorAll('.mobile-sidebar-overlay__panel').forEach((el) => el.remove());
 });
 
 describe('MobileSidebarOverlay', () => {

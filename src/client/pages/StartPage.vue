@@ -35,7 +35,7 @@ function handleFileChange(event: Event): void {
         sessionList.sessions.value = [tempSession, ...sessionList.sessions.value];
       },
       onUploadComplete: async (tempId: string) => {
-        sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
+        sessionList.sessions.value = sessionList.sessions.value.filter((s) => s.id !== tempId);
         await sessionList.fetchSessions();
       },
     });
@@ -74,49 +74,15 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
       aria-hidden="true"
     >
       <defs>
-        <pattern
-          id="spTronGrid"
-          x="0"
-          y="0"
-          width="40"
-          height="40"
-          patternUnits="userSpaceOnUse"
-        >
-          <line
-            x1="0"
-            y1="0"
-            x2="40"
-            y2="0"
-            stroke="#00d4ff"
-            stroke-width="0.4"
-            opacity="0.22"
-          />
-          <line
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="40"
-            stroke="#00d4ff"
-            stroke-width="0.4"
-            opacity="0.22"
-          />
-          <circle
-            cx="0"
-            cy="0"
-            r="0.8"
-            fill="#00d4ff"
-            opacity="0.3"
-          />
+        <pattern id="spTronGrid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="40" y2="0" stroke="#00d4ff" stroke-width="0.4" opacity="0.22" />
+          <line x1="0" y1="0" x2="0" y2="40" stroke="#00d4ff" stroke-width="0.4" opacity="0.22" />
+          <circle cx="0" cy="0" r="0.8" fill="#00d4ff" opacity="0.3" />
         </pattern>
       </defs>
 
       <!-- TRON fine grid -->
-      <rect
-        class="sp-grid-dots"
-        width="100%"
-        height="100%"
-        fill="url(#spTronGrid)"
-      />
+      <rect class="sp-grid-dots" width="100%" height="100%" fill="url(#spTronGrid)" />
 
       <!-- Decorative secondary paths -->
       <path
@@ -132,18 +98,8 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
 
       <!-- Node 1: record (cyan) at grid intersection 280,120 -->
       <g>
-        <circle
-          class="sp-node-fill sp-node-fill--cyan sp-node-fill--n1"
-          cx="280"
-          cy="120"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--cyan sp-node-ring--n1"
-          cx="280"
-          cy="120"
-          r="10"
-        />
+        <circle class="sp-node-fill sp-node-fill--cyan sp-node-fill--n1" cx="280" cy="120" r="6" />
+        <circle class="sp-node-ring sp-node-ring--cyan sp-node-ring--n1" cx="280" cy="120" r="10" />
         <circle
           class="sp-node-outer sp-node-outer--n1"
           cx="280"
@@ -152,27 +108,13 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           stroke="#00d4ff"
           stroke-dasharray="4 4"
         />
-        <text
-          class="sp-node-label sp-node-label--n1"
-          x="280"
-          y="160"
-        >record</text>
+        <text class="sp-node-label sp-node-label--n1" x="280" y="160">record</text>
       </g>
 
       <!-- Node 2: validate (pink) at grid intersection 400,480 -->
       <g>
-        <circle
-          class="sp-node-fill sp-node-fill--pink sp-node-fill--n2"
-          cx="400"
-          cy="480"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--pink sp-node-ring--n2"
-          cx="400"
-          cy="480"
-          r="10"
-        />
+        <circle class="sp-node-fill sp-node-fill--pink sp-node-fill--n2" cx="400" cy="480" r="6" />
+        <circle class="sp-node-ring sp-node-ring--pink sp-node-ring--n2" cx="400" cy="480" r="10" />
         <circle
           class="sp-node-outer sp-node-outer--n2"
           cx="400"
@@ -181,27 +123,13 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           stroke="#ff4d6a"
           stroke-dasharray="4 4"
         />
-        <text
-          class="sp-node-label sp-node-label--n2"
-          x="400"
-          y="520"
-        >validate</text>
+        <text class="sp-node-label sp-node-label--n2" x="400" y="520">validate</text>
       </g>
 
       <!-- Node 3: detect (cyan) at grid intersection 640,80 -->
       <g>
-        <circle
-          class="sp-node-fill sp-node-fill--cyan sp-node-fill--n3"
-          cx="640"
-          cy="80"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--cyan sp-node-ring--n3"
-          cx="640"
-          cy="80"
-          r="10"
-        />
+        <circle class="sp-node-fill sp-node-fill--cyan sp-node-fill--n3" cx="640" cy="80" r="6" />
+        <circle class="sp-node-ring sp-node-ring--cyan sp-node-ring--n3" cx="640" cy="80" r="10" />
         <circle
           class="sp-node-outer sp-node-outer--n3"
           cx="640"
@@ -210,27 +138,13 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           stroke="#00d4ff"
           stroke-dasharray="4 4"
         />
-        <text
-          class="sp-node-label sp-node-label--n3"
-          x="640"
-          y="120"
-        >detect</text>
+        <text class="sp-node-label sp-node-label--n3" x="640" y="120">detect</text>
       </g>
 
       <!-- Node 4: replay (pink) at grid intersection 920,480 -->
       <g>
-        <circle
-          class="sp-node-fill sp-node-fill--pink sp-node-fill--n4"
-          cx="920"
-          cy="480"
-          r="6"
-        />
-        <circle
-          class="sp-node-ring sp-node-ring--pink sp-node-ring--n4"
-          cx="920"
-          cy="480"
-          r="10"
-        />
+        <circle class="sp-node-fill sp-node-fill--pink sp-node-fill--n4" cx="920" cy="480" r="6" />
+        <circle class="sp-node-ring sp-node-ring--pink sp-node-ring--n4" cx="920" cy="480" r="10" />
         <circle
           class="sp-node-outer sp-node-outer--n4"
           cx="920"
@@ -239,21 +153,12 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           stroke="#ff4d6a"
           stroke-dasharray="4 4"
         />
-        <text
-          class="sp-node-label sp-node-label--n4"
-          x="920"
-          y="520"
-        >replay</text>
+        <text class="sp-node-label sp-node-label--n4" x="920" y="520">replay</text>
       </g>
 
       <!-- Node 5: curate (cyan, final — stronger glow) at grid intersection 960,120 -->
       <g>
-        <circle
-          class="sp-node-fill sp-node-fill--final sp-node-fill--n5"
-          cx="960"
-          cy="120"
-          r="8"
-        />
+        <circle class="sp-node-fill sp-node-fill--final sp-node-fill--n5" cx="960" cy="120" r="8" />
         <circle
           class="sp-node-ring sp-node-ring--final sp-node-ring--n5"
           cx="960"
@@ -268,54 +173,24 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           stroke="#00d4ff"
           stroke-dasharray="5 5"
         />
-        <text
-          class="sp-node-label sp-node-label--n5"
-          x="960"
-          y="160"
-        >curate</text>
+        <text class="sp-node-label sp-node-label--n5" x="960" y="160">curate</text>
       </g>
     </svg>
 
     <!-- Ambient particles (8 total — 6 cyan, 2 pink) -->
-    <div
-      class="sp-particle sp-particle--1"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--2"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--3"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--4"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--5"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--6"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--7"
-      aria-hidden="true"
-    />
-    <div
-      class="sp-particle sp-particle--8"
-      aria-hidden="true"
-    />
+    <div class="sp-particle sp-particle--1" aria-hidden="true" />
+    <div class="sp-particle sp-particle--2" aria-hidden="true" />
+    <div class="sp-particle sp-particle--3" aria-hidden="true" />
+    <div class="sp-particle sp-particle--4" aria-hidden="true" />
+    <div class="sp-particle sp-particle--5" aria-hidden="true" />
+    <div class="sp-particle sp-particle--6" aria-hidden="true" />
+    <div class="sp-particle sp-particle--7" aria-hidden="true" />
+    <div class="sp-particle sp-particle--8" aria-hidden="true" />
 
     <!-- Blinking cursor watermark -->
-    <div
-      class="start-page__cursor-prompt"
-      aria-hidden="true"
-    >
-      <span class="start-page__cursor-chevron">&gt;</span><span class="start-page__cursor-blink">_</span>
+    <div class="start-page__cursor-prompt" aria-hidden="true">
+      <span class="start-page__cursor-chevron">&gt;</span
+      ><span class="start-page__cursor-blink">_</span>
     </div>
 
     <!-- Content overlay (centered over SVG) -->
@@ -331,10 +206,7 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
         @keydown="handleDropZoneKeydown"
       >
         <div class="upload-zone__icon">
-          <div
-            class="upload-zone__disc-ring"
-            aria-hidden="true"
-          />
+          <div class="upload-zone__disc-ring" aria-hidden="true" />
           <svg
             width="48"
             height="48"
@@ -352,22 +224,22 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
           {{ hasSessions ? 'Add another session.' : 'No sessions yet. Fix that.' }}
         </div>
         <div class="upload-zone__subtitle">
-          Drop a <code>.cast</code> file here or click to browse
-          — watch it unfold into something you can actually read.
+          Drop a <code>.cast</code> file here or click to browse — watch it unfold into something
+          you can actually read.
         </div>
-        <span
-          class="upload-zone__browse"
-          aria-hidden="true"
-        >Browse Files</span>
+        <span class="upload-zone__browse" aria-hidden="true">Browse Files</span>
       </div>
 
       <!-- AGR hint -->
       <p class="start-page__hint">
-        Recording sessions? Use <a
+        Recording sessions? Use
+        <a
           href="https://github.com/thiscantbeserious/agent-session-recorder"
           target="_blank"
           rel="noopener noreferrer"
-        >AGR</a> to capture them.
+          >AGR</a
+        >
+        to capture them.
       </p>
     </div>
   </div>
@@ -444,20 +316,20 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
 .sp-node-ring--cyan {
   stroke: var(--accent-primary);
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent))
-          drop-shadow(0 0 16px color-mix(in srgb, var(--accent-primary) 20%, transparent));
+    drop-shadow(0 0 16px color-mix(in srgb, var(--accent-primary) 20%, transparent));
 }
 
 .sp-node-ring--pink {
   stroke: var(--accent-secondary);
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-secondary) 35%, transparent))
-          drop-shadow(0 0 16px color-mix(in srgb, var(--accent-secondary) 20%, transparent));
+    drop-shadow(0 0 16px color-mix(in srgb, var(--accent-secondary) 20%, transparent));
 }
 
 .sp-node-ring--final {
   stroke: var(--accent-primary);
   stroke-width: 1.5;
   filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 40%, transparent))
-          drop-shadow(0 0 30px color-mix(in srgb, var(--accent-primary) 25%, transparent));
+    drop-shadow(0 0 30px color-mix(in srgb, var(--accent-primary) 25%, transparent));
 }
 
 .sp-node-outer {
@@ -510,7 +382,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 4px;
   height: 4px;
   background: var(--accent-primary);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent), 0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
 }
 
 .sp-particle--2 {
@@ -519,7 +393,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 4px;
   height: 4px;
   background: var(--accent-secondary);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-secondary) 35%, transparent), 0 0 16px color-mix(in srgb, var(--accent-secondary) 15%, transparent);
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--accent-secondary) 35%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent-secondary) 15%, transparent);
 }
 
 .sp-particle--3 {
@@ -528,7 +404,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 4px;
   height: 4px;
   background: var(--accent-primary);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-primary) 40%, transparent), 0 0 12px color-mix(in srgb, var(--accent-primary) 12%, transparent);
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 0 12px color-mix(in srgb, var(--accent-primary) 12%, transparent);
 }
 
 .sp-particle--4 {
@@ -537,7 +415,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 5px;
   height: 5px;
   background: var(--accent-primary);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent), 0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
 }
 
 .sp-particle--5 {
@@ -546,7 +426,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 6px;
   height: 6px;
   background: var(--accent-primary);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--accent-primary) 40%, transparent), 0 0 20px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 0 20px color-mix(in srgb, var(--accent-primary) 18%, transparent);
 }
 
 .sp-particle--6 {
@@ -555,7 +437,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 4px;
   height: 4px;
   background: var(--accent-primary);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-primary) 40%, transparent), 0 0 12px color-mix(in srgb, var(--accent-primary) 12%, transparent);
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 0 12px color-mix(in srgb, var(--accent-primary) 12%, transparent);
 }
 
 .sp-particle--7 {
@@ -564,7 +448,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 4px;
   height: 4px;
   background: var(--accent-secondary);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-secondary) 35%, transparent), 0 0 12px color-mix(in srgb, var(--accent-secondary) 12%, transparent);
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--accent-secondary) 35%, transparent),
+    0 0 12px color-mix(in srgb, var(--accent-secondary) 12%, transparent);
 }
 
 .sp-particle--8 {
@@ -573,7 +459,9 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   width: 5px;
   height: 5px;
   background: var(--accent-primary);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent), 0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  box-shadow:
+    0 0 8px color-mix(in srgb, var(--accent-primary) 40%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent-primary) 15%, transparent);
 }
 
 /* ============================================================
@@ -644,134 +532,302 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
    ============================================================ */
 
 @keyframes spGridFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes spDecoFadeIn {
-  from { visibility: visible; opacity: 0; }
-  to   { visibility: visible; }
+  from {
+    visibility: visible;
+    opacity: 0;
+  }
+  to {
+    visibility: visible;
+  }
 }
 
 @keyframes spNodeAppear {
-  0%   { opacity: 0; transform: scale(0.4); }
-  60%  { opacity: 1; transform: scale(1.1); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes spOuterRingAppear {
-  0%   { opacity: 0; transform: scale(0.6); }
-  100% { opacity: 0.3; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
 }
 
 @keyframes spFillAppear {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes spLabelReveal {
-  from { opacity: 0; }
-  to   { opacity: 0.3; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.3;
+  }
 }
 
 @keyframes spNodePulseCyan {
-  0%, 100% { transform: scale(1);
-             filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-primary) 35%, transparent))
-                     drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 15%, transparent)); }
-  50%      { transform: scale(1.3);
-             filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 65%, transparent))
-                     drop-shadow(0 0 28px color-mix(in srgb, var(--accent-primary) 25%, transparent)); }
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-primary) 35%, transparent))
+      drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 15%, transparent));
+  }
+  50% {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-primary) 65%, transparent))
+      drop-shadow(0 0 28px color-mix(in srgb, var(--accent-primary) 25%, transparent));
+  }
 }
 
 @keyframes spNodePulsePink {
-  0%, 100% { transform: scale(1);
-             filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-secondary) 35%, transparent))
-                     drop-shadow(0 0 14px color-mix(in srgb, var(--accent-secondary) 15%, transparent)); }
-  50%      { transform: scale(1.3);
-             filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-secondary) 65%, transparent))
-                     drop-shadow(0 0 28px color-mix(in srgb, var(--accent-secondary) 25%, transparent)); }
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-secondary) 35%, transparent))
+      drop-shadow(0 0 14px color-mix(in srgb, var(--accent-secondary) 15%, transparent));
+  }
+  50% {
+    transform: scale(1.3);
+    filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-secondary) 65%, transparent))
+      drop-shadow(0 0 28px color-mix(in srgb, var(--accent-secondary) 25%, transparent));
+  }
 }
 
 @keyframes spNodePulseFinal {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent-primary) 40%, transparent))
-            drop-shadow(0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent));
+      drop-shadow(0 0 20px color-mix(in srgb, var(--accent-primary) 15%, transparent));
   }
   50% {
     transform: scale(1.4);
     filter: drop-shadow(0 0 20px color-mix(in srgb, var(--accent-primary) 70%, transparent))
-            drop-shadow(0 0 40px color-mix(in srgb, var(--accent-primary) 30%, transparent));
+      drop-shadow(0 0 40px color-mix(in srgb, var(--accent-primary) 30%, transparent));
   }
 }
 
 @keyframes spParticleDrift1 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
-  25%  { transform: translate(25px, -35px) scale(1.3); opacity: 0.8; }
-  50%  { transform: translate(-15px, -70px) scale(0.7); opacity: 0.5; }
-  75%  { transform: translate(35px, -25px) scale(1.1); opacity: 0.7; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(25px, -35px) scale(1.3);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translate(-15px, -70px) scale(0.7);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(35px, -25px) scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
 }
 
 @keyframes spParticleDrift2 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.5; }
-  25%  { transform: translate(-35px, 18px) scale(1.2); opacity: 0.7; }
-  50%  { transform: translate(8px, 45px) scale(0.6); opacity: 0.4; }
-  75%  { transform: translate(-25px, -8px) scale(1.4); opacity: 0.6; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(-35px, 18px) scale(1.2);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(8px, 45px) scale(0.6);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(-25px, -8px) scale(1.4);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
 }
 
 @keyframes spParticleDrift3 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.4; }
-  25%  { transform: translate(45px, 25px) scale(1.4); opacity: 0.7; }
-  50%  { transform: translate(18px, -35px) scale(0.8); opacity: 0.5; }
-  75%  { transform: translate(-18px, 18px) scale(1); opacity: 0.6; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translate(45px, 25px) scale(1.4);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(18px, -35px) scale(0.8);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(-18px, 18px) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
 }
 
 @keyframes spParticleDrift4 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.5; }
-  25%  { transform: translate(-25px, -45px) scale(0.7); opacity: 0.4; }
-  50%  { transform: translate(35px, -18px) scale(1.3); opacity: 0.6; }
-  75%  { transform: translate(8px, 25px) scale(0.9); opacity: 0.5; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(-25px, -45px) scale(0.7);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(35px, -18px) scale(1.3);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(8px, 25px) scale(0.9);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
 }
 
 @keyframes spParticleDrift5 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
-  25%  { transform: translate(18px, 35px) scale(0.6); opacity: 0.4; }
-  50%  { transform: translate(-35px, 8px) scale(1.2); opacity: 0.7; }
-  75%  { transform: translate(25px, -18px) scale(1.4); opacity: 0.5; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  25% {
+    transform: translate(18px, 35px) scale(0.6);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-35px, 8px) scale(1.2);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(25px, -18px) scale(1.4);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
 }
 
 @keyframes spParticleDrift6 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.4; }
-  25%  { transform: translate(-18px, -25px) scale(1.2); opacity: 0.6; }
-  50%  { transform: translate(25px, 35px) scale(0.7); opacity: 0.5; }
-  75%  { transform: translate(-35px, 8px) scale(1); opacity: 0.4; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translate(-18px, -25px) scale(1.2);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(25px, 35px) scale(0.7);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(-35px, 8px) scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
 }
 
 @keyframes spParticleDrift7 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.5; }
-  25%  { transform: translate(35px, -18px) scale(1.4); opacity: 0.7; }
-  50%  { transform: translate(-8px, 45px) scale(0.8); opacity: 0.4; }
-  75%  { transform: translate(18px, -35px) scale(1.1); opacity: 0.6; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(35px, -18px) scale(1.4);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(-8px, 45px) scale(0.8);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(18px, -35px) scale(1.1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
 }
 
 @keyframes spParticleDrift8 {
-  0%   { transform: translate(0, 0) scale(1); opacity: 0.4; }
-  25%  { transform: translate(-45px, 18px) scale(0.6); opacity: 0.5; }
-  50%  { transform: translate(18px, -25px) scale(1.3); opacity: 0.6; }
-  75%  { transform: translate(-8px, 35px) scale(1); opacity: 0.4; }
-  100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
+  25% {
+    transform: translate(-45px, 18px) scale(0.6);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(18px, -25px) scale(1.3);
+    opacity: 0.6;
+  }
+  75% {
+    transform: translate(-8px, 35px) scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.4;
+  }
 }
 
 /* ============================================================
@@ -779,14 +835,31 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
    ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
-  .sp-grid-dots { opacity: 1 !important; }
-  .sp-particle { display: none !important; }
-  .sp-deco-path { opacity: 0.06 !important; visibility: visible !important; }
-  .sp-node-ring { opacity: 1 !important; }
-  .sp-node-outer { opacity: 0.3 !important; }
-  .sp-node-fill { opacity: 1 !important; }
-  .sp-node-label { opacity: 0.3 !important; }
-  .start-page__cursor-blink { animation: none !important; }
+  .sp-grid-dots {
+    opacity: 1 !important;
+  }
+  .sp-particle {
+    display: none !important;
+  }
+  .sp-deco-path {
+    opacity: 0.06 !important;
+    visibility: visible !important;
+  }
+  .sp-node-ring {
+    opacity: 1 !important;
+  }
+  .sp-node-outer {
+    opacity: 0.3 !important;
+  }
+  .sp-node-fill {
+    opacity: 1 !important;
+  }
+  .sp-node-label {
+    opacity: 0.3 !important;
+  }
+  .start-page__cursor-blink {
+    animation: none !important;
+  }
 }
 
 /* ============================================================
@@ -807,61 +880,112 @@ function handleDropZoneKeydown(event: KeyboardEvent): void {
   /* Node 1: record (cyan) — grid intersection 280, 120 */
   .sp-node-ring--n1 {
     transform-origin: 280px 120px;
-    animation: spNodeAppear 0.5s ease-out 0.8s forwards,
-               spNodePulseCyan 4s ease-in-out 5.0s infinite;
+    animation:
+      spNodeAppear 0.5s ease-out 0.8s forwards,
+      spNodePulseCyan 4s ease-in-out 5s infinite;
   }
-  .sp-node-outer--n1 { animation: spOuterRingAppear 0.6s ease-out 1.0s forwards; }
-  .sp-node-fill--n1  { animation: spFillAppear 0.3s ease-out 0.9s forwards; }
-  .sp-node-label--n1 { animation: spLabelReveal 0.4s ease-out 1.0s forwards; }
+  .sp-node-outer--n1 {
+    animation: spOuterRingAppear 0.6s ease-out 1s forwards;
+  }
+  .sp-node-fill--n1 {
+    animation: spFillAppear 0.3s ease-out 0.9s forwards;
+  }
+  .sp-node-label--n1 {
+    animation: spLabelReveal 0.4s ease-out 1s forwards;
+  }
 
   /* Node 2: validate (pink) — grid intersection 400, 480 */
   .sp-node-ring--n2 {
     transform-origin: 400px 480px;
-    animation: spNodeAppear 0.5s ease-out 1.7s forwards,
-               spNodePulsePink 4.5s ease-in-out 5.6s infinite;
+    animation:
+      spNodeAppear 0.5s ease-out 1.7s forwards,
+      spNodePulsePink 4.5s ease-in-out 5.6s infinite;
   }
-  .sp-node-outer--n2 { animation: spOuterRingAppear 0.6s ease-out 1.9s forwards; }
-  .sp-node-fill--n2  { animation: spFillAppear 0.3s ease-out 1.8s forwards; }
-  .sp-node-label--n2 { animation: spLabelReveal 0.4s ease-out 2.0s forwards; }
+  .sp-node-outer--n2 {
+    animation: spOuterRingAppear 0.6s ease-out 1.9s forwards;
+  }
+  .sp-node-fill--n2 {
+    animation: spFillAppear 0.3s ease-out 1.8s forwards;
+  }
+  .sp-node-label--n2 {
+    animation: spLabelReveal 0.4s ease-out 2s forwards;
+  }
 
   /* Node 3: detect (cyan) — grid intersection 640, 80 */
   .sp-node-ring--n3 {
     transform-origin: 640px 80px;
-    animation: spNodeAppear 0.5s ease-out 2.3s forwards,
-               spNodePulseCyan 4.2s ease-in-out 6.0s infinite;
+    animation:
+      spNodeAppear 0.5s ease-out 2.3s forwards,
+      spNodePulseCyan 4.2s ease-in-out 6s infinite;
   }
-  .sp-node-outer--n3 { animation: spOuterRingAppear 0.6s ease-out 2.5s forwards; }
-  .sp-node-fill--n3  { animation: spFillAppear 0.3s ease-out 2.4s forwards; }
-  .sp-node-label--n3 { animation: spLabelReveal 0.4s ease-out 2.7s forwards; }
+  .sp-node-outer--n3 {
+    animation: spOuterRingAppear 0.6s ease-out 2.5s forwards;
+  }
+  .sp-node-fill--n3 {
+    animation: spFillAppear 0.3s ease-out 2.4s forwards;
+  }
+  .sp-node-label--n3 {
+    animation: spLabelReveal 0.4s ease-out 2.7s forwards;
+  }
 
   /* Node 4: replay (pink) — grid intersection 920, 480 */
   .sp-node-ring--n4 {
     transform-origin: 920px 480px;
-    animation: spNodeAppear 0.5s ease-out 3.0s forwards,
-               spNodePulsePink 4.8s ease-in-out 5.1s infinite;
+    animation:
+      spNodeAppear 0.5s ease-out 3s forwards,
+      spNodePulsePink 4.8s ease-in-out 5.1s infinite;
   }
-  .sp-node-outer--n4 { animation: spOuterRingAppear 0.6s ease-out 3.2s forwards; }
-  .sp-node-fill--n4  { animation: spFillAppear 0.3s ease-out 3.1s forwards; }
-  .sp-node-label--n4 { animation: spLabelReveal 0.4s ease-out 3.4s forwards; }
+  .sp-node-outer--n4 {
+    animation: spOuterRingAppear 0.6s ease-out 3.2s forwards;
+  }
+  .sp-node-fill--n4 {
+    animation: spFillAppear 0.3s ease-out 3.1s forwards;
+  }
+  .sp-node-label--n4 {
+    animation: spLabelReveal 0.4s ease-out 3.4s forwards;
+  }
 
   /* Node 5: curate (cyan, final) — grid intersection 960, 120 */
   .sp-node-ring--n5 {
     transform-origin: 960px 120px;
-    animation: spNodeAppear 0.7s ease-out 3.4s forwards,
-               spNodePulseFinal 3.5s ease-in-out 5.4s infinite;
+    animation:
+      spNodeAppear 0.7s ease-out 3.4s forwards,
+      spNodePulseFinal 3.5s ease-in-out 5.4s infinite;
   }
-  .sp-node-outer--n5 { animation: spOuterRingAppear 0.8s ease-out 3.6s forwards; }
-  .sp-node-fill--n5  { animation: spFillAppear 0.4s ease-out 3.5s forwards; }
-  .sp-node-label--n5 { animation: spLabelReveal 0.5s ease-out 4.2s forwards; }
+  .sp-node-outer--n5 {
+    animation: spOuterRingAppear 0.8s ease-out 3.6s forwards;
+  }
+  .sp-node-fill--n5 {
+    animation: spFillAppear 0.4s ease-out 3.5s forwards;
+  }
+  .sp-node-label--n5 {
+    animation: spLabelReveal 0.5s ease-out 4.2s forwards;
+  }
 
   /* Ambient particles */
-  .sp-particle--1 { animation: spParticleDrift1 12s ease-in-out -3s infinite; }
-  .sp-particle--2 { animation: spParticleDrift2 15s ease-in-out -7s infinite; }
-  .sp-particle--3 { animation: spParticleDrift3 10s ease-in-out -1s infinite; }
-  .sp-particle--4 { animation: spParticleDrift4 13s ease-in-out -5s infinite; }
-  .sp-particle--5 { animation: spParticleDrift5 16s ease-in-out -9s infinite; }
-  .sp-particle--6 { animation: spParticleDrift6 9s ease-in-out -2s infinite; }
-  .sp-particle--7 { animation: spParticleDrift7 14s ease-in-out -6s infinite; }
-  .sp-particle--8 { animation: spParticleDrift8 17s ease-in-out -11s infinite; }
+  .sp-particle--1 {
+    animation: spParticleDrift1 12s ease-in-out -3s infinite;
+  }
+  .sp-particle--2 {
+    animation: spParticleDrift2 15s ease-in-out -7s infinite;
+  }
+  .sp-particle--3 {
+    animation: spParticleDrift3 10s ease-in-out -1s infinite;
+  }
+  .sp-particle--4 {
+    animation: spParticleDrift4 13s ease-in-out -5s infinite;
+  }
+  .sp-particle--5 {
+    animation: spParticleDrift5 16s ease-in-out -9s infinite;
+  }
+  .sp-particle--6 {
+    animation: spParticleDrift6 9s ease-in-out -2s infinite;
+  }
+  .sp-particle--7 {
+    animation: spParticleDrift7 14s ease-in-out -6s infinite;
+  }
+  .sp-particle--8 {
+    animation: spParticleDrift8 17s ease-in-out -11s infinite;
+  }
 }
 </style>

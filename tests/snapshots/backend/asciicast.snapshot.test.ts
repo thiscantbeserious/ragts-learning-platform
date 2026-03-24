@@ -26,7 +26,7 @@ describe('asciicast snapshots', () => {
 
   it('valid-with-markers.cast — marker extraction', () => {
     const file = parseAsciicast(loadFixture('valid-with-markers.cast'));
-    const markers = file.markers.map(m => ({
+    const markers = file.markers.map((m) => ({
       label: m.label,
       index: m.index,
       time: Math.round(m.time * 1000) / 1000, // Round for determinism
@@ -36,7 +36,7 @@ describe('asciicast snapshots', () => {
 
   it('valid-with-markers.cast — cumulative times first 10 events', () => {
     const file = parseAsciicast(loadFixture('valid-with-markers.cast'));
-    const first10 = file.events.slice(0, 10).map(e => ({
+    const first10 = file.events.slice(0, 10).map((e) => ({
       type: e.type,
       time: Math.round(e.time * 1000) / 1000,
       relativeTime: e.relativeTime,
@@ -79,7 +79,7 @@ describe('asciicast snapshots', () => {
       [0.3, 'r', '120x40'],
     ];
 
-    const parsed = computeCumulativeTimes(events).map(e => ({
+    const parsed = computeCumulativeTimes(events).map((e) => ({
       type: e.type,
       time: Math.round(e.time * 1000) / 1000,
       relativeTime: e.relativeTime,

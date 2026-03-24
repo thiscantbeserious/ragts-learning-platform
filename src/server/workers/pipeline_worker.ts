@@ -56,7 +56,11 @@ async function handleJob(msg: JobMessage): Promise<void> {
     const detectResult = detect(validateResult.events, validateResult.markers);
 
     stageName = 'replay';
-    const replayResult = replaySync(validateResult.header, validateResult.events, detectResult.boundaries);
+    const replayResult = replaySync(
+      validateResult.header,
+      validateResult.events,
+      detectResult.boundaries,
+    );
 
     stageName = 'dedup';
     const processed = dedup(
@@ -65,7 +69,7 @@ async function handleJob(msg: JobMessage): Promise<void> {
       replayResult.sectionData,
       replayResult.epochBoundaries,
       detectResult.boundaries,
-      validateResult.eventCount
+      validateResult.eventCount,
     );
 
     postResult(id, processed);
@@ -90,6 +94,8 @@ try {
   await main();
 } catch (err: unknown) {
   // Fatal: WASM init failed. Worker cannot function — exit so the pool respawns.
-  process.stderr.write(`pipeline_worker fatal: ${err instanceof Error ? err.message : String(err)}\n`);
+  process.stderr.write(
+    `pipeline_worker fatal: ${err instanceof Error ? err.message : String(err)}\n`,
+  );
   process.exit(1);
 }

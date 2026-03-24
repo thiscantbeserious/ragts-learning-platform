@@ -5,20 +5,13 @@
     <!-- Only render SidebarPanel in the grid when not on mobile; the overlay owns it on mobile. -->
     <SidebarPanel v-if="!isMobile" />
   </div>
-  <main
-    id="main-content"
-    class="spatial-shell__main"
-    tabindex="-1"
-  >
+  <main id="main-content" class="spatial-shell__main" tabindex="-1">
     <router-view />
   </main>
   <!-- Mobile sidebar overlay — rendered outside the grid via Teleport inside the component -->
   <MobileSidebarOverlay />
   <!-- Toast container is fixed-position outside the grid flow -->
-  <ToastContainer
-    :toasts="toasts"
-    @dismiss="removeToast"
-  />
+  <ToastContainer :toasts="toasts" @dismiss="removeToast" />
 </template>
 
 <script setup lang="ts">

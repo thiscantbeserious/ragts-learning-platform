@@ -9,7 +9,10 @@ import type { AsciicastHeader, AsciicastEvent } from '../src/shared/asciicast-ty
 async function main() {
   await initVt();
   const filePath = process.argv[2];
-  if (!filePath) { console.error('Usage: tsx dedup-trace2.ts <file>'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: tsx dedup-trace2.ts <file>');
+    process.exit(1);
+  }
 
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -37,7 +40,10 @@ async function main() {
       if (str.includes('\x1b[?1049l')) inAltScreen = false;
       if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
         const lineCount = vt.getAllLines().lines.length;
-        if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+        if (
+          epochBoundaries.length === 0 ||
+          epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount
+        ) {
           epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
         }
       }
@@ -49,7 +55,10 @@ async function main() {
 
   const HEADER = '╭─── Claude Code v2.1.34';
   function lk(i: number) {
-    return rawLines[i].spans.map(s => s.text ?? '').join('').trimEnd();
+    return rawLines[i].spans
+      .map((s) => s.text ?? '')
+      .join('')
+      .trimEnd();
   }
 
   // Build epoch ranges
@@ -69,7 +78,9 @@ async function main() {
       const rawIdx = r.start + i;
       if (lk(rawIdx).startsWith(HEADER)) {
         const remaining = len - i - 1;
-        console.log(`Epoch ${e}: header at pos ${i}/${len} (${remaining} lines after), raw ${rawIdx}`);
+        console.log(
+          `Epoch ${e}: header at pos ${i}/${len} (${remaining} lines after), raw ${rawIdx}`,
+        );
         // Show first 3 lines after the header
         for (let k = 1; k <= Math.min(3, remaining); k++) {
           console.log(`  +${k}: "${lk(rawIdx + k).slice(0, 80)}"`);

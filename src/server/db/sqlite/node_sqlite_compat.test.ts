@@ -9,8 +9,12 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import Database, { NodeSqliteDatabase, type RunResult, type CompatStatement } from './node_sqlite_compat.js';
-import type { } from './node_sqlite_compat.js';
+import Database, {
+  NodeSqliteDatabase,
+  type RunResult,
+  type CompatStatement,
+} from './node_sqlite_compat.js';
+import type {} from './node_sqlite_compat.js';
 
 describe('Database namespace export', () => {
   it('default export is constructable (matches better-sqlite3 usage pattern)', () => {
@@ -76,7 +80,7 @@ describe('NodeSqliteDatabase — exec and prepare/run/get/all', () => {
 
   it('exec creates a table without throwing', () => {
     expect(() =>
-      db.exec('CREATE TABLE IF NOT EXISTS other (id INTEGER PRIMARY KEY)')
+      db.exec('CREATE TABLE IF NOT EXISTS other (id INTEGER PRIMARY KEY)'),
     ).not.toThrow();
   });
 
@@ -96,7 +100,9 @@ describe('NodeSqliteDatabase — exec and prepare/run/get/all', () => {
   it('get returns the inserted row', () => {
     const insert = db.prepare('INSERT INTO items (name) VALUES (?)');
     insert.run('alpha');
-    const row = db.prepare('SELECT * FROM items WHERE name = ?').get('alpha') as { id: number; name: string } | undefined;
+    const row = db.prepare('SELECT * FROM items WHERE name = ?').get('alpha') as
+      | { id: number; name: string }
+      | undefined;
     expect(row).toBeDefined();
     expect(row!.name).toBe('alpha');
   });
@@ -111,9 +117,11 @@ describe('NodeSqliteDatabase — exec and prepare/run/get/all', () => {
     insert.run('a');
     insert.run('b');
     insert.run('c');
-    const rows = db.prepare('SELECT * FROM items ORDER BY name ASC').all() as Array<{ name: string }>;
+    const rows = db.prepare('SELECT * FROM items ORDER BY name ASC').all() as Array<{
+      name: string;
+    }>;
     expect(rows.length).toBe(3);
-    expect(rows.map(r => r.name)).toEqual(['a', 'b', 'c']);
+    expect(rows.map((r) => r.name)).toEqual(['a', 'b', 'c']);
   });
 
   it('all returns empty array when table is empty', () => {
@@ -197,15 +205,19 @@ describe('NodeSqliteDatabase — pragma', () => {
     const cols = db.pragma('table_info(t)') as Array<{ name: string; type: string }>;
     expect(Array.isArray(cols)).toBe(true);
     expect(cols.length).toBe(2);
-    const names = cols.map(c => c.name);
+    const names = cols.map((c) => c.name);
     expect(names).toContain('id');
     expect(names).toContain('val');
   });
 
   it('pragma table_info has correct column metadata shape', () => {
     db.exec('CREATE TABLE sessions (id TEXT PRIMARY KEY, name TEXT NOT NULL)');
-    const cols = db.pragma('table_info(sessions)') as Array<{ name: string; type: string; notnull: number }>;
-    const nameCol = cols.find(c => c.name === 'name');
+    const cols = db.pragma('table_info(sessions)') as Array<{
+      name: string;
+      type: string;
+      notnull: number;
+    }>;
+    const nameCol = cols.find((c) => c.name === 'name');
     expect(nameCol).toBeDefined();
     expect(nameCol!.type).toBe('TEXT');
     expect(nameCol!.notnull).toBe(1);
@@ -236,7 +248,7 @@ describe('NodeSqliteDatabase — pragma', () => {
   it('pragma table_info usable in migration column-check pattern', () => {
     db.exec('CREATE TABLE sessions (id TEXT PRIMARY KEY, name TEXT)');
     const sessionColumns = db.pragma('table_info(sessions)') as Array<{ name: string }>;
-    const columnNames = new Set(sessionColumns.map(col => col.name));
+    const columnNames = new Set(sessionColumns.map((col) => col.name));
     expect(columnNames.has('id')).toBe(true);
     expect(columnNames.has('name')).toBe(true);
     expect(columnNames.has('nonexistent')).toBe(false);
@@ -299,7 +311,7 @@ describe('NodeSqliteDatabase — transaction', () => {
     });
     txn(42, 99);
     const rows = db.prepare('SELECT n FROM counter ORDER BY n ASC').all() as Array<{ n: number }>;
-    expect(rows.map(r => r.n)).toEqual([42, 99]);
+    expect(rows.map((r) => r.n)).toEqual([42, 99]);
   });
 
   it('second call after a rollback leaves DB clean for next transaction', () => {

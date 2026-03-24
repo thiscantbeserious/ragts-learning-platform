@@ -149,10 +149,7 @@ describe('ShellHeader', () => {
     });
 
     it('updates breadcrumb when session id changes', async () => {
-      const sessions = [
-        makeSession('sess-1', 'first.cast'),
-        makeSession('sess-2', 'second.cast'),
-      ];
+      const sessions = [makeSession('sess-1', 'first.cast'), makeSession('sess-2', 'second.cast')];
       const { router } = mountHeader();
       await router.push('/session/sess-1');
       const wrapper = mount(ShellHeader, {

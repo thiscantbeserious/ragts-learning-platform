@@ -51,7 +51,7 @@ export class SectionContentService {
   async getSectionContent(
     sessionId: string,
     sectionId: string,
-    query: SectionContentQuery
+    query: SectionContentQuery,
   ): Promise<SectionContentResult> {
     const session = await this.sessionRepository.findById(sessionId);
     if (!session) {
@@ -78,14 +78,13 @@ export class SectionContentService {
   }
 }
 
-
 /** Build a SectionContentPage from parsed lines and query params. */
 function buildPage(
   sectionId: string,
   lines: SnapshotLine[],
   totalLines: number,
   contentHash: string,
-  query: SectionContentQuery
+  query: SectionContentQuery,
 ): SectionContentPage {
   const offset = query.offset ?? 0;
   const limit = query.limit ?? DEFAULT_SECTION_PAGE_LIMIT;

@@ -66,9 +66,21 @@ describe('buildCleanDocument', () => {
       // Epoch 2: A,B,C,D,E match clean 0-4 (block of 5) → dedup. F,G new.
       // Expected clean: A, B, C, D, E, F, G (7 lines)
       const raw = makeSnapshot([
-        'A', 'B', 'C',           // Epoch 0
-        'A', 'B', 'C', 'D', 'E', // Epoch 1
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', // Epoch 2
+        'A',
+        'B',
+        'C', // Epoch 0
+        'A',
+        'B',
+        'C',
+        'D',
+        'E', // Epoch 1
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G', // Epoch 2
       ]);
 
       const epochs = [
@@ -79,16 +91,34 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(7);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D', 'E', 'F', 'G',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
       ]);
     });
 
     it('maps raw line numbers to clean line numbers correctly', () => {
       const raw = makeSnapshot([
-        'A', 'B', 'C',           // Epoch 0: raw 0-2 -> clean 0-2
-        'A', 'B', 'C', 'D', 'E', // Epoch 1: raw 3-5 -> clean 0-2 (overlap), 6-7 -> clean 3-4
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', // Epoch 2: raw 8-12 -> clean 0-4, 13-14 -> clean 5-6
+        'A',
+        'B',
+        'C', // Epoch 0: raw 0-2 -> clean 0-2
+        'A',
+        'B',
+        'C',
+        'D',
+        'E', // Epoch 1: raw 3-5 -> clean 0-2 (overlap), 6-7 -> clean 3-4
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G', // Epoch 2: raw 8-12 -> clean 0-4, 13-14 -> clean 5-6
       ]);
 
       const epochs = [
@@ -129,7 +159,7 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(3);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual(['A', 'B', 'C']);
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual(['A', 'B', 'C']);
     });
   });
 
@@ -141,20 +171,23 @@ describe('buildCleanDocument', () => {
       // B,C,D match clean 1-3 (block of 3 in the interior) → dedup
       // F,G are new (before the match), H,I are new (after the match)
       // Expected clean: A, B, C, D, E, F, G, H, I (9 lines)
-      const raw = makeSnapshot([
-        'A', 'B', 'C', 'D', 'E',
-        'F', 'G', 'B', 'C', 'D', 'H', 'I',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'B', 'C', 'D', 'H', 'I']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 5 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 5 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(9);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
       ]);
     });
 
@@ -165,11 +198,7 @@ describe('buildCleanDocument', () => {
       //
       // Epoch 2: A,B,C match clean 0-2 (from epoch 0), G,H new
       // Expected clean: A, B, C, D, E, F, G, H (8 lines)
-      const raw = makeSnapshot([
-        'A', 'B', 'C',
-        'D', 'E', 'F',
-        'A', 'B', 'C', 'G', 'H',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'D', 'E', 'F', 'A', 'B', 'C', 'G', 'H']);
 
       const epochs = [
         { eventIndex: 10, rawLineCount: 3 },
@@ -179,8 +208,15 @@ describe('buildCleanDocument', () => {
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(8);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
       ]);
     });
   });
@@ -190,20 +226,21 @@ describe('buildCleanDocument', () => {
       // Epoch 0: A, B, C, D, E (5 lines)
       // Epoch 1: A, B, C, F, G (A,B,C match as block of 3, F,G are new)
       // Expected clean: A, B, C, D, E, F, G (7 lines)
-      const raw = makeSnapshot([
-        'A', 'B', 'C', 'D', 'E',
-        'A', 'B', 'C', 'F', 'G',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'D', 'E', 'A', 'B', 'C', 'F', 'G']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 5 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 5 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(7);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D', 'E', 'F', 'G',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
       ]);
     });
   });
@@ -213,20 +250,20 @@ describe('buildCleanDocument', () => {
       // Epoch 0: A, B, C
       // Epoch 1: X, Y, Z (0% match)
       // Expected clean: A, B, C, X, Y, Z
-      const raw = makeSnapshot([
-        'A', 'B', 'C',
-        'X', 'Y', 'Z',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'X', 'Y', 'Z']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 3 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 3 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(6);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'X', 'Y', 'Z',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'X',
+        'Y',
+        'Z',
       ]);
     });
   });
@@ -235,14 +272,9 @@ describe('buildCleanDocument', () => {
     it('does not dedup when only 2 of 2 lines match (below MIN_MATCH)', () => {
       // Epoch 0: A, B
       // Epoch 1: A, B, C, D (match 2 consecutive = below MIN_MATCH=3)
-      const raw = makeSnapshot([
-        'A', 'B',
-        'A', 'B', 'C', 'D',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'A', 'B', 'C', 'D']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 2 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 2 }];
 
       const result = buildCleanDocument(raw, epochs);
 
@@ -250,21 +282,14 @@ describe('buildCleanDocument', () => {
     });
 
     it('deduplicates exactly 3 matching lines', () => {
-      const raw = makeSnapshot([
-        'A', 'B', 'C',
-        'A', 'B', 'C', 'D',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'A', 'B', 'C', 'D']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 3 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 3 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(4);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D',
-      ]);
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual(['A', 'B', 'C', 'D']);
     });
   });
 
@@ -284,14 +309,12 @@ describe('buildCleanDocument', () => {
         ],
       };
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 3 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 3 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(4);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual(['A', 'B', 'C', 'D']);
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual(['A', 'B', 'C', 'D']);
     });
   });
 
@@ -299,14 +322,9 @@ describe('buildCleanDocument', () => {
     it('does not dedup when no contiguous block reaches MIN_MATCH', () => {
       // Epoch 0: A, B, C, D, E, F (6 lines)
       // Epoch 1: A, X, Y, Z, W, V (only A matches — block of 1, < MIN_MATCH)
-      const raw = makeSnapshot([
-        'A', 'B', 'C', 'D', 'E', 'F',
-        'A', 'X', 'Y', 'Z', 'W', 'V',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'D', 'E', 'F', 'A', 'X', 'Y', 'Z', 'W', 'V']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 6 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 6 }];
 
       const result = buildCleanDocument(raw, epochs);
 
@@ -317,35 +335,30 @@ describe('buildCleanDocument', () => {
     it('deduplicates a 3-line contiguous block even when other lines differ', () => {
       // Epoch 0: A, B, C, D (4 lines)
       // Epoch 1: X, A, B, C, Y (A,B,C match clean 0-2 as block of 3; X,Y are new)
-      const raw = makeSnapshot([
-        'A', 'B', 'C', 'D',
-        'X', 'A', 'B', 'C', 'Y',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'D', 'X', 'A', 'B', 'C', 'Y']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 4 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 4 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       // X is new, A,B,C deduped, Y is new
       expect(result.cleanSnapshot.lines.length).toBe(6);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D', 'X', 'Y',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'D',
+        'X',
+        'Y',
       ]);
     });
   });
 
   describe('rawLineCountToClean mapping', () => {
     it('maps raw line counts to clean line counts correctly', () => {
-      const raw = makeSnapshot([
-        'A', 'B', 'C',
-        'A', 'B', 'C', 'D', 'E',
-      ]);
+      const raw = makeSnapshot(['A', 'B', 'C', 'A', 'B', 'C', 'D', 'E']);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 3 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 3 }];
 
       const result = buildCleanDocument(raw, epochs);
 
@@ -373,9 +386,7 @@ describe('buildCleanDocument', () => {
 
     it('handles epoch boundary at end of snapshot', () => {
       const raw = makeSnapshot(['A', 'B', 'C']);
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 3 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 3 }];
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(3);
@@ -385,23 +396,23 @@ describe('buildCleanDocument', () => {
       // Simulates TUI startup: partial header, blank, full header + details
       // The partial header (line 0) + blank (line 1) should be removed
       const raw = makeSnapshot([
-        'HEADER',     // partial render
-        '',           // blank separator
-        'HEADER',     // full render starts here
+        'HEADER', // partial render
+        '', // blank separator
+        'HEADER', // full render starts here
         'SUBTITLE',
         'INFO',
       ]);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 5 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 5 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       // Stutter removed: first HEADER + blank gone, only full render kept
       expect(result.cleanSnapshot.lines.length).toBe(3);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'HEADER', 'SUBTITLE', 'INFO',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'HEADER',
+        'SUBTITLE',
+        'INFO',
       ]);
     });
 
@@ -409,14 +420,12 @@ describe('buildCleanDocument', () => {
       // Lines with non-trivial content between repetitions should NOT be stutters
       const raw = makeSnapshot([
         'HEADER',
-        'DIFFERENT_CONTENT',  // non-trivial line between
+        'DIFFERENT_CONTENT', // non-trivial line between
         'HEADER',
         'SUBTITLE',
       ]);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 4 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 4 }];
 
       const result = buildCleanDocument(raw, epochs);
 
@@ -433,19 +442,42 @@ describe('buildCleanDocument', () => {
       //   Z is new
       // Expected clean: A,B,C,D,E,F,G,H,X,Y,Z (11 lines)
       const raw = makeSnapshot([
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-        'A', 'B', 'C', 'X', 'Y', 'F', 'G', 'H', 'Z',
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'A',
+        'B',
+        'C',
+        'X',
+        'Y',
+        'F',
+        'G',
+        'H',
+        'Z',
       ]);
 
-      const epochs = [
-        { eventIndex: 10, rawLineCount: 8 },
-      ];
+      const epochs = [{ eventIndex: 10, rawLineCount: 8 }];
 
       const result = buildCleanDocument(raw, epochs);
 
       expect(result.cleanSnapshot.lines.length).toBe(11);
-      expect(result.cleanSnapshot.lines.map(l => l.spans[0]!.text)).toEqual([
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'X', 'Y', 'Z',
+      expect(result.cleanSnapshot.lines.map((l) => l.spans[0]!.text)).toEqual([
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'X',
+        'Y',
+        'Z',
       ]);
     });
   });
@@ -492,7 +524,7 @@ describe('buildCleanDocument — epoch boundary clamping', () => {
     const lines = Array.from({ length: 10 }, (_, i) => `row-${i}`);
     const raw = makeSnapshot(lines);
     const epochs = [
-      { eventIndex: 5, rawLineCount: 50 },  // exceeds 10
+      { eventIndex: 5, rawLineCount: 50 }, // exceeds 10
       { eventIndex: 10, rawLineCount: 100 }, // also exceeds 10
     ];
 

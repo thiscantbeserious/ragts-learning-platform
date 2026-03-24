@@ -1,16 +1,7 @@
 <template>
-  <div
-    class="skeleton-main"
-    role="status"
-    aria-busy="true"
-    aria-label="Loading session"
-  >
+  <div class="skeleton-main" role="status" aria-busy="true" aria-label="Loading session">
     <!-- Section header placeholders -->
-    <div
-      v-for="n in sectionCount"
-      :key="n"
-      class="skeleton-main__section-header"
-    >
+    <div v-for="n in sectionCount" :key="n" class="skeleton-main__section-header">
       <div class="skeleton skeleton--text skeleton-main__section-title" />
     </div>
 

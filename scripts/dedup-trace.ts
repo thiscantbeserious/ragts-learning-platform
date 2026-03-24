@@ -11,13 +11,19 @@ const MIN_MATCH = 3;
 const HEADER_TEXT = '╭─── Claude Code v2.1.34';
 
 function lineKey(line: SnapshotLine): string {
-  return line.spans.map(span => span.text ?? '').join('').trimEnd();
+  return line.spans
+    .map((span) => span.text ?? '')
+    .join('')
+    .trimEnd();
 }
 
 async function main() {
   await initVt();
   const filePath = process.argv[2];
-  if (!filePath) { console.error('Usage: tsx dedup-trace.ts <file>'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: tsx dedup-trace.ts <file>');
+    process.exit(1);
+  }
 
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -45,7 +51,10 @@ async function main() {
       if (str.includes('\x1b[?1049l')) inAltScreen = false;
       if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
         const lineCount = vt.getAllLines().lines.length;
-        if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+        if (
+          epochBoundaries.length === 0 ||
+          epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount
+        ) {
           epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
         }
       }
@@ -72,7 +81,10 @@ async function main() {
     cleanLines.push(line);
     const key = lineKey(line);
     let positions = cleanIndex.get(key);
-    if (!positions) { positions = []; cleanIndex.set(key, positions); }
+    if (!positions) {
+      positions = [];
+      cleanIndex.set(key, positions);
+    }
     positions.push(cleanPos);
     return cleanPos;
   }
@@ -115,7 +127,9 @@ async function main() {
       if (isHeader && headersSeen === 2) {
         console.log(`\n=== TRACE: 2nd header at raw ${rawIdx}, epoch ${epochIdx}, pos ${i} ===`);
         console.log(`Clean doc size: ${cleanLines.length}`);
-        console.log(`Candidates: ${candidates?.length ?? 0} at positions ${candidates?.join(', ')}`);
+        console.log(
+          `Candidates: ${candidates?.length ?? 0} at positions ${candidates?.join(', ')}`,
+        );
         console.log(`Best block: ${bestLen} at clean ${bestCleanStart}`);
 
         if (candidates) {
@@ -125,16 +139,20 @@ async function main() {
               const rawText = lineKey(rawLines[curr.start + i + k]);
               const cleanText = cp + k < cleanLines.length ? lineKey(cleanLines[cp + k]) : '(END)';
               const match = rawText === cleanText;
-              console.log(`    k=${k}: raw="${rawText.slice(0, 60)}" clean="${cleanText.slice(0, 60)}" ${match ? '✓' : '✗'}`);
+              console.log(
+                `    k=${k}: raw="${rawText.slice(0, 60)}" clean="${cleanText.slice(0, 60)}" ${match ? '✓' : '✗'}`,
+              );
               if (!match) break;
             }
           }
         }
 
         // Also show what the raw epoch looks like around the header
-        console.log(`\n  Raw epoch context (pos ${i} to ${i+5}):`);
+        console.log(`\n  Raw epoch context (pos ${i} to ${i + 5}):`);
         for (let k = 0; k < Math.min(5, currLen - i); k++) {
-          console.log(`    raw[${curr.start + i + k}]: "${lineKey(rawLines[curr.start + i + k]).slice(0, 80)}"`);
+          console.log(
+            `    raw[${curr.start + i + k}]: "${lineKey(rawLines[curr.start + i + k]).slice(0, 80)}"`,
+          );
         }
       }
 

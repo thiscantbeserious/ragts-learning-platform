@@ -29,7 +29,9 @@ async function flush(count = 10): Promise<void> {
   for (let i = 0; i < count; i++) await nextTick();
 }
 
-function makeMetaResponse(overrides: Partial<SessionMetadataResponse> = {}): SessionMetadataResponse {
+function makeMetaResponse(
+  overrides: Partial<SessionMetadataResponse> = {},
+): SessionMetadataResponse {
   return {
     id: 'sess-zero',
     filename: 'zero-sections.cast',
@@ -117,7 +119,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
 
     const calls = vi.mocked(fetch).mock.calls;
     const snapshotCalls = calls.filter(
-      ([url]) => typeof url === 'string' && url.includes('/snapshot')
+      ([url]) => typeof url === 'string' && url.includes('/snapshot'),
     );
     expect(snapshotCalls).toHaveLength(0);
   });
@@ -158,7 +160,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
 
     // Reload with a different session that has sectionCount > 0
     vi.mocked(fetch).mockResolvedValueOnce(
-      makeOkResponse(makeMetaResponse({ id: 'sess-2', sectionCount: 6, sections: [] }))
+      makeOkResponse(makeMetaResponse({ id: 'sess-2', sectionCount: 6, sections: [] })),
     );
     sessionId.value = 'sess-2';
     await flush();

@@ -91,7 +91,7 @@ describe('EventLogService.getEvents', () => {
     expect(result.ok).toBe(true);
     assert(result.ok);
     expect(result.data).toHaveLength(3);
-    const types = result.data.map(e => e.eventType);
+    const types = result.data.map((e) => e.eventType);
     expect(types).toEqual(['session.validated', 'session.detected', 'session.ready']);
   });
 

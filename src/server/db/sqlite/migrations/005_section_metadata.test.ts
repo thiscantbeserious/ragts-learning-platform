@@ -54,7 +54,7 @@ function getColumns(db: Database.Database, table: string): string[] {
 function insertSession(db: Database.Database, id: string, snapshot?: string): void {
   db.prepare(
     `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at, snapshot)
-     VALUES (?, ?, ?, ?, ?, ?)`
+     VALUES (?, ?, ?, ?, ?, ?)`,
   ).run(id, `${id}.cast`, `sessions/${id}.cast`, 100, '2026-01-01T00:00:00Z', snapshot ?? null);
 }
 
@@ -64,11 +64,11 @@ function insertCliSection(
   id: string,
   sessionId: string,
   startLine: number,
-  endLine: number
+  endLine: number,
 ): void {
   db.prepare(
     `INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)
-     VALUES (?, ?, 'detected', 0, 10, null, null, ?, ?)`
+     VALUES (?, ?, 'detected', 0, 10, null, null, ?, ?)`,
   ).run(id, sessionId, startLine, endLine);
 }
 
@@ -77,11 +77,11 @@ function insertTuiSection(
   db: Database.Database,
   id: string,
   sessionId: string,
-  snapshotJson: string
+  snapshotJson: string,
 ): void {
   db.prepare(
     `INSERT INTO sections (id, session_id, type, start_event, end_event, label, snapshot, start_line, end_line)
-     VALUES (?, ?, 'detected', 0, 10, null, ?, null, null)`
+     VALUES (?, ?, 'detected', 0, 10, null, ?, null, null)`,
   ).run(id, sessionId, snapshotJson);
 }
 
@@ -123,7 +123,7 @@ describe('migrate005SectionMetadata', () => {
       // Insert section without new columns — they should default to null
       db.exec(
         `INSERT INTO sections (id, session_id, type, start_event)
-         VALUES ('sec-null', 's-nullable', 'detected', 0)`
+         VALUES ('sec-null', 's-nullable', 'detected', 0)`,
       );
       const section = getSection(db, 'sec-null');
       expect(section['line_count']).toBeNull();
@@ -179,7 +179,7 @@ describe('migrate005SectionMetadata', () => {
       insertSession(db, 's-empty');
       db.prepare(
         `INSERT INTO sections (id, session_id, type, start_event)
-         VALUES ('empty-1', 's-empty', 'detected', 0)`
+         VALUES ('empty-1', 's-empty', 'detected', 0)`,
       ).run();
       migrate005SectionMetadata(db);
       const section = getSection(db, 'empty-1');
@@ -211,7 +211,9 @@ describe('migrate005SectionMetadata', () => {
       migrate005SectionMetadata(db);
 
       const section = getSection(db, 'cli-slice');
-      const parsed = JSON.parse(section['snapshot'] as string) as { lines: Array<{ text: string }> };
+      const parsed = JSON.parse(section['snapshot'] as string) as {
+        lines: Array<{ text: string }>;
+      };
       expect(parsed.lines[0]!.text).toBe('line 5');
       expect(parsed.lines[9]!.text).toBe('line 14');
     });
@@ -224,7 +226,9 @@ describe('migrate005SectionMetadata', () => {
       migrate005SectionMetadata(db);
 
       const section = getSection(db, 'tui-keep');
-      const parsed = JSON.parse(section['snapshot'] as string) as { lines: Array<{ text: string }> };
+      const parsed = JSON.parse(section['snapshot'] as string) as {
+        lines: Array<{ text: string }>;
+      };
       expect(parsed.lines[0]!.text).toBe('tui-line');
     });
 
@@ -274,7 +278,7 @@ describe('migrate005SectionMetadata', () => {
       insertSession(db, 's-no-snap');
       db.prepare(
         `INSERT INTO sections (id, session_id, type, start_event)
-         VALUES ('empty-hash', 's-no-snap', 'detected', 0)`
+         VALUES ('empty-hash', 's-no-snap', 'detected', 0)`,
       ).run();
 
       migrate005SectionMetadata(db);

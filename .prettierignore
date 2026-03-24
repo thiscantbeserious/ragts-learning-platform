@@ -1,0 +1,10 @@
+dist/
+coverage/
+node_modules/
+packages/vt-wasm/pkg/
+design/
+.agents/
+.state/
+.research/
+data/
+*.snap

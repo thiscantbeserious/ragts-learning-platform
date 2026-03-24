@@ -109,7 +109,9 @@ describe('SessionService.getSession — storage read throws non-Error', () => {
     // Provide a storageAdapter that throws a non-Error value on read
     const brokenStorage = {
       ...ctx.storageAdapter,
-      read: (_id: string) => { throw 'disk-failure'; },
+      read: (_id: string) => {
+        throw 'disk-failure';
+      },
     };
 
     service = new SessionService({
@@ -170,7 +172,9 @@ describe('SessionService.redetectSession — UNIQUE constraint concurrent branch
     // then create throws UNIQUE, then second findBySessionId returns the real job.
     let findCallCount = 0;
     const wrappedQueue = {
-      create: (_id: string) => { throw new Error('UNIQUE constraint failed'); },
+      create: (_id: string) => {
+        throw new Error('UNIQUE constraint failed');
+      },
       findBySessionId: async (id: string) => {
         findCallCount++;
         if (findCallCount === 1) return null; // first call: no existing job
@@ -201,7 +205,9 @@ describe('SessionService.redetectSession — UNIQUE constraint concurrent branch
 
   it('re-throws when create fails with a non-UNIQUE error', async () => {
     const badJobQueue = {
-      create: (_id: string) => { throw new Error('Disk full'); },
+      create: (_id: string) => {
+        throw new Error('Disk full');
+      },
       findBySessionId: async () => null,
       findPending: ctx.jobQueue.findPending.bind(ctx.jobQueue),
       start: ctx.jobQueue.start.bind(ctx.jobQueue),

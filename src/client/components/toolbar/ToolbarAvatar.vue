@@ -1,10 +1,5 @@
 <template>
-  <button
-    class="toolbar-avatar"
-    title="User menu"
-    type="button"
-    @click="handleClick"
-  >
+  <button class="toolbar-avatar" title="User menu" type="button" @click="handleClick">
     {{ initial }}
   </button>
 </template>
@@ -45,7 +40,11 @@ function handleClick(event: MouseEvent): void {
   height: var(--toolbar-btn-size, 30px);
   border-radius: var(--radius-full);
   border: 1px solid transparent;
-  background: linear-gradient(135deg, var(--toolbar-avatar-gradient-start), var(--toolbar-avatar-gradient-end));
+  background: linear-gradient(
+    135deg,
+    var(--toolbar-avatar-gradient-start),
+    var(--toolbar-avatar-gradient-end)
+  );
   display: flex;
   align-items: center;
   justify-content: center;

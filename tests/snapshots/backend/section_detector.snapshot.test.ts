@@ -5,7 +5,10 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { SectionDetector, type SectionBoundary } from '../../../src/server/processing/section_detector.js';
+import {
+  SectionDetector,
+  type SectionBoundary,
+} from '../../../src/server/processing/section_detector.js';
 import type { AsciicastEvent, Marker } from '../../../src/shared/asciicast-types.js';
 
 /** Generate N output events with the given timing gap. */
@@ -15,16 +18,23 @@ function makeEvents(count: number, gap = 0.1): AsciicastEvent[] {
 
 /** Serialize boundaries for deterministic snapshots (exclude non-deterministic fields). */
 function serializeBoundaries(boundaries: SectionBoundary[]) {
-  return boundaries.map(b => ({
+  return boundaries.map((b) => ({
     eventIndex: b.eventIndex,
     signals: [...b.signals].sort((a, b) => a.localeCompare(b)),
     label: b.label,
-    score: typeof b.score === 'number' && Number.isFinite(b.score) ? Math.round(b.score * 100) / 100 : 'Infinity',
+    score:
+      typeof b.score === 'number' && Number.isFinite(b.score)
+        ? Math.round(b.score * 100) / 100
+        : 'Infinity',
   }));
 }
 
 /** Detect boundaries for events with a signal sandwiched between normal events. */
-function detectWithSignal(signal: AsciicastEvent, beforeCount = 150, afterCount = 150): SectionBoundary[] {
+function detectWithSignal(
+  signal: AsciicastEvent,
+  beforeCount = 150,
+  afterCount = 150,
+): SectionBoundary[] {
   const events: AsciicastEvent[] = [
     ...makeEvents(beforeCount, 0.2),
     signal,
@@ -37,7 +47,8 @@ function detectWithSignal(signal: AsciicastEvent, beforeCount = 150, afterCount 
 function loadFixtureWithMarkers(fixturePath: string) {
   const content = readFileSync(fixturePath, 'utf-8');
   const lines = content.split('\n').filter((l: string) => l.trim());
-  const events: AsciicastEvent[] = lines.slice(1)
+  const events: AsciicastEvent[] = lines
+    .slice(1)
     .map((l: string) => JSON.parse(l))
     .filter((e: any) => Array.isArray(e));
   const markers: Marker[] = events
@@ -53,21 +64,21 @@ describe('section-detector snapshots', () => {
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
     expect(boundaries.length).toBeGreaterThanOrEqual(1);
-    expect(boundaries.some(b => b.signals.includes('timing_gap'))).toBe(true);
+    expect(boundaries.some((b) => b.signals.includes('timing_gap'))).toBe(true);
   });
 
   it('screen clear signal — boundaries from clear sequences', () => {
     const boundaries = detectWithSignal([0.1, 'o', '\x1b[2J\x1b[H']);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
-    expect(boundaries.some(b => b.signals.includes('screen_clear'))).toBe(true);
+    expect(boundaries.some((b) => b.signals.includes('screen_clear'))).toBe(true);
   });
 
   it('alt-screen exit signal', () => {
     const boundaries = detectWithSignal([0.1, 'o', '\x1b[?1049l']);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
-    expect(boundaries.some(b => b.signals.includes('alt_screen_exit'))).toBe(true);
+    expect(boundaries.some((b) => b.signals.includes('alt_screen_exit'))).toBe(true);
   });
 
   it('volume burst signal — after quiet period', () => {
@@ -81,8 +92,8 @@ describe('section-detector snapshots', () => {
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
     // The merged boundary should have both signals
-    const merged = boundaries.find(b =>
-      b.signals.includes('timing_gap') && b.signals.includes('screen_clear')
+    const merged = boundaries.find(
+      (b) => b.signals.includes('timing_gap') && b.signals.includes('screen_clear'),
     );
     expect(merged).toBeDefined();
   });
@@ -94,15 +105,13 @@ describe('section-detector snapshots', () => {
       ...makeEvents(200, 0.2),
     ];
 
-    const markers: Marker[] = [
-      { time: 40, label: 'Test Marker', index: 200 },
-    ];
+    const markers: Marker[] = [{ time: 40, label: 'Test Marker', index: 200 }];
 
     const detector = new SectionDetector(events);
     const boundaries = detector.detectWithMarkers(markers);
 
     expect(serializeBoundaries(boundaries)).toMatchSnapshot();
-    expect(boundaries.some(b => b.signals.includes('marker'))).toBe(true);
+    expect(boundaries.some((b) => b.signals.includes('marker'))).toBe(true);
   });
 
   it('real fixture boundaries — valid-with-markers.cast', () => {

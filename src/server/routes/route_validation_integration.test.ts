@@ -51,7 +51,9 @@ beforeEach(async () => {
     jobQueue: ctx.jobQueue,
     eventLog: ctx.eventLog,
     eventBus,
-    ping: async () => { /* no-op */ },
+    ping: async () => {
+      /* no-op */
+    },
     config: {
       dataDir: testDir,
       port: 3000,
@@ -217,7 +219,10 @@ describe('POST /api/upload — header validation', () => {
 
   it('rejects an asciicast file with width 0 (fails Typia PositiveUInt32 constraint)', async () => {
     const formData = new FormData();
-    formData.append('file', new File([HEADER_ZERO_WIDTH], 'bad-width.cast', { type: 'text/plain' }));
+    formData.append(
+      'file',
+      new File([HEADER_ZERO_WIDTH], 'bad-width.cast', { type: 'text/plain' }),
+    );
 
     const res = await app.fetch(
       new Request('http://localhost/api/upload', { method: 'POST', body: formData }),

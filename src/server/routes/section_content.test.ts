@@ -9,7 +9,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Hono } from 'hono';
 import { handleGetSectionContent } from './section_content.js';
-import type { SectionContentService, SectionContentResult } from '../services/section_content_service.js';
+import type {
+  SectionContentService,
+  SectionContentResult,
+} from '../services/section_content_service.js';
 import type { SectionContentPage } from '../../shared/types/api.js';
 
 // ---------------------------------------------------------------------------
@@ -38,7 +41,7 @@ function makeMockService(result: SectionContentResult): SectionContentService {
 function makeApp(service: SectionContentService) {
   const app = new Hono();
   app.get('/api/sessions/:id/sections/:sectionId/content', (c) =>
-    handleGetSectionContent(c, service)
+    handleGetSectionContent(c, service),
   );
   return app;
 }
@@ -57,10 +60,10 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
   it('returns 200 with section content page', async () => {
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content'),
     );
     expect(res.status).toBe(200);
-    const body = await res.json() as SectionContentPage;
+    const body = (await res.json()) as SectionContentPage;
     expect(body.sectionId).toBe('sect-1');
     expect(body.lines).toHaveLength(1);
   });
@@ -68,7 +71,7 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
   it('sets ETag header on 200 response', async () => {
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content'),
     );
     expect(res.headers.get('etag')).toBe('"abc123"');
   });
@@ -76,7 +79,7 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
   it('sets Cache-Control header on 200 response', async () => {
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content'),
     );
     expect(res.headers.get('cache-control')).toBeTruthy();
   });
@@ -87,7 +90,7 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
     const res = await app.fetch(
       new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content', {
         headers: { 'If-None-Match': '"abc123"' },
-      })
+      }),
     );
     expect(res.status).toBe(304);
   });
@@ -96,10 +99,10 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
     mockService = makeMockService({ ok: false, status: 404, error: 'Session not found' });
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/missing/sections/sect-1/content')
+      new Request('http://localhost/api/sessions/missing/sections/sect-1/content'),
     );
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toContain('not found');
   });
 
@@ -107,7 +110,7 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
     mockService = makeMockService({ ok: false, status: 404, error: 'Section not found' });
     const app = makeApp(mockService);
     const res = await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/missing/content')
+      new Request('http://localhost/api/sessions/sess-1/sections/missing/content'),
     );
     expect(res.status).toBe(404);
   });
@@ -115,24 +118,26 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
   it('passes offset and limit query params to service', async () => {
     const app = makeApp(mockService);
     await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content?offset=10&limit=25')
+      new Request(
+        'http://localhost/api/sessions/sess-1/sections/sect-1/content?offset=10&limit=25',
+      ),
     );
     expect(mockService.getSectionContent).toHaveBeenCalledWith(
       'sess-1',
       'sect-1',
-      expect.objectContaining({ offset: 10, limit: 25 })
+      expect.objectContaining({ offset: 10, limit: 25 }),
     );
   });
 
   it('passes limit=all sentinel when specified', async () => {
     const app = makeApp(mockService);
     await app.fetch(
-      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content?limit=all')
+      new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content?limit=all'),
     );
     expect(mockService.getSectionContent).toHaveBeenCalledWith(
       'sess-1',
       'sect-1',
-      expect.objectContaining({ limit: 'all' })
+      expect.objectContaining({ limit: 'all' }),
     );
   });
 
@@ -141,12 +146,12 @@ describe('GET /api/sessions/:id/sections/:sectionId/content', () => {
     await app.fetch(
       new Request('http://localhost/api/sessions/sess-1/sections/sect-1/content', {
         headers: { 'If-None-Match': '"stale-hash"' },
-      })
+      }),
     );
     expect(mockService.getSectionContent).toHaveBeenCalledWith(
       'sess-1',
       'sect-1',
-      expect.objectContaining({ ifNoneMatch: '"stale-hash"' })
+      expect.objectContaining({ ifNoneMatch: '"stale-hash"' }),
     );
   });
 });
