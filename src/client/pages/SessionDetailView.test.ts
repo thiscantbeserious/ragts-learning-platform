@@ -4,7 +4,7 @@
  * Covers:
  *  - loading state delegates to SkeletonMain
  *  - error state renders inline
- *  - data wired from useSessionV2 to SessionContent
+ *  - data wired from useSession to SessionContent
  *  - large sessions (sectionCount > SMALL_SESSION_THRESHOLD) show SectionNavigator
  *  - small sessions (sectionCount <= SMALL_SESSION_THRESHOLD) do NOT show SectionNavigator
  *  - fetchSectionContent forwarded as onHoverSection on the navigator
@@ -20,7 +20,7 @@ import SessionDetailView from './SessionDetailView.vue';
 // ---------------------------------------------------------------------------
 
 vi.mock('../composables/use_session.js', () => ({
-  useSessionV2: vi.fn(),
+  useSession: vi.fn(),
 }));
 
 vi.mock('../components/SkeletonMain.vue', () => ({
@@ -49,13 +49,13 @@ vi.mock('../components/SectionNavigator.vue', () => ({
   },
 }));
 
-import { useSessionV2 } from '../composables/use_session.js';
+import { useSession } from '../composables/use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-type UseSessionV2Return = ReturnType<typeof import('../composables/use_session.js').useSessionV2>;
+type UseSessionReturn = ReturnType<typeof import('../composables/use_session.js').useSession>;
 
 function makeSections(count: number) {
   return Array.from({ length: count }, (_, i) => ({
@@ -71,21 +71,19 @@ function makeSections(count: number) {
   }));
 }
 
-function mountView(overrides: Partial<UseSessionV2Return> = {}) {
-  const mockedUseSessionV2 = vi.mocked(useSessionV2);
-  const fetchSectionContent = vi
-    .fn()
-    .mockResolvedValue({
-      sectionId: 'sec-0',
-      lines: [],
-      totalLines: 0,
-      offset: 0,
-      limit: 500,
-      hasMore: false,
-      contentHash: 'abc',
-    });
+function mountView(overrides: Partial<UseSessionReturn> = {}) {
+  const mockedUseSession = vi.mocked(useSession);
+  const fetchSectionContent = vi.fn().mockResolvedValue({
+    sectionId: 'sec-0',
+    lines: [],
+    totalLines: 0,
+    offset: 0,
+    limit: 500,
+    hasMore: false,
+    contentHash: 'abc',
+  });
 
-  mockedUseSessionV2.mockReturnValue({
+  mockedUseSession.mockReturnValue({
     session: ref(null),
     sections: ref([]),
     loading: ref(false),
@@ -94,14 +92,14 @@ function mountView(overrides: Partial<UseSessionV2Return> = {}) {
     detectionStatus: ref('completed'),
     fetchSectionContent,
     ...overrides,
-  } as UseSessionV2Return);
+  } as UseSessionReturn);
 
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/session/:id', name: 'session-detail', component: SessionDetailView }],
   });
 
-  return { router, fetchSectionContent, mockedUseSessionV2 };
+  return { router, fetchSectionContent, mockedUseSession };
 }
 
 // ---------------------------------------------------------------------------
@@ -247,7 +245,7 @@ describe('SessionDetailView (Stage 11)', () => {
   });
 
   describe('detectionStatus prop wiring', () => {
-    it('passes detectionStatus from useSessionV2 to SessionContent', async () => {
+    it('passes detectionStatus from useSession to SessionContent', async () => {
       const SessionContentStub = {
         name: 'SessionContentPropsCapture',
         props: [

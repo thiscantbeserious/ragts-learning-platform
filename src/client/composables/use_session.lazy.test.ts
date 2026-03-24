@@ -21,7 +21,7 @@ vi.mock('./useSSE.js', () => ({
   resetConnectionBudget: vi.fn(),
 }));
 
-import { useSessionV2 } from './use_session.js';
+import { useSession } from './use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -99,7 +99,7 @@ function makeTestCache(): SectionCache {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('useSessionV2 — large session lazy fetch', () => {
+describe('useSession — large session lazy fetch', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     mockSseStatus = ref(undefined);
@@ -113,7 +113,7 @@ describe('useSessionV2 — large session lazy fetch', () => {
   it('does NOT auto-fetch bulk content for sessions exceeding SMALL_SESSION_THRESHOLD', async () => {
     vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeLargeMetaResponse()));
 
-    const { loading } = useSessionV2(ref('sess-large'), makeTestCache());
+    const { loading } = useSession(ref('sess-large'), makeTestCache());
     await flush();
 
     expect(loading.value).toBe(false);
@@ -127,7 +127,7 @@ describe('useSessionV2 — large session lazy fetch', () => {
       .mockResolvedValueOnce(makeOkResponse(makeLargeMetaResponse()))
       .mockResolvedValueOnce(makeOkResponse(page));
 
-    const { fetchSectionContent } = useSessionV2(ref('sess-large'), makeTestCache());
+    const { fetchSectionContent } = useSession(ref('sess-large'), makeTestCache());
     await flush();
 
     const result = await fetchSectionContent('sec-0', 0);
@@ -146,7 +146,7 @@ describe('useSessionV2 — large session lazy fetch', () => {
       .mockResolvedValueOnce(makeOkResponse(page));
 
     const cache = makeTestCache();
-    const { fetchSectionContent } = useSessionV2(ref('sess-large'), cache);
+    const { fetchSectionContent } = useSession(ref('sess-large'), cache);
     await flush();
 
     await fetchSectionContent('sec-0', 0);
@@ -162,7 +162,7 @@ describe('useSessionV2 — large session lazy fetch', () => {
       .mockResolvedValueOnce(makeOkResponse(makeLargeMetaResponse()))
       .mockResolvedValueOnce(makeOkResponse(page));
 
-    const { fetchSectionContent } = useSessionV2(ref('sess-large'), makeTestCache());
+    const { fetchSectionContent } = useSession(ref('sess-large'), makeTestCache());
     await flush();
 
     await fetchSectionContent('sec-0', 0);
@@ -180,7 +180,7 @@ describe('useSessionV2 — large session lazy fetch', () => {
       .mockResolvedValueOnce(makeOkResponse(makeLargeMetaResponse()))
       .mockResolvedValueOnce(makeOkResponse(page));
 
-    const { fetchSectionContent } = useSessionV2(ref('sess-large'), makeTestCache());
+    const { fetchSectionContent } = useSession(ref('sess-large'), makeTestCache());
     await flush();
 
     await fetchSectionContent('sec-2', 500, 500);

@@ -1,5 +1,5 @@
 /**
- * useSessionV2 — metadata-first session composable with lazy section content loading.
+ * useSession — metadata-first session composable with lazy section content loading.
  *
  * Fetches session metadata (header + section metadata) first, then:
  * - Small sessions (sectionCount <= SMALL_SESSION_THRESHOLD): bulk-fetches all section
@@ -85,7 +85,7 @@ const TERMINAL = new Set(['completed', 'failed', 'interrupted']);
  * @param sessionId - reactive or static session identifier
  * @param cache - optional SectionCache injection (defaults to module singleton)
  */
-export function useSessionV2(sessionId: MaybeRef<string>, cache?: SectionCache) {
+export function useSession(sessionId: MaybeRef<string>, cache?: SectionCache) {
   const _cache = useSectionCache(cache);
 
   const session = ref<SessionMetadataResponse | null>(null);
