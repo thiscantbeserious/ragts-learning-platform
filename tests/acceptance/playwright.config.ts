@@ -9,8 +9,7 @@
  */
 
 import { defineConfig, devices } from '@playwright/test';
-import pkg from '@bgotink/playwright-coverage';
-const { collectV8Coverage } = pkg;
+import { defineCoverageReporterConfig } from '@bgotink/playwright-coverage';
 
 export default defineConfig({
   testDir: '.',
@@ -24,10 +23,13 @@ export default defineConfig({
     // Output V8 coverage as lcov for merging with vitest coverage
     ...(process.env.PLAYWRIGHT_COVERAGE
       ? [
-          collectV8Coverage({
-            outputDir: '../../coverage/playwright',
-            reporter: ['lcov'],
-          }) as any,
+          [
+            '@bgotink/playwright-coverage',
+            defineCoverageReporterConfig({
+              resultDir: '../../coverage/playwright',
+              reports: [['lcovonly', { file: 'lcov.info' }]],
+            }),
+          ] as const,
         ]
       : []),
   ],
