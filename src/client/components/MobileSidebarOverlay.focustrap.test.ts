@@ -68,10 +68,21 @@ function makeLayoutState(overlayOpen = false) {
   const isMobileOverlayOpen = ref(overlayOpen);
   const isSidebarOpen = ref(true);
   const isMobile = ref(true);
-  const closeMobileOverlay = vi.fn(() => { isMobileOverlayOpen.value = false; });
-  const openMobileOverlay = vi.fn(() => { isMobileOverlayOpen.value = true; });
+  const closeMobileOverlay = vi.fn(() => {
+    isMobileOverlayOpen.value = false;
+  });
+  const openMobileOverlay = vi.fn(() => {
+    isMobileOverlayOpen.value = true;
+  });
   const toggleSidebar = vi.fn();
-  return { isMobileOverlayOpen, isSidebarOpen, isMobile, closeMobileOverlay, openMobileOverlay, toggleSidebar };
+  return {
+    isMobileOverlayOpen,
+    isSidebarOpen,
+    isMobile,
+    closeMobileOverlay,
+    openMobileOverlay,
+    toggleSidebar,
+  };
 }
 
 function makeSessionListState(): SessionListState {
@@ -110,7 +121,7 @@ async function mountOverlay(overlayOpen = false) {
 }
 
 afterEach(() => {
-  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach(el => el.remove());
+  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach((el) => el.remove());
   document.documentElement.style.overflow = '';
 });
 
@@ -156,7 +167,12 @@ describe('MobileSidebarOverlay — focus trap: panel itself focused (lines 88-94
     });
 
     // Tab with panel as activeElement → should direct to first element
-    const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: false, bubbles: true, cancelable: true });
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: false,
+      bubbles: true,
+      cancelable: true,
+    });
     panel!.dispatchEvent(event);
 
     expect(focusSpy).toHaveBeenCalled();
@@ -195,7 +211,12 @@ describe('MobileSidebarOverlay — focus trap: panel itself focused (lines 88-94
     });
 
     // Shift+Tab with panel as activeElement → should direct to last element
-    const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true });
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     panel!.dispatchEvent(event);
 
     expect(focusSpy).toHaveBeenCalled();
@@ -236,7 +257,12 @@ describe('MobileSidebarOverlay — focus trap: Shift+Tab from first (lines 98-99
     });
 
     // Shift+Tab from first → should wrap to last
-    const event = new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true });
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
     panel!.dispatchEvent(event);
 
     expect(focusSpy).toHaveBeenCalled();

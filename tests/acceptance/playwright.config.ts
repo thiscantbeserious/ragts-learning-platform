@@ -22,10 +22,12 @@ export default defineConfig({
     ['list'],
     // Output V8 coverage as lcov for merging with vitest coverage
     ...(process.env.PLAYWRIGHT_COVERAGE
-      ? [collectV8Coverage({
-          outputDir: '../../coverage/playwright',
-          reporter: ['lcov'],
-        }) as any]
+      ? [
+          collectV8Coverage({
+            outputDir: '../../coverage/playwright',
+            reporter: ['lcov'],
+          }) as any,
+        ]
       : []),
   ],
   timeout: 30000,

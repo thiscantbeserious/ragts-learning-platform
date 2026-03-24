@@ -104,9 +104,9 @@ describe('validate stage', () => {
     const header = JSON.stringify({ version: 3, term: { cols: 80, rows: 24 } });
     const lines = [
       header,
-      JSON.stringify([1.0, 'o', 'a\r\n']),  // elapsed: 1.0
+      JSON.stringify([1.0, 'o', 'a\r\n']), // elapsed: 1.0
       JSON.stringify([2.0, 'm', 'Step 1']), // elapsed: 3.0
-      JSON.stringify([0.5, 'o', 'b\r\n']),  // elapsed: 3.5
+      JSON.stringify([0.5, 'o', 'b\r\n']), // elapsed: 3.5
       JSON.stringify([1.5, 'm', 'Step 2']), // elapsed: 5.0
     ];
     const filePath = join(tmpDir, 'cumulative.cast');
@@ -161,7 +161,7 @@ describe('detect stage', () => {
   it('returns boundaries array for events with markers', async () => {
     const content = buildMarkerCast();
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
     const markers = [
       { time: 1.0, label: 'Start', index: 10 },
       { time: 2.0, label: 'End', index: 20 },
@@ -171,14 +171,14 @@ describe('detect stage', () => {
 
     expect(result.boundaries).toBeInstanceOf(Array);
     expect(result.sectionCount).toBeGreaterThan(0);
-    expect(result.boundaries.some(b => b.label === 'Start')).toBe(true);
-    expect(result.boundaries.some(b => b.label === 'End')).toBe(true);
+    expect(result.boundaries.some((b) => b.label === 'Start')).toBe(true);
+    expect(result.boundaries.some((b) => b.label === 'End')).toBe(true);
   });
 
   it('returns empty boundaries for short session with no detectable sections', () => {
     const content = buildShortCast();
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
 
     const result = detect(events, []);
 
@@ -189,7 +189,7 @@ describe('detect stage', () => {
   it('is idempotent — same input produces same output', () => {
     const content = buildMarkerCast();
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
     const markers = [
       { time: 1.0, label: 'Start', index: 10 },
       { time: 2.0, label: 'End', index: 20 },
@@ -213,14 +213,14 @@ describe('detect stage', () => {
     const result = detect(events, markers);
 
     // No preamble boundary prepended because first boundary is at eventIndex 0
-    const preamble = result.boundaries.find(b => b.signals.includes('preamble'));
+    const preamble = result.boundaries.find((b) => b.signals.includes('preamble'));
     expect(preamble).toBeUndefined();
   });
 
   it('does not prepend preamble when pre-marker events are all non-output types', () => {
     // Marker not at index 0, but events before it have no 'o' type — no preamble
     const events: AsciicastEvent[] = [
-      [0.0, 'r', '80x24'],  // resize — not output
+      [0.0, 'r', '80x24'], // resize — not output
       [0.1, 'm', 'Section'],
       [0.2, 'o', 'output\r\n'],
     ];
@@ -228,7 +228,7 @@ describe('detect stage', () => {
 
     const result = detect(events, markers);
 
-    const preamble = result.boundaries.find(b => b.signals.includes('preamble'));
+    const preamble = result.boundaries.find((b) => b.signals.includes('preamble'));
     expect(preamble).toBeUndefined();
   });
 });
@@ -240,10 +240,16 @@ describe('replay stage', () => {
 
   it('returns rawSnapshot, sectionData, and epochBoundaries', async () => {
     const content = buildShortCast();
-    const headerRaw = JSON.parse(content.split('\n')[0]!) as { term: { cols: number; rows: number } };
-    const header: AsciicastHeader = { version: 3, width: headerRaw.term.cols, height: headerRaw.term.rows };
+    const headerRaw = JSON.parse(content.split('\n')[0]!) as {
+      term: { cols: number; rows: number };
+    };
+    const header: AsciicastHeader = {
+      version: 3,
+      width: headerRaw.term.cols,
+      height: headerRaw.term.rows,
+    };
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
 
     const result = await replay(header, events, []);
 
@@ -257,7 +263,7 @@ describe('replay stage', () => {
     const content = buildShortCast();
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
 
     const r1 = await replay(header, events, []);
     const r2 = await replay(header, events, []);
@@ -269,7 +275,7 @@ describe('replay stage', () => {
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
     const events: AsciicastEvent[] = [
       [0.1, 'o', '$ start\r\n'],
-      [0.2, 'r', '100x30'],  // resize event
+      [0.2, 'r', '100x30'], // resize event
       [0.3, 'o', '$ after resize\r\n'],
     ];
 
@@ -283,7 +289,7 @@ describe('replay stage', () => {
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
     const events: AsciicastEvent[] = [
       [0.1, 'o', '$ hello\r\n'],
-      [0.2, 'x', 0],  // exit event — ignored
+      [0.2, 'x', 0], // exit event — ignored
     ];
 
     const result = await replay(header, events, []);
@@ -297,10 +303,10 @@ describe('replay stage', () => {
     // sectionEndMap: next boundary eventIndex → boundary index
     // boundary[0] at 0, boundary[1] at 2; section[0] ends at event 2, section[1] ends at event 4
     const events: AsciicastEvent[] = [
-      [0.1, 'o', '\x1b[?1049h'],     // event 0: enter alt screen
+      [0.1, 'o', '\x1b[?1049h'], // event 0: enter alt screen
       [0.2, 'o', 'tui content\r\n'], // event 1: in alt screen
-      [0.3, 'o', 'still tui\r\n'],   // event 2: still in alt screen → section[0] captures here
-      [0.4, 'o', '\x1b[?1049l'],     // event 3: exit alt screen
+      [0.3, 'o', 'still tui\r\n'], // event 2: still in alt screen → section[0] captures here
+      [0.4, 'o', '\x1b[?1049l'], // event 3: exit alt screen
     ];
     // One boundary at index 0, ends at eventCount(4) → captures at j+1=4 → after event 3 (inAltScreen=false)
     // Need two boundaries so first section ends while still in alt screen
@@ -341,7 +347,7 @@ describe('replay stage', () => {
     // Clear scrollback (3J strips from feed but we track epoch), then output
     const events: AsciicastEvent[] = [
       [0.1, 'o', 'line1\r\nline2\r\nline3\r\n'],
-      [0.2, 'o', '\x1b[2J'],  // clear display — triggers epoch boundary
+      [0.2, 'o', '\x1b[2J'], // clear display — triggers epoch boundary
       [0.3, 'o', 'new line\r\n'],
     ];
     const boundaries: SectionBoundary[] = [
@@ -365,7 +371,7 @@ describe('dedup stage', () => {
     const content = buildShortCast();
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
 
     const replayResult = await replay(header, events, []);
     const boundaries: SectionBoundary[] = [];
@@ -375,7 +381,7 @@ describe('dedup stage', () => {
       replayResult.sectionData,
       replayResult.epochBoundaries,
       boundaries,
-      events.length
+      events.length,
     );
 
     expect(result.sessionId).toBe('session-id');
@@ -388,11 +394,25 @@ describe('dedup stage', () => {
     const content = buildShortCast();
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
     const lines = content.split('\n').slice(1);
-    const events = lines.map(l => JSON.parse(l) as AsciicastEvent);
+    const events = lines.map((l) => JSON.parse(l) as AsciicastEvent);
 
     const replayResult = await replay(header, events, []);
-    const r1 = dedup('s1', replayResult.rawSnapshot, replayResult.sectionData, replayResult.epochBoundaries, [], events.length);
-    const r2 = dedup('s1', replayResult.rawSnapshot, replayResult.sectionData, replayResult.epochBoundaries, [], events.length);
+    const r1 = dedup(
+      's1',
+      replayResult.rawSnapshot,
+      replayResult.sectionData,
+      replayResult.epochBoundaries,
+      [],
+      events.length,
+    );
+    const r2 = dedup(
+      's1',
+      replayResult.rawSnapshot,
+      replayResult.sectionData,
+      replayResult.epochBoundaries,
+      [],
+      events.length,
+    );
 
     expect(r1.snapshot).toBe(r2.snapshot);
     expect(r1.sections.length).toBe(r2.sections.length);
@@ -400,9 +420,7 @@ describe('dedup stage', () => {
 
   it('throws when boundaries array is longer than sectionData (boundary drift)', async () => {
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
-    const events: AsciicastEvent[] = [
-      [0.1, 'o', 'line\r\n'],
-    ];
+    const events: AsciicastEvent[] = [[0.1, 'o', 'line\r\n']];
     const replayResult = await replay(header, events, []);
 
     // Provide 2 boundaries but only 0 sectionData entries
@@ -412,35 +430,37 @@ describe('dedup stage', () => {
     ];
     const emptySectionData: Array<{ lineCount: number | null; snapshot: null }> = [];
 
-    expect(() => dedup(
-      'session-drift',
-      replayResult.rawSnapshot,
-      emptySectionData,
-      replayResult.epochBoundaries,
-      boundaries,
-      events.length
-    )).toThrow(/Missing sectionData/);
+    expect(() =>
+      dedup(
+        'session-drift',
+        replayResult.rawSnapshot,
+        emptySectionData,
+        replayResult.epochBoundaries,
+        boundaries,
+        events.length,
+      ),
+    ).toThrow(/Missing sectionData/);
   });
 
   it('throws when boundary at index is undefined (sparse boundaries array)', async () => {
     const header: AsciicastHeader = { version: 3, width: 80, height: 24 };
-    const events: AsciicastEvent[] = [
-      [0.1, 'o', 'line\r\n'],
-    ];
+    const events: AsciicastEvent[] = [[0.1, 'o', 'line\r\n']];
     const replayResult = await replay(header, events, []);
 
     // Construct a sparse array with length=1 but index 0 is undefined
     const sparseBoundaries = new Array(1) as SectionBoundary[];
     const sectionData = [{ lineCount: 1, snapshot: null }];
 
-    expect(() => dedup(
-      'session-sparse',
-      replayResult.rawSnapshot,
-      sectionData,
-      replayResult.epochBoundaries,
-      sparseBoundaries,
-      events.length
-    )).toThrow(/Missing boundary at index 0/);
+    expect(() =>
+      dedup(
+        'session-sparse',
+        replayResult.rawSnapshot,
+        sectionData,
+        replayResult.epochBoundaries,
+        sparseBoundaries,
+        events.length,
+      ),
+    ).toThrow(/Missing boundary at index 0/);
   });
 
   it('builds sections with snapshot when sectionData has a non-null snapshot (alt-screen path)', async () => {
@@ -463,7 +483,7 @@ describe('dedup stage', () => {
       replayResult.sectionData,
       replayResult.epochBoundaries,
       boundaries,
-      events.length
+      events.length,
     );
 
     expect(result.sections).toHaveLength(1);
@@ -492,7 +512,7 @@ describe('dedup stage', () => {
       replayResult.sectionData,
       replayResult.epochBoundaries,
       boundaries,
-      events.length
+      events.length,
     );
 
     expect(result.sections).toHaveLength(1);
@@ -515,7 +535,7 @@ describe('dedup stage', () => {
 
     // Produce sectionData with snapshot=null and lineCount=null to force the ?? branch
     const replayResult = await replay(header, events, boundaries);
-    const nullLineCountSectionData = replayResult.sectionData.map(sd => ({
+    const nullLineCountSectionData = replayResult.sectionData.map((sd) => ({
       ...sd,
       lineCount: null,
       snapshot: null,
@@ -527,7 +547,7 @@ describe('dedup stage', () => {
       nullLineCountSectionData,
       replayResult.epochBoundaries,
       boundaries,
-      events.length
+      events.length,
     );
 
     expect(result.sections).toHaveLength(1);

@@ -11,14 +11,20 @@ import type { TerminalSnapshot, SnapshotLine } from '../packages/vt-wasm/types.j
 const MIN_MATCH = 3;
 
 function lineKey(line: SnapshotLine): string {
-  return line.spans.map(span => span.text ?? '').join('').trimEnd();
+  return line.spans
+    .map((span) => span.text ?? '')
+    .join('')
+    .trimEnd();
 }
 
 async function main() {
   await initVt();
 
   const filePath = process.argv[2];
-  if (!filePath) { console.error('Usage: tsx dedup-debug.ts <file>'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: tsx dedup-debug.ts <file>');
+    process.exit(1);
+  }
 
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -46,7 +52,10 @@ async function main() {
       if (str.includes('\x1b[?1049l')) inAltScreen = false;
       if (!inAltScreen && (str.includes('\x1b[2J') || str.includes('\x1b[3J'))) {
         const lineCount = vt.getAllLines().lines.length;
-        if (epochBoundaries.length === 0 || epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount) {
+        if (
+          epochBoundaries.length === 0 ||
+          epochBoundaries[epochBoundaries.length - 1].rawLineCount !== lineCount
+        ) {
           epochBoundaries.push({ eventIndex: j, rawLineCount: lineCount });
         }
       }
@@ -70,7 +79,10 @@ async function main() {
     cleanLines.push(line);
     const key = lineKey(line);
     let positions = cleanIndex.get(key);
-    if (!positions) { positions = []; cleanIndex.set(key, positions); }
+    if (!positions) {
+      positions = [];
+      cleanIndex.set(key, positions);
+    }
     positions.push(cleanPos);
     return cleanPos;
   }
@@ -118,7 +130,9 @@ async function main() {
       if (bestLen >= MIN_MATCH) {
         if (isHeader) {
           headersDeduped++;
-          console.log(`  DEDUP header at raw ${rawIdx} (epoch ${epochIdx}, pos ${i}): block of ${bestLen} → clean ${bestCleanStart}`);
+          console.log(
+            `  DEDUP header at raw ${rawIdx} (epoch ${epochIdx}, pos ${i}): block of ${bestLen} → clean ${bestCleanStart}`,
+          );
         }
         i += bestLen;
       } else {
@@ -126,7 +140,9 @@ async function main() {
         if (isHeader) {
           headersNew++;
           headerCleanPositions.push(cleanPos);
-          console.log(`  NEW header at raw ${rawIdx} (epoch ${epochIdx}, pos ${i}) → clean ${cleanPos}, candidates: ${candidates?.length ?? 0}, bestBlock: ${bestLen}`);
+          console.log(
+            `  NEW header at raw ${rawIdx} (epoch ${epochIdx}, pos ${i}) → clean ${cleanPos}, candidates: ${candidates?.length ?? 0}, bestBlock: ${bestLen}`,
+          );
         }
         i++;
       }

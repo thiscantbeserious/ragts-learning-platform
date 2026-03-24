@@ -87,18 +87,17 @@ function countSnapshotLines(snapshotJson: string | null): number {
 }
 
 /** Builds the denormalized snapshot JSON for a CLI section by slicing session lines. */
-function buildCliSnapshot(
-  sessionLines: unknown[],
-  startLine: number,
-  endLine: number
-): string {
+function buildCliSnapshot(sessionLines: unknown[], startLine: number, endLine: number): string {
   const safeEnd = Math.min(endLine, sessionLines.length);
   const safeStart = Math.min(startLine, safeEnd);
   return JSON.stringify({ lines: sessionLines.slice(safeStart, safeEnd) });
 }
 
 /** Computes line_count for a section. */
-function computeLineCount(section: BackfillSectionRow, denormalizedSnapshot: string | null): number {
+function computeLineCount(
+  section: BackfillSectionRow,
+  denormalizedSnapshot: string | null,
+): number {
   // TUI sections already had a snapshot before this migration.
   if (section.snapshot !== null) {
     return countSnapshotLines(section.snapshot);
@@ -129,16 +128,15 @@ function backfillSections(db: Database.Database): void {
 
   const getSessionSnapshot = db.prepare('SELECT snapshot FROM sessions WHERE id = ?');
   const updateSection = db.prepare(
-    'UPDATE sections SET line_count = ?, content_hash = ?, snapshot = COALESCE(?, snapshot) WHERE id = ?'
+    'UPDATE sections SET line_count = ?, content_hash = ?, snapshot = COALESCE(?, snapshot) WHERE id = ?',
   );
 
   // Cache session snapshots to avoid repeated DB reads for the same session.
   const sessionSnapshotCache = new Map<string, unknown[]>();
 
   for (const section of sections) {
-    const isCliSection = section.snapshot === null && (
-      section.start_line !== null || section.end_line !== null
-    );
+    const isCliSection =
+      section.snapshot === null && (section.start_line !== null || section.end_line !== null);
 
     let denormalizedSnapshot: string | null = null;
 
@@ -156,9 +154,7 @@ function backfillSections(db: Database.Database): void {
 
     const effectiveSnapshot = denormalizedSnapshot ?? section.snapshot;
     const lineCount = computeLineCount(section, denormalizedSnapshot);
-    const contentHash = effectiveSnapshot
-      ? computeHash(effectiveSnapshot)
-      : EMPTY_CONTENT_HASH;
+    const contentHash = effectiveSnapshot ? computeHash(effectiveSnapshot) : EMPTY_CONTENT_HASH;
 
     updateSection.run(lineCount, contentHash, denormalizedSnapshot, section.id);
   }

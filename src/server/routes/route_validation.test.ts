@@ -7,11 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { Hono } from 'hono';
-import {
-  validatePathId,
-  validateQueryParam,
-  mapTypiaErrors,
-} from './route_validation.js';
+import { validatePathId, validateQueryParam, mapTypiaErrors } from './route_validation.js';
 import type { IValidation } from 'typia';
 
 // ---------------------------------------------------------------------------
@@ -154,4 +150,3 @@ describe('mapTypiaErrors', () => {
     expect(mapTypiaErrors([])).toEqual([]);
   });
 });
-

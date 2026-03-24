@@ -20,13 +20,15 @@ export async function initVt() {
   try {
     const mod = await import('./pkg/vt_wasm.js');
     if (typeof mod.create !== 'function') {
-      throw new Error('WASM module missing create() function. Binary may be corrupted or out of sync.');
+      throw new Error(
+        'WASM module missing create() function. Binary may be corrupted or out of sync.',
+      );
     }
     wasmModule = mod;
   } catch (error) {
     throw new Error(
       `Failed to load vt-wasm module: ${error instanceof Error ? error.message : String(error)}. ` +
-      `Ensure the WASM binary has been built by running ./build.sh in packages/vt-wasm/.`
+        `Ensure the WASM binary has been built by running ./build.sh in packages/vt-wasm/.`,
     );
   }
 }
@@ -41,16 +43,10 @@ export async function initVt() {
  */
 export function createVt(cols, rows, scrollbackLimit) {
   if (!wasmModule) {
-    throw new Error(
-      'WASM module not initialized. Call initVt() before createVt().'
-    );
+    throw new Error('WASM module not initialized. Call initVt() before createVt().');
   }
 
-  const wasmInstance = wasmModule.create(
-    cols,
-    rows,
-    scrollbackLimit ?? 0
-  );
+  const wasmInstance = wasmModule.create(cols, rows, scrollbackLimit ?? 0);
 
   return {
     feed(data) {

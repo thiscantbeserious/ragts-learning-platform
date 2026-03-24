@@ -26,8 +26,14 @@ const POLL_INTERVAL_MS = 10_000;
 
 /** Processing statuses that warrant an active connection. */
 const ACTIVE_STATUSES = new Set<DetectionStatus>([
-  'pending', 'processing', 'queued', 'validating',
-  'detecting', 'replaying', 'deduplicating', 'storing',
+  'pending',
+  'processing',
+  'queued',
+  'validating',
+  'detecting',
+  'replaying',
+  'deduplicating',
+  'storing',
 ]);
 
 /** Terminal statuses — connection closes when one is reached. */
@@ -188,7 +194,7 @@ export function useSSE(
     try {
       const res = await fetch(`/api/sessions/${id}`);
       if (!res.ok) return;
-      const data = await res.json() as SessionPollResponse;
+      const data = (await res.json()) as SessionPollResponse;
       if (data.detection_status === undefined) return;
       // If an SSE event already updated status, skip applying the potentially stale fetch result
       if (sseEventReceived) return;
@@ -240,7 +246,7 @@ export function useSSE(
     try {
       const res = await fetch(`/api/sessions/${id}`);
       if (!res.ok) return;
-      const data = await res.json() as SessionPollResponse;
+      const data = (await res.json()) as SessionPollResponse;
       if (data.detection_status !== undefined) {
         status.value = data.detection_status;
         if (TERMINAL_STATUSES.has(data.detection_status)) {
@@ -270,7 +276,9 @@ export function useSSE(
   // Watch session ID changes — re-connect when ID changes
   watch(
     sessionId,
-    (id) => { connect(id); },
+    (id) => {
+      connect(id);
+    },
     { immediate: true },
   );
 

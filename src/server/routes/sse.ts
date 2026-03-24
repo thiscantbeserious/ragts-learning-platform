@@ -50,7 +50,7 @@ export async function handleSseEvents(
   c: Context,
   sessionRepository: SessionAdapter,
   eventBus: EventBusAdapter,
-  eventLog: EventLogAdapter
+  eventLog: EventLogAdapter,
 ): Promise<Response> {
   const id = c.req.param('id');
   const invalidId = validatePathId(c, id);
@@ -104,7 +104,7 @@ async function replayMissedEvents(
   eventLog: EventLogAdapter,
   sessionId: string,
   lastEventId: string | undefined,
-  cleanup: () => void
+  cleanup: () => void,
 ): Promise<boolean> {
   if (lastEventId === undefined) return false;
 
@@ -113,7 +113,10 @@ async function replayMissedEvents(
 
   const missed = await getMissedEvents(eventLog, sessionId, afterId);
   for (const entry of missed) {
-    if (stream.closed) { cleanup(); return true; }
+    if (stream.closed) {
+      cleanup();
+      return true;
+    }
     await stream.writeSSE({
       id: String(entry.id),
       event: entry.eventType,
@@ -135,10 +138,17 @@ function createNotifier(): { notify: () => void; waitForEvent: () => Promise<voi
   let resolve: (() => void) | null = null;
 
   return {
-    notify: () => { if (resolve) { resolve(); resolve = null; } },
+    notify: () => {
+      if (resolve) {
+        resolve();
+        resolve = null;
+      }
+    },
     waitForEvent: () => {
       if (resolve) return Promise.resolve();
-      return new Promise<void>((r) => { resolve = r; });
+      return new Promise<void>((r) => {
+        resolve = r;
+      });
     },
   };
 }
@@ -151,7 +161,7 @@ async function drainAndListen(
   stream: { writeSSE: (msg: SseMessage) => Promise<void>; closed: boolean },
   pending: PendingEvent[],
   cleanup: () => void,
-  waitForEvent: () => Promise<void>
+  waitForEvent: () => Promise<void>,
 ): Promise<void> {
   const stopKeepalive = startKeepalive(stream, cleanup);
 
@@ -162,7 +172,11 @@ async function drainAndListen(
       while (pending.length > 0) {
         const { event, logId } = pending.shift()!;
         if (stream.closed) break;
-        await stream.writeSSE({ id: String(logId), event: event.type, data: JSON.stringify(event) });
+        await stream.writeSSE({
+          id: String(logId),
+          event: event.type,
+          data: JSON.stringify(event),
+        });
         if (TERMINAL_TYPES.has(event.type)) return;
       }
 

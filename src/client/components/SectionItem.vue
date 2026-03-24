@@ -13,26 +13,29 @@ import SectionHeader from './SectionHeader.vue';
  * Emits register events so the parent can wire up the scrollspy.
  */
 
-const props = withDefaults(defineProps<{
-  section: SectionMetadata;
-  fetchContent: (id: string) => Promise<SectionContentPage>;
-  defaultCollapsed?: boolean;
-  /** TanStack Virtual measureElement ref callback — pass virtualizer.measureElement here. */
-  measureEl?: ((el: Element | null) => void) | null;
-  /** data-index value for TanStack Virtual measurement (virtual item index). */
-  dataIndex?: number;
-  /**
-   * When true, disables CSS content-visibility: auto so TanStack Virtual's
-   * ResizeObserver (measureElement) receives accurate real heights.
-   * Must be true when rendered inside a virtualizer-managed container.
-   */
-  virtualMode?: boolean;
-}>(), {
-  defaultCollapsed: false,
-  measureEl: null,
-  dataIndex: undefined,
-  virtualMode: false,
-});
+const props = withDefaults(
+  defineProps<{
+    section: SectionMetadata;
+    fetchContent: (id: string) => Promise<SectionContentPage>;
+    defaultCollapsed?: boolean;
+    /** TanStack Virtual measureElement ref callback — pass virtualizer.measureElement here. */
+    measureEl?: ((el: Element | null) => void) | null;
+    /** data-index value for TanStack Virtual measurement (virtual item index). */
+    dataIndex?: number;
+    /**
+     * When true, disables CSS content-visibility: auto so TanStack Virtual's
+     * ResizeObserver (measureElement) receives accurate real heights.
+     * Must be true when rendered inside a virtualizer-managed container.
+     */
+    virtualMode?: boolean;
+  }>(),
+  {
+    defaultCollapsed: false,
+    measureEl: null,
+    dataIndex: undefined,
+    virtualMode: false,
+  },
+);
 
 const emit = defineEmits<{
   /** Fired after mount with the section id and root element for scrollspy wiring. */
@@ -96,14 +99,8 @@ onMounted(() => {
       :line-count="getLineCount()"
       @toggle="toggle"
     />
-    <div
-      v-if="!collapsed"
-      class="section-content"
-    >
-      <div
-        v-if="loadError"
-        class="section-content-error"
-      >
+    <div v-if="!collapsed" class="section-content">
+      <div v-if="loadError" class="section-content-error">
         {{ loadError }}
       </div>
       <TerminalSnapshotComponent
@@ -111,12 +108,7 @@ onMounted(() => {
         :lines="lines"
         :start-line-number="startLineNumber"
       />
-      <div
-        v-else
-        class="section-empty"
-      >
-        No content captured
-      </div>
+      <div v-else class="section-empty">No content captured</div>
     </div>
   </div>
 </template>

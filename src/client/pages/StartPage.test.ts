@@ -60,7 +60,9 @@ describe('StartPage', () => {
       const wrapper = mount(StartPage, {
         global: {
           provide: {
-            [sessionListKey as symbol]: mockSessionListState([{ id: '1', filename: 'test.cast' } as Session]),
+            [sessionListKey as symbol]: mockSessionListState([
+              { id: '1', filename: 'test.cast' } as Session,
+            ]),
           },
         },
       });

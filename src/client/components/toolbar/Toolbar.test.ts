@@ -9,8 +9,12 @@ function MockEventSource() {
 }
 MockEventSource.prototype = {};
 
-beforeEach(() => { vi.stubGlobal('EventSource', MockEventSource); });
-afterEach(() => { vi.unstubAllGlobals(); });
+beforeEach(() => {
+  vi.stubGlobal('EventSource', MockEventSource);
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 function createTestRouter() {
   return createRouter({

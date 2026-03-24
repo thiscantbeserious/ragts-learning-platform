@@ -46,15 +46,19 @@ function createMockEventSource(url: string): MockEventSourceInstance {
       handlers.get(type)!.add(handler);
     },
 
-    close() { this.closed = true; },
-    simulateOpen() { this.onopen?.(new Event('open')); },
+    close() {
+      this.closed = true;
+    },
+    simulateOpen() {
+      this.onopen?.(new Event('open'));
+    },
 
     /** Simulate data sent as raw snapshot (no { type, data } envelope). */
     simulateRawStatus(snapshot: PipelineStatusSnapshot) {
       const event = new MessageEvent('pipeline-status', {
         data: JSON.stringify(snapshot),
       });
-      handlers.get('pipeline-status')?.forEach(h => h(event));
+      handlers.get('pipeline-status')?.forEach((h) => h(event));
     },
 
     /** Simulate data sent as wrapped envelope { type: 'pipeline-status', data: snapshot }. */
@@ -62,7 +66,7 @@ function createMockEventSource(url: string): MockEventSourceInstance {
       const event = new MessageEvent('pipeline-status', {
         data: JSON.stringify({ type: 'pipeline-status', data: snapshot }),
       });
-      handlers.get('pipeline-status')?.forEach(h => h(event));
+      handlers.get('pipeline-status')?.forEach((h) => h(event));
     },
   };
 

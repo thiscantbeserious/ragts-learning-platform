@@ -7,10 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ref, nextTick } from 'vue';
 import type { Ref } from 'vue';
-import type {
-  SessionMetadataResponse,
-  SectionContentPage,
-} from '../../shared/types/api.js';
+import type { SessionMetadataResponse, SectionContentPage } from '../../shared/types/api.js';
 import type { SectionCache } from './use_section_cache.js';
 
 // ---------------------------------------------------------------------------
@@ -85,10 +82,16 @@ function makeTestCache(): SectionCache {
   const store = new Map<string, SectionContentPage>();
   return {
     get: (k) => store.get(k),
-    set: (k, v) => { store.set(k, v); },
+    set: (k, v) => {
+      store.set(k, v);
+    },
     has: (k) => store.has(k),
-    delete: (k) => { store.delete(k); },
-    clear: () => { store.clear(); },
+    delete: (k) => {
+      store.delete(k);
+    },
+    clear: () => {
+      store.clear();
+    },
   };
 }
 

@@ -160,7 +160,9 @@ test.describe('Scrollspy', () => {
   // Test 5: Collapsing a section updates active correctly
   // ---------------------------------------------------------------------------
 
-  test('collapsing section 1 makes section 2 active when section 1 shrinks away', async ({ page }) => {
+  test('collapsing section 1 makes section 2 active when section 1 shrinks away', async ({
+    page,
+  }) => {
     await gotoAndWaitForNav(page);
 
     // Verify section 1 is initially active.

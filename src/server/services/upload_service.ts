@@ -31,7 +31,14 @@ export interface UploadServiceDeps {
 
 export type UploadResult =
   | { ok: true; session: Record<string, unknown> }
-  | { ok: false; status: 400 | 413 | 422 | 500; error: string; details?: string; line?: number; fields?: ValidationFieldError[] };
+  | {
+      ok: false;
+      status: 400 | 413 | 422 | 500;
+      error: string;
+      details?: string;
+      line?: number;
+      fields?: ValidationFieldError[];
+    };
 
 /**
  * UploadService handles file upload validation, session creation, and pipeline triggering.
@@ -59,7 +66,11 @@ export class UploadService {
   async upload(file: File): Promise<UploadResult> {
     const maxBytes = this.maxFileSizeMB * 1024 * 1024;
     if (file.size > maxBytes) {
-      return { ok: false, status: 413, error: `File too large. Maximum size is ${this.maxFileSizeMB}MB` };
+      return {
+        ok: false,
+        status: 413,
+        error: `File too large. Maximum size is ${this.maxFileSizeMB}MB`,
+      };
     }
 
     const content = await file.text();
@@ -128,7 +139,9 @@ export class UploadService {
     } catch (err) {
       try {
         await this.sessionRepository.updateDetectionStatus(id, 'failed');
-      } catch { /* best-effort — don't mask the original error */ }
+      } catch {
+        /* best-effort — don't mask the original error */
+      }
       throw err;
     }
   }
@@ -147,7 +160,9 @@ export class UploadService {
  * Validate the asciicast header using Typia AOT tags.
  * Returns ok:true on success, or ok:false with a ready UploadResult error on failure.
  */
-export function validateHeader(content: string): { ok: true } | { ok: false; error: Extract<UploadResult, { ok: false }> } {
+export function validateHeader(
+  content: string,
+): { ok: true } | { ok: false; error: Extract<UploadResult, { ok: false }> } {
   const firstLine = content.split('\n').find((l) => l.trim().length > 0) ?? '';
   let raw: unknown;
   try {
@@ -156,7 +171,10 @@ export function validateHeader(content: string): { ok: true } | { ok: false; err
     return { ok: false, error: { ok: false, status: 400, error: 'Invalid asciicast header JSON' } };
   }
   if (raw === null || typeof raw !== 'object' || Array.isArray(raw)) {
-    return { ok: false, error: { ok: false, status: 400, error: 'Invalid asciicast header: must be a JSON object' } };
+    return {
+      ok: false,
+      error: { ok: false, status: 400, error: 'Invalid asciicast header: must be a JSON object' },
+    };
   }
   const header = normalizeHeader(raw as Record<string, unknown>);
   const result = typia.validate<AsciicastHeader>(header);

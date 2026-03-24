@@ -16,7 +16,11 @@ import type { JobQueueAdapter } from '../jobs/job_queue_adapter.js';
 import type { EventBusAdapter } from '../events/event_bus_adapter.js';
 import { PipelineStage } from '../../shared/types/pipeline.js';
 import type { Section } from '../../shared/types/section.js';
-import type { SectionMetadata, SessionMetadataResponse, SessionSnapshotResponse } from '../../shared/types/api.js';
+import type {
+  SectionMetadata,
+  SessionMetadataResponse,
+  SessionSnapshotResponse,
+} from '../../shared/types/api.js';
 import type { TerminalSnapshot } from '#vt-wasm/types';
 import { logger } from '../logger.js';
 import { RateLimiter } from '../utils/rate_limiter.js';
@@ -83,7 +87,7 @@ export class SessionService {
     const sections = await this.sectionRepository.findBySessionId(id);
 
     const snapshot = parseSnapshotJson(session.snapshot, 'session', id);
-    const transformedSections = sections.map(section => transformSection(section));
+    const transformedSections = sections.map((section) => transformSection(section));
 
     const { filepath: _fp, snapshot: _snap, ...sessionData } = session;
     return {
@@ -182,7 +186,9 @@ export class SessionService {
    * Re-trigger section detection for an existing session.
    * Returns 202 data payload; the pipeline runs asynchronously.
    */
-  async redetectSession(id: string): Promise<SessionServiceResult<{ message: string; sessionId: string }>> {
+  async redetectSession(
+    id: string,
+  ): Promise<SessionServiceResult<{ message: string; sessionId: string }>> {
     const session = await this.sessionRepository.findById(id);
     if (!session) {
       return { ok: false, status: 404, error: 'Session not found' };
@@ -270,7 +276,7 @@ function transformSection(section: SectionRow): Section {
     startLine: section.start_line,
     endLine: section.end_line,
     snapshot: section.snapshot
-      ? parseSnapshotJson(section.snapshot, 'section', section.id) as Section['snapshot']
+      ? (parseSnapshotJson(section.snapshot, 'section', section.id) as Section['snapshot'])
       : null,
   };
 }

@@ -17,7 +17,9 @@ export function makeLine(text: string, attrs?: Partial<SnapshotSpan>): SnapshotL
 /**
  * Create a SnapshotLine with multiple styled spans.
  */
-export function makeStyledLine(...spans: Array<{ text: string } & Partial<SnapshotSpan>>): SnapshotLine {
+export function makeStyledLine(
+  ...spans: Array<{ text: string } & Partial<SnapshotSpan>>
+): SnapshotLine {
   return { spans };
 }
 
@@ -25,11 +27,7 @@ export function makeStyledLine(...spans: Array<{ text: string } & Partial<Snapsh
  * Create a TerminalSnapshot from an array of text strings.
  * Each string becomes a single-span line.
  */
-export function makeSnapshot(
-  lines: string[],
-  cols = 80,
-  rows = 24
-): TerminalSnapshot {
+export function makeSnapshot(lines: string[], cols = 80, rows = 24): TerminalSnapshot {
   return {
     cols,
     rows,
@@ -42,9 +40,7 @@ export function makeSnapshot(
  * Useful for readable snapshot assertions.
  */
 export function snapshotToText(snapshot: TerminalSnapshot): string[] {
-  return snapshot.lines.map((line) =>
-    line.spans.map((span) => span.text ?? '').join('')
-  );
+  return snapshot.lines.map((line) => line.spans.map((span) => span.text ?? '').join(''));
 }
 
 /**
@@ -57,7 +53,7 @@ export function createCastContent(
     cols?: number;
     rows?: number;
     markers?: Array<{ time: number; label: string }>;
-  }
+  },
 ): string {
   const cols = options?.cols ?? 80;
   const rows = options?.rows ?? 24;
@@ -98,7 +94,7 @@ export function createCastContent(
  */
 export function createCastContentWithEpochs(
   epochs: Array<{ rerender: string[]; newContent: string[] }>,
-  options?: { cols?: number; rows?: number }
+  options?: { cols?: number; rows?: number },
 ): string {
   const cols = options?.cols ?? 80;
   const rows = options?.rows ?? 24;

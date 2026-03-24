@@ -41,7 +41,10 @@ afterEach(() => {
 
 describe('SessionList — confirmDelete branches', () => {
   it('emits delete event when confirm() returns true', async () => {
-    vi.stubGlobal('confirm', vi.fn(() => true));
+    vi.stubGlobal(
+      'confirm',
+      vi.fn(() => true),
+    );
     const router = createTestRouter();
     await router.push('/');
     const session = makeSession({ id: 'to-delete', filename: 'delete-me.cast' });
@@ -59,7 +62,10 @@ describe('SessionList — confirmDelete branches', () => {
   });
 
   it('does NOT emit delete event when confirm() returns false', async () => {
-    vi.stubGlobal('confirm', vi.fn(() => false));
+    vi.stubGlobal(
+      'confirm',
+      vi.fn(() => false),
+    );
     const router = createTestRouter();
     await router.push('/');
     const session = makeSession({ id: 'kept', filename: 'keep-me.cast' });

@@ -22,7 +22,7 @@ const log = logger.child({ module: 'routes/bulk_section_content' });
  */
 export async function handleGetBulkSectionContent(
   c: Context,
-  service: BulkSectionContentService
+  service: BulkSectionContentService,
 ): Promise<Response> {
   try {
     const id = c.req.param('id');

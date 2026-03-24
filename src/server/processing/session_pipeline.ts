@@ -43,7 +43,7 @@ export async function processSessionPipeline(
   filePath: string,
   sessionId: string,
   markers: Marker[],
-  sessionRepo: SessionAdapter
+  sessionRepo: SessionAdapter,
 ): Promise<void> {
   try {
     // Initialize WASM module (safe to call multiple times)
@@ -54,7 +54,12 @@ export async function processSessionPipeline(
     const boundaries = detectBoundaries(events, markers);
     const { rawSnapshot, sectionData, epochBoundaries } = replaySession(header, events, boundaries);
     const processed = buildProcessedSession(
-      sessionId, rawSnapshot, sectionData, epochBoundaries, boundaries, events.length
+      sessionId,
+      rawSnapshot,
+      sectionData,
+      epochBoundaries,
+      boundaries,
+      events.length,
     );
 
     await sessionRepo.completeProcessing(processed);
@@ -69,7 +74,7 @@ export async function processSessionPipeline(
 /** Reads a .cast file and returns the normalized header and events. */
 async function readCastFile(
   filePath: string,
-  sessionId: string
+  sessionId: string,
 ): Promise<{ header: AsciicastHeader; events: AsciicastEvent[] }> {
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -85,7 +90,10 @@ async function readCastFile(
   }
 
   if (stream.malformedLineCount > 0) {
-    log.warn({ sessionId, malformedLines: stream.malformedLineCount }, 'Skipped malformed lines in .cast file');
+    log.warn(
+      { sessionId, malformedLines: stream.malformedLineCount },
+      'Skipped malformed lines in .cast file',
+    );
   }
 
   if (!header) {
@@ -110,10 +118,10 @@ function detectBoundaries(events: AsciicastEvent[], markers: Marker[]): SectionB
   const detector = new SectionDetector(events);
   const boundaries = detector.detectWithMarkers(markers);
 
-  const hasMarkerBoundary = boundaries.some(b => b.signals.includes('marker'));
+  const hasMarkerBoundary = boundaries.some((b) => b.signals.includes('marker'));
   const firstBoundary = boundaries[0];
   if (hasMarkerBoundary && firstBoundary !== undefined && firstBoundary.eventIndex > 0) {
-    const hasPreContent = events.slice(0, firstBoundary.eventIndex).some(e => e[1] === 'o');
+    const hasPreContent = events.slice(0, firstBoundary.eventIndex).some((e) => e[1] === 'o');
     if (hasPreContent) {
       boundaries.unshift({
         eventIndex: 0,
@@ -128,13 +136,17 @@ function detectBoundaries(events: AsciicastEvent[], markers: Marker[]): SectionB
 }
 
 /** Builds a map of (section end event index) → boundary index for O(1) lookup during replay. */
-function buildSectionEndMap(boundaries: SectionBoundary[], eventCount: number): Map<number, number> {
+function buildSectionEndMap(
+  boundaries: SectionBoundary[],
+  eventCount: number,
+): Map<number, number> {
   const sectionEndEvents: Map<number, number> = new Map();
   for (let i = 0; i < boundaries.length; i++) {
     const nextBoundary = boundaries[i + 1];
-    const endEvent = i < boundaries.length - 1 && nextBoundary !== undefined
-      ? nextBoundary.eventIndex
-      : eventCount;
+    const endEvent =
+      i < boundaries.length - 1 && nextBoundary !== undefined
+        ? nextBoundary.eventIndex
+        : eventCount;
     sectionEndEvents.set(endEvent, i);
   }
   return sectionEndEvents;
@@ -159,7 +171,7 @@ function handleEpochTracking(
   str: string,
   inAltScreen: boolean,
   eventIndex: number,
-  epochBoundaries: EpochBoundary[]
+  epochBoundaries: EpochBoundary[],
 ): void {
   if (inAltScreen) return;
   if (!str.includes('\x1b[2J') && !str.includes('\x1b[3J')) return;
@@ -181,7 +193,7 @@ function captureSectionData(
   inAltScreen: boolean,
   boundaryIdx: number,
   highWaterLineCount: number,
-  sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>
+  sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>,
 ): number {
   if (inAltScreen) {
     // TUI section: capture viewport snapshot
@@ -222,7 +234,7 @@ function captureSectionData(
 function replaySession(
   header: AsciicastHeader,
   events: AsciicastEvent[],
-  boundaries: SectionBoundary[]
+  boundaries: SectionBoundary[],
 ): {
   rawSnapshot: TerminalSnapshot;
   sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>;
@@ -277,7 +289,13 @@ function replaySession(
 
       const boundaryIdx = sectionEndEvents.get(j + 1);
       if (boundaryIdx !== undefined) {
-        highWaterLineCount = captureSectionData(vt, inAltScreen, boundaryIdx, highWaterLineCount, sectionData);
+        highWaterLineCount = captureSectionData(
+          vt,
+          inAltScreen,
+          boundaryIdx,
+          highWaterLineCount,
+          sectionData,
+        );
       }
     }
 
@@ -301,7 +319,7 @@ function buildProcessedSession(
   sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>,
   epochBoundaries: EpochBoundary[],
   boundaries: SectionBoundary[],
-  eventCount: number
+  eventCount: number,
 ): ProcessedSession {
   // Deduplicate scrollback if clear-screen epochs were detected.
   // For CLI sessions (zero clears): identity transform, no change.
@@ -319,9 +337,10 @@ function buildProcessedSession(
     const sd = sectionData[i];
     if (boundary === undefined || sd === undefined) continue;
 
-    const endEvent = i < boundaries.length - 1 && nextBoundary !== undefined
-      ? nextBoundary.eventIndex
-      : eventCount;
+    const endEvent =
+      i < boundaries.length - 1 && nextBoundary !== undefined
+        ? nextBoundary.eventIndex
+        : eventCount;
     const isMarker = boundary.signals.includes('marker');
 
     if (sd.snapshot) {
@@ -357,9 +376,7 @@ function buildProcessedSession(
     }
   }
 
-  const detectedSectionsCount = boundaries.filter(
-    b => !b.signals.includes('marker')
-  ).length;
+  const detectedSectionsCount = boundaries.filter((b) => !b.signals.includes('marker')).length;
 
   return {
     sessionId,

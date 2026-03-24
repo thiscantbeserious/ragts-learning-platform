@@ -3,7 +3,12 @@
  * Covers empty state, populated states, upload interactions, and session management.
  */
 import { test, expect } from '@playwright/test';
-import { uploadFixture, waitForProcessing, deleteAllSessions, seedSessionFixture } from '../helpers/seed-visual-data';
+import {
+  uploadFixture,
+  waitForProcessing,
+  deleteAllSessions,
+  seedSessionFixture,
+} from '../helpers/seed-visual-data';
 
 test.describe('Landing Page', () => {
   test.describe.configure({ mode: 'serial' });
@@ -33,7 +38,11 @@ test.describe('Landing Page', () => {
 
   test('with 3 sessions — grid layout', async ({ page }) => {
     await deleteAllSessions();
-    for (const fixture of ['valid-with-markers.cast', 'valid-without-markers.cast', 'valid-with-markers.cast']) {
+    for (const fixture of [
+      'valid-with-markers.cast',
+      'valid-without-markers.cast',
+      'valid-with-markers.cast',
+    ]) {
       const id = await uploadFixture(fixture);
       await waitForProcessing(id);
     }
@@ -50,7 +59,9 @@ test.describe('Landing Page', () => {
   test('upload zone — default state', async ({ page }) => {
     await page.goto('/');
     await page.waitForSelector('.start-page .upload-zone', { timeout: 10000 });
-    await expect(page.locator('.start-page .upload-zone')).toHaveScreenshot('upload-zone-default.png');
+    await expect(page.locator('.start-page .upload-zone')).toHaveScreenshot(
+      'upload-zone-default.png',
+    );
   });
 
   test('upload in progress — optimistic card visible', async ({ page }) => {
@@ -59,7 +70,7 @@ test.describe('Landing Page', () => {
 
     // Mock slow upload by intercepting
     await page.route('**/api/upload', async (route) => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await route.continue();
     });
 
@@ -72,9 +83,13 @@ test.describe('Landing Page', () => {
     });
 
     // Wait for optimistic card to appear in the sidebar (scoped to sidebar to avoid mobile overlay duplicate)
-    const processingCard = page.locator('.spatial-shell__sidebar .session-card--processing').first();
+    const processingCard = page
+      .locator('.spatial-shell__sidebar .session-card--processing')
+      .first();
     await expect(processingCard).toBeVisible({ timeout: 3000 });
-    await expect(page.locator('.spatial-shell__sidebar').first()).toHaveScreenshot('upload-zone-uploading.png');
+    await expect(page.locator('.spatial-shell__sidebar').first()).toHaveScreenshot(
+      'upload-zone-uploading.png',
+    );
   });
 
   test('session card hover', async ({ page }) => {

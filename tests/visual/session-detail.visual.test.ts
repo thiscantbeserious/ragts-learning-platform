@@ -77,7 +77,9 @@ test.describe('Session Detail Page', () => {
     const count = await lineNumbers.count();
     expect(count).toBeGreaterThan(0);
 
-    await expect(page.locator('.terminal-chrome')).toHaveScreenshot('session-detail-terminal-chrome.png');
+    await expect(page.locator('.terminal-chrome')).toHaveScreenshot(
+      'session-detail-terminal-chrome.png',
+    );
   });
 
   test('section badge types visible', async ({ page }) => {

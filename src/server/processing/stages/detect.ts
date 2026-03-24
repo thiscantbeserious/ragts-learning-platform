@@ -30,7 +30,7 @@ function detectBoundaries(events: AsciicastEvent[], markers: Marker[]): SectionB
   const detector = new SectionDetector(events);
   const boundaries = detector.detectWithMarkers(markers);
 
-  const hasMarkerBoundary = boundaries.some(b => b.signals.includes('marker'));
+  const hasMarkerBoundary = boundaries.some((b) => b.signals.includes('marker'));
   const firstBoundary = boundaries[0];
   if (hasMarkerBoundary && firstBoundary !== undefined && firstBoundary.eventIndex > 0) {
     if (hasPreMarkerContent(events, firstBoundary.eventIndex)) {
@@ -48,5 +48,5 @@ function detectBoundaries(events: AsciicastEvent[], markers: Marker[]): SectionB
 
 /** Returns true if any output events exist before the first boundary. */
 function hasPreMarkerContent(events: AsciicastEvent[], firstBoundaryIndex: number): boolean {
-  return events.slice(0, firstBoundaryIndex).some(e => e[1] === 'o');
+  return events.slice(0, firstBoundaryIndex).some((e) => e[1] === 'o');
 }

@@ -104,7 +104,7 @@ export class NodeSqliteDatabase {
    * Arguments passed to the wrapper are forwarded to `fn`.
    */
   transaction<TArgs extends unknown[], TReturn>(
-    fn: (...args: TArgs) => TReturn
+    fn: (...args: TArgs) => TReturn,
   ): (...args: TArgs) => TReturn {
     return (...args: TArgs): TReturn => {
       this._db.exec('BEGIN');

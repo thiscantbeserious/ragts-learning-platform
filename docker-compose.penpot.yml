@@ -16,7 +16,7 @@ services:
     image: penpotapp/frontend:latest
     restart: unless-stopped
     ports:
-      - "9001:8080"
+      - '9001:8080'
     volumes:
       - penpot_assets:/opt/data/assets
     depends_on:
@@ -81,9 +81,9 @@ services:
       context: ./docker/penpot-mcp
     restart: unless-stopped
     ports:
-      - "4400:4400"
-      - "4401:4401"
-      - "4402:4402"
+      - '4400:4400'
+      - '4401:4401'
+      - '4402:4402'
     depends_on:
       - penpot-frontend
 
@@ -91,9 +91,9 @@ services:
     image: sj26/mailcatcher:latest
     restart: unless-stopped
     ports:
-      - "1080:1080"
+      - '1080:1080'
     expose:
-      - "1025"
+      - '1025'
 
 volumes:
   penpot_postgres:

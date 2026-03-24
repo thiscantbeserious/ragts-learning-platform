@@ -2,12 +2,15 @@
 import type { SnapshotLine } from '#vt-wasm/types';
 /* terminal ANSI color tokens are now in design/styles/layout.css :root */
 
-const props = withDefaults(defineProps<{
-  lines: SnapshotLine[];
-  startLineNumber?: number;
-}>(), {
-  startLineNumber: 1,
-});
+const props = withDefaults(
+  defineProps<{
+    lines: SnapshotLine[];
+    startLineNumber?: number;
+  }>(),
+  {
+    startLineNumber: 1,
+  },
+);
 
 /**
  * Convert a palette color index (0-255) to RGB color string.
@@ -29,7 +32,7 @@ function paletteToRgb(index: number): string {
     const b = cubeIndex % 6;
 
     // Map 0-5 to 0, 95, 135, 175, 215, 255
-    const toRgbValue = (v: number) => v === 0 ? 0 : 55 + v * 40;
+    const toRgbValue = (v: number) => (v === 0 ? 0 : 55 + v * 40);
 
     return `rgb(${toRgbValue(r)}, ${toRgbValue(g)}, ${toRgbValue(b)})`;
   }
@@ -65,7 +68,15 @@ function getBgColor(bg?: string | number): string | undefined {
 /**
  * Get CSS classes for a span based on text attributes.
  */
-function getSpanClasses(span: { bold?: boolean; faint?: boolean; italic?: boolean; underline?: boolean; strikethrough?: boolean; blink?: boolean; inverse?: boolean }): string[] {
+function getSpanClasses(span: {
+  bold?: boolean;
+  faint?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  blink?: boolean;
+  inverse?: boolean;
+}): string[] {
   const classes: string[] = ['terminal-span'];
   if (span.bold) classes.push('terminal-span--bold');
   if (span.faint) classes.push('terminal-span--faint');
@@ -80,7 +91,10 @@ function getSpanClasses(span: { bold?: boolean; faint?: boolean; italic?: boolea
 /**
  * Get inline styles for a span.
  */
-function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Record<string, string> {
+function getSpanStyle(span: {
+  fg?: string | number;
+  bg?: string | number;
+}): Record<string, string> {
   const style: Record<string, string> = {};
   const fgColor = getFgColor(span.fg);
   const bgColor = getBgColor(span.bg);
@@ -92,18 +106,17 @@ function getSpanStyle(span: { fg?: string | number; bg?: string | number }): Rec
 
 <template>
   <div class="terminal-snapshot">
-    <div
-      v-for="(line, lineIndex) in lines"
-      :key="lineIndex"
-      class="terminal-line"
-    >
+    <div v-for="(line, lineIndex) in lines" :key="lineIndex" class="terminal-line">
       <span class="terminal-line__number">{{ startLineNumber + lineIndex }}</span>
-      <span class="terminal-line__content"><span
-        v-for="(span, spanIndex) in line.spans"
-        :key="spanIndex"
-        :class="getSpanClasses(span)"
-        :style="getSpanStyle(span)"
-      >{{ span.text }}</span></span>
+      <span class="terminal-line__content"
+        ><span
+          v-for="(span, spanIndex) in line.spans"
+          :key="spanIndex"
+          :class="getSpanClasses(span)"
+          :style="getSpanStyle(span)"
+          >{{ span.text }}</span
+        ></span
+      >
     </div>
   </div>
 </template>

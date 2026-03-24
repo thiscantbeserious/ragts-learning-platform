@@ -5,7 +5,10 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from '../../../src/server/db/sqlite/node_sqlite_compat.js';
-import { SqliteDatabaseImpl, BASE_SCHEMA } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
+import {
+  SqliteDatabaseImpl,
+  BASE_SCHEMA,
+} from '../../../src/server/db/sqlite/sqlite_database_impl.js';
 import { migrate002Sections } from '../../../src/server/db/sqlite/migrations/002_sections.js';
 import { migrate003UnifiedSnapshot } from '../../../src/server/db/sqlite/migrations/003_unified_snapshot.js';
 import { migrate004PipelineJobsEvents } from '../../../src/server/db/sqlite/migrations/004_pipeline_jobs_events.js';
@@ -25,7 +28,7 @@ describe('SqliteEventLogImpl', () => {
     eventLog = ctx.eventLog;
 
     const session = await ctx.sessionRepository.create(
-      createTestSession({ filename: 'evlog.cast', filepath: 'sessions/evlog.cast' })
+      createTestSession({ filename: 'evlog.cast', filepath: 'sessions/evlog.cast' }),
     );
     sessionId = session.id;
   });
@@ -96,14 +99,16 @@ describe('SqliteEventLogImpl', () => {
       migrate004PipelineJobsEvents(rawDb);
 
       // Insert a session for FK constraint
-      rawDb.prepare(
-        `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES (?, ?, ?, ?, ?)`
-      ).run('s-null-payload', 'null.cast', 'sessions/null.cast', 10, new Date().toISOString());
+      rawDb
+        .prepare(
+          `INSERT INTO sessions (id, filename, filepath, size_bytes, uploaded_at) VALUES (?, ?, ?, ?, ?)`,
+        )
+        .run('s-null-payload', 'null.cast', 'sessions/null.cast', 10, new Date().toISOString());
 
       // Insert an event row with NULL payload directly, bypassing the log() method
-      rawDb.prepare(
-        `INSERT INTO events (session_id, event_type, stage, payload) VALUES (?, ?, ?, ?)`
-      ).run('s-null-payload', 'session.uploaded', null, null);
+      rawDb
+        .prepare(`INSERT INTO events (session_id, event_type, stage, payload) VALUES (?, ?, ?, ?)`)
+        .run('s-null-payload', 'session.uploaded', null, null);
 
       const impl = new SqliteEventLogImpl(rawDb);
       const entries = await impl.findBySessionId('s-null-payload');
@@ -135,7 +140,7 @@ describe('SqliteEventLogImpl', () => {
 
     it('does not return events for other sessions', async () => {
       const other = await ctx.sessionRepository.create(
-        createTestSession({ filename: 'other.cast', filepath: 'sessions/other.cast' })
+        createTestSession({ filename: 'other.cast', filepath: 'sessions/other.cast' }),
       );
 
       await eventLog.log({ type: 'session.uploaded', sessionId, filename: 'evlog.cast' });

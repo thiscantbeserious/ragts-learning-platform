@@ -58,16 +58,29 @@ function createTestRouter() {
   });
 }
 
-function makeLayoutState(overrides: Partial<{
-  isMobileOverlayOpen: boolean;
-}> = {}) {
+function makeLayoutState(
+  overrides: Partial<{
+    isMobileOverlayOpen: boolean;
+  }> = {},
+) {
   const isMobileOverlayOpen = ref(overrides.isMobileOverlayOpen ?? false);
   const isSidebarOpen = ref(true);
   const isMobile = ref(true);
-  const closeMobileOverlay = vi.fn(() => { isMobileOverlayOpen.value = false; });
-  const openMobileOverlay = vi.fn(() => { isMobileOverlayOpen.value = true; });
+  const closeMobileOverlay = vi.fn(() => {
+    isMobileOverlayOpen.value = false;
+  });
+  const openMobileOverlay = vi.fn(() => {
+    isMobileOverlayOpen.value = true;
+  });
   const toggleSidebar = vi.fn();
-  return { isMobileOverlayOpen, isSidebarOpen, isMobile, closeMobileOverlay, openMobileOverlay, toggleSidebar };
+  return {
+    isMobileOverlayOpen,
+    isSidebarOpen,
+    isMobile,
+    closeMobileOverlay,
+    openMobileOverlay,
+    toggleSidebar,
+  };
 }
 
 function makeSessionListState(): SessionListState {
@@ -106,7 +119,7 @@ async function mountOverlay(overlayOpen: boolean) {
 }
 
 afterEach(() => {
-  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach(el => el.remove());
+  document.querySelectorAll('.mobile-sidebar-overlay__root').forEach((el) => el.remove());
   // Reset body scroll lock after each test
   document.documentElement.style.overflow = '';
 });

@@ -59,7 +59,11 @@ function spawnWorker(): Promise<Worker> {
 }
 
 /** Send a job to the worker and return the result message. */
-function runJob(worker: Worker, id: number, payload: unknown): Promise<{
+function runJob(
+  worker: Worker,
+  id: number,
+  payload: unknown,
+): Promise<{
   type: string;
   id: number;
   ok: boolean;

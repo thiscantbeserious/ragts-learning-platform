@@ -108,8 +108,15 @@ export class SqliteDatabaseImpl implements DatabaseAdapter {
       storageAdapter,
       jobQueue,
       eventLog,
-      ping: async () => { db.prepare('SELECT 1').get(); },
-      close: async () => { if (db.open) { db.pragma('optimize'); } db.close(); },
+      ping: async () => {
+        db.prepare('SELECT 1').get();
+      },
+      close: async () => {
+        if (db.open) {
+          db.pragma('optimize');
+        }
+        db.close();
+      },
     };
   }
 }

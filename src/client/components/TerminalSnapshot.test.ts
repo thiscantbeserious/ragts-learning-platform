@@ -81,9 +81,7 @@ describe('TerminalSnapshot', () => {
   });
 
   it('renders true color (#RRGGBB) span', () => {
-    const lines: SnapshotLine[] = [
-      { spans: [{ text: 'True color', fg: '#ff5733' }] },
-    ];
+    const lines: SnapshotLine[] = [{ spans: [{ text: 'True color', fg: '#ff5733' }] }];
 
     const wrapper = mount(TerminalSnapshot, {
       props: { lines },

@@ -47,9 +47,7 @@ function makeSection(overrides: Partial<SectionRow> = {}): SectionRow {
 
 function makeMockSessionRepo(exists = true): SessionAdapter {
   return {
-    findById: vi.fn().mockResolvedValue(
-      exists ? { id: 'sess-1', filename: 'test.cast' } : null
-    ),
+    findById: vi.fn().mockResolvedValue(exists ? { id: 'sess-1', filename: 'test.cast' } : null),
   } as unknown as SessionAdapter;
 }
 
@@ -66,7 +64,10 @@ function makeMockSectionRepo(sections: SectionRow[]): SectionAdapter {
 function makeService(sections: SectionRow[], sessionExists = true) {
   const sessionRepo = makeMockSessionRepo(sessionExists);
   const sectionRepo = makeMockSectionRepo(sections);
-  return new BulkSectionContentService({ sessionRepository: sessionRepo, sectionRepository: sectionRepo });
+  return new BulkSectionContentService({
+    sessionRepository: sessionRepo,
+    sectionRepository: sectionRepo,
+  });
 }
 
 type OkResult = { ok: true; data: { sections: Record<string, unknown> } };
@@ -84,7 +85,7 @@ describe('BulkSectionContentService.getBulkSectionContent', () => {
 
   it('returns 413 when session has more sections than BULK_MAX_SECTIONS', async () => {
     const sections = Array.from({ length: BULK_MAX_SECTIONS + 1 }, (_, i) =>
-      makeSection({ id: `sect-${i}` })
+      makeSection({ id: `sect-${i}` }),
     );
     const service = makeService(sections);
     const result = await service.getBulkSectionContent('sess-1');
@@ -155,7 +156,7 @@ describe('BulkSectionContentService.getBulkSectionContent', () => {
 
   it('accepts exactly BULK_MAX_SECTIONS sections without error', async () => {
     const sections = Array.from({ length: BULK_MAX_SECTIONS }, (_, i) =>
-      makeSection({ id: `sect-${i}` })
+      makeSection({ id: `sect-${i}` }),
     );
     const service = makeService(sections);
 

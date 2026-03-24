@@ -37,7 +37,9 @@ describe('useLayout() — no-window / no-scope branches (lines 50-61)', () => {
 
     const scope = effectScope();
     let layout: ReturnType<typeof useLayout> | undefined;
-    scope.run(() => { layout = useLayout(); });
+    scope.run(() => {
+      layout = useLayout();
+    });
 
     // isMobile should default to false (mq?.matches ?? false → null?.matches → false)
     expect(layout?.isMobile.value).toBe(false);
@@ -49,7 +51,9 @@ describe('useLayout() — no-window / no-scope branches (lines 50-61)', () => {
     vi.spyOn(window, 'matchMedia').mockReturnValue(null as unknown as MediaQueryList);
 
     const scope = effectScope();
-    scope.run(() => { useLayout(); });
+    scope.run(() => {
+      useLayout();
+    });
 
     // Stopping the scope when mq is null should not throw
     expect(() => scope.stop()).not.toThrow();
@@ -66,7 +70,9 @@ describe('useLayout() — no-window / no-scope branches (lines 50-61)', () => {
     vi.spyOn(window, 'matchMedia').mockReturnValue(mqStub as unknown as MediaQueryList);
 
     // Call outside any scope — should not throw even without scope dispose registration
-    expect(() => { useLayout(); }).not.toThrow();
+    expect(() => {
+      useLayout();
+    }).not.toThrow();
 
     // removeEventListener should NOT be called (no scope to dispose)
     // addEventListener was called to attach the change handler
@@ -82,7 +88,9 @@ describe('useLayout() — no-window / no-scope branches (lines 50-61)', () => {
     vi.spyOn(window, 'matchMedia').mockReturnValue(mqStub as unknown as MediaQueryList);
 
     const scope = effectScope();
-    scope.run(() => { useLayout(); });
+    scope.run(() => {
+      useLayout();
+    });
 
     // Stopping scope should trigger removeEventListener (via onScopeDispose callback)
     scope.stop();

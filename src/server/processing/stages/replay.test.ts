@@ -69,17 +69,15 @@ describe('replay() — result shape', () => {
 describe('replay() — epoch boundaries', () => {
   it('produces epoch boundary at \\x1b[2J (clear screen)', async () => {
     // Use >= 100 events so the clear is processed as critical (within a longer session)
-    const prefix: AsciicastEvent[] = Array.from({ length: 50 }, (_, i) =>
-      [0.01, 'o', `line ${i}\r\n`] as AsciicastEvent
+    const prefix: AsciicastEvent[] = Array.from(
+      { length: 50 },
+      (_, i) => [0.01, 'o', `line ${i}\r\n`] as AsciicastEvent,
     );
-    const suffix: AsciicastEvent[] = Array.from({ length: 50 }, (_, i) =>
-      [0.01, 'o', `after ${i}\r\n`] as AsciicastEvent
+    const suffix: AsciicastEvent[] = Array.from(
+      { length: 50 },
+      (_, i) => [0.01, 'o', `after ${i}\r\n`] as AsciicastEvent,
     );
-    const events: AsciicastEvent[] = [
-      ...prefix,
-      [0.1, 'o', '\x1b[2J'],
-      ...suffix,
-    ];
+    const events: AsciicastEvent[] = [...prefix, [0.1, 'o', '\x1b[2J'], ...suffix];
 
     const result = await replay(HEADER, events, []);
 
@@ -106,9 +104,9 @@ describe('replay() — epoch boundaries', () => {
   it('does not produce epoch boundary for \\x1b[2J inside alt-screen', async () => {
     // alt-screen transitions suppress epoch tracking
     const events: AsciicastEvent[] = [
-      [0.1, 'o', '\x1b[?1049h'],    // enter alt screen
-      [0.1, 'o', '\x1b[2J'],        // clear inside alt screen — should NOT produce epoch
-      [0.1, 'o', '\x1b[?1049l'],    // exit alt screen
+      [0.1, 'o', '\x1b[?1049h'], // enter alt screen
+      [0.1, 'o', '\x1b[2J'], // clear inside alt screen — should NOT produce epoch
+      [0.1, 'o', '\x1b[?1049l'], // exit alt screen
     ];
 
     const result = await replay(HEADER, events, []);
@@ -125,7 +123,7 @@ describe('replay() — \\x1b[3J stripping', () => {
   it('strips \\x1b[3J before feeding to VT engine (preserves scrollback content)', async () => {
     const events: AsciicastEvent[] = [
       [0.1, 'o', 'scrollback line\r\n'],
-      [0.1, 'o', '\x1b[2J\x1b[3J'],  // clear screen + erase scrollback — 3J must be stripped
+      [0.1, 'o', '\x1b[2J\x1b[3J'], // clear screen + erase scrollback — 3J must be stripped
       [0.1, 'o', 'new line\r\n'],
     ];
 
@@ -136,7 +134,7 @@ describe('replay() — \\x1b[3J stripping', () => {
     expect(result.epochBoundaries.length).toBeGreaterThan(0);
     // Snapshot should contain content from after the clear
     const allText = result.rawSnapshot.lines
-      .map(l => l.spans.map(s => s.text ?? '').join(''))
+      .map((l) => l.spans.map((s) => s.text ?? '').join(''))
       .join('\n');
     expect(allText).toContain('new line');
   });
@@ -144,7 +142,7 @@ describe('replay() — \\x1b[3J stripping', () => {
   it('\\x1b[3J alone does not produce epoch boundary (only 2J does)', async () => {
     const events: AsciicastEvent[] = [
       [0.1, 'o', 'line1\r\n'],
-      [0.1, 'o', '\x1b[3J'],  // scrollback erase only — no 2J
+      [0.1, 'o', '\x1b[3J'], // scrollback erase only — no 2J
       [0.1, 'o', 'line2\r\n'],
     ];
 
@@ -183,9 +181,7 @@ describe('replay() — resize events', () => {
   it('flushes batched text before processing resize event', async () => {
     // Batch some output, then resize, then more output — all must appear in snapshot
     const events: AsciicastEvent[] = [
-      ...Array.from({ length: 5 }, (_, i) =>
-        [0.01, 'o', `batch line ${i}\r\n`] as AsciicastEvent
-      ),
+      ...Array.from({ length: 5 }, (_, i) => [0.01, 'o', `batch line ${i}\r\n`] as AsciicastEvent),
       [0.1, 'r', '100x30'],
       [0.1, 'o', 'post-resize\r\n'],
     ];
@@ -193,7 +189,7 @@ describe('replay() — resize events', () => {
     const result = await replay(HEADER, events, []);
 
     const allText = result.rawSnapshot.lines
-      .map(l => l.spans.map(s => s.text ?? '').join(''))
+      .map((l) => l.spans.map((s) => s.text ?? '').join(''))
       .join('\n');
     expect(allText).toContain('post-resize');
   });
@@ -207,10 +203,10 @@ describe('replay() — alt-screen transitions', () => {
   it('captures viewport snapshot (not lineCount) when section boundary is inside alt-screen', async () => {
     // Section[0] ends at event 2 — while inAltScreen=true → snapshot path
     const events: AsciicastEvent[] = [
-      [0.1, 'o', '\x1b[?1049h'],       // event 0: enter alt screen
-      [0.1, 'o', 'tui content\r\n'],   // event 1: in alt screen
-      [0.1, 'o', 'still tui\r\n'],     // event 2: still in alt screen → section[0] captures
-      [0.1, 'o', '\x1b[?1049l'],       // event 3: exit alt screen
+      [0.1, 'o', '\x1b[?1049h'], // event 0: enter alt screen
+      [0.1, 'o', 'tui content\r\n'], // event 1: in alt screen
+      [0.1, 'o', 'still tui\r\n'], // event 2: still in alt screen → section[0] captures
+      [0.1, 'o', '\x1b[?1049l'], // event 3: exit alt screen
     ];
     // Two boundaries so section[0] ends at j+1=3 (boundary[1].eventIndex=3)
     const boundaries: SectionBoundary[] = [
@@ -229,9 +225,9 @@ describe('replay() — alt-screen transitions', () => {
   it('tracks alt-screen state correctly across enter and exit sequences', async () => {
     const events: AsciicastEvent[] = [
       [0.1, 'o', 'normal mode\r\n'],
-      [0.1, 'o', '\x1b[?1049h'],  // enter alt screen
+      [0.1, 'o', '\x1b[?1049h'], // enter alt screen
       [0.1, 'o', 'alt screen\r\n'],
-      [0.1, 'o', '\x1b[?1049l'],  // exit alt screen
+      [0.1, 'o', '\x1b[?1049l'], // exit alt screen
       [0.1, 'o', 'normal again\r\n'],
     ];
 
@@ -249,8 +245,9 @@ describe('replay() — alt-screen transitions', () => {
 
 describe('replay() — section boundary capture', () => {
   it('captures one sectionData entry per boundary', async () => {
-    const events: AsciicastEvent[] = Array.from({ length: 10 }, (_, i) =>
-      [0.01, 'o', `line ${i}\r\n`] as AsciicastEvent
+    const events: AsciicastEvent[] = Array.from(
+      { length: 10 },
+      (_, i) => [0.01, 'o', `line ${i}\r\n`] as AsciicastEvent,
     );
     const boundaries: SectionBoundary[] = [
       { eventIndex: 0, score: 1, signals: ['detected'], label: 'Section 1' },
@@ -288,7 +285,7 @@ describe('replay() — section boundary capture', () => {
       [0.1, 'o', 'initial line 1\r\n'],
       [0.1, 'o', 'initial line 2\r\n'],
       [0.1, 'o', 'initial line 3\r\n'],
-      [0.1, 'o', '\x1b[2J'],           // clear screen → epoch boundary, approxLineCount continues
+      [0.1, 'o', '\x1b[2J'], // clear screen → epoch boundary, approxLineCount continues
       [0.1, 'o', 'after clear\r\n'],
     ];
     const boundaries: SectionBoundary[] = [
@@ -315,9 +312,7 @@ describe('replay() — error handling', () => {
   });
 
   it('resolves successfully for a small session (< 100 events)', async () => {
-    const events: AsciicastEvent[] = [
-      [0.1, 'o', 'hello\r\n'],
-    ];
+    const events: AsciicastEvent[] = [[0.1, 'o', 'hello\r\n']];
 
     const result = await replay(HEADER, events, []);
 
@@ -328,8 +323,9 @@ describe('replay() — error handling', () => {
 
   it('handles large batches without exceeding BATCH_SIZE without error', async () => {
     // Generate > 1000 events to trigger the batch flush path in the worker
-    const events: AsciicastEvent[] = Array.from({ length: 1100 }, (_, i) =>
-      [0.001, 'o', `line ${i}\r\n`] as AsciicastEvent
+    const events: AsciicastEvent[] = Array.from(
+      { length: 1100 },
+      (_, i) => [0.001, 'o', `line ${i}\r\n`] as AsciicastEvent,
     );
 
     const result = await replay(HEADER, events, []);
@@ -365,10 +361,7 @@ describe('replay() — worker crash paths', () => {
     const { Worker } = await import('node:worker_threads');
     const promise = new Promise<void>((resolve, reject) => {
       let settled = false;
-      const worker = new Worker(
-        'throw new Error("simulated crash")',
-        { eval: true },
-      );
+      const worker = new Worker('throw new Error("simulated crash")', { eval: true });
       worker.once('message', () => {
         if (settled) return;
         settled = true;
@@ -394,10 +387,7 @@ describe('replay() — worker crash paths', () => {
     const { Worker } = await import('node:worker_threads');
     const promise = new Promise<void>((resolve, reject) => {
       let settled = false;
-      const worker = new Worker(
-        'process.exit(42)',
-        { eval: true },
-      );
+      const worker = new Worker('process.exit(42)', { eval: true });
       worker.once('message', () => {
         if (settled) return;
         settled = true;
@@ -424,10 +414,7 @@ describe('replay() — worker crash paths', () => {
     let rejectCount = 0;
     const promise = new Promise<void>((resolve, reject) => {
       let settled = false;
-      const worker = new Worker(
-        'throw new Error("crash")',
-        { eval: true },
-      );
+      const worker = new Worker('throw new Error("crash")', { eval: true });
       worker.once('message', () => {
         if (settled) return;
         settled = true;
@@ -450,7 +437,7 @@ describe('replay() — worker crash paths', () => {
     });
     await expect(promise).rejects.toThrow();
     // Wait for exit event to fire after error
-    await new Promise<void>(r => setTimeout(r, 100));
+    await new Promise<void>((r) => setTimeout(r, 100));
     expect(rejectCount, 'settled flag should prevent double rejection').toBe(1);
   });
 });

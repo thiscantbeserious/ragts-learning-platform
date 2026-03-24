@@ -13,7 +13,7 @@ export const ToastCategory = {
   PROCESSING_FAILED: 'processing-failed',
 } as const;
 
-export type ToastCategory = typeof ToastCategory[keyof typeof ToastCategory];
+export type ToastCategory = (typeof ToastCategory)[keyof typeof ToastCategory];
 
 export interface Toast {
   id: number;
@@ -96,7 +96,10 @@ function removeToast(id: number): void {
   dismissHandles.delete(id);
   durations.delete(id);
   for (const [key, state] of activeKeys) {
-    if (state.toastId === id) { activeKeys.delete(key); break; }
+    if (state.toastId === id) {
+      activeKeys.delete(key);
+      break;
+    }
   }
   toasts.value = toasts.value.filter((t) => t.id !== id);
 }
@@ -125,14 +128,18 @@ function ensureWatchScope(): void {
 
   watchScope = effectScope();
   watchScope.run(() => {
-    watch(toasts, () => {
-      const currentIds = new Set(toasts.value.map((t) => t.id));
-      for (const [key, state] of activeKeys) {
-        if (!currentIds.has(state.toastId)) {
-          activeKeys.delete(key);
+    watch(
+      toasts,
+      () => {
+        const currentIds = new Set(toasts.value.map((t) => t.id));
+        for (const [key, state] of activeKeys) {
+          if (!currentIds.has(state.toastId)) {
+            activeKeys.delete(key);
+          }
         }
-      }
-    }, { flush: 'post' });
+      },
+      { flush: 'post' },
+    );
   });
 }
 
@@ -170,7 +177,10 @@ function buildSummary(state: AggregationState): string {
 
 /** Creates a fresh aggregation entry in activeKeys for the given key. */
 function trackNewAggregation(
-  key: string, id: number, message: string, opts: FireToastOptions,
+  key: string,
+  id: number,
+  message: string,
+  opts: FireToastOptions,
 ): void {
   activeKeys.set(key, {
     toastId: id,
@@ -238,11 +248,7 @@ export function useToast() {
   }
 
   /** Creates a brand-new toast entry with no aggregation tracking. */
-  function createFreshToast(
-    message: string,
-    type: Toast['type'],
-    opts: FireToastOptions,
-  ): number {
+  function createFreshToast(message: string, type: Toast['type'], opts: FireToastOptions): number {
     const id = nextId++;
     const duration = opts.durationMs ?? DISMISS_DURATION[type];
     durations.set(id, duration);

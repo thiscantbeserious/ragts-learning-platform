@@ -56,11 +56,13 @@ function makeMockSection(overrides: Partial<SectionRow> = {}): SectionRow {
 
 const MINIMAL_CAST = `{"version":3,"width":80,"height":24}\n[0.5,"o","hello"]\n`;
 
-function makeDeps(overrides: {
-  session?: Session | null;
-  sections?: SectionRow[];
-  castContent?: string;
-} = {}): ConstructorParameters<typeof SessionService>[0] {
+function makeDeps(
+  overrides: {
+    session?: Session | null;
+    sections?: SectionRow[];
+    castContent?: string;
+  } = {},
+): ConstructorParameters<typeof SessionService>[0] {
   const session = overrides.session !== undefined ? overrides.session : makeMockSession();
   const sections = overrides.sections ?? [];
   const castContent = overrides.castContent ?? MINIMAL_CAST;
@@ -157,19 +159,23 @@ describe('SessionService.getSessionMetadata', () => {
   });
 
   it('maps SectionRow fields to SectionMetadata camelCase shape', async () => {
-    service = new SessionService(makeDeps({
-      sections: [makeMockSection({
-        id: 'sec-42',
-        type: 'detected',
-        label: 'My Section',
-        start_event: 5,
-        end_event: 15,
-        start_line: 10,
-        end_line: 20,
-        line_count: 11,
-        preview: 'First output line',
-      })],
-    }));
+    service = new SessionService(
+      makeDeps({
+        sections: [
+          makeMockSection({
+            id: 'sec-42',
+            type: 'detected',
+            label: 'My Section',
+            start_event: 5,
+            end_event: 15,
+            start_line: 10,
+            end_line: 20,
+            line_count: 11,
+            preview: 'First output line',
+          }),
+        ],
+      }),
+    );
 
     const result = await service.getSessionMetadata('sess-1');
 
@@ -177,17 +183,19 @@ describe('SessionService.getSessionMetadata', () => {
     expect(result).toMatchObject({
       ok: true,
       data: {
-        sections: [{
-          id: 'sec-42',
-          type: 'detected',
-          label: 'My Section',
-          startEvent: 5,
-          endEvent: 15,
-          startLine: 10,
-          endLine: 20,
-          lineCount: 11,
-          preview: 'First output line',
-        }],
+        sections: [
+          {
+            id: 'sec-42',
+            type: 'detected',
+            label: 'My Section',
+            startEvent: 5,
+            endEvent: 15,
+            startLine: 10,
+            endLine: 20,
+            lineCount: 11,
+            preview: 'First output line',
+          },
+        ],
       },
     });
   });
@@ -198,7 +206,10 @@ describe('SessionService.getSessionMetadata', () => {
     const result = await service.getSessionMetadata('sess-1');
 
     expect(result.ok).toBe(true);
-    expect(result).toMatchObject({ ok: true, data: { sections: [expect.objectContaining({ lineCount: 0 })] } });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { sections: [expect.objectContaining({ lineCount: 0 })] },
+    });
   });
 
   it('handles null preview by returning null', async () => {
@@ -207,7 +218,10 @@ describe('SessionService.getSessionMetadata', () => {
     const result = await service.getSessionMetadata('sess-1');
 
     expect(result.ok).toBe(true);
-    expect(result).toMatchObject({ ok: true, data: { sections: [expect.objectContaining({ preview: null })] } });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { sections: [expect.objectContaining({ preview: null })] },
+    });
   });
 
   it('handles null label by returning empty string', async () => {
@@ -216,7 +230,10 @@ describe('SessionService.getSessionMetadata', () => {
     const result = await service.getSessionMetadata('sess-1');
 
     expect(result.ok).toBe(true);
-    expect(result).toMatchObject({ ok: true, data: { sections: [expect.objectContaining({ label: '' })] } });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { sections: [expect.objectContaining({ label: '' })] },
+    });
   });
 
   it('handles null end_event by returning 0', async () => {
@@ -225,17 +242,22 @@ describe('SessionService.getSessionMetadata', () => {
     const result = await service.getSessionMetadata('sess-1');
 
     expect(result.ok).toBe(true);
-    expect(result).toMatchObject({ ok: true, data: { sections: [expect.objectContaining({ endEvent: 0 })] } });
+    expect(result).toMatchObject({
+      ok: true,
+      data: { sections: [expect.objectContaining({ endEvent: 0 })] },
+    });
   });
 
   it('computes totalLines as sum of all section lineCounts', async () => {
-    service = new SessionService(makeDeps({
-      sections: [
-        makeMockSection({ id: 'sec-1', start_event: 0, end_event: 5, line_count: 10 }),
-        makeMockSection({ id: 'sec-2', start_event: 6, end_event: 10, line_count: 5 }),
-        makeMockSection({ id: 'sec-3', start_event: 11, end_event: 20, line_count: 8 }),
-      ],
-    }));
+    service = new SessionService(
+      makeDeps({
+        sections: [
+          makeMockSection({ id: 'sec-1', start_event: 0, end_event: 5, line_count: 10 }),
+          makeMockSection({ id: 'sec-2', start_event: 6, end_event: 10, line_count: 5 }),
+          makeMockSection({ id: 'sec-3', start_event: 11, end_event: 20, line_count: 8 }),
+        ],
+      }),
+    );
 
     const result = await service.getSessionMetadata('sess-1');
 
@@ -244,12 +266,14 @@ describe('SessionService.getSessionMetadata', () => {
   });
 
   it('computes sectionCount equal to sections array length', async () => {
-    service = new SessionService(makeDeps({
-      sections: [
-        makeMockSection({ id: 'sec-1', start_event: 0, end_event: 5 }),
-        makeMockSection({ id: 'sec-2', start_event: 6, end_event: 10 }),
-      ],
-    }));
+    service = new SessionService(
+      makeDeps({
+        sections: [
+          makeMockSection({ id: 'sec-1', start_event: 0, end_event: 5 }),
+          makeMockSection({ id: 'sec-2', start_event: 6, end_event: 10 }),
+        ],
+      }),
+    );
 
     const result = await service.getSessionMetadata('sess-1');
 
@@ -267,9 +291,11 @@ describe('SessionService.getSessionMetadata', () => {
   });
 
   it('returns detection_status from the session record', async () => {
-    service = new SessionService(makeDeps({
-      session: makeMockSession({ detection_status: 'pending' }),
-    }));
+    service = new SessionService(
+      makeDeps({
+        session: makeMockSession({ detection_status: 'pending' }),
+      }),
+    );
 
     const result = await service.getSessionMetadata('sess-1');
 

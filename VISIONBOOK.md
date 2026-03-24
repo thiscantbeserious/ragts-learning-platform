@@ -110,6 +110,7 @@ Phase 2 — **LanceDB + Transformers.js** for semantic similarity. Embed section
 **Current behavior:** First-come-first-served. Whichever `SessionCard` components mount first grab the SSE slots. If 3 background sessions are processing and the user clicks a 4th, it falls back to 10s polling instead of real-time updates.
 
 **Proposed behavior:** Priority queue with eviction. When the user selects a session that's processing:
+
 1. If a slot is free, use it
 2. If all slots are taken, evict the least-important connection (oldest background session) and give the slot to the selected session
 3. The evicted session falls back to polling
@@ -221,7 +222,7 @@ Workspaces without auth are meaningless. Auth without workspaces is single-tenan
 - **Freetext entries** — custom instruction notes, prose, context — anything the user wants to attach that isn't derived from sessions. Think "here's what I know about this pattern" written directly into the domain.
 - **Connections** — visual, drag-and-drop links between any of the above, forming a graph of related knowledge
 
-This list is deliberately open. A domain is a container for *whatever helps generate better instructions* — session-derived content, hand-written notes, external references, structured data. The exact building blocks will emerge through use.
+This list is deliberately open. A domain is a container for _whatever helps generate better instructions_ — session-derived content, hand-written notes, external references, structured data. The exact building blocks will emerge through use.
 
 **The interaction model (exploratory):**
 

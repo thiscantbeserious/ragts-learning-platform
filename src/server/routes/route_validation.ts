@@ -34,7 +34,9 @@ export interface ValidationFieldError {
  */
 export function validatePathId(c: Context, id: string | undefined): Response | null {
   if (!id || id.trim().length === 0) {
-    const body: ValidationErrorResponse = { error: 'Invalid path parameter: id must be a non-empty string' };
+    const body: ValidationErrorResponse = {
+      error: 'Invalid path parameter: id must be a non-empty string',
+    };
     return c.json(body, 400);
   }
   return null;
@@ -44,7 +46,11 @@ export function validatePathId(c: Context, id: string | undefined): Response | n
  * Validate that a query parameter is a non-empty string.
  * Returns a 400 JSON response if the param is missing or empty; otherwise returns null.
  */
-export function validateQueryParam(c: Context, name: string, value: string | undefined): Response | null {
+export function validateQueryParam(
+  c: Context,
+  name: string,
+  value: string | undefined,
+): Response | null {
   if (!value || value.trim().length === 0) {
     const body: ValidationErrorResponse = { error: `Missing or empty query parameter: ${name}` };
     return c.json(body, 400);
@@ -63,4 +69,3 @@ export function mapTypiaErrors(errors: IValidation.IError[]): ValidationFieldErr
     value: e.value,
   }));
 }
-

@@ -15,10 +15,18 @@ function makeLocalStorageStub() {
   const store: Record<string, string> = {};
   return {
     getItem: vi.fn((key: string) => store[key] ?? null),
-    setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
-    removeItem: vi.fn((key: string) => { delete store[key]; }),
-    clear: vi.fn(() => { for (const key of Object.keys(store)) delete store[key]; }),
-    get length() { return Object.keys(store).length; },
+    setItem: vi.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: vi.fn(() => {
+      for (const key of Object.keys(store)) delete store[key];
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
     key: vi.fn((index: number) => Object.keys(store)[index] ?? null),
     _store: store,
   };
@@ -126,7 +134,9 @@ describe('useLayout()', () => {
       // Simulate viewport narrowing to mobile width.
       mqStub.matches = true;
       if (changeHandler) {
-        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({ matches: true } as MediaQueryListEvent);
+        (changeHandler as (e: Partial<MediaQueryListEvent>) => void)({
+          matches: true,
+        } as MediaQueryListEvent);
       }
 
       expect(isMobile?.value).toBe(true);
@@ -146,7 +156,9 @@ describe('useLayout()', () => {
       vi.spyOn(window, 'matchMedia').mockReturnValue(mqStub as unknown as MediaQueryList);
 
       const scope = effectScope();
-      scope.run(() => { useLayout(); });
+      scope.run(() => {
+        useLayout();
+      });
       scope.stop();
 
       expect(mqStub.removeEventListener).toHaveBeenCalledWith('change', changeHandler);
@@ -155,7 +167,9 @@ describe('useLayout()', () => {
 
   describe('localStorage resilience', () => {
     it('toggleSidebar does not throw when localStorage.setItem throws', () => {
-      localStorageStub.setItem.mockImplementation(() => { throw new Error('quota exceeded'); });
+      localStorageStub.setItem.mockImplementation(() => {
+        throw new Error('quota exceeded');
+      });
       const { toggleSidebar, isSidebarOpen } = useLayout();
       expect(() => toggleSidebar()).not.toThrow();
       // State still flips even though persistence failed.

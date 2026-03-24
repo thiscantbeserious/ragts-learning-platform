@@ -14,10 +14,7 @@ const log = logger.child({ module: 'routes/upload' });
  * Handle POST /api/upload
  * Multipart file upload — thin route; business logic lives in UploadService.
  */
-export async function handleUpload(
-  c: Context,
-  service: UploadService
-): Promise<Response> {
+export async function handleUpload(c: Context, service: UploadService): Promise<Response> {
   try {
     const formData = await c.req.parseBody();
     const file = formData['file'];

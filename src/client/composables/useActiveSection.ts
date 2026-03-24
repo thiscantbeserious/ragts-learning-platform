@@ -77,14 +77,20 @@ export interface ActiveSectionOptions {
  */
 export function useActiveSection(
   elements: Ref<SectionEntry[]>,
-  options: ActiveSectionOptions = {}
+  options: ActiveSectionOptions = {},
 ): ActiveSectionState {
   const activeId = ref<string | null>(null);
 
   const { scrollElement, getItemOffsets, stickyHeaderRef } = options;
 
   if (scrollElement && getItemOffsets) {
-    return setupScrollPositionMode(elements, activeId, scrollElement, getItemOffsets, stickyHeaderRef);
+    return setupScrollPositionMode(
+      elements,
+      activeId,
+      scrollElement,
+      getItemOffsets,
+      stickyHeaderRef,
+    );
   }
 
   return setupIntersectionMode(elements, activeId);
@@ -103,7 +109,7 @@ function setupScrollPositionMode(
   activeId: Ref<string | null>,
   scrollElement: Ref<HTMLElement | null>,
   getItemOffsets: () => SectionOffset[],
-  stickyHeaderRef?: Ref<HTMLElement | null>
+  stickyHeaderRef?: Ref<HTMLElement | null>,
 ): ActiveSectionState {
   let currentEl: HTMLElement | null = null;
 
@@ -126,10 +132,18 @@ function setupScrollPositionMode(
     }
   }
 
-  watch(scrollElement, (el) => { attach(el); }, { immediate: true });
+  watch(
+    scrollElement,
+    (el) => {
+      attach(el);
+    },
+    { immediate: true },
+  );
 
   // Re-evaluate when elements list changes (session change resets entries).
-  watch(elements, () => { onScroll(); });
+  watch(elements, () => {
+    onScroll();
+  });
 
   function cleanup(): void {
     if (currentEl) {
@@ -155,7 +169,7 @@ function setupScrollPositionMode(
 function findActiveSectionByScroll(
   scrollTop: number,
   offsets: SectionOffset[],
-  headerOffset = 0
+  headerOffset = 0,
 ): string | null {
   if (offsets.length === 0) return null;
 
@@ -187,7 +201,7 @@ function findActiveSectionByScroll(
  */
 function setupIntersectionMode(
   elements: Ref<SectionEntry[]>,
-  activeId: Ref<string | null>
+  activeId: Ref<string | null>,
 ): ActiveSectionState {
   /** Set of section ids currently intersecting the viewport. */
   const visibleIds = new Set<string>();
@@ -247,7 +261,13 @@ function setupIntersectionMode(
     }
   }
 
-  watch(elements, () => { connectObserver(); }, { immediate: true });
+  watch(
+    elements,
+    () => {
+      connectObserver();
+    },
+    { immediate: true },
+  );
 
   function cleanup(): void {
     disconnectObserver();

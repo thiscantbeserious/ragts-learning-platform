@@ -37,7 +37,7 @@ function acquireSlot(): Promise<void> {
     activeCount++;
     return Promise.resolve();
   }
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     waitQueue.push({ resolve });
   });
 }

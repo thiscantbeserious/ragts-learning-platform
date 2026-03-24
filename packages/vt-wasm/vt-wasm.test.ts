@@ -18,9 +18,7 @@ describe('vt-wasm', () => {
       await initVt();
     } catch (error) {
       // If WASM module is not built yet, tests will fail with clear message
-      console.warn(
-        'WASM module not available. Run ./build.sh in packages/vt-wasm/ to build it.'
-      );
+      console.warn('WASM module not available. Run ./build.sh in packages/vt-wasm/ to build it.');
       throw error;
     }
   });
@@ -68,7 +66,7 @@ describe('vt-wasm', () => {
       expect(firstLine.spans).toBeDefined();
 
       // Extract text from spans
-      const text = firstLine.spans.map(span => span.text).join('');
+      const text = firstLine.spans.map((span) => span.text).join('');
       expect(text).toContain('Hello, World!');
     });
 
@@ -79,8 +77,8 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       // Should have at least 3 lines with content
-      const nonEmptyLines = view.lines.filter(line =>
-        line.spans.some(span => span.text.trim().length > 0)
+      const nonEmptyLines = view.lines.filter((line) =>
+        line.spans.some((span) => span.text.trim().length > 0),
       );
       expect(nonEmptyLines.length).toBeGreaterThanOrEqual(3);
     });
@@ -96,7 +94,7 @@ describe('vt-wasm', () => {
 
       // Find span with "Red Text"
       const spans = view.lines[0].spans;
-      const redSpan = spans.find(span => span.text.includes('Red'));
+      const redSpan = spans.find((span) => span.text.includes('Red'));
 
       expect(redSpan).toBeDefined();
       // Foreground color should be set (either palette index or RGB)
@@ -111,14 +109,12 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const orangeSpan = spans.find(span => span.text.includes('Orange'));
+      const orangeSpan = spans.find((span) => span.text.includes('Orange'));
 
       expect(orangeSpan).toBeDefined();
       expect(orangeSpan?.fg).toBeDefined();
       // True color should be a string in format "#RRGGBB" or a number
-      expect(
-        typeof orangeSpan?.fg === 'string' || typeof orangeSpan?.fg === 'number'
-      ).toBe(true);
+      expect(typeof orangeSpan?.fg === 'string' || typeof orangeSpan?.fg === 'number').toBe(true);
     });
 
     it('feed background color sets bg property', () => {
@@ -129,7 +125,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const blueSpan = spans.find(span => span.text.includes('Blue'));
+      const blueSpan = spans.find((span) => span.text.includes('Blue'));
 
       expect(blueSpan).toBeDefined();
       expect(blueSpan?.bg).toBeDefined();
@@ -146,7 +142,7 @@ describe('vt-wasm', () => {
       vt.feed('B');
 
       const view = vt.getView();
-      const text = view.lines[0].spans.map(span => span.text).join('');
+      const text = view.lines[0].spans.map((span) => span.text).join('');
 
       // "A" at position 0, "B" at position ~10
       expect(text[0]).toBe('A');
@@ -173,13 +169,13 @@ describe('vt-wasm', () => {
       // Write text, then clear screen
       vt.feed('This will be cleared');
       vt.feed('\u001b[2J'); // Clear entire screen
-      vt.feed('\u001b[H');  // Move cursor to home (optional but common)
+      vt.feed('\u001b[H'); // Move cursor to home (optional but common)
 
       const view = vt.getView();
 
       // Buffer should be empty (all lines have no text or only whitespace)
-      const hasContent = view.lines.some(line =>
-        line.spans.some(span => span.text.trim().length > 0)
+      const hasContent = view.lines.some((line) =>
+        line.spans.some((span) => span.text.trim().length > 0),
       );
 
       expect(hasContent).toBe(false);
@@ -193,9 +189,7 @@ describe('vt-wasm', () => {
       vt.feed('New text');
 
       const view = vt.getView();
-      const allText = view.lines
-        .flatMap(line => line.spans.map(span => span.text))
-        .join('');
+      const allText = view.lines.flatMap((line) => line.spans.map((span) => span.text)).join('');
 
       expect(allText).toContain('New text');
       expect(allText).not.toContain('Old text');
@@ -209,9 +203,7 @@ describe('vt-wasm', () => {
       // Write to primary screen
       vt.feed('Primary screen content');
       const primaryView = vt.getView();
-      const _primaryText = primaryView.lines[0].spans
-        .map(span => span.text)
-        .join('');
+      const _primaryText = primaryView.lines[0].spans.map((span) => span.text).join('');
 
       // Enter alternate screen (1049h)
       vt.feed('\u001b[?1049h');
@@ -220,9 +212,7 @@ describe('vt-wasm', () => {
       // Exit alternate screen (1049l) - should restore primary
       vt.feed('\u001b[?1049l');
       const restoredView = vt.getView();
-      const restoredText = restoredView.lines[0].spans
-        .map(span => span.text)
-        .join('');
+      const restoredText = restoredView.lines[0].spans.map((span) => span.text).join('');
 
       // Primary content should be restored
       expect(restoredText).toContain('Primary');
@@ -239,7 +229,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const boldSpan = spans.find(span => span.text.includes('Bold'));
+      const boldSpan = spans.find((span) => span.text.includes('Bold'));
 
       expect(boldSpan).toBeDefined();
       expect(boldSpan?.bold).toBe(true);
@@ -253,7 +243,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const faintSpan = spans.find(span => span.text.includes('Faint'));
+      const faintSpan = spans.find((span) => span.text.includes('Faint'));
 
       expect(faintSpan).toBeDefined();
       expect(faintSpan?.faint).toBe(true);
@@ -267,7 +257,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const italicSpan = spans.find(span => span.text.includes('Italic'));
+      const italicSpan = spans.find((span) => span.text.includes('Italic'));
 
       expect(italicSpan).toBeDefined();
       expect(italicSpan?.italic).toBe(true);
@@ -281,7 +271,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const underlineSpan = spans.find(span => span.text.includes('Underline'));
+      const underlineSpan = spans.find((span) => span.text.includes('Underline'));
 
       expect(underlineSpan).toBeDefined();
       expect(underlineSpan?.underline).toBe(true);
@@ -295,7 +285,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const strikeSpan = spans.find(span => span.text.includes('Strike'));
+      const strikeSpan = spans.find((span) => span.text.includes('Strike'));
 
       expect(strikeSpan).toBeDefined();
       expect(strikeSpan?.strikethrough).toBe(true);
@@ -309,7 +299,7 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       const spans = view.lines[0].spans;
-      const inverseSpan = spans.find(span => span.text.includes('Inverse'));
+      const inverseSpan = spans.find((span) => span.text.includes('Inverse'));
 
       expect(inverseSpan).toBeDefined();
       expect(inverseSpan?.inverse).toBe(true);
@@ -326,7 +316,7 @@ describe('vt-wasm', () => {
 
       // Feed all 50 output events
       expect(() => {
-        fixtureData.forEach(output => {
+        fixtureData.forEach((output) => {
           vt.feed(output);
         });
       }).not.toThrow();
@@ -345,27 +335,25 @@ describe('vt-wasm', () => {
       const fixturePath = join(__dirname, 'fixtures', 'claude-first-50-outputs.json');
       const fixtureData = JSON.parse(readFileSync(fixturePath, 'utf-8')) as string[];
 
-      fixtureData.forEach(output => vt.feed(output));
+      fixtureData.forEach((output) => vt.feed(output));
 
       const view = vt.getView();
 
       // Check that we have actual styled content
-      const hasStyledSpans = view.lines.some(line =>
+      const hasStyledSpans = view.lines.some((line) =>
         line.spans.some(
-          span =>
+          (span) =>
             span.fg !== undefined ||
             span.bg !== undefined ||
             span.bold === true ||
-            span.italic === true
-        )
+            span.italic === true,
+        ),
       );
 
       expect(hasStyledSpans).toBe(true);
 
       // Check that we have readable text (not just escape codes)
-      const allText = view.lines
-        .flatMap(line => line.spans.map(span => span.text))
-        .join('');
+      const allText = view.lines.flatMap((line) => line.spans.map((span) => span.text)).join('');
 
       // Should contain recognizable text from Claude session
       // (the fixture includes "Claude Code", "Opus", etc.)
@@ -384,7 +372,7 @@ describe('vt-wasm', () => {
 
       // Feed all 50 output events
       expect(() => {
-        fixtureData.forEach(output => {
+        fixtureData.forEach((output) => {
           vt.feed(output);
         });
       }).not.toThrow();
@@ -403,26 +391,21 @@ describe('vt-wasm', () => {
       const fixturePath = join(__dirname, 'fixtures', 'codex-first-50-outputs.json');
       const fixtureData = JSON.parse(readFileSync(fixturePath, 'utf-8')) as string[];
 
-      fixtureData.forEach(output => vt.feed(output));
+      fixtureData.forEach((output) => vt.feed(output));
 
       const view = vt.getView();
 
       // Check for styled content
-      const hasStyledSpans = view.lines.some(line =>
+      const hasStyledSpans = view.lines.some((line) =>
         line.spans.some(
-          span =>
-            span.fg !== undefined ||
-            span.bg !== undefined ||
-            span.bold === true
-        )
+          (span) => span.fg !== undefined || span.bg !== undefined || span.bold === true,
+        ),
       );
 
       expect(hasStyledSpans).toBe(true);
 
       // Check for readable text
-      const allText = view.lines
-        .flatMap(line => line.spans.map(span => span.text))
-        .join('');
+      const allText = view.lines.flatMap((line) => line.spans.map((span) => span.text)).join('');
 
       // Fixture includes "OpenAI Codex", "model:", etc.
       const hasReadableText = allText.length > 100;
@@ -442,7 +425,7 @@ describe('vt-wasm', () => {
 
       const start = performance.now();
 
-      events.forEach(event => vt.feed(event));
+      events.forEach((event) => vt.feed(event));
 
       const duration = performance.now() - start;
 
@@ -462,7 +445,7 @@ describe('vt-wasm', () => {
 
       const start = performance.now();
 
-      events.forEach(event => vt.feed(event));
+      events.forEach((event) => vt.feed(event));
 
       const duration = performance.now() - start;
 
@@ -506,8 +489,8 @@ describe('vt-wasm', () => {
       const view = vt.getView();
 
       // Long text in narrow terminal should produce content across multiple lines
-      const nonEmptyLines = view.lines.filter(line =>
-        line.spans.some(span => span.text.trim().length > 0)
+      const nonEmptyLines = view.lines.filter((line) =>
+        line.spans.some((span) => span.text.trim().length > 0),
       );
       expect(nonEmptyLines.length).toBeGreaterThan(1);
     });
@@ -547,7 +530,7 @@ describe('vt-wasm', () => {
       vt.feed('\u001b[K'); // Erase from cursor to end of line
 
       const view = vt.getView();
-      const text = view.lines[0].spans.map(span => span.text).join('');
+      const text = view.lines[0].spans.map((span) => span.text).join('');
 
       // "World" should be erased, "Hello" remains
       expect(text).toContain('Hello');

@@ -36,9 +36,11 @@ function makeSessionAdapter(sessions: Session[] = []): SessionAdapter {
     create: vi.fn(),
     createWithId: vi.fn(),
     findAll: vi.fn().mockResolvedValue(sessions),
-    findByStatuses: vi.fn().mockImplementation((statuses: string[]) =>
-      Promise.resolve(sessions.filter(s => statuses.includes(s.detection_status!)))
-    ),
+    findByStatuses: vi
+      .fn()
+      .mockImplementation((statuses: string[]) =>
+        Promise.resolve(sessions.filter((s) => statuses.includes(s.detection_status!))),
+      ),
     findById: vi.fn(),
     deleteById: vi.fn(),
     updateDetectionStatus: vi.fn(),
@@ -130,7 +132,7 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     eventBus.emit({ type: 'session.uploaded', sessionId: 'sess-1', filename: 'test.cast' });
 
     const snapshot = service.getSnapshot();
-    expect(snapshot.processing.find(s => s.id === 'sess-1')).toBeTruthy();
+    expect(snapshot.processing.find((s) => s.id === 'sess-1')).toBeTruthy();
   });
 
   it('keeps session in processing when session.validated event fires', () => {
@@ -138,7 +140,7 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     eventBus.emit({ type: 'session.validated', sessionId: 'sess-1', eventCount: 100 });
 
     const snapshot = service.getSnapshot();
-    const session = snapshot.processing.find(s => s.id === 'sess-1');
+    const session = snapshot.processing.find((s) => s.id === 'sess-1');
     expect(session).toBeTruthy();
     // session.validated means validation finished — next stage is detecting
     expect(session!.status).toBe('detecting');
@@ -149,7 +151,7 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     eventBus.emit({ type: 'session.detected', sessionId: 'sess-1', sectionCount: 5 });
 
     const snapshot = service.getSnapshot();
-    const session = snapshot.processing.find(s => s.id === 'sess-1');
+    const session = snapshot.processing.find((s) => s.id === 'sess-1');
     expect(session).toBeTruthy();
     // session.detected means detection finished — next stage is replaying
     expect(session!.status).toBe('replaying');
@@ -160,7 +162,7 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     eventBus.emit({ type: 'session.replayed', sessionId: 'sess-1', lineCount: 200 });
 
     const snapshot = service.getSnapshot();
-    const session = snapshot.processing.find(s => s.id === 'sess-1');
+    const session = snapshot.processing.find((s) => s.id === 'sess-1');
     expect(session).toBeTruthy();
     // session.replayed means replay finished — next stage is deduplicating
     expect(session!.status).toBe('deduplicating');
@@ -171,7 +173,7 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     eventBus.emit({ type: 'session.deduped', sessionId: 'sess-1', rawLines: 100, cleanLines: 80 });
 
     const snapshot = service.getSnapshot();
-    const session = snapshot.processing.find(s => s.id === 'sess-1');
+    const session = snapshot.processing.find((s) => s.id === 'sess-1');
     expect(session).toBeTruthy();
     // session.deduped means dedup finished — next stage is storing
     expect(session!.status).toBe('storing');
@@ -182,8 +184,8 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     eventBus.emit({ type: 'session.ready', sessionId: 'sess-1' });
 
     const snapshot = service.getSnapshot();
-    expect(snapshot.processing.find(s => s.id === 'sess-1')).toBeUndefined();
-    const completed = snapshot.recentlyCompleted.find(s => s.id === 'sess-1');
+    expect(snapshot.processing.find((s) => s.id === 'sess-1')).toBeUndefined();
+    const completed = snapshot.recentlyCompleted.find((s) => s.id === 'sess-1');
     expect(completed).toBeTruthy();
     expect(completed!.status).toBe('completed');
   });
@@ -198,7 +200,7 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     });
 
     const snapshot = service.getSnapshot();
-    const session = snapshot.processing.find(s => s.id === 'sess-1');
+    const session = snapshot.processing.find((s) => s.id === 'sess-1');
     expect(session).toBeTruthy();
     expect(session!.status).toBe('processing');
   });
@@ -213,8 +215,8 @@ describe('PipelineStatusService — event bus subscriptions', () => {
     });
 
     const snapshot = service.getSnapshot();
-    expect(snapshot.processing.find(s => s.id === 'sess-1')).toBeUndefined();
-    const completed = snapshot.recentlyCompleted.find(s => s.id === 'sess-1');
+    expect(snapshot.processing.find((s) => s.id === 'sess-1')).toBeUndefined();
+    const completed = snapshot.recentlyCompleted.find((s) => s.id === 'sess-1');
     expect(completed).toBeTruthy();
     expect(completed!.status).toBe('failed');
   });
@@ -319,11 +321,13 @@ describe('PipelineStatusService — onUpdate callback', () => {
     eventBus.emit({ type: 'session.uploaded', sessionId: 'sess-1', filename: 'test.cast' });
 
     expect(callback).toHaveBeenCalledTimes(1);
-    expect(callback).toHaveBeenCalledWith(expect.objectContaining({
-      processing: expect.any(Array),
-      queued: expect.any(Array),
-      recentlyCompleted: expect.any(Array),
-    }));
+    expect(callback).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processing: expect.any(Array),
+        queued: expect.any(Array),
+        recentlyCompleted: expect.any(Array),
+      }),
+    );
   });
 
   it('calls multiple update callbacks when registered', async () => {
@@ -373,7 +377,7 @@ describe('PipelineStatusService — session name from filename', () => {
     eventBus.emit({ type: 'session.uploaded', sessionId: 'sess-1', filename: 'my-recording.cast' });
 
     const snapshot = service.getSnapshot();
-    const session = snapshot.processing.find(s => s.id === 'sess-1');
+    const session = snapshot.processing.find((s) => s.id === 'sess-1');
     expect(session!.name).toBe('my-recording.cast');
   });
 

@@ -16,15 +16,15 @@ Erika is a multi-user, self-hostable web platform where teams browse agent termi
 
 Decided in [MVP v1 ADR](.state/feat/mvp-v1/ADR.md), evolved through MVP v2.
 
-| Layer | Choice | Rationale |
-|-------|--------|-----------|
-| **Backend** | TypeScript + Hono | Unified language with frontend, shared types, web-standard middleware |
-| **Frontend** | Vue 3 (Composition API) | Composables for state, no Pinia at current scale |
-| **Database** | SQLite via `better-sqlite3` | Embedded, zero-config, WAL mode for concurrent reads |
+| Layer                  | Choice                         | Rationale                                                               |
+| ---------------------- | ------------------------------ | ----------------------------------------------------------------------- |
+| **Backend**            | TypeScript + Hono              | Unified language with frontend, shared types, web-standard middleware   |
+| **Frontend**           | Vue 3 (Composition API)        | Composables for state, no Pinia at current scale                        |
+| **Database**           | SQLite via `better-sqlite3`    | Embedded, zero-config, WAL mode for concurrent reads                    |
 | **Terminal rendering** | asciinema `avt` crate via WASM | Full VT parser, server-side processing, client renders structured spans |
-| **IDs** | `nanoid` | URL-safe, 21 chars, cryptographically strong |
-| **Build** | Vite | Frontend bundling, dev proxy to Hono backend |
-| **Testing** | Vitest + Playwright | Snapshot tests + visual regression |
+| **IDs**                | `nanoid`                       | URL-safe, 21 chars, cryptographically strong                            |
+| **Build**              | Vite                           | Frontend bundling, dev proxy to Hono backend                            |
+| **Testing**            | Vitest + Playwright            | Snapshot tests + visual regression                                      |
 
 ### Design System
 
@@ -36,20 +36,21 @@ Dual license: application code = AGPL-3.0, design system = Elastic License 2.0 (
 
 Priority order when trade-offs arise:
 
-| Priority | Attribute | What It Means |
-|----------|-----------|---------------|
-| 1 | **Security** | Sessions contain sensitive terminal output. Auth, authorization, tenant isolation are non-negotiable. |
-| 2 | **Self-hostability** | Single container with minimal dependencies. Complex setups kill adoption. |
-| 3 | **Multi-tenancy** | Multiple users, teams, and workspaces from day one. Not bolted on later. |
-| 4 | **Extensibility** | Integration with diverse auth providers, retrieval mechanisms, and agent ecosystems. |
-| 5 | **Performance** | Sessions can be massive. Rendering, search, and retrieval must handle scale. |
-| 6 | **Operability** | Upgrades, backups, monitoring, and configuration must be straightforward. |
+| Priority | Attribute            | What It Means                                                                                         |
+| -------- | -------------------- | ----------------------------------------------------------------------------------------------------- |
+| 1        | **Security**         | Sessions contain sensitive terminal output. Auth, authorization, tenant isolation are non-negotiable. |
+| 2        | **Self-hostability** | Single container with minimal dependencies. Complex setups kill adoption.                             |
+| 3        | **Multi-tenancy**    | Multiple users, teams, and workspaces from day one. Not bolted on later.                              |
+| 4        | **Extensibility**    | Integration with diverse auth providers, retrieval mechanisms, and agent ecosystems.                  |
+| 5        | **Performance**      | Sessions can be massive. Rendering, search, and retrieval must handle scale.                          |
+| 6        | **Operability**      | Upgrades, backups, monitoring, and configuration must be straightforward.                             |
 
 ## 4. Current Architecture
 
 ### Data Flow
 
 **Ingestion:**
+
 ```
 Upload .cast -> Validate -> Save to disk -> Insert DB row
   -> Async pipeline: NDJSON stream -> section detection -> VT processing -> scrollback dedup
@@ -57,12 +58,14 @@ Upload .cast -> Validate -> Save to disk -> Insert DB row
 ```
 
 **Browsing:**
+
 ```
 GET /api/sessions/:id -> Session metadata + sections with pre-rendered snapshots
   -> Client renders TerminalSnapshot as styled <span> grid
 ```
 
 **Section Detection** ([MVP v2 ADR](.state/feat/mvp-v2/ADR.md)):
+
 - Co-primary signals: timing gaps (raw sessions) + screen clears (AGR-processed)
 - Secondary: alternate screen buffer transitions
 - Markers always take precedence over auto-detected boundaries
@@ -71,26 +74,26 @@ GET /api/sessions/:id -> Session metadata + sections with pre-rendered snapshots
 
 Adapter pattern, fully implemented:
 
-| Component | Interface | Implementation | Status |
-|-----------|-----------|---------------|--------|
-| Sessions | `SessionAdapter` | `SqliteSessionImpl` | Complete |
-| Sections | `SectionAdapter` | `SqliteSectionImpl` | Complete |
-| File storage | `StorageAdapter` | `FsStorageImpl` | Complete |
-| DB init | `DatabaseAdapter` | `SqliteDatabaseImpl` | Complete |
-| DB creation | -- | `DatabaseFactory` | Complete |
+| Component    | Interface         | Implementation       | Status   |
+| ------------ | ----------------- | -------------------- | -------- |
+| Sessions     | `SessionAdapter`  | `SqliteSessionImpl`  | Complete |
+| Sections     | `SectionAdapter`  | `SqliteSectionImpl`  | Complete |
+| File storage | `StorageAdapter`  | `FsStorageImpl`      | Complete |
+| DB init      | `DatabaseAdapter` | `SqliteDatabaseImpl` | Complete |
+| DB creation  | --                | `DatabaseFactory`    | Complete |
 
 The application entry point obtains a `DatabaseAdapter` through `DatabaseFactory.create()`, which uses a dynamic require to avoid coupling `index.ts` to the concrete SQLite implementation. Adding a new backend (e.g. PostgreSQL) requires only a new `*DatabaseImpl` class and a new case in the factory — no changes to routes or processing code.
 
 ### API Surface
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Health check |
-| POST | `/api/upload` | Multipart .cast file upload |
-| GET | `/api/sessions` | List sessions |
-| GET | `/api/sessions/:id` | Session detail with sections and snapshots |
-| DELETE | `/api/sessions/:id` | Delete session |
-| POST | `/api/sessions/:id/redetect` | Re-run section detection (202 Accepted) |
+| Method | Endpoint                     | Description                                |
+| ------ | ---------------------------- | ------------------------------------------ |
+| GET    | `/api/health`                | Health check                               |
+| POST   | `/api/upload`                | Multipart .cast file upload                |
+| GET    | `/api/sessions`              | List sessions                              |
+| GET    | `/api/sessions/:id`          | Session detail with sections and snapshots |
+| DELETE | `/api/sessions/:id`          | Delete session                             |
+| POST   | `/api/sessions/:id/redetect` | Re-run section detection (202 Accepted)    |
 
 ## 5. Domain Model
 
@@ -108,14 +111,14 @@ The application entry point obtains a `DatabaseAdapter` through `DatabaseFactory
 
 ### Bounded Contexts
 
-| Context | Status | What's There |
-|---------|--------|-------------|
-| **Session** | Partial | Ingestion, storage, browsing, section detection, scrollback dedup |
-| **Transform** | Partial | VT processing via avt WASM, snapshot generation |
-| **Identity** | Not started | Planned: built-in auth + OIDC delegation |
-| **Retrieval** | Not started | Planned: MCP server + REST API for agents |
-| **Index** | Not started | Planned: full-text + semantic search |
-| **Cache** | Not started | Planned: Redis or in-process for hot sessions |
+| Context       | Status      | What's There                                                      |
+| ------------- | ----------- | ----------------------------------------------------------------- |
+| **Session**   | Partial     | Ingestion, storage, browsing, section detection, scrollback dedup |
+| **Transform** | Partial     | VT processing via avt WASM, snapshot generation                   |
+| **Identity**  | Not started | Planned: built-in auth + OIDC delegation                          |
+| **Retrieval** | Not started | Planned: MCP server + REST API for agents                         |
+| **Index**     | Not started | Planned: full-text + semantic search                              |
+| **Cache**     | Not started | Planned: Redis or in-process for hot sessions                     |
 
 ## 6. Deployment
 
@@ -135,10 +138,10 @@ Everything in one Docker image. Works behind existing reverse proxy.
 
 ```yaml
 services:
-  erika-app:        # Application server + web UI
-  erika-db:         # PostgreSQL (when SQLite hits concurrency limits)
-  erika-cache:      # Redis (session caching, job queues)
-  erika-transform:  # AGR service worker
+  erika-app: # Application server + web UI
+  erika-db: # PostgreSQL (when SQLite hits concurrency limits)
+  erika-cache: # Redis (session caching, job queues)
+  erika-transform: # AGR service worker
 ```
 
 Same application code at every scale. Configuration determines embedded vs external infrastructure.
@@ -172,17 +175,17 @@ Same application code at every scale. Configuration determines embedded vs exter
 
 ## 8. Decision History
 
-| Branch | ADR | Key Decisions |
-|--------|-----|---------------|
-| `feat/mvp-v1` | [ADR](.state/feat/mvp-v1/ADR.md) | TypeScript+Hono, SQLite, repository pattern, Vue 3, nanoid |
-| `feat/mvp-v2` | [ADR](.state/feat/mvp-v2/ADR.md) | avt WASM rendering, section detection, hybrid server/client rendering, scrollback dedup |
-| `feat/snapshot-testing` | [ADR](.state/feat/snapshot-testing/ADR.md) | Vitest + Playwright snapshot and visual regression strategy |
-| `design-system-bootstrap` | [ADR](.state/design-system-bootstrap/ADR.md) | Route map, navigation model, curation slide-over, design system scope |
-| `chore/sdlc-overhaul` | [ADR](.state/chore/sdlc-overhaul/ADR.md) | Specialized roles, dynamic coordinator, role isolation |
-| `refactor/db-adapter-pattern` | [ADR](.state/refactor/db-adapter-pattern/ADR.md) | DatabaseAdapter pattern, SectionAdapter interface, StorageAdapter/FsStorageImpl |
+| Branch                        | ADR                                              | Key Decisions                                                                           |
+| ----------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `feat/mvp-v1`                 | [ADR](.state/feat/mvp-v1/ADR.md)                 | TypeScript+Hono, SQLite, repository pattern, Vue 3, nanoid                              |
+| `feat/mvp-v2`                 | [ADR](.state/feat/mvp-v2/ADR.md)                 | avt WASM rendering, section detection, hybrid server/client rendering, scrollback dedup |
+| `feat/snapshot-testing`       | [ADR](.state/feat/snapshot-testing/ADR.md)       | Vitest + Playwright snapshot and visual regression strategy                             |
+| `design-system-bootstrap`     | [ADR](.state/design-system-bootstrap/ADR.md)     | Route map, navigation model, curation slide-over, design system scope                   |
+| `chore/sdlc-overhaul`         | [ADR](.state/chore/sdlc-overhaul/ADR.md)         | Specialized roles, dynamic coordinator, role isolation                                  |
+| `refactor/db-adapter-pattern` | [ADR](.state/refactor/db-adapter-pattern/ADR.md) | DatabaseAdapter pattern, SectionAdapter interface, StorageAdapter/FsStorageImpl         |
 
 ## 9. Previous Versions
 
-| Version | Date | Notes |
-|---------|------|-------|
+| Version                                                                          | Date       | Notes                                                                                                                                                                   |
+| -------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [v1 -- Initial baseline](.state/architecture-history/ARCHITECTURE-v1-initial.md) | 2026-02-16 | Pre-MVP brainstorm. Foundation decisions (tech stack, DB, rendering) resolved through ADRs above. Auth, retrieval, and multi-tenancy decisions remain open (Section 7). |

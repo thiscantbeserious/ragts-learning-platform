@@ -16,7 +16,7 @@ import type { ProcessedSession } from '../types.js';
  */
 export async function store(
   processed: ProcessedSession,
-  sessionAdapter: SessionAdapter
+  sessionAdapter: SessionAdapter,
 ): Promise<void> {
   await sessionAdapter.completeProcessing(processed);
 }

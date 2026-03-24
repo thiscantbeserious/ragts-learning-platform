@@ -29,12 +29,7 @@ function setupGlobals() {
   });
 }
 
-function stubViewport(
-  el: HTMLElement,
-  scrollHeight: number,
-  clientHeight: number,
-  scrollTop = 0,
-) {
+function stubViewport(el: HTMLElement, scrollHeight: number, clientHeight: number, scrollTop = 0) {
   Object.defineProperty(el, 'scrollHeight', { value: scrollHeight, configurable: true });
   Object.defineProperty(el, 'clientHeight', { value: clientHeight, configurable: true });
   Object.defineProperty(el, 'scrollTop', { value: scrollTop, configurable: true, writable: true });
@@ -229,7 +224,7 @@ describe('OverlayScrollbar — thumb drag branches', () => {
 
     expect(wrapper.find('.overlay-scrollbar--dragging').exists()).toBe(true);
     // Verify document listeners were added for mousemove and mouseup
-    const calls = addSpy.mock.calls.map(c => c[0]);
+    const calls = addSpy.mock.calls.map((c) => c[0]);
     expect(calls).toContain('mousemove');
     expect(calls).toContain('mouseup');
   });
@@ -271,7 +266,7 @@ describe('OverlayScrollbar — thumb drag branches', () => {
     await nextTick();
 
     expect(wrapper.find('.overlay-scrollbar--dragging').exists()).toBe(false);
-    const calls = removeSpy.mock.calls.map(c => c[0]);
+    const calls = removeSpy.mock.calls.map((c) => c[0]);
     expect(calls).toContain('mousemove');
     expect(calls).toContain('mouseup');
   });

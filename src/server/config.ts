@@ -25,7 +25,9 @@ export function loadConfig(): Config {
   }
 
   if (isNaN(maxFileSizeMB) || maxFileSizeMB <= 0) {
-    throw new Error(`Invalid MAX_FILE_SIZE_MB: "${process.env.MAX_FILE_SIZE_MB}". Must be a positive number.`);
+    throw new Error(
+      `Invalid MAX_FILE_SIZE_MB: "${process.env.MAX_FILE_SIZE_MB}". Must be a positive number.`,
+    );
   }
 
   return {

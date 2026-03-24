@@ -37,11 +37,16 @@ function makeOkResponse(body: unknown): Response {
   } as unknown as Response;
 }
 
-function makeSessionResponse(overrides: Partial<SessionDetailResponse> = {}): SessionDetailResponse {
+function makeSessionResponse(
+  overrides: Partial<SessionDetailResponse> = {},
+): SessionDetailResponse {
   return {
     id: 'sess-1',
     filename: 'session.cast',
-    content: { header: { version: 2, width: 80, height: 24, timestamp: 0, title: '' }, markers: [] },
+    content: {
+      header: { version: 2, width: 80, height: 24, timestamp: 0, title: '' },
+      markers: [],
+    },
     snapshot: null,
     sections: [],
     detection_status: 'processing',

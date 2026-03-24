@@ -1,14 +1,7 @@
 <template>
-  <button
-    class="hex-gate-icon"
-    :class="{ 'is-open': isOpen }"
-    type="button"
-  >
+  <button class="hex-gate-icon" :class="{ 'is-open': isOpen }" type="button">
     <span class="hex-gate-icon__box">
-      <span
-        class="hex-gate-icon__inner"
-        aria-hidden="true"
-      >
+      <span class="hex-gate-icon__inner" aria-hidden="true">
         <span class="hex-gate-icon__seg hex-gate-icon__seg--1" />
         <span class="hex-gate-icon__seg hex-gate-icon__seg--2" />
         <span class="hex-gate-icon__seg hex-gate-icon__seg--3" />
@@ -97,7 +90,9 @@ defineProps<{
 
 @keyframes hex-gate-glow-pulse {
   0% {
-    box-shadow: 0 0 8px color-mix(in srgb, var(--accent-primary) 15%, transparent), inset 0 0 6px color-mix(in srgb, var(--accent-primary) 8%, transparent);
+    box-shadow:
+      0 0 8px color-mix(in srgb, var(--accent-primary) 15%, transparent),
+      inset 0 0 6px color-mix(in srgb, var(--accent-primary) 8%, transparent);
   }
 
   40% {

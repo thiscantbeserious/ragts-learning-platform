@@ -39,7 +39,7 @@ export function validateAsciicast(content: string): ValidationResult {
     return { valid: false, error: 'File is empty', line: 0 };
   }
 
-  const lines = content.split('\n').filter(line => line.trim().length > 0);
+  const lines = content.split('\n').filter((line) => line.trim().length > 0);
   if (lines.length === 0) {
     return { valid: false, error: 'File contains no valid lines', line: 0 };
   }
@@ -67,11 +67,19 @@ function validateHeader(headerLine: string): ValidationResult {
   }
 
   if (header.version !== 3) {
-    return { valid: false, error: `Unsupported version: ${header.version}. Only version 3 is supported.`, line: 1 };
+    return {
+      valid: false,
+      error: `Unsupported version: ${header.version}. Only version 3 is supported.`,
+      line: 1,
+    };
   }
 
   if (typeof header.width !== 'number' || typeof header.height !== 'number') {
-    return { valid: false, error: 'Header must include term.cols/term.rows (v3) or width/height (v2-compat)', line: 1 };
+    return {
+      valid: false,
+      error: 'Header must include term.cols/term.rows (v3) or width/height (v2-compat)',
+      line: 1,
+    };
   }
 
   return { valid: true };
@@ -97,7 +105,11 @@ function validateSingleEvent(line: string, lineNumber: number): ValidationResult
   try {
     const event = JSON.parse(line);
     if (!Array.isArray(event) || event.length < 3) {
-      return { valid: false, error: 'Event must be an array with at least 3 elements', line: lineNumber };
+      return {
+        valid: false,
+        error: 'Event must be an array with at least 3 elements',
+        line: lineNumber,
+      };
     }
     if (typeof event[0] !== 'number') {
       return { valid: false, error: 'Event timestamp must be a number', line: lineNumber };
@@ -106,7 +118,11 @@ function validateSingleEvent(line: string, lineNumber: number): ValidationResult
       return { valid: false, error: 'Event type must be a string', line: lineNumber };
     }
   } catch (err) {
-    return { valid: false, error: `Invalid JSON in event: ${err instanceof Error ? err.message : String(err)}`, line: lineNumber };
+    return {
+      valid: false,
+      error: `Invalid JSON in event: ${err instanceof Error ? err.message : String(err)}`,
+      line: lineNumber,
+    };
   }
   return { valid: true };
 }
@@ -121,10 +137,10 @@ export function parseAsciicast(content: string): AsciicastFile {
     throw new Error(`Invalid asciicast file at line ${validation.line}: ${validation.error}`);
   }
 
-  const lines = content.split('\n').filter(line => line.trim().length > 0);
+  const lines = content.split('\n').filter((line) => line.trim().length > 0);
 
   const header: AsciicastHeader = normalizeHeader(JSON.parse(lines[0] ?? ''));
-  const rawEvents: AsciicastEvent[] = lines.slice(1).map(line => JSON.parse(line));
+  const rawEvents: AsciicastEvent[] = lines.slice(1).map((line) => JSON.parse(line));
 
   const events = computeCumulativeTimes(rawEvents);
   const markers = extractMarkers(events);

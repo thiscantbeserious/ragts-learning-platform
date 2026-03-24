@@ -66,12 +66,11 @@ export class BulkSectionContentService {
   }
 }
 
-
 /** Build a full-content SectionContentPage (limit="all") for a single section. */
 function buildFullPage(
   sectionId: string,
   snapshot: string | null,
-  contentHash: string | null
+  contentHash: string | null,
 ): SectionContentPage {
   const lines = parseSnapshotLines(snapshot);
   return {

@@ -1,13 +1,7 @@
 <template>
-  <header
-    class="spatial-shell__header shell-header"
-    aria-label="Application header"
-  >
+  <header class="spatial-shell__header shell-header" aria-label="Application header">
     <!-- Hex Gate nav trigger + brand name: unified mobile logotype unit, visible only on mobile viewports -->
-    <div
-      v-if="isMobile"
-      class="shell-header__mobile-brand"
-    >
+    <div v-if="isMobile" class="shell-header__mobile-brand">
       <HexGateIcon
         ref="hamburgerRef"
         class="shell-header__hamburger"
@@ -19,21 +13,9 @@
       <span class="shell-header__brand">Erika</span>
     </div>
     <div class="shell-header__left">
-      <nav
-        v-if="isSessionRoute"
-        class="shell-header__breadcrumb"
-        aria-label="Breadcrumb"
-      >
-        <router-link
-          to="/"
-          class="shell-header__breadcrumb-home"
-        >
-          Sessions
-        </router-link>
-        <span
-          class="shell-header__breadcrumb-sep"
-          aria-hidden="true"
-        >/</span>
+      <nav v-if="isSessionRoute" class="shell-header__breadcrumb" aria-label="Breadcrumb">
+        <router-link to="/" class="shell-header__breadcrumb-home"> Sessions </router-link>
+        <span class="shell-header__breadcrumb-sep" aria-hidden="true">/</span>
         <span class="shell-header__breadcrumb-current">
           {{ sessionLabel }}
         </span>
@@ -245,5 +227,4 @@ defineExpose({ hamburgerRef });
     0 0 12px color-mix(in srgb, var(--accent-primary) 40%, transparent),
     0 0 24px color-mix(in srgb, var(--accent-primary) 20%, transparent);
 }
-
 </style>

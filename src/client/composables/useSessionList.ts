@@ -27,8 +27,14 @@ export const sessionListKey: InjectionKey<SessionListState> = Symbol('sessionLis
 
 /** Detection statuses that map to the "Processing" filter pill. */
 const PROCESSING_STATUSES = new Set<Session['detection_status']>([
-  'pending', 'processing', 'queued', 'validating',
-  'detecting', 'replaying', 'deduplicating', 'storing',
+  'pending',
+  'processing',
+  'queued',
+  'validating',
+  'detecting',
+  'replaying',
+  'deduplicating',
+  'storing',
 ]);
 
 /** Maps a session's detection_status to its StatusFilter group. */
@@ -70,9 +76,10 @@ export function useSessionList() {
 
   /** Sessions filtered by both searchQuery and statusFilter. */
   const filteredSessions: ComputedRef<Session[]> = computed(() =>
-    sessions.value.filter(session =>
-      matchesSearch(session, searchQuery.value) &&
-      matchesStatusFilter(session, statusFilter.value),
+    sessions.value.filter(
+      (session) =>
+        matchesSearch(session, searchQuery.value) &&
+        matchesStatusFilter(session, statusFilter.value),
     ),
   );
 
@@ -84,7 +91,7 @@ export function useSessionList() {
       if (!res.ok) {
         throw new Error(`Failed to fetch sessions (${res.status})`);
       }
-      sessions.value = await res.json() as Session[];
+      sessions.value = (await res.json()) as Session[];
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to load sessions';
     } finally {
@@ -96,7 +103,7 @@ export function useSessionList() {
     try {
       const res = await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
       if (!res.ok) {
-        const data = await res.json() as { error?: string };
+        const data = (await res.json()) as { error?: string };
         error.value = data.error || `Delete failed (${res.status})`;
         return false;
       }

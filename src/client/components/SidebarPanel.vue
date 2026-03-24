@@ -8,15 +8,8 @@
     @drop.prevent="onDrop"
   >
     <!-- Mobile brand header — close button + brand name, only visible on mobile overlay -->
-    <div
-      v-if="isMobile"
-      class="sidebar__mobile-header"
-    >
-      <HexGateIcon
-        :is-open="true"
-        aria-label="Close navigation"
-        @click="closeMobileOverlay"
-      />
+    <div v-if="isMobile" class="sidebar__mobile-header">
+      <HexGateIcon :is-open="true" aria-label="Close navigation" @click="closeMobileOverlay" />
       <span class="sidebar__mobile-brand">Erika</span>
       <Toolbar class="sidebar__mobile-toolbar" />
     </div>
@@ -24,10 +17,7 @@
     <SkeletonSidebar v-if="sessionList.loading.value" />
     <template v-else>
       <!-- Search input -->
-      <div
-        class="sidebar__search-wrap"
-        :class="{ 'sidebar__dimmed': isDragOver }"
-      >
+      <div class="sidebar__search-wrap" :class="{ sidebar__dimmed: isDragOver }">
         <input
           v-model="sessionList.searchQuery.value"
           type="search"
@@ -40,7 +30,7 @@
       <!-- Filter pills -->
       <div
         class="sidebar__filters filter-pills"
-        :class="{ 'sidebar__dimmed': isDragOver }"
+        :class="{ sidebar__dimmed: isDragOver }"
         role="group"
         aria-label="Filter by status"
       >
@@ -58,23 +48,14 @@
       </div>
 
       <!-- Session list (hidden during drag) -->
-      <OverlayScrollbar
-        v-show="!isDragOver"
-        class="sidebar__list-region"
-      >
-        <ul
-          v-if="sessionList.filteredSessions.value.length > 0"
-          class="sidebar__session-list"
-        >
+      <OverlayScrollbar v-show="!isDragOver" class="sidebar__list-region">
+        <ul v-if="sessionList.filteredSessions.value.length > 0" class="sidebar__session-list">
           <li
             v-for="session in sessionList.filteredSessions.value"
             :key="session.id"
             class="sidebar__session-item"
           >
-            <SessionCard
-              :session="session"
-              :is-selected="session.id === currentSessionId"
-            />
+            <SessionCard :session="session" :is-selected="session.id === currentSessionId" />
           </li>
         </ul>
 
@@ -85,14 +66,8 @@
           role="status"
           aria-live="polite"
         >
-          <p class="sidebar__empty-message">
-            No sessions match your filters.
-          </p>
-          <button
-            class="sidebar__clear-filters-btn"
-            type="button"
-            @click="clearFilters"
-          >
+          <p class="sidebar__empty-message">No sessions match your filters.</p>
+          <button class="sidebar__clear-filters-btn" type="button" @click="clearFilters">
             Clear filters
           </button>
         </div>
@@ -106,10 +81,7 @@
         aria-label="Drop .cast file to upload"
       >
         <div class="upload-zone__icon">
-          <div
-            class="upload-zone__disc-ring"
-            aria-hidden="true"
-          />
+          <div class="upload-zone__disc-ring" aria-hidden="true" />
           <svg
             width="48"
             height="48"
@@ -123,21 +95,12 @@
             <path d="M16 20L24 12L32 20" />
           </svg>
         </div>
-        <div class="upload-zone__title">
-          Release to upload
-        </div>
-        <div class="upload-zone__subtitle">
-          File will be processed automatically
-        </div>
+        <div class="upload-zone__title">Release to upload</div>
+        <div class="upload-zone__subtitle">File will be processed automatically</div>
       </div>
 
       <!-- Upload status live region — screen readers announce result after drag-drop or file pick -->
-      <div
-        role="status"
-        aria-live="polite"
-        class="sidebar__upload-status"
-        aria-atomic="true"
-      >
+      <div role="status" aria-live="polite" class="sidebar__upload-status" aria-atomic="true">
         {{ uploadStatusMessage }}
       </div>
 
@@ -192,7 +155,7 @@ const _injectedSessionList = inject(sessionListKey);
 if (!_injectedSessionList) {
   throw new Error(
     'SidebarPanel: sessionListKey not provided. ' +
-    'Ensure SpatialShell (or a parent component) calls provide(sessionListKey, useSessionList()).'
+      'Ensure SpatialShell (or a parent component) calls provide(sessionListKey, useSessionList()).',
   );
 }
 const sessionList: SessionListState = _injectedSessionList;
@@ -282,7 +245,7 @@ function onDrop(event: DragEvent): void {
         sessionList.sessions.value = [tempSession, ...sessionList.sessions.value];
       },
       onUploadComplete: async (tempId: string) => {
-        sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
+        sessionList.sessions.value = sessionList.sessions.value.filter((s) => s.id !== tempId);
         await sessionList.fetchSessions();
         announceUploadStatus('Upload complete.');
       },
@@ -308,7 +271,7 @@ function handleFileInputChange(event: Event): void {
         sessionList.sessions.value = [tempSession, ...sessionList.sessions.value];
       },
       onUploadComplete: async (tempId: string) => {
-        sessionList.sessions.value = sessionList.sessions.value.filter(s => s.id !== tempId);
+        sessionList.sessions.value = sessionList.sessions.value.filter((s) => s.id !== tempId);
         await sessionList.fetchSessions();
         announceUploadStatus('Upload complete.');
       },
@@ -368,7 +331,8 @@ function clearFilters(): void {
   appearance: none;
   width: 14px;
   height: 14px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M3.5 3.5l7 7M10.5 3.5l-7 7' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")
+    center/contain no-repeat;
   cursor: pointer;
 }
 

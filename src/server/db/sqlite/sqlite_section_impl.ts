@@ -75,7 +75,7 @@ export class SqliteSectionImpl implements SectionAdapter {
       input.endLine,
       input.lineCount ?? null,
       input.contentHash ?? null,
-      input.preview ?? null
+      input.preview ?? null,
     );
 
     // Retrieve the created section to get generated created_at

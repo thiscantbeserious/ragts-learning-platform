@@ -44,7 +44,7 @@ export function useUpload(onSuccess?: () => void) {
         body: formData,
       });
 
-      const data = await res.json() as UploadResponse;
+      const data = (await res.json()) as UploadResponse;
 
       if (!res.ok) {
         error.value = data.error || `Upload failed (${res.status})`;
@@ -101,7 +101,7 @@ export function useUpload(onSuccess?: () => void) {
         body: formData,
       });
 
-      const data = await res.json() as UploadResponse;
+      const data = (await res.json()) as UploadResponse;
 
       if (!res.ok) {
         const msg = data.error || `Upload failed (${res.status})`;

@@ -117,9 +117,7 @@ describe('PipelineRingTrigger', () => {
         { id: 's1', name: 'a.cast', status: 'processing' as const },
         { id: 's2', name: 'b.cast', status: 'processing' as const },
       ]);
-      const queuedSessions = ref([
-        { id: 's3', name: 'c.cast', status: 'queued' as const },
-      ]);
+      const queuedSessions = ref([{ id: 's3', name: 'c.cast', status: 'queued' as const }]);
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => processingCount.value + queuedCount.value);
@@ -139,9 +137,7 @@ describe('PipelineRingTrigger', () => {
     });
 
     it('updates count when totalActive changes reactively', async () => {
-      const processingSessions = ref([
-        { id: 's1', name: 'a.cast', status: 'processing' as const },
-      ]);
+      const processingSessions = ref([{ id: 's1', name: 'a.cast', status: 'processing' as const }]);
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value + queuedCount.value);
@@ -166,26 +162,35 @@ describe('PipelineRingTrigger', () => {
   describe('aria-label', () => {
     it('has aria-label showing count=0 when idle', () => {
       const wrapper = mountWithStatus(makePipelineStatus());
-      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe('Pipeline: 0 active');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe(
+        'Pipeline: 0 active',
+      );
     });
 
     it('updates aria-label when totalActive changes', async () => {
-      const processingSessions = ref([
-        { id: 's1', name: 'a.cast', status: 'processing' as const },
-      ]);
+      const processingSessions = ref([{ id: 's1', name: 'a.cast', status: 'processing' as const }]);
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value + queuedCount.value);
 
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountWithStatus(status);
 
-      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe('Pipeline: 1 active');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe(
+        'Pipeline: 1 active',
+      );
 
       processingSessions.value = [];
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe('Pipeline: 0 active');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-label')).toBe(
+        'Pipeline: 0 active',
+      );
     });
   });
 
@@ -226,7 +231,9 @@ describe('PipelineRingTrigger', () => {
 
     it('aria-expanded is false by default', () => {
       const wrapper = mountWithStatus(makePipelineStatus());
-      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('false');
+      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe(
+        'false',
+      );
     });
 
     it('clicking trigger opens the dropdown', async () => {
@@ -262,20 +269,30 @@ describe('PipelineRingTrigger', () => {
 
     // Teleport to body + v-if toggle causes insertBefore error in happy-dom.
     // The outside-click behavior is verified by aria-expanded state.
-    it.todo('clicking outside closes the dropdown (blocked by happy-dom Teleport bug)', async () => {
-      const wrapper = mountWithStatus(makePipelineStatus());
-      await wrapper.find('button.pipeline-ring-trigger').trigger('click');
-      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('true');
+    it.todo(
+      'clicking outside closes the dropdown (blocked by happy-dom Teleport bug)',
+      async () => {
+        const wrapper = mountWithStatus(makePipelineStatus());
+        await wrapper.find('button.pipeline-ring-trigger').trigger('click');
+        expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe(
+          'true',
+        );
 
-      // Simulate outside click via document event
-      document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await wrapper.vm.$nextTick();
-      expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe('false');
-    });
+        // Simulate outside click via document event
+        document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await wrapper.vm.$nextTick();
+        expect(wrapper.find('button.pipeline-ring-trigger').attributes('aria-expanded')).toBe(
+          'false',
+        );
+      },
+    );
 
     it('pressing Escape returns focus to the trigger button', async () => {
       const wrapper = mountWithStatus(makePipelineStatus());
-      const triggerButton = wrapper.find('button.pipeline-ring-trigger').element as Element & { blur(): void; focus(): void };
+      const triggerButton = wrapper.find('button.pipeline-ring-trigger').element as Element & {
+        blur(): void;
+        focus(): void;
+      };
 
       await wrapper.find('button.pipeline-ring-trigger').trigger('click');
       expect(!!document.querySelector('.pipeline-dropdown')).toBe(true);

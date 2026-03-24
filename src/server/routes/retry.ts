@@ -15,10 +15,7 @@ const log = logger.child({ module: 'routes/retry' });
  * Handle POST /api/sessions/:id/retry
  * Starts a retry from the validate stage for failed or interrupted jobs.
  */
-export async function handleRetry(
-  c: Context,
-  service: RetryService
-): Promise<Response> {
+export async function handleRetry(c: Context, service: RetryService): Promise<Response> {
   try {
     const id = c.req.param('id');
     const invalid = validatePathId(c, id);

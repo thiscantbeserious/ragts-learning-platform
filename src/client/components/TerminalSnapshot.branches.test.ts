@@ -14,9 +14,7 @@ import type { SnapshotLine } from '#vt-wasm/types';
 describe('TerminalSnapshot — paletteToRgb toRgbValue zero branch (line 44)', () => {
   it('renders palette index 16 (cube index 0) as rgb(0, 0, 0) — all channels zero', () => {
     // Palette index 16 = cube index 0: r=0, g=0, b=0 → toRgbValue(0) = 0 for each
-    const lines: SnapshotLine[] = [
-      { spans: [{ text: 'Black cube', fg: 16 }] },
-    ];
+    const lines: SnapshotLine[] = [{ spans: [{ text: 'Black cube', fg: 16 }] }];
 
     const wrapper = mount(TerminalSnapshot, {
       props: { lines },
@@ -30,9 +28,7 @@ describe('TerminalSnapshot — paletteToRgb toRgbValue zero branch (line 44)', (
 
   it('renders palette index 17 (cube = r0,g0,b1) as rgb(0, 0, 95)', () => {
     // Palette index 17 = cube index 1: r=0, g=0, b=1 → toRgbValue(0)=0, toRgbValue(0)=0, toRgbValue(1)=95
-    const lines: SnapshotLine[] = [
-      { spans: [{ text: 'Near-black', fg: 17 }] },
-    ];
+    const lines: SnapshotLine[] = [{ spans: [{ text: 'Near-black', fg: 17 }] }];
 
     const wrapper = mount(TerminalSnapshot, {
       props: { lines },
@@ -43,9 +39,7 @@ describe('TerminalSnapshot — paletteToRgb toRgbValue zero branch (line 44)', (
   });
 
   it('renders palette index 16 as background color (bg channel zero branch)', () => {
-    const lines: SnapshotLine[] = [
-      { spans: [{ text: 'Black bg', bg: 16 }] },
-    ];
+    const lines: SnapshotLine[] = [{ spans: [{ text: 'Black bg', bg: 16 }] }];
 
     const wrapper = mount(TerminalSnapshot, {
       props: { lines },
@@ -57,9 +51,7 @@ describe('TerminalSnapshot — paletteToRgb toRgbValue zero branch (line 44)', (
 
   it('renders out-of-range palette index as "inherit" (fallback branch)', () => {
     // Index 256 is out of range (>255) — should use fallback 'inherit'
-    const lines: SnapshotLine[] = [
-      { spans: [{ text: 'Out of range', fg: 256 }] },
-    ];
+    const lines: SnapshotLine[] = [{ spans: [{ text: 'Out of range', fg: 256 }] }];
 
     const wrapper = mount(TerminalSnapshot, {
       props: { lines },

@@ -4,7 +4,10 @@ import type { AsciicastHeader, AsciicastEvent } from '../src/shared/asciicast-ty
 
 async function main() {
   const filePath = process.argv[2];
-  if (!filePath) { console.error('Usage: tsx frame-diag.ts <file>'); process.exit(1); }
+  if (!filePath) {
+    console.error('Usage: tsx frame-diag.ts <file>');
+    process.exit(1);
+  }
 
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
@@ -45,14 +48,14 @@ async function main() {
       if (clearExamples < 5) {
         clearExamples++;
         // Show surrounding events for context
-        const prevData = j > 0 ? String(events[j-1][2]).slice(0, 80) : '(start)';
-        const nextData = j < events.length - 1 ? String(events[j+1][2]).slice(0, 80) : '(end)';
+        const prevData = j > 0 ? String(events[j - 1][2]).slice(0, 80) : '(start)';
+        const nextData = j < events.length - 1 ? String(events[j + 1][2]).slice(0, 80) : '(end)';
         console.log(`\nClear event #${clearExamples} at index ${j} (t=${ts.toFixed(1)}s):`);
         console.log(`  prev: ${JSON.stringify(prevData)}`);
 
         // Show the escape sequences in this event
         const escapes = str.match(/\x1b\[[^a-zA-Z]*[a-zA-Z]/g) || [];
-        const uniqueEsc = [...new Set(escapes.map(e => e.replace(/\x1b/g, 'ESC')))];
+        const uniqueEsc = [...new Set(escapes.map((e) => e.replace(/\x1b/g, 'ESC')))];
         console.log(`  this: ${uniqueEsc.join(', ')} (${str.length} bytes)`);
         console.log(`  next: ${JSON.stringify(nextData)}`);
       }

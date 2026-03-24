@@ -1,9 +1,5 @@
 <template>
-  <div
-    class="pipeline-wrap"
-    @keydown.escape="closeDropdown"
-    @click.stop
-  >
+  <div class="pipeline-wrap" @keydown.escape="closeDropdown" @click.stop>
     <button
       ref="triggerButtonRef"
       class="pipeline-ring-trigger"
@@ -12,19 +8,8 @@
       :aria-expanded="isOpen"
       @click="toggleDropdown"
     >
-      <svg
-        class="progress-ring"
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
-        aria-hidden="true"
-      >
-        <circle
-          class="progress-ring__bg"
-          cx="12"
-          cy="12"
-          r="9"
-        />
+      <svg class="progress-ring" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <circle class="progress-ring__bg" cx="12" cy="12" r="9" />
         <circle
           class="progress-ring__fill"
           cx="12"
@@ -33,21 +18,13 @@
           stroke-dasharray="56.55"
           :stroke-dashoffset="dashOffset"
         />
-        <text
-          class="ring-count"
-          x="12"
-          y="12"
-        >{{ totalActive }}</text>
+        <text class="ring-count" x="12" y="12">{{ totalActive }}</text>
       </svg>
       <span class="pipeline-label">Pipeline</span>
     </button>
 
     <Teleport to="body">
-      <PipelineDropdown
-        v-if="isOpen"
-        :open="isOpen"
-        :style="dropdownStyle"
-      />
+      <PipelineDropdown v-if="isOpen" :open="isOpen" :style="dropdownStyle" />
     </Teleport>
   </div>
 </template>

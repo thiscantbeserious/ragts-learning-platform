@@ -5,7 +5,11 @@ import SessionContent from '../components/SessionContent.vue';
 import SectionNavigator from '../components/SectionNavigator.vue';
 import SkeletonMain from '../components/SkeletonMain.vue';
 import { useSessionV2 } from '../composables/use_session.js';
-import { useActiveSection, type SectionEntry, type SectionOffset } from '../composables/useActiveSection.js';
+import {
+  useActiveSection,
+  type SectionEntry,
+  type SectionOffset,
+} from '../composables/useActiveSection.js';
 import { useSectionVirtualizer } from '../composables/use_section_virtualizer.js';
 import { SMALL_SESSION_THRESHOLD } from '../../shared/constants.js';
 
@@ -48,19 +52,21 @@ const scrollViewport = ref<HTMLElement | null>(null);
 
 const stickyHeaderEl = ref<HTMLElement | null>(null);
 
-watch(sessionContentRef, (content) => {
-  scrollViewport.value = content?.scrollViewport ?? null;
-  stickyHeaderEl.value = content?.stickyHeaderEl ?? null;
-}, { immediate: true });
+watch(
+  sessionContentRef,
+  (content) => {
+    scrollViewport.value = content?.scrollViewport ?? null;
+    stickyHeaderEl.value = content?.stickyHeaderEl ?? null;
+  },
+  { immediate: true },
+);
 
 const { virtualizer, virtualItems, scrollToSection } = useSectionVirtualizer(
   sections,
-  scrollViewport as Ref<HTMLElement | null>
+  scrollViewport as Ref<HTMLElement | null>,
 );
 
-const totalHeight = computed(() =>
-  isLargeSession.value ? virtualizer.value.getTotalSize() : 0
-);
+const totalHeight = computed(() => (isLargeSession.value ? virtualizer.value.getTotalSize() : 0));
 
 /**
  * measureElement bound to the virtualizer instance.
@@ -69,8 +75,10 @@ const totalHeight = computed(() =>
  */
 const measureElement = computed(() =>
   isLargeSession.value
-    ? (el: Element | null) => { if (el) virtualizer.value.measureElement(el); }
-    : null
+    ? (el: Element | null) => {
+        if (el) virtualizer.value.measureElement(el);
+      }
+    : null,
 );
 
 // ---------------------------------------------------------------------------
@@ -138,10 +146,7 @@ function onHoverSection(id: string): void {
 </script>
 
 <template>
-  <div
-    class="session-detail-view"
-    :class="{ 'session-detail-view--with-nav': isLargeSession }"
-  >
+  <div class="session-detail-view" :class="{ 'session-detail-view--with-nav': isLargeSession }">
     <SkeletonMain v-if="loading" />
     <div
       v-else-if="error"

@@ -132,9 +132,7 @@ describe('shell.css structural requirements', () => {
     // Extract the actual grid-template-columns property value lines (not comments).
     // CSS property lines start with optional whitespace then the property name.
     const lines = css.split('\n');
-    const templateColumnsLines = lines.filter(
-      (l) => /^\s+grid-template-columns\s*:/.test(l)
-    );
+    const templateColumnsLines = lines.filter((l) => /^\s+grid-template-columns\s*:/.test(l));
     expect(templateColumnsLines.length).toBeGreaterThan(0);
     for (const line of templateColumnsLines) {
       expect(line).not.toContain('repeat(');

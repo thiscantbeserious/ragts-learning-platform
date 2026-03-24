@@ -189,13 +189,21 @@ describe('useSessionList()', () => {
 
     it('filters by statusFilter "processing" — shows processing-family statuses', async () => {
       const processingStatuses = [
-        'pending', 'processing', 'queued', 'validating',
-        'detecting', 'replaying', 'deduplicating', 'storing',
+        'pending',
+        'processing',
+        'queued',
+        'validating',
+        'detecting',
+        'replaying',
+        'deduplicating',
+        'storing',
       ] as const;
       const sessions = processingStatuses.map((status, i) =>
         makeSession({ id: String(i), filename: `${status}.cast`, detection_status: status }),
       );
-      sessions.push(makeSession({ id: '99', filename: 'done.cast', detection_status: 'completed' }));
+      sessions.push(
+        makeSession({ id: '99', filename: 'done.cast', detection_status: 'completed' }),
+      );
       vi.mocked(fetch).mockResolvedValue(makeOkResponse(sessions));
       const composable = useSessionList();
       await composable.fetchSessions();
@@ -281,12 +289,11 @@ describe('useSessionList()', () => {
     });
 
     it('returns false and sets error with server message on HTTP failure', async () => {
-      vi.mocked(fetch)
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 404,
-          json: () => Promise.resolve({ error: 'Session not found' }),
-        } as unknown as Response);
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: () => Promise.resolve({ error: 'Session not found' }),
+      } as unknown as Response);
 
       const { error, deleteSession } = useSessionList();
       const result = await deleteSession('missing-id');
@@ -295,12 +302,11 @@ describe('useSessionList()', () => {
     });
 
     it('returns false and sets fallback error when server provides no error message', async () => {
-      vi.mocked(fetch)
-        .mockResolvedValueOnce({
-          ok: false,
-          status: 500,
-          json: () => Promise.resolve({}),
-        } as unknown as Response);
+      vi.mocked(fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({}),
+      } as unknown as Response);
 
       const { error, deleteSession } = useSessionList();
       const result = await deleteSession('some-id');

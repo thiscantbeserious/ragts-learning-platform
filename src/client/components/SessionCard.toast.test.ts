@@ -172,8 +172,16 @@ describe('SessionCard — toast dedup (hasNotifiedTerminal guard)', () => {
   });
 
   it('aggregates rapid session-ready completions into a single toast with summary', async () => {
-    const session1 = makeSession({ id: 'sess-1', filename: 'alpha.cast', detection_status: 'processing' });
-    const session2 = makeSession({ id: 'sess-2', filename: 'beta.cast', detection_status: 'processing' });
+    const session1 = makeSession({
+      id: 'sess-1',
+      filename: 'alpha.cast',
+      detection_status: 'processing',
+    });
+    const session2 = makeSession({
+      id: 'sess-2',
+      filename: 'beta.cast',
+      detection_status: 'processing',
+    });
 
     // Mount two cards sharing the same toast state
     mountCard(session1);
@@ -203,8 +211,16 @@ describe('SessionCard — toast dedup (hasNotifiedTerminal guard)', () => {
   });
 
   it('aggregates rapid processing-failed events into a single toast with filename summary', async () => {
-    const session1 = makeSession({ id: 'sess-1', filename: 'alpha.cast', detection_status: 'processing' });
-    const session2 = makeSession({ id: 'sess-2', filename: 'beta.cast', detection_status: 'processing' });
+    const session1 = makeSession({
+      id: 'sess-1',
+      filename: 'alpha.cast',
+      detection_status: 'processing',
+    });
+    const session2 = makeSession({
+      id: 'sess-2',
+      filename: 'beta.cast',
+      detection_status: 'processing',
+    });
 
     mountCard(session1);
     await nextTick();

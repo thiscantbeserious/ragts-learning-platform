@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 import vitest from '@vitest/eslint-plugin';
+import eslintConfigPrettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
@@ -12,6 +13,7 @@ export default tseslint.config(
       'packages/vt-wasm/pkg/**',
       'design/**',
       '.agents/scripts/**',
+      '.agents/worktrees/**',
       '.state/**',
     ],
   },
@@ -25,14 +27,17 @@ export default tseslint.config(
   {
     files: ['**/*.{ts,tsx}'],
     rules: {
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-empty-object-type': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-var': 'error',
       'prefer-const': 'error',
     },
@@ -78,17 +83,23 @@ export default tseslint.config(
     },
     rules: {
       'vue/multi-word-component-names': 'off',
-      'vue/html-self-closing': ['error', {
-        html: { void: 'always', normal: 'always', component: 'always' },
-      }],
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_|^props$|^emit$|^slots$',
-      }],
+      'vue/html-self-closing': [
+        'error',
+        {
+          html: { void: 'always', normal: 'always', component: 'always' },
+        },
+      ],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_|^props$|^emit$|^slots$',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-empty-object-type': 'off',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-var': 'error',
       'prefer-const': 'error',
     },
@@ -109,10 +120,7 @@ export default tseslint.config(
   },
 
   {
-    files: [
-      'scripts/**/*.ts',
-      'src/server/scripts/**/*.ts',
-    ],
+    files: ['scripts/**/*.ts', 'src/server/scripts/**/*.ts'],
     rules: {
       'no-console': 'off',
       'no-control-regex': 'off',
@@ -120,4 +128,7 @@ export default tseslint.config(
       'prefer-const': 'warn',
     },
   },
+
+  // Must be last — disables ESLint rules that conflict with Prettier.
+  eslintConfigPrettier,
 );

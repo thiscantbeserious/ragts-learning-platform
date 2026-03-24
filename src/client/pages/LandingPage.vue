@@ -48,9 +48,7 @@ async function onDelete(id: string): Promise<void> {
       />
 
       <section class="landing-page__sessions">
-        <h2 class="section__title">
-          Sessions
-        </h2>
+        <h2 class="section__title">Sessions</h2>
         <SessionList
           :sessions="sessions"
           :loading="loading"
@@ -60,10 +58,7 @@ async function onDelete(id: string): Promise<void> {
       </section>
     </main>
 
-    <ToastContainer
-      :toasts="toasts"
-      @dismiss="removeToast"
-    />
+    <ToastContainer :toasts="toasts" @dismiss="removeToast" />
   </div>
 </template>
 

@@ -8,9 +8,17 @@
  * Connections: EventBusAdapter (events/), SessionAdapter (db/).
  */
 
-import type { EventBusAdapter, EventHandler, AnyEventHandler } from '../events/event_bus_adapter.js';
+import type {
+  EventBusAdapter,
+  EventHandler,
+  AnyEventHandler,
+} from '../events/event_bus_adapter.js';
 import type { SessionAdapter } from '../db/session_adapter.js';
-import type { PipelineEvent, PipelineEventType, DetectionStatus } from '../../shared/types/pipeline.js';
+import type {
+  PipelineEvent,
+  PipelineEventType,
+  DetectionStatus,
+} from '../../shared/types/pipeline.js';
 import type {
   PipelineSession,
   PipelineStatusSnapshot,
@@ -21,7 +29,13 @@ const RECENTLY_COMPLETED_TTL_MS = 5 * 60 * 1000;
 
 /** Active detection statuses that belong in the processing list. */
 const PROCESSING_STATUSES = new Set<DetectionStatus>([
-  'pending', 'processing', 'validating', 'detecting', 'replaying', 'deduplicating', 'storing',
+  'pending',
+  'processing',
+  'validating',
+  'detecting',
+  'replaying',
+  'deduplicating',
+  'storing',
 ]);
 
 /**
@@ -105,8 +119,8 @@ export class PipelineStatusService {
     }
 
     const recentlyCompleted = this.recentlyCompleted
-      .filter(e => e.completedAt > cutoff)
-      .map(e => e.session);
+      .filter((e) => e.completedAt > cutoff)
+      .map((e) => e.session);
 
     return { processing, queued, recentlyCompleted };
   }
@@ -186,10 +200,7 @@ export class PipelineStatusService {
   }
 
   /** Register a typed handler and store the reference for cleanup. */
-  private registerHandler<T extends PipelineEventType>(
-    type: T,
-    handler: EventHandler<T>
-  ): void {
+  private registerHandler<T extends PipelineEventType>(type: T, handler: EventHandler<T>): void {
     this.handlers.set(type, handler as unknown as AnyEventHandler);
     this.eventBus.on(type, handler);
   }
@@ -231,7 +242,7 @@ export class PipelineStatusService {
     const cutoff = now - RECENTLY_COMPLETED_TTL_MS;
 
     // Prune expired entries before appending to prevent unbounded growth.
-    this.recentlyCompleted = this.recentlyCompleted.filter(e => e.completedAt > cutoff);
+    this.recentlyCompleted = this.recentlyCompleted.filter((e) => e.completedAt > cutoff);
     this.recentlyCompleted.push({ session: completedSession, completedAt: now });
     this.notifyCallbacks();
   }

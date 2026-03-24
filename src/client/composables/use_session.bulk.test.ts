@@ -36,7 +36,7 @@ async function flush(count = 10): Promise<void> {
 }
 
 function makeMetaResponse(
-  overrides: Partial<SessionMetadataResponse> = {}
+  overrides: Partial<SessionMetadataResponse> = {},
 ): SessionMetadataResponse {
   return {
     id: 'sess-1',
@@ -55,9 +55,15 @@ function makeMetaResponse(
 
 function makeSection(id: string): SessionMetadataResponse['sections'][0] {
   return {
-    id, type: 'detected', label: `Section ${id}`,
-    startEvent: 0, endEvent: 10, startLine: 0, endLine: 9,
-    lineCount: 10, preview: null,
+    id,
+    type: 'detected',
+    label: `Section ${id}`,
+    startEvent: 0,
+    endEvent: 10,
+    startLine: 0,
+    endLine: 9,
+    lineCount: 10,
+    preview: null,
   };
 }
 
@@ -85,10 +91,16 @@ function makeTestCache(): SectionCache {
   const store = new Map<string, SectionContentPage>();
   return {
     get: (k) => store.get(k),
-    set: (k, v) => { store.set(k, v); },
+    set: (k, v) => {
+      store.set(k, v);
+    },
     has: (k) => store.has(k),
-    delete: (k) => { store.delete(k); },
-    clear: () => { store.clear(); },
+    delete: (k) => {
+      store.delete(k);
+    },
+    clear: () => {
+      store.clear();
+    },
   };
 }
 

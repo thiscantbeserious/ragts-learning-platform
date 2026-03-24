@@ -52,15 +52,23 @@ function createMockEventSource(url: string): MockEventSourceInstance {
     removeEventListener(type: string, handler: (e: MessageEvent) => void) {
       handlers.get(type)?.delete(handler);
     },
-    close() { this.closed = true; },
-    simulateOpen() { if (this.onopen) this.onopen(new Event('open')); },
+    close() {
+      this.closed = true;
+    },
+    simulateOpen() {
+      if (this.onopen) this.onopen(new Event('open'));
+    },
     simulateEvent(type: string, data: object) {
       const msg = new MessageEvent(type, { data: JSON.stringify(data) });
       const set = handlers.get(type);
-      if (set) { for (const h of set) h(msg); }
+      if (set) {
+        for (const h of set) h(msg);
+      }
       if (this.onmessage) this.onmessage(msg);
     },
-    simulateError() { if (this.onerror) this.onerror(new Event('error')); },
+    simulateError() {
+      if (this.onerror) this.onerror(new Event('error'));
+    },
   };
 
   mockInstances.push(instance);
@@ -153,7 +161,9 @@ describe('useSSE() — handleSSEMessage: unknown event type (lines ~173-176)', (
 describe('useSSE() — syncStatusOnOpen: sseEventReceived guard (lines 235-237)', () => {
   it('skips applying stale sync result when SSE event arrives before fetch resolves', async () => {
     let resolveFetch: (value: Response) => void = () => {};
-    const pendingFetch = new Promise<Response>((resolve) => { resolveFetch = resolve; });
+    const pendingFetch = new Promise<Response>((resolve) => {
+      resolveFetch = resolve;
+    });
     vi.stubGlobal('fetch', vi.fn().mockReturnValue(pendingFetch));
 
     const sessionId = ref('sess-guard-1');
@@ -166,7 +176,10 @@ describe('useSSE() — syncStatusOnOpen: sseEventReceived guard (lines 235-237)'
 
     // An SSE event arrives before the fetch resolves — this sets sseEventReceived = true
     // and updates status to 'detecting'
-    instance.simulateEvent('session.validated', { type: 'session.validated', sessionId: 'sess-guard-1' });
+    instance.simulateEvent('session.validated', {
+      type: 'session.validated',
+      sessionId: 'sess-guard-1',
+    });
     expect(status.value).toBe('detecting');
 
     // Now resolve the fetch with a stale 'processing' status
@@ -184,10 +197,13 @@ describe('useSSE() — syncStatusOnOpen: sseEventReceived guard (lines 235-237)'
   });
 
   it('applies sync result when no SSE event has fired yet (sseEventReceived = false)', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ id: 'sess-no-guard', detection_status: 'storing' }),
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ id: 'sess-no-guard', detection_status: 'storing' }),
+      }),
+    );
 
     const sessionId = ref('sess-no-guard');
     const { status } = useSSE(sessionId, makeStatus('processing'));
@@ -205,10 +221,13 @@ describe('useSSE() — syncStatusOnOpen: sseEventReceived guard (lines 235-237)'
   });
 
   it('skips applying sync result when fetch response has no detection_status field', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ id: 'sess-no-status' }),
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ id: 'sess-no-status' }),
+      }),
+    );
 
     const sessionId = ref('sess-no-status');
     const { status } = useSSE(sessionId, makeStatus('processing'));
@@ -225,10 +244,13 @@ describe('useSSE() — syncStatusOnOpen: sseEventReceived guard (lines 235-237)'
   });
 
   it('skips applying sync result when fetch response is not ok', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: false,
-      json: () => Promise.resolve({ id: 'sess-bad-response', detection_status: 'completed' }),
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: () => Promise.resolve({ id: 'sess-bad-response', detection_status: 'completed' }),
+      }),
+    );
 
     const sessionId = ref('sess-bad-response');
     const { status } = useSSE(sessionId, makeStatus('processing'));
@@ -253,10 +275,13 @@ describe('useSSE() — pollSession: detection_status undefined in response', () 
     await nextTick();
 
     // Poll response without detection_status field
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ id: 'sess-poll' }),
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ id: 'sess-poll' }),
+      }),
+    );
 
     const { status } = useSSE(ref('sess-poll'), makeStatus('processing'));
     await nextTick();

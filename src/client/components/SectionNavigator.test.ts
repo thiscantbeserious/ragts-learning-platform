@@ -36,7 +36,7 @@ const mounted: VueWrapper[] = [];
 function mountNavigator(
   sections: SectionMetadata[],
   activeId: string | null = null,
-  overrides: Record<string, unknown> = {}
+  overrides: Record<string, unknown> = {},
 ): VueWrapper {
   const scrollToSection = vi.fn();
   const onHoverSection = vi.fn();

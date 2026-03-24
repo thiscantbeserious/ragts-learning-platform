@@ -20,7 +20,7 @@ function makeSnapshot(): TerminalSnapshot {
 function makeMockService(
   result:
     | { ok: true; data: SessionSnapshotResponse }
-    | { ok: false; status: 404 | 429 | 500; error: string }
+    | { ok: false; status: 404 | 429 | 500; error: string },
 ): Pick<SessionService, 'getSessionSnapshot'> {
   return {
     getSessionSnapshot: vi.fn().mockResolvedValue(result),
@@ -30,7 +30,7 @@ function makeMockService(
 function makeApp(service: Pick<SessionService, 'getSessionSnapshot'>) {
   const app = new Hono();
   app.get('/api/sessions/:id/snapshot', (c) =>
-    handleGetSessionSnapshot(c, service as SessionService)
+    handleGetSessionSnapshot(c, service as SessionService),
   );
   return app;
 }
@@ -44,7 +44,7 @@ describe('GET /api/sessions/:id/snapshot', () => {
     const res = await app.fetch(new Request('http://localhost/api/sessions/sess-1/snapshot'));
 
     expect(res.status).toBe(200);
-    const body = await res.json() as SessionSnapshotResponse;
+    const body = (await res.json()) as SessionSnapshotResponse;
     expect(body.id).toBe('sess-1');
     expect(body.snapshot).toEqual(snapshot);
   });
@@ -56,7 +56,7 @@ describe('GET /api/sessions/:id/snapshot', () => {
     const res = await app.fetch(new Request('http://localhost/api/sessions/sess-1/snapshot'));
 
     expect(res.status).toBe(200);
-    const body = await res.json() as SessionSnapshotResponse;
+    const body = (await res.json()) as SessionSnapshotResponse;
     expect(body.snapshot).toBeNull();
   });
 
@@ -66,7 +66,7 @@ describe('GET /api/sessions/:id/snapshot', () => {
     const res = await app.fetch(new Request('http://localhost/api/sessions/missing/snapshot'));
 
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe('Session not found');
   });
 

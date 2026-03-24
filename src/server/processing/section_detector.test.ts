@@ -24,8 +24,8 @@ import type { AsciicastEvent } from '../../shared/types/asciicast.js';
  */
 function loadFixtureEvents(fixtureName: string): AsciicastEvent[] {
   const content = readFileSync(join(process.cwd(), 'fixtures', fixtureName), 'utf-8');
-  const lines = content.split('\n').filter(l => l.trim());
-  return lines.slice(1).map(line => JSON.parse(line) as AsciicastEvent);
+  const lines = content.split('\n').filter((l) => l.trim());
+  return lines.slice(1).map((line) => JSON.parse(line) as AsciicastEvent);
 }
 
 describe('SectionDetector', () => {
@@ -82,7 +82,10 @@ describe('SectionDetector', () => {
       const events: AsciicastEvent[] = [
         ...Array.from({ length: 100 }, (_, i) => [0.01, 'o', `line ${i}\n`] as AsciicastEvent),
         [0.01, 'o', '\x1b[2J'] as AsciicastEvent, // screen clear at 100
-        ...Array.from({ length: 100 }, (_, i) => [0.01, 'o', `line ${i + 100}\n`] as AsciicastEvent),
+        ...Array.from(
+          { length: 100 },
+          (_, i) => [0.01, 'o', `line ${i + 100}\n`] as AsciicastEvent,
+        ),
       ];
 
       const detector = new SectionDetector(events);
@@ -235,7 +238,7 @@ describe('SectionDetector', () => {
       // Should merge into one boundary (scores are equal, first wins, signals merged)
       expect(boundaries.length).toBe(1);
       // Both screen_clear signals should be merged
-      expect(boundaries[0]!.signals.filter(s => s === 'screen_clear').length).toBe(1);
+      expect(boundaries[0]!.signals.filter((s) => s === 'screen_clear').length).toBe(1);
     });
 
     it('keeps separate boundaries when > 50 events apart', () => {
@@ -309,7 +312,12 @@ describe('SectionDetector', () => {
       const events: AsciicastEvent[] = [];
       for (let i = 0; i < 60; i++) {
         // Add 150 events per section (enough for minimum size)
-        events.push(...Array.from({ length: 150 }, (_, j) => [0.1, 'o', `line ${i}-${j}\n`] as AsciicastEvent));
+        events.push(
+          ...Array.from(
+            { length: 150 },
+            (_, j) => [0.1, 'o', `line ${i}-${j}\n`] as AsciicastEvent,
+          ),
+        );
         // Add a strong boundary (10s gap)
         if (i < 59) {
           events.push([10.0 + i * 0.1, 'o', 'gap\n'] as AsciicastEvent); // Vary scores slightly
@@ -368,7 +376,7 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       // If isTimingReliable returns true, timing gap at index 300 should be detected
-      expect(boundaries.some(b => b.signals.includes('timing_gap'))).toBe(true);
+      expect(boundaries.some((b) => b.signals.includes('timing_gap'))).toBe(true);
     });
 
     it('returns false (no timing boundaries) when all gaps are < 0.01s', () => {
@@ -383,7 +391,7 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       // No timing_gap boundaries when timing is unreliable
-      expect(boundaries.every(b => !b.signals.includes('timing_gap'))).toBe(true);
+      expect(boundaries.every((b) => !b.signals.includes('timing_gap'))).toBe(true);
     });
   });
 
@@ -446,7 +454,7 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       // ESC[3J is not detected by any current signal (no screen_clear, no erase_to_end)
-      expect(boundaries.every(b => !b.signals.includes('erase_to_end'))).toBe(true);
+      expect(boundaries.every((b) => !b.signals.includes('erase_to_end'))).toBe(true);
     });
 
     it('does NOT fire on non-output events', () => {
@@ -460,7 +468,7 @@ describe('SectionDetector', () => {
       const boundaries = detector.detect();
 
       // No erase_to_end detected from input event
-      expect(boundaries.every(b => !b.signals.includes('erase_to_end'))).toBe(true);
+      expect(boundaries.every((b) => !b.signals.includes('erase_to_end'))).toBe(true);
     });
   });
 
@@ -551,7 +559,7 @@ describe('SectionDetector', () => {
       expect(boundaries.length).toBeLessThanOrEqual(20);
 
       // At least one boundary must have the erase_to_end signal
-      const hasEraseToEnd = boundaries.some(b => b.signals.includes('erase_to_end'));
+      const hasEraseToEnd = boundaries.some((b) => b.signals.includes('erase_to_end'));
       expect(hasEraseToEnd).toBe(true);
     });
 
@@ -568,7 +576,7 @@ describe('SectionDetector', () => {
       expect(boundaries.length).toBeLessThanOrEqual(20);
 
       // At least one boundary must have the timing_gap signal
-      const hasTimingGap = boundaries.some(b => b.signals.includes('timing_gap'));
+      const hasTimingGap = boundaries.some((b) => b.signals.includes('timing_gap'));
       expect(hasTimingGap).toBe(true);
     });
 
@@ -579,7 +587,7 @@ describe('SectionDetector', () => {
 
       // Claude uses ESC[2J for screen clears — existing behavior must be preserved
       expect(boundaries.length).toBeGreaterThanOrEqual(1);
-      const hasScreenClear = boundaries.some(b => b.signals.includes('screen_clear'));
+      const hasScreenClear = boundaries.some((b) => b.signals.includes('screen_clear'));
       expect(hasScreenClear).toBe(true);
     });
   });

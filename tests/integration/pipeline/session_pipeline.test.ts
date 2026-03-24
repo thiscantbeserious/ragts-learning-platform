@@ -51,12 +51,7 @@ describe('processSessionPipeline', () => {
     });
 
     // Run pipeline
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     // Verify session was updated
     const updatedSession = await sessionRepo.findById(session.id);
@@ -88,12 +83,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      markers,
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, markers, sessionRepo);
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const markerSections = sections.filter((s) => s.type === 'marker');
@@ -136,12 +126,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const detectedSections = sections.filter((s) => s.type === 'detected');
@@ -179,12 +164,7 @@ describe('processSessionPipeline', () => {
     const initialSession = await sessionRepo.findById(session.id);
     expect(initialSession?.detection_status).toBe('pending');
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     const updatedSession = await sessionRepo.findById(session.id);
     expect(updatedSession?.detection_status).toBe('completed');
@@ -204,12 +184,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     const updatedSession = await sessionRepo.findById(session.id);
     expect(updatedSession?.event_count).toBe(eventCount);
@@ -229,12 +204,7 @@ describe('processSessionPipeline', () => {
     });
 
     // Pass a non-existent file path to trigger error
-    await processSessionPipeline(
-      '/nonexistent/file.cast',
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline('/nonexistent/file.cast', session.id, [], sessionRepo);
 
     const updatedSession = await sessionRepo.findById(session.id);
     expect(updatedSession?.detection_status).toBe('failed');
@@ -254,23 +224,13 @@ describe('processSessionPipeline', () => {
     });
 
     // First processing
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     const firstSections = await ctx.sectionRepository.findBySessionId(session.id);
     const firstCount = firstSections.length;
 
     // Second processing (should replace sections)
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     const secondSections = await ctx.sectionRepository.findBySessionId(session.id);
 
@@ -301,12 +261,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      markers,
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, markers, sessionRepo);
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
@@ -342,12 +297,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      markers,
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, markers, sessionRepo);
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
@@ -381,13 +331,15 @@ describe('processSessionPipeline', () => {
     }
 
     // Sections with line ranges should be non-overlapping and monotonic
-    const rangedSections = sortedSections.filter(s => s.start_line !== null && s.end_line !== null);
+    const rangedSections = sortedSections.filter(
+      (s) => s.start_line !== null && s.end_line !== null,
+    );
     for (let i = 0; i < rangedSections.length - 1; i++) {
       expect(rangedSections[i]!.end_line).toBeLessThanOrEqual(rangedSections[i + 1]!.start_line!);
     }
 
     // Sections with viewport snapshots should have valid snapshot data
-    const snapshotSections = sortedSections.filter(s => s.snapshot !== null);
+    const snapshotSections = sortedSections.filter((s) => s.snapshot !== null);
     for (const s of snapshotSections) {
       const snap = JSON.parse(s.snapshot!);
       expect(snap.lines).toBeDefined();
@@ -410,12 +362,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      markers,
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, markers, sessionRepo);
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
@@ -426,7 +373,7 @@ describe('processSessionPipeline', () => {
     // After ADR Decision 8 (CLI section denormalization), all sections have a snapshot.
     // TUI sections are identified by null start_line/end_line.
     // CLI sections are identified by having numeric start_line/end_line.
-    const tuiSections = sortedSections.filter(s => s.start_line === null && s.end_line === null);
+    const tuiSections = sortedSections.filter((s) => s.start_line === null && s.end_line === null);
     expect(tuiSections.length).toBeGreaterThan(0);
 
     // Verify TUI section has snapshot and no line ranges
@@ -441,7 +388,7 @@ describe('processSessionPipeline', () => {
     expect(Array.isArray(tuiSnapshot.lines)).toBe(true);
 
     // CLI sections have line ranges AND a denormalized snapshot (ADR Decision 8)
-    const cliSections = sortedSections.filter(s => s.start_line !== null);
+    const cliSections = sortedSections.filter((s) => s.start_line !== null);
     expect(cliSections.length).toBeGreaterThan(0);
 
     for (const cliSection of cliSections) {
@@ -460,9 +407,9 @@ describe('processSessionPipeline', () => {
 
     // Session snapshot should NOT contain TUI content (alt-screen content disappears after exit)
     // TUI content is only in the section's viewport snapshot
-    const sessionText = sessionSnapshot.lines.map((l: any) =>
-      l.spans?.map((s: any) => s.text).join('') || ''
-    ).join('');
+    const sessionText = sessionSnapshot.lines
+      .map((l: any) => l.spans?.map((s: any) => s.text).join('') || '')
+      .join('');
     expect(sessionText).not.toContain('TUI Application');
   });
 
@@ -485,12 +432,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      markers,
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, markers, sessionRepo);
 
     // Verify session has non-null snapshot
     const updatedSession = await sessionRepo.findById(session.id);
@@ -503,16 +445,14 @@ describe('processSessionPipeline', () => {
     expect(fullSnapshot.lines.length).toBeGreaterThan(0);
 
     // Verify the lines contain expected content from the session
-    const allText = fullSnapshot.lines.map((l: any) =>
-      l.spans?.map((s: any) => s.text).join('') || ''
-    ).join('');
+    const allText = fullSnapshot.lines
+      .map((l: any) => l.spans?.map((s: any) => s.text).join('') || '')
+      .join('');
     expect(allText).toContain('Line'); // Our test fixture generates "Line X" content
 
     // Verify section line ranges correctly slice the session snapshot
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
-    const rangedSections = sections.filter(
-      (s) => s.start_line !== null && s.end_line !== null
-    );
+    const rangedSections = sections.filter((s) => s.start_line !== null && s.end_line !== null);
     expect(rangedSections.length).toBeGreaterThan(0);
     for (const section of rangedSections) {
       const sectionLines = fullSnapshot.lines.slice(section.start_line!, section.end_line!);
@@ -541,18 +481,13 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      markers,
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, markers, sessionRepo);
 
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
     const sortedSections = sections.sort((a, b) => a.start_event - b.start_event);
 
     // Filter to CLI sections only (those with line ranges)
-    const cliSections = sortedSections.filter(s => s.start_line !== null && s.end_line !== null);
+    const cliSections = sortedSections.filter((s) => s.start_line !== null && s.end_line !== null);
     expect(cliSections.length).toBeGreaterThan(0);
 
     // Sort by start_line
@@ -589,12 +524,7 @@ describe('processSessionPipeline', () => {
       uploaded_at: new Date().toISOString(),
     });
 
-    await processSessionPipeline(
-      filePath,
-      session.id,
-      [],
-      sessionRepo
-    );
+    await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
     // Verify no sections were created
     const sections = await ctx.sectionRepository.findBySessionId(session.id);
@@ -611,9 +541,9 @@ describe('processSessionPipeline', () => {
     expect(fullSnapshot.lines.length).toBeGreaterThan(0);
 
     // Verify content is present
-    const allText = fullSnapshot.lines.map((l: any) =>
-      l.spans?.map((s: any) => s.text).join('') || ''
-    ).join('');
+    const allText = fullSnapshot.lines
+      .map((l: any) => l.spans?.map((s: any) => s.text).join('') || '')
+      .join('');
     expect(allText).toContain('hello world');
   });
 
@@ -692,12 +622,7 @@ describe('processSessionPipeline', () => {
         uploaded_at: new Date().toISOString(),
       });
 
-      await processSessionPipeline(
-        filePath,
-        session.id,
-        [],
-        sessionRepo
-      );
+      await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
       // Should complete without error
       const updatedSession = await sessionRepo.findById(session.id);
@@ -728,12 +653,7 @@ describe('processSessionPipeline', () => {
         uploaded_at: new Date().toISOString(),
       });
 
-      await processSessionPipeline(
-        filePath,
-        session.id,
-        [],
-        sessionRepo
-      );
+      await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
       // Should complete without error
       const updatedSession = await sessionRepo.findById(session.id);
@@ -777,12 +697,7 @@ describe('processSessionPipeline', () => {
         uploaded_at: new Date().toISOString(),
       });
 
-      await processSessionPipeline(
-        filePath,
-        session.id,
-        [],
-        sessionRepo
-      );
+      await processSessionPipeline(filePath, session.id, [], sessionRepo);
 
       // Should complete without error
       const updatedSession = await sessionRepo.findById(session.id);
@@ -857,7 +772,9 @@ function createCastFileWithDistinctSections(): string {
 
   // Setup content (events 5-28): 24 events with distinct "setup" text
   for (let i = 0; i < 24; i++) {
-    events.push(JSON.stringify([1.0 + i * 0.01, 'o', `Installing dependencies (${i + 1}/24)...\r\n`]));
+    events.push(
+      JSON.stringify([1.0 + i * 0.01, 'o', `Installing dependencies (${i + 1}/24)...\r\n`]),
+    );
   }
 
   // Marker "Build" at index 29, followed by screen clear
@@ -875,7 +792,9 @@ function createCastFileWithDistinctSections(): string {
 
   // Test content (events 57-80): 24 events with distinct "test" text
   for (let i = 0; i < 24; i++) {
-    events.push(JSON.stringify([3.0 + i * 0.01, 'o', `  PASS  test-suite-${i + 1}.ts (${i + 2}ms)\r\n`]));
+    events.push(
+      JSON.stringify([3.0 + i * 0.01, 'o', `  PASS  test-suite-${i + 1}.ts (${i + 2}ms)\r\n`]),
+    );
   }
 
   return [header, ...events].join('\n');
@@ -905,7 +824,10 @@ function createCastFileWithScreenClear(): string {
  * Helper to create a mixed CLI/TUI cast file with alt-screen transitions and markers.
  * Tests the hybrid snapshot model: CLI sections get line ranges, TUI sections get viewport snapshots.
  */
-function createMixedCastFileWithMarkers(): { content: string; markers: { time: number; label: string; index: number }[] } {
+function createMixedCastFileWithMarkers(): {
+  content: string;
+  markers: { time: number; label: string; index: number }[];
+} {
   const header = JSON.stringify({
     version: 3,
     term: { cols: 80, rows: 24 },
@@ -917,11 +839,11 @@ function createMixedCastFileWithMarkers(): { content: string; markers: { time: n
   let eventIndex = 0;
 
   // CLI section: normal terminal output
-  events.push(JSON.stringify([t += 0.01, 'o', '$ ls\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '$ ls\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', 'file1.txt  file2.txt\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', 'file1.txt  file2.txt\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '$ vim main.rs\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '$ vim main.rs\r\n']));
   eventIndex++;
 
   // Marker: entering vim (which will use alt-screen)
@@ -930,21 +852,21 @@ function createMixedCastFileWithMarkers(): { content: string; markers: { time: n
   eventIndex++;
 
   // TUI section: enter alt screen, draw TUI content
-  events.push(JSON.stringify([t += 0.01, 'o', '\x1b[?1049h']));  // Enter alt screen
+  events.push(JSON.stringify([(t += 0.01), 'o', '\x1b[?1049h'])); // Enter alt screen
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '\x1b[H\x1b[2J']));  // Clear screen
+  events.push(JSON.stringify([(t += 0.01), 'o', '\x1b[H\x1b[2J'])); // Clear screen
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', 'TUI Application v1.0\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', 'TUI Application v1.0\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '━━━━━━━━━━━━━━━━━━━━━━\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '━━━━━━━━━━━━━━━━━━━━━━\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '> Option 1\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '> Option 1\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '  Option 2\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '  Option 2\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '  Option 3\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '  Option 3\r\n']));
   eventIndex++;
 
   // Marker: exiting vim
@@ -953,13 +875,13 @@ function createMixedCastFileWithMarkers(): { content: string; markers: { time: n
   eventIndex++;
 
   // Exit alt screen back to CLI
-  events.push(JSON.stringify([t += 0.01, 'o', '\x1b[?1049l']));  // Exit alt screen
+  events.push(JSON.stringify([(t += 0.01), 'o', '\x1b[?1049l'])); // Exit alt screen
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', '$ cargo build\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '$ cargo build\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', 'Compiling...\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', 'Compiling...\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', 'Finished dev target in 2.5s\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', 'Finished dev target in 2.5s\r\n']));
   eventIndex++;
 
   // Marker: running tests
@@ -967,11 +889,11 @@ function createMixedCastFileWithMarkers(): { content: string; markers: { time: n
   events.push(JSON.stringify([t, 'm', 'Run Tests']));
   eventIndex++;
 
-  events.push(JSON.stringify([t += 0.01, 'o', '$ cargo test\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', '$ cargo test\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', 'running 5 tests\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', 'running 5 tests\r\n']));
   eventIndex++;
-  events.push(JSON.stringify([t += 0.01, 'o', 'test result: ok. 5 passed\r\n']));
+  events.push(JSON.stringify([(t += 0.01), 'o', 'test result: ok. 5 passed\r\n']));
   eventIndex++;
 
   return {

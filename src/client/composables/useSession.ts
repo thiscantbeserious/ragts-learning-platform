@@ -68,7 +68,7 @@ export function useSession(sessionId: MaybeRef<string>) {
       if (!res.ok) {
         throw new Error(`Failed to load session (${res.status})`);
       }
-      const data = await res.json() as SessionDetailResponse;
+      const data = (await res.json()) as SessionDetailResponse;
       session.value = data;
       detectionStatus.value = data.detection_status;
       sections.value = mapSections(data.sections);
@@ -93,9 +93,13 @@ export function useSession(sessionId: MaybeRef<string>) {
   // Normalise sessionId to a Ref so useSSE can watch it
   const sessionIdRef = computed(() => toValue(sessionId));
 
-  watch(sessionIdRef, (id) => {
-    if (id) fetchSession(id);
-  }, { immediate: true });
+  watch(
+    sessionIdRef,
+    (id) => {
+      if (id) fetchSession(id);
+    },
+    { immediate: true },
+  );
 
   // SSE integration — soft re-fetch when pipeline reaches a terminal state.
   // Only triggers when transitioning FROM a non-terminal state TO a terminal one,

@@ -74,7 +74,9 @@ describe('ToolbarPill', () => {
       });
       injected!.toggleCollapse();
       await wrapper.vm.$nextTick();
-      expect(wrapper.find('.toolbar-pill__content').classes()).toContain('toolbar-pill__content--collapsed');
+      expect(wrapper.find('.toolbar-pill__content').classes()).toContain(
+        'toolbar-pill__content--collapsed',
+      );
     });
 
     it('toggleCollapse toggles isCollapsed from false to true', async () => {

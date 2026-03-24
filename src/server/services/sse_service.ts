@@ -45,14 +45,14 @@ export class SseService {
   registerSessionHandlers(
     sessionId: string,
     pending: PendingEvent[],
-    notify: () => void
+    notify: () => void,
   ): Map<PipelineEventType, (event: PipelineEvent) => void> {
     return registerSessionHandlers(this.eventBus, sessionId, pending, notify);
   }
 
   /** Remove all registered event bus handlers. */
   unregisterSessionHandlers(
-    handlers: Map<PipelineEventType, (event: PipelineEvent) => void>
+    handlers: Map<PipelineEventType, (event: PipelineEvent) => void>,
   ): void {
     unregisterSessionHandlers(this.eventBus, handlers);
   }
@@ -73,7 +73,7 @@ export function registerSessionHandlers(
   eventBus: EventBusAdapter,
   sessionId: string,
   pending: PendingEvent[],
-  notify: () => void
+  notify: () => void,
 ): Map<PipelineEventType, (event: PipelineEvent) => void> {
   const handlers = new Map<PipelineEventType, (event: PipelineEvent) => void>();
   for (const type of ALL_PIPELINE_EVENT_TYPES) {
@@ -93,7 +93,7 @@ export function registerSessionHandlers(
 /** Remove all registered event bus handlers. */
 export function unregisterSessionHandlers(
   eventBus: EventBusAdapter,
-  handlers: Map<PipelineEventType, (event: PipelineEvent) => void>
+  handlers: Map<PipelineEventType, (event: PipelineEvent) => void>,
 ): void {
   for (const [type, handler] of handlers) {
     eventBus.off(type, handler as EventHandler<typeof type>);
@@ -104,7 +104,7 @@ export function unregisterSessionHandlers(
 export async function getMissedEvents(
   eventLog: EventLogAdapter,
   sessionId: string,
-  afterId: number
+  afterId: number,
 ): Promise<EventLogEntry[]> {
   return eventLog.findBySessionIdAfterId(sessionId, afterId);
 }

@@ -77,14 +77,15 @@ async function waitForPipeline(
     await new Promise<void>((r) => setTimeout(r, POLL_INTERVAL_MS));
     try {
       const res = await fetch(`${baseUrl}/api/sessions/${sessionId}`);
-      const data = await res.json() as { detection_status: string };
+      const data = (await res.json()) as { detection_status: string };
       status = data.detection_status;
     } catch (err) {
       // Transient connection errors (ECONNRESET, ECONNREFUSED) can occur when
       // the server event loop is saturated by WASM processing. Retry next poll.
       // Node.js native fetch wraps socket errors as TypeError with a cause.
-      const code = (err as NodeJS.ErrnoException).code ??
-        ((err as { cause?: NodeJS.ErrnoException }).cause?.code);
+      const code =
+        (err as NodeJS.ErrnoException).code ??
+        (err as { cause?: NodeJS.ErrnoException }).cause?.code;
       if (code !== 'ECONNRESET' && code !== 'ECONNREFUSED') throw err;
     }
   }
@@ -92,7 +93,11 @@ async function waitForPipeline(
 }
 
 /** Upload a single fixture file and return the session id. */
-async function uploadFixture(baseUrl: string, fixture: string, index: number): Promise<{ id: string; uploadMs: number }> {
+async function uploadFixture(
+  baseUrl: string,
+  fixture: string,
+  index: number,
+): Promise<{ id: string; uploadMs: number }> {
   const start = performance.now();
   const formData = new FormData();
   const fileContent = readFileSync(join(FIXTURES_DIR, fixture));
@@ -105,7 +110,7 @@ async function uploadFixture(baseUrl: string, fixture: string, index: number): P
 
   const uploadMs = performance.now() - start;
   expect(res.status, `Upload ${index} (${fixture}) should return 201`).toBe(201);
-  const data = await res.json() as { id: string };
+  const data = (await res.json()) as { id: string };
   return { id: data.id, uploadMs };
 }
 
@@ -172,50 +177,54 @@ afterAll(async () => {
 }, 30_000);
 
 describe('Pipeline stress test — bulk upload with responsiveness', () => {
-  it('processes all fixture uploads without RangeError', async () => {
-    const baseUrl = state.baseUrl!;
-    const fixtures = BULK_UPLOAD_FIXTURES;
+  it(
+    'processes all fixture uploads without RangeError',
+    async () => {
+      const baseUrl = state.baseUrl!;
+      const fixtures = BULK_UPLOAD_FIXTURES;
 
-    // Upload all fixtures in rapid succession without waiting between them
-    const uploadResults = await Promise.all(
-      fixtures.map((fixture, i) => uploadFixture(baseUrl, fixture, i))
-    );
+      // Upload all fixtures in rapid succession without waiting between them
+      const uploadResults = await Promise.all(
+        fixtures.map((fixture, i) => uploadFixture(baseUrl, fixture, i)),
+      );
 
-    const sessionIds = uploadResults.map((r) => r.id);
-    expect(sessionIds.length).toBe(fixtures.length);
+      const sessionIds = uploadResults.map((r) => r.id);
+      expect(sessionIds.length).toBe(fixtures.length);
 
-    // Poll all sessions in parallel for completion
-    const pollStart = performance.now();
-    const pipelineResults = await Promise.all(
-      sessionIds.map(async (id) => {
-        const sessionStart = performance.now();
-        const status = await waitForPipeline(baseUrl, id, pollStart);
-        const pipelineMs = performance.now() - sessionStart;
-        return { id, status, pipelineMs };
-      })
-    );
+      // Poll all sessions in parallel for completion
+      const pollStart = performance.now();
+      const pipelineResults = await Promise.all(
+        sessionIds.map(async (id) => {
+          const sessionStart = performance.now();
+          const status = await waitForPipeline(baseUrl, id, pollStart);
+          const pipelineMs = performance.now() - sessionStart;
+          return { id, status, pipelineMs };
+        }),
+      );
 
-    const totalMs = performance.now() - pollStart;
+      const totalMs = performance.now() - pollStart;
 
-    // Report timing metrics
-    console.log('\n=== Pipeline Stress Test Results ===');
-    console.log(`Total sessions: ${sessionIds.length}`);
-    console.log(`Total pipeline time: ${(totalMs / 1000).toFixed(2)}s`);
-    console.log(`Average per session: ${(totalMs / sessionIds.length / 1000).toFixed(2)}s`);
-    console.log('\nUpload times:');
-    for (const [i, r] of uploadResults.entries()) {
-      console.log(`  upload-${i}-${fixtures[i]}: ${r.uploadMs.toFixed(0)}ms`);
-    }
-    console.log('\nPer-session pipeline times:');
-    for (const r of pipelineResults) {
-      console.log(`  ${r.id}: ${(r.pipelineMs / 1000).toFixed(2)}s — ${r.status}`);
-    }
+      // Report timing metrics
+      console.log('\n=== Pipeline Stress Test Results ===');
+      console.log(`Total sessions: ${sessionIds.length}`);
+      console.log(`Total pipeline time: ${(totalMs / 1000).toFixed(2)}s`);
+      console.log(`Average per session: ${(totalMs / sessionIds.length / 1000).toFixed(2)}s`);
+      console.log('\nUpload times:');
+      for (const [i, r] of uploadResults.entries()) {
+        console.log(`  upload-${i}-${fixtures[i]}: ${r.uploadMs.toFixed(0)}ms`);
+      }
+      console.log('\nPer-session pipeline times:');
+      for (const r of pipelineResults) {
+        console.log(`  ${r.id}: ${(r.pipelineMs / 1000).toFixed(2)}s — ${r.status}`);
+      }
 
-    // Verify all sessions completed without failure
-    for (const { id, status } of pipelineResults) {
-      expect(status, `Session ${id} should complete without error`).toBe('completed');
-    }
-  }, PIPELINE_TIMEOUT_MS);
+      // Verify all sessions completed without failure
+      for (const { id, status } of pipelineResults) {
+        expect(status, `Session ${id} should complete without error`).toBe('completed');
+      }
+    },
+    PIPELINE_TIMEOUT_MS,
+  );
 
   it('server remains responsive during pipeline processing', async () => {
     const baseUrl = state.baseUrl!;
@@ -230,7 +239,7 @@ describe('Pipeline stress test — bulk upload with responsiveness', () => {
       body: formData,
     });
     expect(uploadRes.status).toBe(201);
-    const uploadData = await uploadRes.json() as { id: string };
+    const uploadData = (await uploadRes.json()) as { id: string };
     const sessionId = uploadData.id;
 
     // Measure health check latency while processing runs in the background
@@ -244,7 +253,10 @@ describe('Pipeline stress test — bulk upload with responsiveness', () => {
         const elapsed = performance.now() - start;
         healthTimes.push(elapsed);
         expect(res.status, 'Health check must return 200 during processing').toBe(200);
-        expect(elapsed, `Health check latency ${elapsed.toFixed(0)}ms exceeds ${HEALTH_RESPONSE_THRESHOLD_MS}ms`).toBeLessThan(HEALTH_RESPONSE_THRESHOLD_MS);
+        expect(
+          elapsed,
+          `Health check latency ${elapsed.toFixed(0)}ms exceeds ${HEALTH_RESPONSE_THRESHOLD_MS}ms`,
+        ).toBeLessThan(HEALTH_RESPONSE_THRESHOLD_MS);
         await new Promise<void>((r) => setTimeout(r, 200));
       }
     })();
@@ -266,14 +278,18 @@ describe('Pipeline stress test — bulk upload with responsiveness', () => {
 });
 
 /** Upload a pre-built Buffer as a cast file and return the session id. */
-async function uploadBuffer(baseUrl: string, content: Buffer, name: string): Promise<{ id: string; uploadMs: number }> {
+async function uploadBuffer(
+  baseUrl: string,
+  content: Buffer,
+  name: string,
+): Promise<{ id: string; uploadMs: number }> {
   const start = performance.now();
   const formData = new FormData();
   formData.append('file', new Blob([content]), name);
   const res = await fetch(`${baseUrl}/api/upload`, { method: 'POST', body: formData });
   const uploadMs = performance.now() - start;
   expect(res.status, `Upload ${name} should return 201`).toBe(201);
-  const data = await res.json() as { id: string };
+  const data = (await res.json()) as { id: string };
   return { id: data.id, uploadMs };
 }
 
@@ -322,7 +338,7 @@ async function runWithResponsivenessProbe(
         failedProbes++;
         healthProbes.push(performance.now() - t0);
       }
-      await new Promise<void>(r => setTimeout(r, PERF.PROBE_INTERVAL_MS));
+      await new Promise<void>((r) => setTimeout(r, PERF.PROBE_INTERVAL_MS));
     }
   })();
 
@@ -335,49 +351,94 @@ async function runWithResponsivenessProbe(
   return { status, pipelineMs, healthProbes, failedProbes };
 }
 
-function reportResults(label: string, sizeMB: string, result: Awaited<ReturnType<typeof runWithResponsivenessProbe>>) {
+function reportResults(
+  label: string,
+  sizeMB: string,
+  result: Awaited<ReturnType<typeof runWithResponsivenessProbe>>,
+) {
   const { pipelineMs, healthProbes, failedProbes } = result;
   const max = healthProbes.length > 0 ? Math.max(...healthProbes) : 0;
-  const avg = healthProbes.length > 0 ? healthProbes.reduce((a, b) => a + b, 0) / healthProbes.length : 0;
+  const avg =
+    healthProbes.length > 0 ? healthProbes.reduce((a, b) => a + b, 0) / healthProbes.length : 0;
   const min = healthProbes.length > 0 ? Math.min(...healthProbes) : 0;
   console.log(`\n=== ${label} ===`);
-  console.log(`File: ${sizeMB}MB | Pipeline: ${(pipelineMs / 1000).toFixed(2)}s | Status: ${result.status}`);
+  console.log(
+    `File: ${sizeMB}MB | Pipeline: ${(pipelineMs / 1000).toFixed(2)}s | Status: ${result.status}`,
+  );
   console.log(`Health probes: ${healthProbes.length} total, ${failedProbes} failed`);
-  console.log(`  Latency — min: ${min.toFixed(1)}ms | avg: ${avg.toFixed(1)}ms | max: ${max.toFixed(1)}ms`);
+  console.log(
+    `  Latency — min: ${min.toFixed(1)}ms | avg: ${avg.toFixed(1)}ms | max: ${max.toFixed(1)}ms`,
+  );
 }
 
 describe('Synthetic large session tests', () => {
-  it('2MB / 30 sections / resizes — completes within budget, server stays responsive', async () => {
-    const baseUrl = state.baseUrl!;
-    const buf = generateLargeCast({ sections: 30, targetSizeMB: 2, includeResizes: true, resizeInterval: 10 });
-    const sizeMB = (buf.length / 1024 / 1024).toFixed(2);
+  it(
+    '2MB / 30 sections / resizes — completes within budget, server stays responsive',
+    async () => {
+      const baseUrl = state.baseUrl!;
+      const buf = generateLargeCast({
+        sections: 30,
+        targetSizeMB: 2,
+        includeResizes: true,
+        resizeInterval: 10,
+      });
+      const sizeMB = (buf.length / 1024 / 1024).toFixed(2);
 
-    const { id } = await uploadBuffer(baseUrl, buf, 'synthetic-2mb.cast');
-    const result = await runWithResponsivenessProbe(baseUrl, id, PERF.MAX_PIPELINE_SMALL_MS);
-    reportResults('2MB / 30 sections / resizes', sizeMB, result);
+      const { id } = await uploadBuffer(baseUrl, buf, 'synthetic-2mb.cast');
+      const result = await runWithResponsivenessProbe(baseUrl, id, PERF.MAX_PIPELINE_SMALL_MS);
+      reportResults('2MB / 30 sections / resizes', sizeMB, result);
 
-    expect(result.status, 'Pipeline must complete (no RangeError)').toBe('completed');
-    expect(result.pipelineMs, `Pipeline exceeded ${PERF.MAX_PIPELINE_SMALL_MS / 1000}s budget`).toBeLessThan(PERF.MAX_PIPELINE_SMALL_MS);
-    const maxFailedProbes = Math.max(2, Math.ceil(result.healthProbes.length * 0.1));
-    expect(result.failedProbes, `Too many failed health probes: ${result.failedProbes}/${result.healthProbes.length}`).toBeLessThanOrEqual(maxFailedProbes);
-    const maxLatency = result.healthProbes.length > 0 ? Math.max(...result.healthProbes) : 0;
-    expect(maxLatency, `Max health latency ${maxLatency.toFixed(0)}ms exceeds ${PERF.MAX_HEALTH_LATENCY_MS}ms`).toBeLessThan(PERF.MAX_HEALTH_LATENCY_MS);
-  }, PERF.MAX_PIPELINE_SMALL_MS + 5_000);
+      expect(result.status, 'Pipeline must complete (no RangeError)').toBe('completed');
+      expect(
+        result.pipelineMs,
+        `Pipeline exceeded ${PERF.MAX_PIPELINE_SMALL_MS / 1000}s budget`,
+      ).toBeLessThan(PERF.MAX_PIPELINE_SMALL_MS);
+      const maxFailedProbes = Math.max(2, Math.ceil(result.healthProbes.length * 0.1));
+      expect(
+        result.failedProbes,
+        `Too many failed health probes: ${result.failedProbes}/${result.healthProbes.length}`,
+      ).toBeLessThanOrEqual(maxFailedProbes);
+      const maxLatency = result.healthProbes.length > 0 ? Math.max(...result.healthProbes) : 0;
+      expect(
+        maxLatency,
+        `Max health latency ${maxLatency.toFixed(0)}ms exceeds ${PERF.MAX_HEALTH_LATENCY_MS}ms`,
+      ).toBeLessThan(PERF.MAX_HEALTH_LATENCY_MS);
+    },
+    PERF.MAX_PIPELINE_SMALL_MS + 5_000,
+  );
 
-  it('5MB / 50 sections / resizes — completes within budget, server stays responsive', async () => {
-    const baseUrl = state.baseUrl!;
-    const buf = generateLargeCast({ sections: 50, targetSizeMB: 5, includeResizes: true, resizeInterval: 10 });
-    const sizeMB = (buf.length / 1024 / 1024).toFixed(2);
+  it(
+    '5MB / 50 sections / resizes — completes within budget, server stays responsive',
+    async () => {
+      const baseUrl = state.baseUrl!;
+      const buf = generateLargeCast({
+        sections: 50,
+        targetSizeMB: 5,
+        includeResizes: true,
+        resizeInterval: 10,
+      });
+      const sizeMB = (buf.length / 1024 / 1024).toFixed(2);
 
-    const { id } = await uploadBuffer(baseUrl, buf, 'synthetic-5mb.cast');
-    const result = await runWithResponsivenessProbe(baseUrl, id, PERF.MAX_PIPELINE_LARGE_MS);
-    reportResults('5MB / 50 sections / resizes', sizeMB, result);
+      const { id } = await uploadBuffer(baseUrl, buf, 'synthetic-5mb.cast');
+      const result = await runWithResponsivenessProbe(baseUrl, id, PERF.MAX_PIPELINE_LARGE_MS);
+      reportResults('5MB / 50 sections / resizes', sizeMB, result);
 
-    expect(result.status, 'Pipeline must complete (no RangeError)').toBe('completed');
-    expect(result.pipelineMs, `Pipeline exceeded ${PERF.MAX_PIPELINE_LARGE_MS / 1000}s budget`).toBeLessThan(PERF.MAX_PIPELINE_LARGE_MS);
-    const maxFailedProbes = Math.max(2, Math.ceil(result.healthProbes.length * 0.1));
-    expect(result.failedProbes, `Too many failed health probes: ${result.failedProbes}/${result.healthProbes.length}`).toBeLessThanOrEqual(maxFailedProbes);
-    const maxLatency = result.healthProbes.length > 0 ? Math.max(...result.healthProbes) : 0;
-    expect(maxLatency, `Max health latency ${maxLatency.toFixed(0)}ms exceeds ${PERF.MAX_HEALTH_LATENCY_MS}ms`).toBeLessThan(PERF.MAX_HEALTH_LATENCY_MS);
-  }, PERF.MAX_PIPELINE_LARGE_MS + 5_000);
+      expect(result.status, 'Pipeline must complete (no RangeError)').toBe('completed');
+      expect(
+        result.pipelineMs,
+        `Pipeline exceeded ${PERF.MAX_PIPELINE_LARGE_MS / 1000}s budget`,
+      ).toBeLessThan(PERF.MAX_PIPELINE_LARGE_MS);
+      const maxFailedProbes = Math.max(2, Math.ceil(result.healthProbes.length * 0.1));
+      expect(
+        result.failedProbes,
+        `Too many failed health probes: ${result.failedProbes}/${result.healthProbes.length}`,
+      ).toBeLessThanOrEqual(maxFailedProbes);
+      const maxLatency = result.healthProbes.length > 0 ? Math.max(...result.healthProbes) : 0;
+      expect(
+        maxLatency,
+        `Max health latency ${maxLatency.toFixed(0)}ms exceeds ${PERF.MAX_HEALTH_LATENCY_MS}ms`,
+      ).toBeLessThan(PERF.MAX_HEALTH_LATENCY_MS);
+    },
+    PERF.MAX_PIPELINE_LARGE_MS + 5_000,
+  );
 });

@@ -238,7 +238,10 @@ export class WorkerPool<TPayload, TResult> {
   }
 
   /** Sends a job message to the given slot's worker and marks it busy. */
-  private dispatchJob(slot: WorkerSlot<TPayload, TResult>, job: PendingJob<TPayload, TResult>): void {
+  private dispatchJob(
+    slot: WorkerSlot<TPayload, TResult>,
+    job: PendingJob<TPayload, TResult>,
+  ): void {
     slot.state = 'busy';
     slot.currentJob = job;
     slot.worker!.postMessage({ type: 'job', id: job.id, payload: job.payload });

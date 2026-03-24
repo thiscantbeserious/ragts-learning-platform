@@ -26,10 +26,7 @@ export interface ValidateResult {
  * Parses NDJSON, normalizes the header, and extracts events and markers.
  * Throws if the file cannot be read or contains no header.
  */
-export async function validate(
-  filePath: string,
-  sessionId: string
-): Promise<ValidateResult> {
+export async function validate(filePath: string, sessionId: string): Promise<ValidateResult> {
   let header: AsciicastHeader | null = null;
   const events: AsciicastEvent[] = [];
   const markers: Marker[] = [];

@@ -15,7 +15,10 @@ import { tmpdir } from 'os';
 import { SqliteDatabaseImpl } from '../../../src/server/db/sqlite/sqlite_database_impl.js';
 import type { DatabaseContext } from '../../../src/server/db/database_adapter.js';
 import { EmitterEventBusImpl } from '../../../src/server/events/emitter_event_bus_impl.js';
-import { PipelineOrchestrator, type StageDependencies } from '../../../src/server/processing/pipeline_orchestrator.js';
+import {
+  PipelineOrchestrator,
+  type StageDependencies,
+} from '../../../src/server/processing/pipeline_orchestrator.js';
 import { PipelineStage } from '../../../src/shared/types/pipeline.js';
 
 function buildShortCast(): string {
@@ -32,7 +35,7 @@ function buildShortCast(): string {
 function waitForEvent(
   eventBus: EmitterEventBusImpl,
   type: string,
-  timeoutMs = 15000
+  timeoutMs = 15000,
 ): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`Timeout waiting for ${type}`)), timeoutMs);
@@ -88,9 +91,13 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     await ctx.jobQueue.create(session.id);
 
     const readyPromise = waitForEvent(eventBus, 'session.ready');
-    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'orch-session.cast' });
+    eventBus.emit({
+      type: 'session.uploaded',
+      sessionId: session.id,
+      filename: 'orch-session.cast',
+    });
 
-    const readyEvent = await readyPromise as { type: string; sessionId: string };
+    const readyEvent = (await readyPromise) as { type: string; sessionId: string };
     expect(readyEvent.type).toBe('session.ready');
     expect(readyEvent.sessionId).toBe(session.id);
 
@@ -113,9 +120,18 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     await ctx.jobQueue.create(session.id);
 
     const failedPromise = waitForEvent(eventBus, 'session.failed');
-    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'fail-session.cast' });
+    eventBus.emit({
+      type: 'session.uploaded',
+      sessionId: session.id,
+      filename: 'fail-session.cast',
+    });
 
-    const failedEvent = await failedPromise as { type: string; sessionId: string; stage: string; error: string };
+    const failedEvent = (await failedPromise) as {
+      type: string;
+      sessionId: string;
+      stage: string;
+      error: string;
+    };
     expect(failedEvent.type).toBe('session.failed');
     expect(failedEvent.sessionId).toBe(session.id);
     expect(failedEvent.stage).toBe(PipelineStage.Validate);
@@ -133,7 +149,7 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
 
     eventBus.emit({ type: 'session.uploaded', sessionId: 'no-job-session', filename: 'noop.cast' });
 
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50));
 
     expect(failSpy).not.toHaveBeenCalled();
     expect(readySpy).not.toHaveBeenCalled();
@@ -171,7 +187,11 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     await orchestrator.start();
 
     const readyPromise = waitForEvent(eventBus, 'session.ready');
-    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'status-test.cast' });
+    eventBus.emit({
+      type: 'session.uploaded',
+      sessionId: session.id,
+      filename: 'status-test.cast',
+    });
     await readyPromise;
 
     // Should have seen at least validating -> (others) before completed
@@ -226,8 +246,11 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
       const id = nanoid();
       const fp = await ctx.storageAdapter.save(id, content);
       const session = await ctx.sessionRepository.createWithId(id, {
-        filename: `conc-${i}.cast`, filepath: fp,
-        size_bytes: content.length, marker_count: 0, uploaded_at: new Date().toISOString(),
+        filename: `conc-${i}.cast`,
+        filepath: fp,
+        size_bytes: content.length,
+        marker_count: 0,
+        uploaded_at: new Date().toISOString(),
       });
       await ctx.jobQueue.create(session.id);
       sessions.push(session);
@@ -243,16 +266,20 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     });
 
     for (const session of sessions) {
-      eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: session.filename });
+      eventBus.emit({
+        type: 'session.uploaded',
+        sessionId: session.id,
+        filename: session.filename,
+      });
     }
 
     // Wait for all to complete
     await freshOrchestrator.waitForPending();
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
 
     // All 4 should eventually complete (pool queues and drains automatically)
-    const jobs = await Promise.all(sessions.map(s => ctx.jobQueue.findBySessionId(s.id)));
-    const completed = jobs.filter(j => j?.status === 'completed');
+    const jobs = await Promise.all(sessions.map((s) => ctx.jobQueue.findBySessionId(s.id)));
+    const completed = jobs.filter((j) => j?.status === 'completed');
     expect(completed.length).toBeGreaterThanOrEqual(3);
 
     await freshOrchestrator.stop();
@@ -286,10 +313,14 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
 
     // Emit upload — pipeline will fail (missing file), then fail() throws
     // The inner catch should prevent an unhandled rejection
-    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'double-fail.cast' });
+    eventBus.emit({
+      type: 'session.uploaded',
+      sessionId: session.id,
+      filename: 'double-fail.cast',
+    });
 
     // Wait for the job to be processed (even if silently absorbed by inner catch)
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500));
 
     // No unhandled rejection should surface; orchestrator should still be stoppable
     await freshOrchestrator.stop();
@@ -338,7 +369,7 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     const failedPromise = waitForEvent(eventBus, 'session.failed');
     eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'ghost.cast' });
 
-    const failedEvent = await failedPromise as { type: string; sessionId: string };
+    const failedEvent = (await failedPromise) as { type: string; sessionId: string };
     expect(failedEvent.type).toBe('session.failed');
     expect(failedEvent.sessionId).toBe(session.id);
 
@@ -377,9 +408,13 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
 
     // The real error should propagate to handleStageError, marking the job failed
     const failedPromise = waitForEvent(eventBus, 'session.failed');
-    eventBus.emit({ type: 'session.uploaded', sessionId: session.id, filename: 'rethrow-test.cast' });
+    eventBus.emit({
+      type: 'session.uploaded',
+      sessionId: session.id,
+      filename: 'rethrow-test.cast',
+    });
 
-    const failedEvent = await failedPromise as { type: string; sessionId: string; error: string };
+    const failedEvent = (await failedPromise) as { type: string; sessionId: string; error: string };
     expect(failedEvent.type).toBe('session.failed');
     expect(failedEvent.sessionId).toBe(session.id);
     expect(failedEvent.error).toContain('Unexpected DB constraint error');
@@ -396,8 +431,11 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     const id1 = nanoid();
     const fp1 = await ctx.storageAdapter.save(id1, content);
     await ctx.sessionRepository.createWithId(id1, {
-      filename: 'drain1.cast', filepath: fp1,
-      size_bytes: content.length, marker_count: 0, uploaded_at: new Date().toISOString(),
+      filename: 'drain1.cast',
+      filepath: fp1,
+      size_bytes: content.length,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
     });
     await ctx.jobQueue.create(id1);
 
@@ -405,8 +443,11 @@ describe('PipelineOrchestrator', { timeout: 30000 }, () => {
     const id2 = nanoid();
     const fp2 = await ctx.storageAdapter.save(id2, content);
     await ctx.sessionRepository.createWithId(id2, {
-      filename: 'drain2.cast', filepath: fp2,
-      size_bytes: content.length, marker_count: 0, uploaded_at: new Date().toISOString(),
+      filename: 'drain2.cast',
+      filepath: fp2,
+      size_bytes: content.length,
+      marker_count: 0,
+      uploaded_at: new Date().toISOString(),
     });
     await ctx.jobQueue.create(id2);
 

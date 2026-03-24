@@ -195,7 +195,11 @@ describe('useSSE()', () => {
       const { status } = useSSE(sessionId, makeStatus('validating'));
       await nextTick();
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.validated', { type: 'session.validated', sessionId: 'sess-1', eventCount: 10 });
+      instance.simulateEvent('session.validated', {
+        type: 'session.validated',
+        sessionId: 'sess-1',
+        eventCount: 10,
+      });
       expect(status.value).toBe('detecting');
     });
 
@@ -204,7 +208,11 @@ describe('useSSE()', () => {
       const { status } = useSSE(sessionId, makeStatus('detecting'));
       await nextTick();
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.detected', { type: 'session.detected', sessionId: 'sess-1', sectionCount: 5 });
+      instance.simulateEvent('session.detected', {
+        type: 'session.detected',
+        sessionId: 'sess-1',
+        sectionCount: 5,
+      });
       expect(status.value).toBe('replaying');
     });
 
@@ -213,7 +221,11 @@ describe('useSSE()', () => {
       const { status } = useSSE(sessionId, makeStatus('replaying'));
       await nextTick();
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.replayed', { type: 'session.replayed', sessionId: 'sess-1', lineCount: 100 });
+      instance.simulateEvent('session.replayed', {
+        type: 'session.replayed',
+        sessionId: 'sess-1',
+        lineCount: 100,
+      });
       expect(status.value).toBe('deduplicating');
     });
 
@@ -222,7 +234,12 @@ describe('useSSE()', () => {
       const { status } = useSSE(sessionId, makeStatus('deduplicating'));
       await nextTick();
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.deduped', { type: 'session.deduped', sessionId: 'sess-1', rawLines: 50, cleanLines: 40 });
+      instance.simulateEvent('session.deduped', {
+        type: 'session.deduped',
+        sessionId: 'sess-1',
+        rawLines: 50,
+        cleanLines: 40,
+      });
       expect(status.value).toBe('storing');
     });
 
@@ -240,7 +257,12 @@ describe('useSSE()', () => {
       const { status } = useSSE(sessionId, makeStatus('processing'));
       await nextTick();
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.failed', { type: 'session.failed', sessionId: 'sess-1', stage: 'validate', error: 'bad data' });
+      instance.simulateEvent('session.failed', {
+        type: 'session.failed',
+        sessionId: 'sess-1',
+        stage: 'validate',
+        error: 'bad data',
+      });
       expect(status.value).toBe('failed');
     });
   });
@@ -260,7 +282,12 @@ describe('useSSE()', () => {
       useSSE(sessionId, makeStatus('processing'));
       await nextTick();
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.failed', { type: 'session.failed', sessionId: 'sess-1', stage: 'validate', error: 'bad' });
+      instance.simulateEvent('session.failed', {
+        type: 'session.failed',
+        sessionId: 'sess-1',
+        stage: 'validate',
+        error: 'bad',
+      });
       expect(instance.closed).toBe(true);
     });
 
@@ -311,10 +338,13 @@ describe('useSSE()', () => {
 
   describe('polling fallback — beyond budget', () => {
     it('polls /api/sessions/:id when beyond connection budget', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ id: 'sess-4', detection_status: 'processing' }),
-      }));
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ id: 'sess-4', detection_status: 'processing' }),
+        }),
+      );
 
       useSSE(ref('sess-1'), makeStatus('processing'));
       useSSE(ref('sess-2'), makeStatus('processing'));
@@ -333,10 +363,13 @@ describe('useSSE()', () => {
     });
 
     it('updates status from polling response when it changes', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ id: 'sess-4', detection_status: 'completed' }),
-      }));
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ id: 'sess-4', detection_status: 'completed' }),
+        }),
+      );
 
       useSSE(ref('sess-1'), makeStatus('processing'));
       useSSE(ref('sess-2'), makeStatus('processing'));
@@ -406,10 +439,13 @@ describe('useSSE()', () => {
     });
 
     it('updates status to "completed" and closes SSE when sync finds session already completed', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ id: 'sess-1', detection_status: 'completed' }),
-      }));
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ id: 'sess-1', detection_status: 'completed' }),
+        }),
+      );
 
       const sessionId = ref('sess-1');
       const { status } = useSSE(sessionId, makeStatus('processing'));
@@ -425,10 +461,13 @@ describe('useSSE()', () => {
     });
 
     it('updates status to "failed" and closes SSE when sync finds session failed', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ id: 'sess-1', detection_status: 'failed' }),
-      }));
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ id: 'sess-1', detection_status: 'failed' }),
+        }),
+      );
 
       const sessionId = ref('sess-1');
       const { status } = useSSE(sessionId, makeStatus('processing'));
@@ -444,10 +483,13 @@ describe('useSSE()', () => {
     });
 
     it('leaves SSE open when sync finds session still processing', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ id: 'sess-1', detection_status: 'detecting' }),
-      }));
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: () => Promise.resolve({ id: 'sess-1', detection_status: 'detecting' }),
+        }),
+      );
 
       const sessionId = ref('sess-1');
       useSSE(sessionId, makeStatus('processing'));
@@ -503,7 +545,11 @@ describe('useSSE()', () => {
 
       // Simulate a status update from SSE
       const instance = mockInstances[0]!;
-      instance.simulateEvent('session.validated', { type: 'session.validated', sessionId: 'sess-1', eventCount: 5 });
+      instance.simulateEvent('session.validated', {
+        type: 'session.validated',
+        sessionId: 'sess-1',
+        eventCount: 5,
+      });
       expect(status.value).toBe('detecting');
 
       // Change session ID — status should reset to initial

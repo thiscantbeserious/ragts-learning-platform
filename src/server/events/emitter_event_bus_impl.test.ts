@@ -45,7 +45,11 @@ describe('EmitterEventBusImpl', () => {
         received = event;
       });
 
-      const event: PipelineEvent = { type: 'session.detected', sessionId: 'sess-2', sectionCount: 5 };
+      const event: PipelineEvent = {
+        type: 'session.detected',
+        sessionId: 'sess-2',
+        sectionCount: 5,
+      };
       bus.emit(event);
 
       expect(received).toEqual(event);
@@ -82,7 +86,12 @@ describe('EmitterEventBusImpl', () => {
       const handler = vi.fn();
       bus.once('session.failed', handler);
 
-      const event: PipelineEvent = { type: 'session.failed', sessionId: 'sess-5', stage: PipelineStage.Validate, error: 'bad file' };
+      const event: PipelineEvent = {
+        type: 'session.failed',
+        sessionId: 'sess-5',
+        stage: PipelineStage.Validate,
+        error: 'bad file',
+      };
       bus.emit(event);
       bus.emit(event);
       bus.emit(event);
@@ -174,7 +183,9 @@ describe('EmitterEventBusImpl', () => {
 
   describe('handler errors', () => {
     it('a throwing handler does not prevent other handlers from being called', () => {
-      const errorHandler = vi.fn(() => { throw new Error('boom'); });
+      const errorHandler = vi.fn(() => {
+        throw new Error('boom');
+      });
       const goodHandler = vi.fn();
 
       bus.on('session.ready', errorHandler);

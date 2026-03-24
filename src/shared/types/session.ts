@@ -38,11 +38,22 @@ export interface Session {
   created_at: NonEmptyString;
   agent_type?: string | null;
   /** Total event count after validation. 0 or more. */
-  event_count?: (UInt32) | null;
+  event_count?: UInt32 | null;
   /** Number of detected sections. 0 or more. */
-  detected_sections_count?: (UInt32) | null;
-  detection_status?: 'pending' | 'processing' | 'queued' | 'validating' | 'detecting' | 'replaying' | 'deduplicating' | 'storing' | 'completed' | 'failed' | 'interrupted';
-  snapshot?: string | null;  // Full getAllLines() JSON from VT terminal
+  detected_sections_count?: UInt32 | null;
+  detection_status?:
+    | 'pending'
+    | 'processing'
+    | 'queued'
+    | 'validating'
+    | 'detecting'
+    | 'replaying'
+    | 'deduplicating'
+    | 'storing'
+    | 'completed'
+    | 'failed'
+    | 'interrupted';
+  snapshot?: string | null; // Full getAllLines() JSON from VT terminal
 }
 
 /**

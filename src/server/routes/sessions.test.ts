@@ -16,7 +16,9 @@ import type { SessionMetadataResponse } from '../../shared/types/api.js';
 // Mock factories
 // ---------------------------------------------------------------------------
 
-function makeMockMetadata(overrides: Partial<SessionMetadataResponse> = {}): SessionMetadataResponse {
+function makeMockMetadata(
+  overrides: Partial<SessionMetadataResponse> = {},
+): SessionMetadataResponse {
   return {
     id: 'sess-1',
     filename: 'test.cast',
@@ -29,7 +31,11 @@ function makeMockMetadata(overrides: Partial<SessionMetadataResponse> = {}): Ses
   } as unknown as SessionMetadataResponse;
 }
 
-function makeMockService(result: { ok: true; data: SessionMetadataResponse } | { ok: false; status: 404 | 429 | 500; error: string }): Pick<SessionService, 'getSessionMetadata'> {
+function makeMockService(
+  result:
+    | { ok: true; data: SessionMetadataResponse }
+    | { ok: false; status: 404 | 429 | 500; error: string },
+): Pick<SessionService, 'getSessionMetadata'> {
   return {
     getSessionMetadata: vi.fn().mockResolvedValue(result),
   } as unknown as Pick<SessionService, 'getSessionMetadata'>;
@@ -53,7 +59,7 @@ describe('GET /api/sessions/:id', () => {
     const res = await app.fetch(new Request('http://localhost/api/sessions/sess-1'));
 
     expect(res.status).toBe(200);
-    const body = await res.json() as SessionMetadataResponse;
+    const body = (await res.json()) as SessionMetadataResponse;
     expect(body.id).toBe('sess-1');
     expect(body.filename).toBe('test.cast');
   });
@@ -64,7 +70,7 @@ describe('GET /api/sessions/:id', () => {
     const res = await app.fetch(new Request('http://localhost/api/sessions/missing'));
 
     expect(res.status).toBe(404);
-    const body = await res.json() as { error: string };
+    const body = (await res.json()) as { error: string };
     expect(body.error).toBe('Session not found');
   });
 
@@ -81,17 +87,19 @@ describe('GET /api/sessions/:id', () => {
 
   it('returns sections array without snapshot fields', async () => {
     const data = makeMockMetadata({
-      sections: [{
-        id: 'sec-1',
-        type: 'marker',
-        label: 'Setup',
-        startEvent: 0,
-        endEvent: 10,
-        startLine: 0,
-        endLine: 5,
-        lineCount: 6,
-        preview: 'First line',
-      }] as unknown as SessionMetadataResponse['sections'],
+      sections: [
+        {
+          id: 'sec-1',
+          type: 'marker',
+          label: 'Setup',
+          startEvent: 0,
+          endEvent: 10,
+          startLine: 0,
+          endLine: 5,
+          lineCount: 6,
+          preview: 'First line',
+        },
+      ] as unknown as SessionMetadataResponse['sections'],
       sectionCount: 1,
       totalLines: 6,
     });
@@ -99,7 +107,7 @@ describe('GET /api/sessions/:id', () => {
 
     const res = await app.fetch(new Request('http://localhost/api/sessions/sess-1'));
 
-    const body = await res.json() as SessionMetadataResponse;
+    const body = (await res.json()) as SessionMetadataResponse;
     expect(body.sections).toHaveLength(1);
     expect(body.sections[0]).not.toHaveProperty('snapshot');
     expect(body.sections[0]!.lineCount).toBe(6);
@@ -115,7 +123,7 @@ describe('GET /api/sessions/:id', () => {
 
     const res = await app.fetch(new Request('http://localhost/api/sessions/sess-1'));
 
-    const body = await res.json() as SessionMetadataResponse;
+    const body = (await res.json()) as SessionMetadataResponse;
     expect(body.totalLines).toBe(42);
     expect(body.sectionCount).toBe(3);
   });

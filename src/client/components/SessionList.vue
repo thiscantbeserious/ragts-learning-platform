@@ -33,31 +33,15 @@ function confirmDelete(id: string, filename: string): void {
 
 <template>
   <div class="session-list">
-    <div
-      v-if="loading"
-      class="session-list__loading"
-    >
-      Loading sessions...
-    </div>
-    <div
-      v-else-if="error"
-      class="session-list__error"
-    >
+    <div v-if="loading" class="session-list__loading">Loading sessions...</div>
+    <div v-else-if="error" class="session-list__error">
       {{ error }}
     </div>
-    <div
-      v-else-if="sessions.length === 0"
-      class="session-list__empty"
-    >
+    <div v-else-if="sessions.length === 0" class="session-list__empty">
       <p>No sessions yet.</p>
-      <p class="session-list__empty-hint">
-        Upload a <code>.cast</code> file to get started.
-      </p>
+      <p class="session-list__empty-hint">Upload a <code>.cast</code> file to get started.</p>
     </div>
-    <div
-      v-else
-      class="session-list__grid grid"
-    >
+    <div v-else class="session-list__grid grid">
       <router-link
         v-for="session in sessions"
         :key="session.id"
@@ -76,10 +60,7 @@ function confirmDelete(id: string, filename: string): void {
         </div>
         <div class="session-card__meta">
           <span class="session-card__meta-item">{{ formatSize(session.size_bytes) }}</span>
-          <span
-            v-if="session.marker_count > 0"
-            class="badge badge--sm badge--accent"
-          >
+          <span v-if="session.marker_count > 0" class="badge badge--sm badge--accent">
             {{ session.marker_count }} marker{{ session.marker_count !== 1 ? 's' : '' }}
           </span>
         </div>

@@ -29,7 +29,7 @@ export function createTestSession(overrides: Partial<SessionCreate> = {}): Sessi
  */
 export function createTestSection(
   sessionId: string,
-  overrides: Partial<CreateSectionInput> = {}
+  overrides: Partial<CreateSectionInput> = {},
 ): CreateSectionInput {
   return {
     sessionId,

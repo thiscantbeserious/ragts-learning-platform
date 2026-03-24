@@ -56,7 +56,9 @@ export function generateLargeCast(options: SyntheticCastOptions = {}): Buffer {
   const bytesPerSection = Math.floor(targetBytes / sections);
 
   const lines: string[] = [];
-  lines.push(JSON.stringify({ version: 3, term: { cols, rows }, timestamp: Math.floor(Date.now() / 1000) }));
+  lines.push(
+    JSON.stringify({ version: 3, term: { cols, rows }, timestamp: Math.floor(Date.now() / 1000) }),
+  );
 
   for (let s = 0; s < sections; s++) {
     if (includeResizes && s > 0 && s % resizeInterval === 0) {

@@ -45,19 +45,13 @@ export interface MigrationResult {
  * @param sessionRepo - Session adapter
  * @returns Migration result summary
  */
-export async function migrateV2(
-  sessionRepo: SessionAdapter
-): Promise<MigrationResult> {
+export async function migrateV2(sessionRepo: SessionAdapter): Promise<MigrationResult> {
   const allSessions = await sessionRepo.findAll();
-  const sessionsToProcess = allSessions.filter(
-    (s) => s.detection_status !== 'completed'
-  );
+  const sessionsToProcess = allSessions.filter((s) => s.detection_status !== 'completed');
 
   console.log(`Migration v2: Found ${sessionsToProcess.length} sessions to process`);
 
-  const { processed, failed } = await processPendingSessions(
-    sessionsToProcess, sessionRepo
-  );
+  const { processed, failed } = await processPendingSessions(sessionsToProcess, sessionRepo);
 
   console.log('');
   console.log('Checking for sessions without unified snapshot...');
@@ -82,7 +76,7 @@ export async function migrateV2(
 
 async function processPendingSessions(
   sessions: import('../../shared/types/session.js').Session[],
-  sessionRepo: SessionAdapter
+  sessionRepo: SessionAdapter,
 ): Promise<{ processed: number; failed: number }> {
   let processed = 0;
   let failed = 0;
@@ -100,7 +94,9 @@ async function processPendingSessions(
       console.log(`${progress} Success: ${session.filename}`);
     } catch (error) {
       failed++;
-      console.error(`${progress} Failed: ${session.filename} - ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `${progress} Failed: ${session.filename} - ${error instanceof Error ? error.message : String(error)}`,
+      );
       try {
         await sessionRepo.updateDetectionStatus(session.id, 'failed');
       } catch {
@@ -112,9 +108,7 @@ async function processPendingSessions(
   return { processed, failed };
 }
 
-async function reprocessMissingSnapshots(
-  sessionRepo: SessionAdapter
-): Promise<number> {
+async function reprocessMissingSnapshots(sessionRepo: SessionAdapter): Promise<number> {
   const allSessions = await sessionRepo.findAll();
   let reprocessed = 0;
 
@@ -125,7 +119,9 @@ async function reprocessMissingSnapshots(
     if (!fullSession || fullSession.snapshot) continue;
 
     const progress = `[${i + 1}/${allSessions.length}]`;
-    console.log(`${progress} Reprocessing session ${fullSession.id} (${fullSession.filename}) for unified snapshot...`);
+    console.log(
+      `${progress} Reprocessing session ${fullSession.id} (${fullSession.filename}) for unified snapshot...`,
+    );
 
     try {
       const markers = await extractMarkersFromFile(fullSession.filepath);
@@ -133,7 +129,9 @@ async function reprocessMissingSnapshots(
       reprocessed++;
       console.log(`${progress} Reprocessed: ${fullSession.filename}`);
     } catch (error) {
-      console.error(`${progress} Reprocess failed: ${fullSession.filename} - ${error instanceof Error ? error.message : String(error)}`);
+      console.error(
+        `${progress} Reprocess failed: ${fullSession.filename} - ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

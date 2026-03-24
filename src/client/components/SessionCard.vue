@@ -20,21 +20,13 @@
     </div>
 
     <!-- Row 2 (ready/failed): section count + relative age -->
-    <div
-      v-if="!isProcessing"
-      class="session-card__row session-card__meta"
-    >
+    <div v-if="!isProcessing" class="session-card__row session-card__meta">
       <span class="session-card__sections">{{ sectionText }}</span>
       <span class="session-card__age">{{ relativeAge }}</span>
     </div>
 
     <!-- Row 2 (processing): animated "Processing" text replaces metadata -->
-    <div
-      v-else
-      class="session-card__processing-text"
-    >
-      Processing
-    </div>
+    <div v-else class="session-card__processing-text">Processing</div>
 
     <!-- ARIA live region: announces real-time status updates to screen readers -->
     <span
@@ -42,7 +34,8 @@
       :role="liveRole"
       aria-atomic="true"
       :aria-live="liveAriaPoliteness"
-    >{{ liveAnnouncement }}</span>
+      >{{ liveAnnouncement }}</span
+    >
   </div>
 </template>
 
@@ -89,8 +82,14 @@ const sessionList = inject(sessionListKey, null);
 type StatusGroup = 'ready' | 'processing' | 'failed';
 
 const PROCESSING_STATUSES = new Set<Session['detection_status']>([
-  'pending', 'processing', 'queued', 'validating',
-  'detecting', 'replaying', 'deduplicating', 'storing',
+  'pending',
+  'processing',
+  'queued',
+  'validating',
+  'detecting',
+  'replaying',
+  'deduplicating',
+  'storing',
 ]);
 
 /** Derives the display group from the live (SSE-updated) status. */
@@ -135,7 +134,9 @@ watch(liveStatus, (next, prev) => {
       itemLabel: props.session.filename,
       summaryNoun: 'sessions ready',
     });
-    scheduler.after(700, () => { justCompleted.value = false; });
+    scheduler.after(700, () => {
+      justCompleted.value = false;
+    });
     // Refresh sidebar list so section counts and status reflect server state
     sessionList?.refreshOnSessionComplete();
   } else if ((next === 'failed' || next === 'interrupted') && !hasNotifiedTerminal.value) {
@@ -206,9 +207,7 @@ const sectionText = computed<string>(() => {
 });
 
 /** Human-readable relative age of the session. */
-const relativeAge = computed<string>(() =>
-  formatRelativeTime(props.session.uploaded_at),
-);
+const relativeAge = computed<string>(() => formatRelativeTime(props.session.uploaded_at));
 
 /** Navigates to the session detail route. No-op while session is processing. */
 function handleClick(): void {
@@ -237,8 +236,9 @@ function handleClick(): void {
   color: var(--text-primary);
   font-family: var(--font-body);
   box-sizing: border-box;
-  transition: background var(--duration-fast) var(--easing-default),
-              border-color var(--duration-fast) var(--easing-default);
+  transition:
+    background var(--duration-fast) var(--easing-default),
+    border-color var(--duration-fast) var(--easing-default);
 }
 
 .session-card:hover {
@@ -337,8 +337,15 @@ function handleClick(): void {
 }
 
 @keyframes status-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
 }
 
 /* Glow burst animation for completion transition */
@@ -347,9 +354,18 @@ function handleClick(): void {
 }
 
 @keyframes status-glow {
-  0% { box-shadow: 0 0 0 0 var(--status-success); transform: scale(1); }
-  50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--status-success) 40%, transparent); transform: scale(1.2); }
-  100% { box-shadow: 0 0 0 0 transparent; transform: scale(1); }
+  0% {
+    box-shadow: 0 0 0 0 var(--status-success);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--status-success) 40%, transparent);
+    transform: scale(1.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    transform: scale(1);
+  }
 }
 
 /* ================================================================
@@ -380,10 +396,18 @@ function handleClick(): void {
 }
 
 @keyframes ellipsis {
-  0%  { content: ''; }
-  25% { content: '.'; }
-  50% { content: '..'; }
-  75% { content: '...'; }
+  0% {
+    content: '';
+  }
+  25% {
+    content: '.';
+  }
+  50% {
+    content: '..';
+  }
+  75% {
+    content: '...';
+  }
 }
 
 /* Swoosh pseudo-element — synced across all processing cards via shared keyframes + timing */
@@ -410,8 +434,12 @@ function handleClick(): void {
 }
 
 @keyframes swoosh-sweep {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
 }
 
 /* Respect prefers-reduced-motion */

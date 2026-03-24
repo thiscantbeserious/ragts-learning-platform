@@ -10,9 +10,7 @@ import AppHeader from '@client/components/AppHeader.vue';
 function createTestRouter() {
   return createRouter({
     history: createMemoryHistory(),
-    routes: [
-      { path: '/', name: 'landing', component: { template: '<div/>' } },
-    ],
+    routes: [{ path: '/', name: 'landing', component: { template: '<div/>' } }],
   });
 }
 

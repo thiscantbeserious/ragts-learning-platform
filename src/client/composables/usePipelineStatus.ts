@@ -12,7 +12,10 @@
 
 import { ref, computed, onUnmounted, getCurrentInstance } from 'vue';
 import type { Ref, ComputedRef, InjectionKey } from 'vue';
-import type { PipelineSession, PipelineStatusSnapshot } from '../../shared/types/pipeline_status.js';
+import type {
+  PipelineSession,
+  PipelineStatusSnapshot,
+} from '../../shared/types/pipeline_status.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -69,7 +72,9 @@ export function usePipelineStatus(): PipelineStatusState {
 
   const processingCount: ComputedRef<number> = computed(() => processingSessions.value.length);
   const queuedCount: ComputedRef<number> = computed(() => queuedSessions.value.length);
-  const totalActive: ComputedRef<number> = computed(() => processingCount.value + queuedCount.value);
+  const totalActive: ComputedRef<number> = computed(
+    () => processingCount.value + queuedCount.value,
+  );
 
   let eventSource: EventSource | null = null;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -119,10 +124,13 @@ export function usePipelineStatus(): PipelineStatusState {
     es.addEventListener('pipeline-status', (e: MessageEvent) => {
       try {
         // The server wraps the snapshot in { type, data }. Extract the inner payload.
-        const parsed = JSON.parse(e.data as string) as { type: string; data: PipelineStatusSnapshot } | PipelineStatusSnapshot;
-        const snapshot = 'data' in parsed && typeof parsed.data === 'object' && parsed.data !== null
-          ? parsed.data
-          : parsed as PipelineStatusSnapshot;
+        const parsed = JSON.parse(e.data as string) as
+          | { type: string; data: PipelineStatusSnapshot }
+          | PipelineStatusSnapshot;
+        const snapshot =
+          'data' in parsed && typeof parsed.data === 'object' && parsed.data !== null
+            ? parsed.data
+            : (parsed as PipelineStatusSnapshot);
         applySnapshot(snapshot);
       } catch {
         // Malformed snapshot — ignore and wait for next event

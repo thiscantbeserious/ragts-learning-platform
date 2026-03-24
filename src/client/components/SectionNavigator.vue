@@ -1,9 +1,5 @@
 <template>
-  <aside
-    class="section-nav"
-    role="navigation"
-    aria-label="Section navigator"
-  >
+  <aside class="section-nav" role="navigation" aria-label="Section navigator">
     <!-- Section count header -->
     <div class="section-nav__header">
       <span class="section-nav__count">{{ sections.length }}</span>
@@ -47,7 +43,10 @@
       <div
         v-if="hoveredSection !== null"
         class="section-popover"
-        :class="[`section-popover--${hoveredSection.type}`, { 'section-popover--no-arrow': popoverClamped }]"
+        :class="[
+          `section-popover--${hoveredSection.type}`,
+          { 'section-popover--no-arrow': popoverClamped },
+        ]"
         :style="popoverStyle"
         aria-hidden="true"
       >
@@ -66,10 +65,7 @@
           </span>
           <span>{{ hoveredSection.lineCount }} lines</span>
         </div>
-        <div
-          v-if="hoveredSection.preview != null"
-          class="section-popover__preview"
-        >
+        <div v-if="hoveredSection.preview != null" class="section-popover__preview">
           {{ hoveredSection.preview }}
         </div>
         <div class="section-popover__slots">
@@ -129,14 +125,10 @@ const pillRefs = ref<HTMLElement[]>([]);
 // ---------------------------------------------------------------------------
 
 /** The full SectionMetadata object for the currently active section. */
-const activeSection = computed(() =>
-  props.sections.find((s) => s.id === props.activeId) ?? null
-);
+const activeSection = computed(() => props.sections.find((s) => s.id === props.activeId) ?? null);
 
 /** The 0-based index of the active pill. */
-const activeIndex = computed(() =>
-  props.sections.findIndex((s) => s.id === props.activeId)
-);
+const activeIndex = computed(() => props.sections.findIndex((s) => s.id === props.activeId));
 
 // ---------------------------------------------------------------------------
 // Active pointer position
@@ -150,8 +142,10 @@ const pointerTop = ref<number | null>(null);
 
 watch(
   () => props.activeId,
-  () => { updatePointerPosition(); },
-  { flush: 'post' }
+  () => {
+    updatePointerPosition();
+  },
+  { flush: 'post' },
 );
 
 function updatePointerPosition(): void {
@@ -470,7 +464,9 @@ function positionPopover(pillEl: HTMLElement): void {
   background: var(--bg-elevated);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    var(--shadow-lg),
+    0 0 20px rgba(0, 0, 0, 0.4);
   padding: var(--space-3);
   display: flex;
   flex-direction: column;

@@ -23,10 +23,7 @@ describe('NdjsonStream', () => {
         [0.1, 'o', 'World\n'],
       ];
 
-      const content = [
-        JSON.stringify(header),
-        ...events.map(e => JSON.stringify(e)),
-      ].join('\n');
+      const content = [JSON.stringify(header), ...events.map((e) => JSON.stringify(e))].join('\n');
 
       writeFileSync(testFile, content);
 

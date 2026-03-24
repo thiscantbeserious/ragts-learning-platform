@@ -6,11 +6,7 @@
  */
 
 /** Semantic error codes that map to HTTP status codes in route handlers. */
-export type ServiceErrorCode =
-  | 'NOT_FOUND'
-  | 'BAD_REQUEST'
-  | 'CONFLICT'
-  | 'VALIDATION_ERROR';
+export type ServiceErrorCode = 'NOT_FOUND' | 'BAD_REQUEST' | 'CONFLICT' | 'VALIDATION_ERROR';
 
 /**
  * Thrown by service methods when a business rule is violated.
@@ -20,7 +16,7 @@ export class ServiceError extends Error {
   constructor(
     message: string,
     public readonly code: ServiceErrorCode,
-    public readonly statusCode: number = 400
+    public readonly statusCode: number = 400,
   ) {
     super(message);
     this.name = 'ServiceError';

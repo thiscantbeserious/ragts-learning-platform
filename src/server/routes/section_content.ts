@@ -21,7 +21,7 @@ const log = logger.child({ module: 'routes/section_content' });
  */
 export async function handleGetSectionContent(
   c: Context,
-  service: SectionContentService
+  service: SectionContentService,
 ): Promise<Response> {
   try {
     const id = c.req.param('id');

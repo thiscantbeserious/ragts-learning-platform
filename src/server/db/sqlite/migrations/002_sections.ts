@@ -39,7 +39,7 @@ export function migrate002Sections(db: Database.Database): void {
   }
 
   if (!columnNames.has('detection_status')) {
-    db.exec('ALTER TABLE sessions ADD COLUMN detection_status TEXT DEFAULT \'pending\'');
+    db.exec("ALTER TABLE sessions ADD COLUMN detection_status TEXT DEFAULT 'pending'");
   }
 
   // Create sections table
@@ -59,6 +59,8 @@ export function migrate002Sections(db: Database.Database): void {
 
   // Create indexes for efficient querying
   db.exec('CREATE INDEX IF NOT EXISTS idx_sections_session_id ON sections(session_id)');
-  db.exec('CREATE INDEX IF NOT EXISTS idx_sections_start_event ON sections(session_id, start_event)');
+  db.exec(
+    'CREATE INDEX IF NOT EXISTS idx_sections_start_event ON sections(session_id, start_event)',
+  );
   db.exec('CREATE INDEX IF NOT EXISTS idx_sessions_agent_type ON sessions(agent_type)');
 }

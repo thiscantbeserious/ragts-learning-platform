@@ -14,14 +14,14 @@ describe('vt-wasm error path branches', () => {
     it('createVt throws when called before initVt', async () => {
       const { createVt } = await import('./index.js');
       expect(() => createVt(80, 24)).toThrow(
-        'WASM module not initialized. Call initVt() before createVt().'
+        'WASM module not initialized. Call initVt() before createVt().',
       );
     });
 
     it('createVt throws when called with scrollbackLimit before initVt', async () => {
       const { createVt } = await import('./index.js');
       expect(() => createVt(80, 24, 500)).toThrow(
-        'WASM module not initialized. Call initVt() before createVt().'
+        'WASM module not initialized. Call initVt() before createVt().',
       );
     });
   });

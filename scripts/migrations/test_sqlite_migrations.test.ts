@@ -64,15 +64,11 @@ interface MigrationModule {
 /** Discovers migration files matching /^\d{3}_.*\.ts$/ excluding .test.ts files. */
 function discover_migration_files(): string[] {
   const entries = readdirSync(MIGRATIONS_DIR);
-  return entries
-    .filter((f) => /^\d{3}_.*\.ts$/.test(f) && !f.endsWith('.test.ts'))
-    .sort();
+  return entries.filter((f) => /^\d{3}_.*\.ts$/.test(f) && !f.endsWith('.test.ts')).sort();
 }
 
 /** Loads and returns the single exported migration function from a file. */
-async function load_migration_fn(
-  file_name: string,
-): Promise<(db: DatabaseType) => void> {
+async function load_migration_fn(file_name: string): Promise<(db: DatabaseType) => void> {
   const file_path = join(MIGRATIONS_DIR, file_name);
   const mod = (await import(file_path)) as MigrationModule;
   const fn_keys = Object.keys(mod).filter((k) => typeof mod[k] === 'function');

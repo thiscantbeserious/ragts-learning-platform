@@ -17,7 +17,13 @@ import PipelineDropdown from './PipelineDropdown.vue';
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makeSession(overrides: Partial<PipelineSession> & { id: string; name: string; status: PipelineSession['status'] }): PipelineSession {
+function makeSession(
+  overrides: Partial<PipelineSession> & {
+    id: string;
+    name: string;
+    status: PipelineSession['status'];
+  },
+): PipelineSession {
   return { ...overrides };
 }
 
@@ -106,7 +112,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.find('.pipeline-dropdown__section--processing').exists()).toBe(true);
@@ -119,7 +130,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.text()).toContain('my-session.cast');
@@ -133,7 +149,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.findAll('.mini-spinner')).toHaveLength(2);
@@ -146,7 +167,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.text()).toContain('42%');
@@ -166,7 +192,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => 0);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => queuedCount.value);
-      const status = makePipelineStatus({ queuedSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        queuedSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.find('.pipeline-dropdown__section--queued').exists()).toBe(true);
@@ -179,7 +210,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => 0);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => queuedCount.value);
-      const status = makePipelineStatus({ queuedSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        queuedSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.text()).toContain('waiting.cast');
@@ -193,7 +229,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => 0);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => queuedCount.value);
-      const status = makePipelineStatus({ queuedSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        queuedSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.findAll('.queue-dot')).toHaveLength(2);
@@ -206,7 +247,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => 0);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => queuedCount.value);
-      const status = makePipelineStatus({ queuedSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        queuedSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       expect(wrapper.text()).toContain('#3');
@@ -221,7 +267,12 @@ describe('PipelineDropdown', () => {
 
     it('shows recently completed section when non-empty', () => {
       const recentlyCompleted = ref<PipelineSession[]>([
-        makeSession({ id: 's1', name: 'done.cast', status: 'completed', completedAt: new Date().toISOString() }),
+        makeSession({
+          id: 's1',
+          name: 'done.cast',
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+        }),
       ]);
       const status = makePipelineStatus({ recentlyCompleted });
       const wrapper = mountDropdown(status);
@@ -231,7 +282,12 @@ describe('PipelineDropdown', () => {
 
     it('renders session names in recently completed section', () => {
       const recentlyCompleted = ref<PipelineSession[]>([
-        makeSession({ id: 's1', name: 'finished.cast', status: 'completed', completedAt: new Date().toISOString() }),
+        makeSession({
+          id: 's1',
+          name: 'finished.cast',
+          status: 'completed',
+          completedAt: new Date().toISOString(),
+        }),
       ]);
       const status = makePipelineStatus({ recentlyCompleted });
       const wrapper = mountDropdown(status);
@@ -276,7 +332,13 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => processingCount.value + queuedCount.value);
-      const status = makePipelineStatus({ processingSessions, queuedSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        queuedSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       const summaryText = wrapper.find('.pipeline-dropdown__summary').text();
@@ -304,7 +366,9 @@ describe('PipelineDropdown', () => {
       const status = makePipelineStatus({ recentlyCompleted });
       const wrapper = mountDropdown(status);
 
-      const statusEl = wrapper.find('.pipeline-dropdown__section--completed .pipeline-item__status');
+      const statusEl = wrapper.find(
+        '.pipeline-dropdown__section--completed .pipeline-item__status',
+      );
       expect(statusEl.text()).toBe('');
     });
 
@@ -330,7 +394,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       const items = wrapper.findAll('.pipeline-item');
@@ -346,7 +415,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdown(status);
 
       const item = wrapper.find('.pipeline-item');
@@ -379,7 +453,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdownAttached(status);
 
       const items = wrapper.findAll('.pipeline-item');
@@ -398,7 +477,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdownAttached(status);
 
       const items = wrapper.findAll('.pipeline-item');
@@ -417,7 +501,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdownAttached(status);
 
       const items = wrapper.findAll('.pipeline-item');
@@ -436,7 +525,12 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => 0);
       const totalActive = computed(() => processingCount.value);
-      const status = makePipelineStatus({ processingSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdownAttached(status);
 
       const items = wrapper.findAll('.pipeline-item');
@@ -457,7 +551,13 @@ describe('PipelineDropdown', () => {
       const processingCount = computed(() => processingSessions.value.length);
       const queuedCount = computed(() => queuedSessions.value.length);
       const totalActive = computed(() => processingCount.value + queuedCount.value);
-      const status = makePipelineStatus({ processingSessions, queuedSessions, processingCount, queuedCount, totalActive });
+      const status = makePipelineStatus({
+        processingSessions,
+        queuedSessions,
+        processingCount,
+        queuedCount,
+        totalActive,
+      });
       const wrapper = mountDropdownAttached(status);
 
       const items = wrapper.findAll('.pipeline-item');

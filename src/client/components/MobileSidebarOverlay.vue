@@ -5,11 +5,7 @@
       :class="{ 'mobile-sidebar-overlay__root--open': isMobileOverlayOpen }"
     >
       <!-- Backdrop -->
-      <div
-        class="mobile-sidebar-overlay__backdrop"
-        aria-hidden="true"
-        @click="onBackdropClick"
-      />
+      <div class="mobile-sidebar-overlay__backdrop" aria-hidden="true" @click="onBackdropClick" />
       <!-- Slide-in panel -->
       <div
         ref="panelRef"
@@ -148,11 +144,14 @@ watch(isMobileOverlayOpen, async (isOpen) => {
 });
 
 /** Close overlay on route change — handles session card selection. */
-watch(() => route.fullPath, (newPath, oldPath) => {
-  if (newPath !== oldPath && isMobileOverlayOpen.value) {
-    closeMobileOverlay();
-  }
-});
+watch(
+  () => route.fullPath,
+  (newPath, oldPath) => {
+    if (newPath !== oldPath && isMobileOverlayOpen.value) {
+      closeMobileOverlay();
+    }
+  },
+);
 </script>
 
 <style scoped>

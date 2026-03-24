@@ -33,8 +33,12 @@ function createMockEventSource(url: string): MockEventSourceInstance {
     onerror: null,
     closed: false,
     addEventListener: vi.fn(),
-    close() { this.closed = true; },
-    simulateOpen() { if (this.onopen) this.onopen(new Event('open')); },
+    close() {
+      this.closed = true;
+    },
+    simulateOpen() {
+      if (this.onopen) this.onopen(new Event('open'));
+    },
   };
   mockInstances.push(instance);
   return instance;
@@ -64,18 +68,24 @@ describe('useSSE() — stale session guard in syncStatusOnOpen (line 196)', () =
     let resolveSecondFetch: (value: Response) => void = () => {};
     let fetchCallCount = 0;
 
-    vi.stubGlobal('fetch', vi.fn().mockImplementation((_url: string) => {
-      fetchCallCount++;
-      if (fetchCallCount === 1) {
-        // First fetch: returns a pending promise that we control
-        return new Promise<Response>((resolve) => { resolveSecondFetch = resolve; });
-      }
-      // Second fetch (after session ID change): resolve immediately
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ id: 'sess-b', detection_status: 'completed' as DetectionStatus }),
-      } as Response);
-    }));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((_url: string) => {
+        fetchCallCount++;
+        if (fetchCallCount === 1) {
+          // First fetch: returns a pending promise that we control
+          return new Promise<Response>((resolve) => {
+            resolveSecondFetch = resolve;
+          });
+        }
+        // Second fetch (after session ID change): resolve immediately
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({ id: 'sess-b', detection_status: 'completed' as DetectionStatus }),
+        } as Response);
+      }),
+    );
 
     // Start with session A
     const sessionId = ref('sess-a');
@@ -95,7 +105,8 @@ describe('useSSE() — stale session guard in syncStatusOnOpen (line 196)', () =
     // Now resolve the stale fetch for sess-a with completed status
     resolveSecondFetch({
       ok: true,
-      json: () => Promise.resolve({ id: 'sess-a', detection_status: 'completed' as DetectionStatus }),
+      json: () =>
+        Promise.resolve({ id: 'sess-a', detection_status: 'completed' as DetectionStatus }),
     } as Response);
     await Promise.resolve();
     await nextTick();

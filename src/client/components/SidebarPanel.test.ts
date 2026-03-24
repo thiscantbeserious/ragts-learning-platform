@@ -56,7 +56,7 @@ function makeSession(overrides: Partial<Session> = {}): Session {
 function makeSessionListState(overrides: Partial<SessionListState> = {}): SessionListState {
   const sessions = ref<Session[]>(overrides.sessions?.value ?? []);
   const searchQuery = ref(overrides.searchQuery?.value ?? '');
-  const statusFilter = ref(overrides.statusFilter?.value ?? 'all' as const);
+  const statusFilter = ref(overrides.statusFilter?.value ?? ('all' as const));
   const loading = ref(overrides.loading?.value ?? false);
   const error = ref<string | null>(overrides.error?.value ?? null);
   const filteredSessions = computed(() => sessions.value);
@@ -74,7 +74,10 @@ function makeSessionListState(overrides: Partial<SessionListState> = {}): Sessio
   };
 }
 
-function makeLayoutState(isMobile: boolean): { layout: LayoutState; closeMobileOverlay: ReturnType<typeof vi.fn> } {
+function makeLayoutState(isMobile: boolean): {
+  layout: LayoutState;
+  closeMobileOverlay: ReturnType<typeof vi.fn>;
+} {
   const closeMobileOverlay = vi.fn();
   const layout: LayoutState = {
     isSidebarOpen: ref(true),
@@ -158,7 +161,7 @@ describe('SidebarPanel', () => {
       const state = makeSessionListState();
       const wrapper = await mountWithState(state);
       const pills = wrapper.findAll('[aria-pressed]');
-      const labels = pills.map(p => p.text());
+      const labels = pills.map((p) => p.text());
       expect(labels).toContain('All');
       expect(labels).toContain('Processing');
       expect(labels).toContain('Ready');
@@ -168,21 +171,23 @@ describe('SidebarPanel', () => {
     it('marks the "All" pill as pressed when statusFilter is "all"', async () => {
       const state = makeSessionListState({ statusFilter: ref('all') });
       const wrapper = await mountWithState(state);
-      const allPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'All');
+      const allPill = wrapper.findAll('[aria-pressed]').find((p) => p.text() === 'All');
       expect(allPill?.attributes('aria-pressed')).toBe('true');
     });
 
     it('marks the "Ready" pill as pressed when statusFilter is "ready"', async () => {
       const state = makeSessionListState({ statusFilter: ref('ready') });
       const wrapper = await mountWithState(state);
-      const readyPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'Ready');
+      const readyPill = wrapper.findAll('[aria-pressed]').find((p) => p.text() === 'Ready');
       expect(readyPill?.attributes('aria-pressed')).toBe('true');
     });
 
     it('updates statusFilter when a pill is clicked', async () => {
       const state = makeSessionListState();
       const wrapper = await mountWithState(state);
-      const processingPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'Processing');
+      const processingPill = wrapper
+        .findAll('[aria-pressed]')
+        .find((p) => p.text() === 'Processing');
       await processingPill?.trigger('click');
       expect(state.statusFilter.value).toBe('processing');
     });
@@ -190,7 +195,7 @@ describe('SidebarPanel', () => {
     it('resets statusFilter to "all" when "All" pill is clicked', async () => {
       const state = makeSessionListState({ statusFilter: ref('ready') });
       const wrapper = await mountWithState(state);
-      const allPill = wrapper.findAll('[aria-pressed]').find(p => p.text() === 'All');
+      const allPill = wrapper.findAll('[aria-pressed]').find((p) => p.text() === 'All');
       await allPill?.trigger('click');
       expect(state.statusFilter.value).toBe('all');
     });
@@ -432,7 +437,9 @@ describe('SidebarPanel', () => {
       const sidebar = wrapper.find('.spatial-shell__sidebar');
       await sidebar.trigger('dragenter');
       expect(wrapper.find('.upload-zone__title').text()).toBe('Release to upload');
-      expect(wrapper.find('.upload-zone__subtitle').text()).toBe('File will be processed automatically');
+      expect(wrapper.find('.upload-zone__subtitle').text()).toBe(
+        'File will be processed automatically',
+      );
     });
 
     it('calls uploadFileWithOptimistic for each file when multiple files are dropped', async () => {

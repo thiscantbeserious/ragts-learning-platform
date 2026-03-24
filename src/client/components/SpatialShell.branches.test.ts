@@ -46,7 +46,10 @@ describe('SpatialShell — isMobile branch (v-if="!isMobile" on SidebarPanel)', 
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
     };
-    vi.stubGlobal('matchMedia', vi.fn(() => mqStub));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => mqStub),
+    );
 
     const router = createTestRouter();
     await router.push('/');
@@ -67,7 +70,10 @@ describe('SpatialShell — isMobile branch (v-if="!isMobile" on SidebarPanel)', 
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
     };
-    vi.stubGlobal('matchMedia', vi.fn(() => mqStub));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => mqStub),
+    );
 
     const router = createTestRouter();
     await router.push('/');

@@ -104,7 +104,9 @@ describe('ShellHeader', () => {
     it('renders the settings ToolbarButton with correct icon and label', async () => {
       const wrapper = await mountShellHeader();
       const buttons = wrapper.findAllComponents(ToolbarButton);
-      const settings = buttons.find((b) => (b.props() as Record<string, unknown>).icon === 'icon-settings');
+      const settings = buttons.find(
+        (b) => (b.props() as Record<string, unknown>).icon === 'icon-settings',
+      );
       expect(settings).toBeTruthy();
       expect((settings?.props() as Record<string, unknown>)?.label).toBe('Settings');
     });

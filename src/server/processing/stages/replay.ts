@@ -41,7 +41,10 @@ function countLFs(str: string): number {
  * Build a set of event indices that must be processed individually (not batched).
  * These are events containing clear-screen escapes or events at section boundaries.
  */
-function buildCriticalIndices(events: AsciicastEvent[], sectionEndMap: Map<number, number>): Set<number> {
+function buildCriticalIndices(
+  events: AsciicastEvent[],
+  sectionEndMap: Map<number, number>,
+): Set<number> {
   const critical = new Set<number>();
   for (let j = 0; j < events.length; j++) {
     const event = events[j];
@@ -50,8 +53,12 @@ function buildCriticalIndices(events: AsciicastEvent[], sectionEndMap: Map<numbe
     if (eventType !== 'o') continue;
 
     const str = String(data);
-    if (str.includes('\x1b[2J') || str.includes('\x1b[3J') ||
-        str.includes('\x1b[?1049h') || str.includes('\x1b[?1049l')) {
+    if (
+      str.includes('\x1b[2J') ||
+      str.includes('\x1b[3J') ||
+      str.includes('\x1b[?1049h') ||
+      str.includes('\x1b[?1049l')
+    ) {
       critical.add(j);
     }
     if (sectionEndMap.has(j + 1)) {
@@ -62,7 +69,10 @@ function buildCriticalIndices(events: AsciicastEvent[], sectionEndMap: Map<numbe
 }
 
 /** Builds a map from (next event index) → boundary index. */
-function buildSectionEndMap(boundaries: SectionBoundary[], eventCount: number): Map<number, number> {
+function buildSectionEndMap(
+  boundaries: SectionBoundary[],
+  eventCount: number,
+): Map<number, number> {
   const map = new Map<number, number>();
   for (let i = 0; i < boundaries.length; i++) {
     const next = boundaries[i + 1];
@@ -73,12 +83,18 @@ function buildSectionEndMap(boundaries: SectionBoundary[], eventCount: number): 
 }
 
 /** Allocates empty section data slots. */
-function initSectionData(count: number): Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }> {
+function initSectionData(
+  count: number,
+): Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }> {
   return Array.from({ length: count }, () => ({ lineCount: null, snapshot: null }));
 }
 
 /** Handles resize events, returns new row count. */
-function handleResizeEvent(vt: ReturnType<typeof createVt>, data: unknown, currentRows: number): number {
+function handleResizeEvent(
+  vt: ReturnType<typeof createVt>,
+  data: unknown,
+  currentRows: number,
+): number {
   const match = /^(\d+)x(\d+)$/.exec(String(data));
   if (match?.[1] !== undefined && match?.[2] !== undefined) {
     vt.resize(Number.parseInt(match[1], 10), Number.parseInt(match[2], 10));
@@ -88,7 +104,11 @@ function handleResizeEvent(vt: ReturnType<typeof createVt>, data: unknown, curre
 }
 
 /** Records a clear-screen epoch boundary if line count changed. */
-function recordEpochBoundary(eventIndex: number, approxLineCount: number, epochBoundaries: EpochBoundary[]): void {
+function recordEpochBoundary(
+  eventIndex: number,
+  approxLineCount: number,
+  epochBoundaries: EpochBoundary[],
+): void {
   if (epochBoundaries.at(-1)?.rawLineCount !== approxLineCount) {
     epochBoundaries.push({ eventIndex, rawLineCount: approxLineCount });
   }
@@ -101,7 +121,7 @@ function captureSectionSnapshot(
   boundaryIdx: number,
   highWaterLineCount: number,
   approxLineCount: number,
-  sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>
+  sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>,
 ): number {
   if (inAltScreen) {
     sectionData[boundaryIdx] = { lineCount: null, snapshot: vt.getView() };
@@ -157,7 +177,12 @@ function processCriticalEvent(
 
   if (boundaryIdx !== undefined) {
     state.highWaterLineCount = captureSectionSnapshot(
-      vt, state.inAltScreen, boundaryIdx, state.highWaterLineCount, state.approxLineCount, state.sectionData
+      vt,
+      state.inAltScreen,
+      boundaryIdx,
+      state.highWaterLineCount,
+      state.approxLineCount,
+      state.sectionData,
     );
   }
 }
@@ -167,7 +192,7 @@ function processBatchedEvent(
   vt: ReturnType<typeof createVt>,
   state: ReplayState,
   fed: string,
-  str: string
+  str: string,
 ): void {
   state.batchText += fed;
   state.batchCount++;
@@ -191,7 +216,7 @@ function processBatchedEvent(
 export function replaySync(
   header: AsciicastHeader,
   events: AsciicastEvent[],
-  boundaries: SectionBoundary[]
+  boundaries: SectionBoundary[],
 ): ReplayResult {
   const vt = createVt(header.width, header.height, SCROLLBACK_SIZE);
 
@@ -259,7 +284,7 @@ export function replaySync(
 export function replay(
   header: AsciicastHeader,
   events: AsciicastEvent[],
-  boundaries: SectionBoundary[]
+  boundaries: SectionBoundary[],
 ): Promise<ReplayResult> {
   try {
     return Promise.resolve(replaySync(header, events, boundaries));

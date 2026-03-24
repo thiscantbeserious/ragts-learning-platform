@@ -62,7 +62,7 @@ describe('useUpload', () => {
 
     it('sets error with details appended when server provides details', async () => {
       vi.mocked(fetch).mockResolvedValue(
-        makeErrorResponse(422, { error: 'Invalid file', details: 'missing header' })
+        makeErrorResponse(422, { error: 'Invalid file', details: 'missing header' }),
       );
       const { error, uploadFile } = useUpload();
       await uploadFile(new File(['data'], 'session.cast'));
@@ -141,7 +141,7 @@ describe('useUpload', () => {
       const event = { dataTransfer: { files: [file] } } as unknown as DragEvent;
       handleDrop(event);
       expect(isDragging.value).toBe(false);
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       expect(fetch).toHaveBeenCalledOnce();
     });
 
@@ -151,7 +151,7 @@ describe('useUpload', () => {
       const event = { dataTransfer: null } as unknown as DragEvent;
       handleDrop(event);
       expect(isDragging.value).toBe(false);
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       expect(fetch).not.toHaveBeenCalled();
     });
   });
@@ -164,7 +164,7 @@ describe('useUpload', () => {
       const input = { files: [file] } as unknown as HTMLInputElement;
       const event = { target: input } as unknown as Event;
       handleFileInput(event);
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       expect(fetch).toHaveBeenCalledOnce();
     });
 
@@ -173,7 +173,7 @@ describe('useUpload', () => {
       const input = { files: null } as unknown as HTMLInputElement;
       const event = { target: input } as unknown as Event;
       handleFileInput(event);
-      await new Promise<void>(resolve => setTimeout(resolve, 0));
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
       expect(fetch).not.toHaveBeenCalled();
     });
   });

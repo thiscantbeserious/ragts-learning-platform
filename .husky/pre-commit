@@ -4,3 +4,28 @@ if command -v gitleaks &> /dev/null; then
 else
   echo "gitleaks not installed — skipping secret scan (install: brew install gitleaks)"
 fi
+
+# Auto-format staged files with Prettier, then re-stage
+STAGED=$(git diff --cached --name-only --diff-filter=ACDMR)
+if [ -n "$STAGED" ]; then
+  echo "$STAGED" | xargs npx prettier --write --ignore-unknown 2>/dev/null
+  echo "$STAGED" | xargs git add
+fi
+
+# Lint — block commit on errors
+echo "Running lint..."
+npm run lint --silent 2>&1
+LINT_EXIT=$?
+
+# Type check — block commit on errors
+echo "Running type check..."
+npx tsc --noEmit 2>&1
+TSC_EXIT=$?
+
+if [ $LINT_EXIT -ne 0 ] || [ $TSC_EXIT -ne 0 ]; then
+  echo ""
+  [ $LINT_EXIT -ne 0 ] && echo "ERROR: Lint failed (exit $LINT_EXIT)"
+  [ $TSC_EXIT -ne 0 ] && echo "ERROR: Type check failed (exit $TSC_EXIT)"
+  echo "Fix the above errors before committing."
+  exit 1
+fi

@@ -1,14 +1,6 @@
 <template>
-  <button
-    class="toolbar-btn"
-    :aria-label="label"
-    :title="label"
-    type="button"
-  >
-    <span
-      class="icon"
-      :class="icon"
-    />
+  <button class="toolbar-btn" :aria-label="label" :title="label" type="button">
+    <span class="icon" :class="icon" />
   </button>
 </template>
 

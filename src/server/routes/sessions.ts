@@ -16,10 +16,7 @@ const log = logger.child({ module: 'routes/sessions' });
  * Handle GET /api/sessions
  * List all sessions with metadata.
  */
-export async function handleListSessions(
-  c: Context,
-  service: SessionService
-): Promise<Response> {
+export async function handleListSessions(c: Context, service: SessionService): Promise<Response> {
   try {
     const sessions = await service.listSessions();
     return c.json(sessions);
@@ -34,10 +31,7 @@ export async function handleListSessions(
  * Retrieve session metadata and section metadata (no snapshot content).
  * Terminal line data is fetched separately via per-section or bulk content endpoints.
  */
-export async function handleGetSession(
-  c: Context,
-  service: SessionService
-): Promise<Response> {
+export async function handleGetSession(c: Context, service: SessionService): Promise<Response> {
   try {
     const id = c.req.param('id');
     const invalid = validatePathId(c, id);
@@ -48,7 +42,10 @@ export async function handleGetSession(
     }
     const validation = typia.validate<SessionMetadataResponse>(result.data);
     if (!validation.success) {
-      log.warn({ errors: validation.errors }, 'Response validation warning: session metadata shape mismatch');
+      log.warn(
+        { errors: validation.errors },
+        'Response validation warning: session metadata shape mismatch',
+      );
     }
     return c.json(result.data);
   } catch (err) {
@@ -61,10 +58,7 @@ export async function handleGetSession(
  * Handle DELETE /api/sessions/:id
  * Delete session from both DB and filesystem.
  */
-export async function handleDeleteSession(
-  c: Context,
-  service: SessionService
-): Promise<Response> {
+export async function handleDeleteSession(c: Context, service: SessionService): Promise<Response> {
   try {
     const id = c.req.param('id');
     const invalid = validatePathId(c, id);
@@ -85,10 +79,7 @@ export async function handleDeleteSession(
  * Re-run section detection on an existing session.
  * Returns 202 Accepted; orchestrator handles async processing.
  */
-export async function handleRedetect(
-  c: Context,
-  service: SessionService
-): Promise<Response> {
+export async function handleRedetect(c: Context, service: SessionService): Promise<Response> {
   try {
     const id = c.req.param('id');
     const invalid = validatePathId(c, id);

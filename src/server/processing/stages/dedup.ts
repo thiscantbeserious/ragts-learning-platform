@@ -24,14 +24,19 @@ export function dedup(
   sectionData: Array<{ lineCount: number | null; snapshot: TerminalSnapshot | null }>,
   epochBoundaries: EpochBoundary[],
   boundaries: SectionBoundary[],
-  eventCount: number
+  eventCount: number,
 ): ProcessedSession {
   const { cleanSnapshot, rawLineCountToClean } = buildCleanDocument(rawSnapshot, epochBoundaries);
-  const sections = buildSections(sessionId, sectionData, boundaries, eventCount, rawSnapshot, rawLineCountToClean);
+  const sections = buildSections(
+    sessionId,
+    sectionData,
+    boundaries,
+    eventCount,
+    rawSnapshot,
+    rawLineCountToClean,
+  );
 
-  const detectedSectionsCount = boundaries.filter(
-    b => !b.signals.includes('marker')
-  ).length;
+  const detectedSectionsCount = boundaries.filter((b) => !b.signals.includes('marker')).length;
 
   return {
     sessionId,
@@ -49,7 +54,7 @@ function buildSections(
   boundaries: SectionBoundary[],
   eventCount: number,
   rawSnapshot: TerminalSnapshot,
-  rawLineCountToClean: (rawLineCount: number) => number
+  rawLineCountToClean: (rawLineCount: number) => number,
 ): CreateSectionInput[] {
   const sections: CreateSectionInput[] = [];
   let previousCleanLineCount = 0;
@@ -65,9 +70,10 @@ function buildSections(
       throw new Error(`Missing sectionData for boundary index ${i} in session ${sessionId}`);
     }
 
-    const endEvent = i < boundaries.length - 1 && nextBoundary !== undefined
-      ? nextBoundary.eventIndex
-      : eventCount;
+    const endEvent =
+      i < boundaries.length - 1 && nextBoundary !== undefined
+        ? nextBoundary.eventIndex
+        : eventCount;
     const isMarker = boundary.signals.includes('marker');
 
     const section = buildSection(sessionId, boundary, endEvent, isMarker, {
@@ -96,7 +102,7 @@ function buildSection(
   boundary: SectionBoundary,
   endEvent: number,
   isMarker: boolean,
-  options: BuildSectionOptions
+  options: BuildSectionOptions,
 ): { input: CreateSectionInput; nextLineCount: number } {
   const { sd, rawSnapshot, rawLineCountToClean, previousCleanLineCount } = options;
   if (sd.snapshot) {
