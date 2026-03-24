@@ -130,11 +130,8 @@ function onRegisterSection(id: string, el: Element): void {
   }
 }
 
-// Reset section entries and scroll position when session changes.
-watch(sessionId, () => {
-  sectionEntries.value = [];
-  virtualizer.value.scrollToOffset(0);
-});
+// No manual reset needed on session change — SpatialShell keys <router-view>
+// by $route.fullPath, so this component fully remounts for each session.
 
 // ---------------------------------------------------------------------------
 // Prefetch on hover
