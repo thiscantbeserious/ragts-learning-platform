@@ -6,7 +6,7 @@
     <SidebarPanel v-if="!isMobile" />
   </div>
   <main id="main-content" class="spatial-shell__main" tabindex="-1">
-    <router-view />
+    <router-view :key="$route.params.id ?? $route.path" />
   </main>
   <!-- Mobile sidebar overlay — rendered outside the grid via Teleport inside the component -->
   <MobileSidebarOverlay />
