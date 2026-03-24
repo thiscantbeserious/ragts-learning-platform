@@ -8,7 +8,9 @@ fi
 # Auto-format staged files with Prettier, then re-stage
 STAGED=$(git diff --cached --name-only --diff-filter=ACDMR)
 if [ -n "$STAGED" ]; then
+  echo "Formatting staged files..."
   echo "$STAGED" | xargs npx prettier --write --ignore-unknown 2>/dev/null
+  echo "$STAGED" | xargs npx eslint --fix --no-error-on-unmatched-pattern 2>/dev/null
   echo "$STAGED" | xargs git add
 fi
 
