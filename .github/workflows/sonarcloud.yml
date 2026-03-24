@@ -52,7 +52,7 @@ jobs:
       - name: Merge coverage reports
         run: |
           if [ -f coverage/vitest/lcov.info ] && [ -f coverage/playwright/lcov.info ]; then
-            npx lcov-result-merger 'coverage/*/lcov.info' -o coverage/lcov.info
+            npx lcov-result-merger 'coverage/*/lcov.info' > coverage/lcov.info
             echo "Merged vitest + Playwright coverage"
           elif [ -f coverage/vitest/lcov.info ]; then
             cp coverage/vitest/lcov.info coverage/lcov.info
