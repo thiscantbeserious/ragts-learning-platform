@@ -43,6 +43,13 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
+      - name: Start dev server for acceptance tests
+        run: |
+          npm run dev &
+          timeout 30 sh -c 'until curl -sf http://localhost:5173 > /dev/null 2>&1; do sleep 1; done'
+        env:
+          CI: true
+
       - name: Run acceptance tests with coverage
         continue-on-error: true
         run: PLAYWRIGHT_COVERAGE=1 npx playwright test tests/acceptance/ --config tests/acceptance/playwright.config.ts
