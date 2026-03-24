@@ -107,7 +107,7 @@ function getItemOffsets(): SectionOffset[] {
   });
 }
 
-const { activeId } = useActiveSection(sectionEntries, {
+const { activeId, suppress: suppressScrollspy } = useActiveSection(sectionEntries, {
   scrollElement: scrollViewport as Ref<HTMLElement | null>,
   getItemOffsets,
   stickyHeaderRef: stickyHeaderEl,
@@ -136,6 +136,12 @@ function onRegisterSection(id: string, el: Element): void {
 // ---------------------------------------------------------------------------
 // Prefetch on hover
 // ---------------------------------------------------------------------------
+
+/** Scroll to section with scrollspy suppression to prevent arrow chasing. */
+function onScrollToSection(id: string): void {
+  suppressScrollspy(id);
+  scrollToSection(id);
+}
 
 /** Prefetch section content on navigator pill hover (after 150ms debounce in navigator). */
 function onHoverSection(id: string): void {
@@ -173,7 +179,7 @@ function onHoverSection(id: string): void {
         class="session-detail-view__nav"
         :sections="sections"
         :active-id="activeId"
-        :scroll-to-section="scrollToSection"
+        :scroll-to-section="onScrollToSection"
         :on-hover-section="onHoverSection"
       />
     </template>

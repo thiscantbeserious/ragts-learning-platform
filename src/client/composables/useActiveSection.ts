@@ -40,6 +40,12 @@ export interface ActiveSectionState {
   activeId: Ref<string | null>;
   /** Disconnect the observer and reset activeId. */
   cleanup: () => void;
+  /**
+   * Suppress scrollspy updates until scrolling settles (150ms idle).
+   * Call before programmatic scrolls (e.g. pill click) to prevent the
+   * pointer from chasing through intermediate sections.
+   */
+  suppress: (targetId: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,12 +118,31 @@ function setupScrollPositionMode(
   stickyHeaderRef?: Ref<HTMLElement | null>,
 ): ActiveSectionState {
   let currentEl: HTMLElement | null = null;
+  let suppressed = false;
+  let settleTimer: ReturnType<typeof setTimeout> | null = null;
 
   function onScroll(): void {
+    if (suppressed) {
+      // While suppressed, restart the settle timer on every scroll event.
+      // Once scrolling stops for 150ms, re-enable scrollspy.
+      if (settleTimer) clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => {
+        suppressed = false;
+        settleTimer = null;
+        onScroll();
+      }, 150);
+      return;
+    }
     const el = scrollElement.value;
     if (!el) return;
     const headerOffset = stickyHeaderRef?.value?.offsetHeight ?? 0;
     activeId.value = findActiveSectionByScroll(el.scrollTop, getItemOffsets(), headerOffset);
+  }
+
+  function suppress(targetId: string): void {
+    activeId.value = targetId;
+    suppressed = true;
+    if (settleTimer) clearTimeout(settleTimer);
   }
 
   function attach(el: HTMLElement | null): void {
@@ -146,6 +171,8 @@ function setupScrollPositionMode(
   });
 
   function cleanup(): void {
+    if (settleTimer) clearTimeout(settleTimer);
+    suppressed = false;
     if (currentEl) {
       currentEl.removeEventListener('scroll', onScroll);
       currentEl = null;
@@ -157,7 +184,7 @@ function setupScrollPositionMode(
     onUnmounted(cleanup);
   }
 
-  return { activeId, cleanup };
+  return { activeId, cleanup, suppress };
 }
 
 /**
@@ -279,5 +306,6 @@ function setupIntersectionMode(
     onUnmounted(cleanup);
   }
 
-  return { activeId, cleanup };
+  // Suppression not needed for IntersectionObserver mode (no programmatic scrolling).
+  return { activeId, cleanup, suppress: () => {} };
 }
