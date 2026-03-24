@@ -20,7 +20,7 @@ vi.mock('./useSSE.js', () => ({
   resetConnectionBudget: vi.fn(),
 }));
 
-import { useSessionV2 } from './use_session.js';
+import { useSession } from './use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -61,7 +61,7 @@ function makeOkResponse(body: unknown): Response {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('useSessionV2 — SSE auto-refresh', () => {
+describe('useSession — SSE auto-refresh', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     // Fresh ref per test prevents watcher accumulation across tests
@@ -78,7 +78,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
       makeOkResponse(makeMetaResponse({ detection_status: 'processing' })),
     );
 
-    const { detectionStatus } = useSessionV2(ref('sess-1'));
+    const { detectionStatus } = useSession(ref('sess-1'));
     await flush();
     expect(fetch).toHaveBeenCalledTimes(1);
 
@@ -97,7 +97,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
       makeOkResponse(makeMetaResponse({ detection_status: 'processing' })),
     );
 
-    useSessionV2(ref('sess-1'));
+    useSession(ref('sess-1'));
     await flush();
     expect(fetch).toHaveBeenCalledTimes(1);
 
@@ -115,7 +115,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
       makeOkResponse(makeMetaResponse({ detection_status: 'processing' })),
     );
 
-    useSessionV2(ref('sess-1'));
+    useSession(ref('sess-1'));
     await flush();
     expect(fetch).toHaveBeenCalledTimes(1);
 
@@ -130,7 +130,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
   it('does not re-fetch when SSE transitions to undefined', async () => {
     vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeMetaResponse()));
 
-    useSessionV2(ref('sess-1'));
+    useSession(ref('sess-1'));
     await flush();
     const callCount = vi.mocked(fetch).mock.calls.length;
 
@@ -141,7 +141,7 @@ describe('useSessionV2 — SSE auto-refresh', () => {
   });
 });
 
-describe('useSessionV2 — session ID change', () => {
+describe('useSession — session ID change', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     mockSseStatus = ref(undefined);
@@ -155,7 +155,7 @@ describe('useSessionV2 — session ID change', () => {
   it('re-fetches when the session ID ref changes', async () => {
     vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeMetaResponse()));
     const idRef = ref('sess-1');
-    useSessionV2(idRef);
+    useSession(idRef);
 
     await flush();
     expect(fetch).toHaveBeenCalledTimes(1);

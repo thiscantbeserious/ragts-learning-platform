@@ -25,7 +25,7 @@ vi.mock('./useSSE.js', () => ({
   resetConnectionBudget: vi.fn(),
 }));
 
-import { useSessionV2 } from './use_session.js';
+import { useSession } from './use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -108,7 +108,7 @@ function makeTestCache(): SectionCache {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('useSessionV2 — small session bulk load', () => {
+describe('useSession — small session bulk load', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     mockSseStatus = ref(undefined);
@@ -134,7 +134,7 @@ describe('useSessionV2 — small session bulk load', () => {
       .mockResolvedValueOnce(makeOkResponse(bulkResponse));
 
     const cache = makeTestCache();
-    const { loading } = useSessionV2(ref('sess-1'), cache);
+    const { loading } = useSession(ref('sess-1'), cache);
     await flush();
 
     expect(loading.value).toBe(false);
@@ -156,7 +156,7 @@ describe('useSessionV2 — small session bulk load', () => {
       .mockResolvedValueOnce(makeOkResponse(bulkResponse));
 
     const cache = makeTestCache();
-    useSessionV2(ref('sess-1'), cache);
+    useSession(ref('sess-1'), cache);
     await flush();
 
     expect(cache.has('sec-1:0:all')).toBe(true);
@@ -174,7 +174,7 @@ describe('useSessionV2 — small session bulk load', () => {
       .mockResolvedValueOnce(makeOkResponse(metaResponse))
       .mockResolvedValueOnce(makeOkResponse(bulkResponse));
 
-    const { loading } = useSessionV2(ref('sess-1'), makeTestCache());
+    const { loading } = useSession(ref('sess-1'), makeTestCache());
     await flush();
 
     expect(loading.value).toBe(false);

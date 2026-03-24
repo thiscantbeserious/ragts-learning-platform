@@ -4,7 +4,7 @@ import { useRoute } from 'vue-router';
 import SessionContent from '../components/SessionContent.vue';
 import SectionNavigator from '../components/SectionNavigator.vue';
 import SkeletonMain from '../components/SkeletonMain.vue';
-import { useSessionV2 } from '../composables/use_session.js';
+import { useSession } from '../composables/use_session.js';
 import {
   useActiveSection,
   type SectionEntry,
@@ -24,7 +24,7 @@ import { SMALL_SESSION_THRESHOLD } from '../../shared/constants.js';
  * For small sessions:
  *   - Renders all sections directly via SessionContent (no virtualizer/navigator).
  *
- * useSessionV2 provides metadata-first loading: section metadata arrives first,
+ * useSession provides metadata-first loading: section metadata arrives first,
  * then content is fetched per-section on demand (cache-backed).
  */
 
@@ -32,7 +32,7 @@ const route = useRoute();
 const sessionId = computed(() => route.params['id'] as string);
 
 const { sections, snapshot, loading, error, detectionStatus, fetchSectionContent } =
-  useSessionV2(sessionId);
+  useSession(sessionId);
 
 /** True when this session requires the large-session treatment. */
 const isLargeSession = computed(() => sections.value.length > SMALL_SESSION_THRESHOLD);
@@ -130,9 +130,10 @@ function onRegisterSection(id: string, el: Element): void {
   }
 }
 
-// Reset section entries when session changes.
+// Reset section entries and scroll position when session changes.
 watch(sessionId, () => {
   sectionEntries.value = [];
+  virtualizer.value.scrollToOffset(0);
 });
 
 // ---------------------------------------------------------------------------

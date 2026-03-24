@@ -20,7 +20,7 @@ vi.mock('./useSSE.js', () => ({
   resetConnectionBudget: vi.fn(),
 }));
 
-import { useSessionV2 } from './use_session.js';
+import { useSession } from './use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -69,7 +69,7 @@ function makeErrorResponse(status: number): Response {
 // initial state
 // ---------------------------------------------------------------------------
 
-describe('useSessionV2 — initial state', () => {
+describe('useSession — initial state', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     mockSseStatus = ref(undefined);
@@ -82,25 +82,25 @@ describe('useSessionV2 — initial state', () => {
 
   it('starts with loading true', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {}) as Promise<Response>);
-    const { loading } = useSessionV2(ref('sess-1'));
+    const { loading } = useSession(ref('sess-1'));
     expect(loading.value).toBe(true);
   });
 
   it('starts with empty sections', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {}) as Promise<Response>);
-    const { sections } = useSessionV2(ref('sess-1'));
+    const { sections } = useSession(ref('sess-1'));
     expect(sections.value).toEqual([]);
   });
 
   it('starts with null error', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {}) as Promise<Response>);
-    const { error } = useSessionV2(ref('sess-1'));
+    const { error } = useSession(ref('sess-1'));
     expect(error.value).toBeNull();
   });
 
   it('starts with empty filename', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {}) as Promise<Response>);
-    const { filename } = useSessionV2(ref('sess-1'));
+    const { filename } = useSession(ref('sess-1'));
     expect(filename.value).toBe('');
   });
 });
@@ -109,7 +109,7 @@ describe('useSessionV2 — initial state', () => {
 // metadata fetch
 // ---------------------------------------------------------------------------
 
-describe('useSessionV2 — metadata fetch', () => {
+describe('useSession — metadata fetch', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
     mockSseStatus = ref(undefined);
@@ -122,7 +122,7 @@ describe('useSessionV2 — metadata fetch', () => {
 
   it('sets loading to false after fetch completes', async () => {
     vi.mocked(fetch).mockResolvedValue(makeOkResponse(makeMetaResponse()));
-    const { loading } = useSessionV2(ref('sess-1'));
+    const { loading } = useSession(ref('sess-1'));
     await flush();
     expect(loading.value).toBe(false);
   });
@@ -131,7 +131,7 @@ describe('useSessionV2 — metadata fetch', () => {
     vi.mocked(fetch).mockResolvedValue(
       makeOkResponse(makeMetaResponse({ filename: 'my-session.cast' })),
     );
-    const { filename } = useSessionV2(ref('sess-1'));
+    const { filename } = useSession(ref('sess-1'));
     await flush();
     expect(filename.value).toBe('my-session.cast');
   });
@@ -140,7 +140,7 @@ describe('useSessionV2 — metadata fetch', () => {
     vi.mocked(fetch).mockResolvedValue(
       makeOkResponse(makeMetaResponse({ detection_status: 'completed' })),
     );
-    const { detectionStatus } = useSessionV2(ref('sess-1'));
+    const { detectionStatus } = useSession(ref('sess-1'));
     await flush();
     expect(detectionStatus.value).toBe('completed');
   });
@@ -160,7 +160,7 @@ describe('useSessionV2 — metadata fetch', () => {
     vi.mocked(fetch).mockResolvedValue(
       makeOkResponse(makeMetaResponse({ sections: [section], sectionCount: 6 })),
     );
-    const { sections } = useSessionV2(ref('sess-1'));
+    const { sections } = useSession(ref('sess-1'));
     await flush();
     expect(sections.value).toHaveLength(1);
     expect(sections.value[0]?.id).toBe('sec-1');
@@ -168,7 +168,7 @@ describe('useSessionV2 — metadata fetch', () => {
 
   it('sets error on 404 response', async () => {
     vi.mocked(fetch).mockResolvedValue(makeErrorResponse(404));
-    const { error, loading } = useSessionV2(ref('sess-1'));
+    const { error, loading } = useSession(ref('sess-1'));
     await flush();
     expect(error.value).toBe('Session not found');
     expect(loading.value).toBe(false);
@@ -176,21 +176,21 @@ describe('useSessionV2 — metadata fetch', () => {
 
   it('sets error on non-ok non-404 response', async () => {
     vi.mocked(fetch).mockResolvedValue(makeErrorResponse(500));
-    const { error } = useSessionV2(ref('sess-1'));
+    const { error } = useSession(ref('sess-1'));
     await flush();
     expect(error.value).toContain('500');
   });
 
   it('sets error on network failure', async () => {
     vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
-    const { error } = useSessionV2(ref('sess-1'));
+    const { error } = useSession(ref('sess-1'));
     await flush();
     expect(error.value).toBe('Network error');
   });
 
   it('sets fallback error when thrown value is not an Error', async () => {
     vi.mocked(fetch).mockRejectedValue('string error');
-    const { error } = useSessionV2(ref('sess-1'));
+    const { error } = useSession(ref('sess-1'));
     await flush();
     expect(error.value).toBe('Failed to load session');
   });

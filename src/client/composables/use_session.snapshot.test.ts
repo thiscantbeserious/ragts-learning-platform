@@ -1,5 +1,5 @@
 /**
- * Tests for useSessionV2 — 0-section session snapshot fetching.
+ * Tests for useSession — 0-section session snapshot fetching.
  *
  * When a session has sectionCount === 0, the composable should fetch the
  * session-level snapshot via GET /api/sessions/:id/snapshot and expose it
@@ -19,7 +19,7 @@ vi.mock('./useSSE.js', () => ({
   resetConnectionBudget: vi.fn(),
 }));
 
-import { useSessionV2 } from './use_session.js';
+import { useSession } from './use_session.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -81,7 +81,7 @@ function makeTerminalSnapshot(lineCount = 3): TerminalSnapshot {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('useSessionV2 — 0-section snapshot fetching', () => {
+describe('useSession — 0-section snapshot fetching', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', vi.fn());
   });
@@ -93,7 +93,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
 
   it('starts with null snapshot', () => {
     vi.mocked(fetch).mockReturnValue(new Promise(() => {}) as Promise<Response>);
-    const { snapshot } = useSessionV2(ref('sess-zero'));
+    const { snapshot } = useSession(ref('sess-zero'));
     expect(snapshot.value).toBeNull();
   });
 
@@ -103,7 +103,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
       .mockResolvedValueOnce(makeOkResponse(makeMetaResponse({ sectionCount: 0 })))
       .mockResolvedValueOnce(makeOkResponse(makeSnapshotResponse(terminalSnapshot)));
 
-    const { snapshot } = useSessionV2(ref('sess-zero'));
+    const { snapshot } = useSession(ref('sess-zero'));
     await flush();
 
     expect(fetch).toHaveBeenCalledWith('/api/sessions/sess-zero/snapshot');
@@ -129,7 +129,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
       .mockResolvedValueOnce(makeOkResponse(makeMetaResponse({ sectionCount: 0 })))
       .mockResolvedValueOnce(makeOkResponse(makeSnapshotResponse(null)));
 
-    const { snapshot } = useSessionV2(ref('sess-zero'));
+    const { snapshot } = useSession(ref('sess-zero'));
     await flush();
 
     expect(snapshot.value).toBeNull();
@@ -140,7 +140,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
       .mockResolvedValueOnce(makeOkResponse(makeMetaResponse({ sectionCount: 0 })))
       .mockResolvedValueOnce(makeErrorResponse(500));
 
-    const { snapshot, error } = useSessionV2(ref('sess-zero'));
+    const { snapshot, error } = useSession(ref('sess-zero'));
     await flush();
 
     expect(snapshot.value).toBeNull();
@@ -154,7 +154,7 @@ describe('useSessionV2 — 0-section snapshot fetching', () => {
       .mockResolvedValueOnce(makeOkResponse(makeSnapshotResponse(terminalSnapshot)));
 
     const sessionId = ref('sess-zero');
-    const { snapshot } = useSessionV2(sessionId);
+    const { snapshot } = useSession(sessionId);
     await flush();
     expect(snapshot.value).toEqual(terminalSnapshot);
 

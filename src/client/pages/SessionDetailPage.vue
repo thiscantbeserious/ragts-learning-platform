@@ -3,18 +3,18 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import SessionContent from '../components/SessionContent.vue';
 import SkeletonMain from '../components/SkeletonMain.vue';
-import { useSessionV2 } from '../composables/use_session.js';
+import { useSession } from '../composables/use_session.js';
 
 /**
  * SessionDetailPage — legacy page component (not used by current router).
  * Kept for reference; the active session detail view is SessionDetailView.vue.
- * Migrated to useSessionV2 to satisfy TypeScript after SessionContent API update.
+ * Migrated to useSession to satisfy TypeScript after SessionContent API update.
  */
 
 const route = useRoute();
 const sessionId = computed(() => route.params['id'] as string);
 const { sections, loading, error, filename, detectionStatus, fetchSectionContent } =
-  useSessionV2(sessionId);
+  useSession(sessionId);
 </script>
 
 <template>
