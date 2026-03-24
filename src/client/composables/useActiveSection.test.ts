@@ -432,4 +432,101 @@ describe('useActiveSection — scroll-position mode', () => {
     await nextTick();
     expect(activeId.value).toBe('c');
   });
+
+  it('suppress() sets activeId immediately and blocks scroll updates', async () => {
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId, suppress } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    expect(activeId.value).toBe('a');
+
+    // Suppress and set target to 'c'
+    suppress('c');
+    expect(activeId.value).toBe('c');
+
+    // Scroll events during suppression should be ignored
+    (scrollEl as unknown as Record<string, number>)['scrollTop'] = 600;
+    scrollEl.dispatchEvent(new Event('scroll'));
+    expect(activeId.value).toBe('c');
+  });
+
+  it('suppress() resumes scrollspy after scroll settles (150ms idle)', async () => {
+    vi.useFakeTimers();
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId, suppress } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    suppress('c');
+
+    // Fire a scroll event — still suppressed, starts settle timer
+    (scrollEl as unknown as Record<string, number>)['scrollTop'] = 600;
+    scrollEl.dispatchEvent(new Event('scroll'));
+    expect(activeId.value).toBe('c');
+
+    // After 150ms with no more scroll events, scrollspy resumes
+    vi.advanceTimersByTime(150);
+    // The settle callback fires onScroll(), which reads scrollTop=600 → section 'b'
+    expect(activeId.value).toBe('b');
+
+    vi.useRealTimers();
+  });
+
+  it('suppress() resets settle timer on each scroll event', async () => {
+    vi.useFakeTimers();
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId, suppress } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    suppress('c');
+
+    // First scroll at t=0
+    scrollEl.dispatchEvent(new Event('scroll'));
+    vi.advanceTimersByTime(100);
+    // Still suppressed (only 100ms elapsed)
+    expect(activeId.value).toBe('c');
+
+    // Another scroll at t=100 — resets the 150ms timer
+    scrollEl.dispatchEvent(new Event('scroll'));
+    vi.advanceTimersByTime(100);
+    // Still suppressed (only 100ms since last scroll)
+    expect(activeId.value).toBe('c');
+
+    // 150ms after last scroll → resumes
+    vi.advanceTimersByTime(50);
+    expect(activeId.value).toBe('a'); // scrollTop still 0
+
+    vi.useRealTimers();
+  });
+
+  it('cleanup() clears suppression state', async () => {
+    const scrollEl = makeScrollContainer(0);
+    const scrollElement = ref<HTMLElement | null>(scrollEl);
+    const offsets = makeOffsets(['a', 'b', 'c']);
+    const { activeId, suppress, cleanup } = useActiveSection(ref([]), {
+      scrollElement,
+      getItemOffsets: () => offsets,
+    });
+
+    await nextTick();
+    suppress('c');
+    expect(activeId.value).toBe('c');
+
+    cleanup();
+    expect(activeId.value).toBeNull();
+  });
 });
