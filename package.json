@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@bgotink/playwright-coverage": "^0.3.2",
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.1",
     "@hono/vite-dev-server": "^0.25.1",
     "@playwright/test": "^1.58.2",
     "@prettier/plugin-oxc": "^0.1.3",
